@@ -1,13 +1,12 @@
 ---
 title: Autoplay
-description: Autoplay a video with Video.js, detect when the browser blocks it, and recover gracefully.
+description: Autoplay a video with Video.js, detect when the browser blocks it, and handle it gracefully.
 ---
 
 import FrameworkCase from '@/components/docs/FrameworkCase.astro';
 import DocsLink from '@/components/docs/DocsLink.astro';
-import Aside from '@/components/Aside.astro';
 
-Autoplaying a video isn't guaranteed. This guide will walk you through what you can do to improve your chances that a video will autoplay, as well as ways to recover gracefully from a failure.
+Autoplaying a video isn't guaranteed. This guide will walk you through what you can do to improve your chances that a video will autoplay, as well as what to do when the browser blocks it.
 
 ## Increase your chance of autoplay working
 
@@ -25,15 +24,19 @@ There are a few things you can do to improve your chances of autoplay working:
 </FrameworkCase>
 <FrameworkCase frameworks={["html"]}>
 ```html
-<video autoplay muted playsInline>
+<video autoplay muted playsinline>
 ```
 </FrameworkCase>
 
-## Detect and recover from blocked autoplay
+## Call `play()` yourself
 
-The `autoplay` attribute is fire-and-forget: the browser plays your video or quietly does nothing. To know which happened so you can retry muted, to log the outcome, or to show a "click to play" overlay, call `play()` yourself. It returns a promise that resolves on success and rejects when the browser blocks playback.
+With the `autoplay` attribute, the browser plays your video or quietly does nothing. However, if you call `play()` instead, you can do more. Because `play()` returns a promise that rejects when the browser blocks playback, you can do things like retyring muted, logging the outcome, or showing a "click to play" overlay.
+
+Drop the `autoplay` attribute from your media when you call `play()`. Combining the declarative attribute with a manual `play()` call leads to duplicate attempts and inconsistent state.
 
 <FrameworkCase frameworks={["react"]}>
+Reach for the `play` action with <DocsLink slug="reference/use-player">`usePlayer`</DocsLink>.
+
 ```jsx
 const play = usePlayer(s => s.play);
 
@@ -58,18 +61,16 @@ player.store.state.play().then(() => {
 ```
 </FrameworkCase>
 
-Drop the `autoplay` attribute from your media when you do this. Combining the declarative attribute with a manual `play()` call leads to duplicate attempts and inconsistent state.
+A rejected `play()` promise is a [`DOMException`](https://developer.mozilla.org/en-US/docs/Web/API/DOMException) whose `name` tells you what happened:
 
-<Aside type="note">
-A rejected `play()` promise is a [`DOMException`](https://developer.mozilla.org/en-US/docs/Web/API/DOMException) whose `name` tells you the cause. Two are standardized: `NotAllowedError`, the autoplay policy blocking playback, and `NotSupportedError`, when the source isn't a supported media format. Some browsers also reject with `AbortError` when an unrelated call interrupts playback. Most handling can treat every rejection the same; to log only true autoplay failures, branch on `error.name === 'NotAllowedError'`.
-</Aside>
+| `name` | What happened |
+| --- | --- |
+| `NotAllowedError` | The autoplay policy blocked playback. |
+| `NotSupportedError` | The source isn't a format the browser can play. |
+| `AbortError` | Another call interrupted playback. Not every browser uses this. |
 
-## Handle the blocked state
+## What happens when playback is blocked
 
-When muted autoplay fails too, playback won't start without the viewer. Treat that as expected, not as an error:
+When even muted autoplay fails, playback won't start until the viewer asks for it with a click.
 
-- **Keep the poster visible.** The player isn't loading, it's waiting. Don't show a buffering spinner.
-- **Expose a clear play affordance.** A play button over the poster is the conventional pattern. The player's own controls already do this, so make sure they render in the blocked state.
-- **Don't log a blocked autoplay as a fatal error.** It's the browser doing its job. If your analytics counts every `play()` rejection as a playback failure, your error rates will spike on first visits where the policy hasn't been earned yet. Distinguish a `NotAllowedError` on the initial attempt from real playback errors.
-
-Wire your fallback UI to the status the handler exposes, and show the overlay only once it reaches `'blocked'`.
+If you're using our components, they'll handle blocked playback gracefully: the poster and controls will stay up, so the play button is there for the viewer to press. If you're building your own UI components, you'll have to handle showing that kind of button yourself.
