@@ -65,7 +65,7 @@ A rejected `play()` promise is a [`DOMException`](https://developer.mozilla.org/
 
 | `name` | What happened |
 | --- | --- |
-| `NotAllowedError` | The autoplay policy blocked playback. |
+| `NotAllowedError` | The autoplay policy blocked playback. Not a fatal error. Retry muted or offer your user a button. |
 | `NotSupportedError` | The source isn't a format the browser can play. |
 | `AbortError` | Another call interrupted playback. Not every browser uses this. |
 
