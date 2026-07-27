@@ -41,10 +41,12 @@ Reach for the `play` action with <DocsLink slug="reference/use-player">`usePlaye
 const play = usePlayer(s => s.play);
 
 useEffect(() => {
-  play().then(() => {
-    // autoplay was successful!
-  }).catch((error) => {
-    // do something if you want to handle or track this error
+  play().catch((error) => {
+    if (error.name === 'NotAllowedError') {
+      // the browser blocked playback; retry muted or offer the user a button
+    } else {
+      // something else went wrong
+    }
   });
 }, [play])
 ```
@@ -53,10 +55,12 @@ useEffect(() => {
 <FrameworkCase frameworks={["html"]}>
 ```js
 const player = document.querySelector('video-player');
-player.store.state.play().then(() => {
-  // autoplay was successful!
-}).catch((error) => {
-  // do something if you want to handle or track this error
+player.store.state.play()..catch((error) => {
+  if (error.name === 'NotAllowedError') {
+    // the browser blocked playback; retry muted or offer the user a button
+  } else {
+    // something else went wrong
+  }
 });
 ```
 </FrameworkCase>
