@@ -646,6 +646,49 @@ describe('CustomMediaElement', () => {
     });
   });
 
+  describe('content metadata reflection', () => {
+    it('sets the host contentTitle from the content-title attribute', () => {
+      const el = create(defineVideoElement());
+      el.setAttribute('content-title', 'A title');
+      expect(el.contentTitle).toBe('A title');
+    });
+
+    it('keeps an empty attribute as an empty string, not absence', () => {
+      const el = create(defineVideoElement());
+      el.setAttribute('content-title', '');
+      expect(el.contentTitle).toBe('');
+    });
+
+    it('reports null when the attribute is removed, per empty: null', () => {
+      const el = create(defineVideoElement());
+      el.setAttribute('content-title', 'A title');
+      el.removeAttribute('content-title');
+
+      // Not `''`. Absence has to stay distinguishable from a deliberately blank
+      // title, or the player cannot fall through to a lower-precedence source.
+      expect(el.contentTitle).toBeNull();
+    });
+
+    it('does not forward content metadata to the inner media element', () => {
+      const el = create(defineVideoElement());
+      el.setAttribute('content-title', 'A title');
+      el.setAttribute('content-poster', 'poster.jpg');
+
+      expect(el.target!.hasAttribute('content-title')).toBe(false);
+      expect(el.target!.hasAttribute('content-poster')).toBe(false);
+    });
+
+    it('maps each field to its kebab-case attribute', () => {
+      const el = create(defineVideoElement());
+
+      el.setAttribute('content-poster', 'poster.jpg');
+      el.setAttribute('content-poster-alt', 'A description');
+
+      expect(el.contentPoster).toBe('poster.jpg');
+      expect(el.contentPosterAlt).toBe('A description');
+    });
+  });
+
   describe('event delegation', () => {
     it('forwards non-composed media events from the target to the host', () => {
       const el = create(defineVideoElement());

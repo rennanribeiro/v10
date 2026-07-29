@@ -4,6 +4,9 @@ import { EMPTY_REMOTE, EMPTY_TEXT_TRACKS, EMPTY_TIME_RANGES } from './constants'
 import type {
   MediaAudioTrackCapability,
   MediaBufferCapability,
+  MediaContentPosterAltCapability,
+  MediaContentPosterCapability,
+  MediaContentTitleCapability,
   MediaErrorCapability,
   MediaLiveCapability,
   MediaPauseCapability,
@@ -108,6 +111,40 @@ export function isMediaStreamTypeCapable(value: unknown): value is MediaStreamTy
   if (!isObject(value)) return false;
   const media = value as Record<string, unknown>;
   return !isUndefined(media.streamType);
+}
+
+/**
+ * These three read `!isUndefined` like every other predicate here, and that is
+ * load-bearing rather than incidental.
+ *
+ * `undefined` means the property is not declared at all. A host that *does*
+ * declare it reports `null` when it has nothing to say — which is why
+ * `CustomMediaElement` declarations for these fields must specify `empty: null`.
+ * Were absence spelled `undefined`, capability would flicker as an attribute
+ * came and went, and because a feature checks capability once at attach and
+ * wires its listener then, a value arriving later would never reach the store.
+ *
+ * The practical consequence, accepted deliberately: any host carrying the
+ * declaration is capable, always, so for these fields the check is a formality
+ * rather than a real branch. There is nothing to gate — any media host can
+ * carry content metadata.
+ */
+export function isMediaContentTitleCapable(value: unknown): value is MediaContentTitleCapability {
+  if (!isObject(value)) return false;
+  const media = value as Record<string, unknown>;
+  return !isUndefined(media.contentTitle);
+}
+
+export function isMediaContentPosterCapable(value: unknown): value is MediaContentPosterCapability {
+  if (!isObject(value)) return false;
+  const media = value as Record<string, unknown>;
+  return !isUndefined(media.contentPoster);
+}
+
+export function isMediaContentPosterAltCapable(value: unknown): value is MediaContentPosterAltCapability {
+  if (!isObject(value)) return false;
+  const media = value as Record<string, unknown>;
+  return !isUndefined(media.contentPosterAlt);
 }
 
 export function isMediaLiveCapable(value: unknown): value is MediaLiveCapability {

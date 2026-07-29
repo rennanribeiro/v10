@@ -1,4 +1,4 @@
-import type { ErrorLike, MediaFeatureAvailability, MediaStreamType, TextTrackKind } from './types';
+import type { ErrorLike, MediaContentValue, MediaFeatureAvailability, MediaStreamType, TextTrackKind } from './types';
 
 export type { TextTrackKind };
 
@@ -369,4 +369,44 @@ export interface MediaPictureInPictureState {
   exitPictureInPicture(): Promise<void>;
   /** Toggle picture-in-picture mode. */
   togglePictureInPicture(): Promise<void>;
+}
+
+/**
+ * Content metadata resolved by the player, plus the setters that feed it.
+ *
+ * `contentTitle`, `contentPoster`, and `contentPosterAlt` are computed from the
+ * developer's override, whatever the media reports, and the developer's
+ * fallback, in that order. Each is a plain `string`, so consumers never handle a
+ * missing value, and an **empty string means "render nothing"** — no title text,
+ * no poster element — rather than an element with an empty source. A component
+ * piping `contentPoster` straight into `src` must guard, because `<img src="">`
+ * requests the current page.
+ *
+ * The setters come in pairs. `setX` writes the developer's **override**, which
+ * beats anything the media reports; `setDefaultX` writes the developer's
+ * **fallback**, used only when the media reports nothing. These write the same
+ * two slots as the provider's `content-title` and `default-content-title`
+ * attributes, so the imperative and declarative paths cannot drift. Passing
+ * `null` or `undefined` clears a slot and lets resolution fall through; passing
+ * an empty string sets it to deliberately blank.
+ */
+export interface MediaContentMetadataState {
+  /** Title of the content. Empty string when nothing should be shown. */
+  contentTitle: string;
+  /** URL of a poster image for the content. Empty string when there is none. */
+  contentPoster: string;
+  /**
+   * Alternative text describing the content poster.
+   *
+   * Empty string is the correct default: it marks the image decorative, which
+   * is what an empty `alt` already means in HTML, rather than leaving an image
+   * with no accessible name.
+   */
+  contentPosterAlt: string;
+  setContentTitle(value: MediaContentValue): void;
+  setDefaultContentTitle(value: MediaContentValue): void;
+  setContentPoster(value: MediaContentValue): void;
+  setDefaultContentPoster(value: MediaContentValue): void;
+  setContentPosterAlt(value: MediaContentValue): void;
+  setDefaultContentPosterAlt(value: MediaContentValue): void;
 }

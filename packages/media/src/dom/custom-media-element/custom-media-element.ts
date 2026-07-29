@@ -132,6 +132,14 @@ export function CustomMediaElement<T extends Constructor<MediaHost>>(
       preload: { type: String, empty: null },
       src: { type: String, empty: '' },
       streamType: { type: String, attribute: 'stream-type', empty: 'unknown' },
+      // `empty: null`, following `preload` above rather than `poster` and `src`.
+      // Removing the attribute must mean "nothing to say" so the player falls
+      // through to a lower-precedence source; collapsing to `''` would instead
+      // assert a deliberately blank title, and would also make the capability
+      // predicate flicker. See `MediaContentTitleCapability`.
+      contentTitle: { type: String, attribute: 'content-title', empty: null },
+      contentPoster: { type: String, attribute: 'content-poster', empty: null },
+      contentPosterAlt: { type: String, attribute: 'content-poster-alt', empty: null },
     };
 
     static get observedAttributes() {

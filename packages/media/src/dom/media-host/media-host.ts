@@ -2,6 +2,7 @@ import type { EventListenerFor, EventType, QueriedElement } from '@videojs/utils
 import { EMPTY_REMOTE, EMPTY_TEXT_TRACKS, EMPTY_TIME_RANGES } from '../../core/constants';
 import {
   type EventLike,
+  type MediaContentValue,
   type MediaFull,
   type MediaStreamType,
   MediaStreamTypes,
@@ -55,6 +56,9 @@ export class HTMLMediaElementHost<Target extends HTMLMediaTargetLike, Events ext
   #target: Target | null = null;
   #eventTypes = new Set<string>();
   #streamType: MediaStreamType = MediaStreamTypes.UNKNOWN;
+  #contentTitle: MediaContentValue = null;
+  #contentPoster: MediaContentValue = null;
+  #contentPosterAlt: MediaContentValue = null;
   #config: MediaConfig = {};
 
   protected get target() {
@@ -144,6 +148,48 @@ export class HTMLMediaElementHost<Target extends HTMLMediaTargetLike, Events ext
     this.#streamType = value;
     setMediaProp(this, 'streamType', value);
     this.dispatchEvent(new Event('streamtypechange'));
+  }
+
+  /**
+   * Title of the content, as reported by the media itself — distinct from
+   * {@link title}, which is the developer's setting on the element.
+   *
+   * The backing field starts as `null`, not `undefined`: `null` reads as
+   * "nothing to say" to the player's resolve chain while still satisfying the
+   * capability predicate, so a host stays capable even before a value arrives.
+   * Deliberately **no** `?? ''` fallback — that would erase the difference
+   * between "absent" and "deliberately blank", which the player depends on.
+   */
+  get contentTitle(): MediaContentValue {
+    return getMediaProp(this, 'contentTitle') ?? this.#contentTitle;
+  }
+  set contentTitle(value: MediaContentValue) {
+    if (this.contentTitle === value) return;
+    this.#contentTitle = value ?? null;
+    setMediaProp(this, 'contentTitle', value);
+    this.dispatchEvent(new Event('contenttitlechange'));
+  }
+
+  /** URL of a poster image for the content, as reported by the media itself. */
+  get contentPoster(): MediaContentValue {
+    return getMediaProp(this, 'contentPoster') ?? this.#contentPoster;
+  }
+  set contentPoster(value: MediaContentValue) {
+    if (this.contentPoster === value) return;
+    this.#contentPoster = value ?? null;
+    setMediaProp(this, 'contentPoster', value);
+    this.dispatchEvent(new Event('contentposterchange'));
+  }
+
+  /** Alternative text describing the content poster. */
+  get contentPosterAlt(): MediaContentValue {
+    return getMediaProp(this, 'contentPosterAlt') ?? this.#contentPosterAlt;
+  }
+  set contentPosterAlt(value: MediaContentValue) {
+    if (this.contentPosterAlt === value) return;
+    this.#contentPosterAlt = value ?? null;
+    setMediaProp(this, 'contentPosterAlt', value);
+    this.dispatchEvent(new Event('contentposteraltchange'));
   }
 
   get liveEdgeStart() {

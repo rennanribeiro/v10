@@ -464,6 +464,71 @@ export interface MediaLiveCapability {
 }
 
 // ----------------------------------------
+// Content metadata
+// ----------------------------------------
+
+/**
+ * A metadata value the media is reporting about its content.
+ *
+ * `null` and `undefined` both mean "the media has nothing to say" and let the
+ * player fall through to a lower-precedence source. An **empty string is a real
+ * value** meaning "deliberately blank" — a media must never manufacture one to
+ * stand in for absence.
+ *
+ * @see {@link MediaContentTitleCapability}
+ */
+export type MediaContentValue = string | null | undefined;
+
+/**
+ * Content metadata is deliberately separate from the element's own `title` and
+ * `poster`.
+ *
+ * `title` and `poster` are the *developer's* settings on the media element —
+ * the native tooltip and the `<video poster>` frame. The `content*` properties
+ * are *facts about the content itself*, usually supplied by a backend: a
+ * `mux-video` that fetches a title from the Mux API reports it here. Merging the
+ * two would erase that distinction, so they are not reconciled.
+ *
+ * A media that reports content metadata is expected to **clear it on source
+ * change** and dispatch the change event. Only the dispatch half is
+ * structurally enforced — assigning through the host setter always fires the
+ * event, whereas clearing on a new source is convention with nothing checking
+ * it. The player wires no fallback listener; see
+ * `internal/decisions/media/content-metadata.md`.
+ */
+export interface MediaContentTitleEvents {
+  contenttitlechange: EventLike;
+}
+
+export interface MediaContentTitleCapability {
+  /** Title of the content, or nothing if the media has no opinion. */
+  readonly contentTitle: MediaContentValue;
+}
+
+export interface MediaContentPosterEvents {
+  contentposterchange: EventLike;
+}
+
+export interface MediaContentPosterCapability {
+  /** URL of a poster image for the content, or nothing if the media has no opinion. */
+  readonly contentPoster: MediaContentValue;
+}
+
+export interface MediaContentPosterAltEvents {
+  contentposteraltchange: EventLike;
+}
+
+export interface MediaContentPosterAltCapability {
+  /**
+   * Alternative text describing the content poster.
+   *
+   * An empty string is the platform's marker for a decorative image, so it is a
+   * meaningful value here rather than a stand-in for absence.
+   */
+  readonly contentPosterAlt: MediaContentValue;
+}
+
+// ----------------------------------------
 // Remote playback
 // ----------------------------------------
 
@@ -547,7 +612,10 @@ export interface MediaFullEvents
     MediaErrorEvents,
     TextTrackListEvents,
     MediaStreamTypeEvents,
-    MediaLiveEvents {}
+    MediaLiveEvents,
+    MediaContentTitleEvents,
+    MediaContentPosterEvents,
+    MediaContentPosterAltEvents {}
 
 export interface MediaFull<Events extends { [K in keyof Events]: EventLike } = MediaFullEvents>
   extends Media<Events>,
@@ -565,7 +633,10 @@ export interface MediaFull<Events extends { [K in keyof Events]: EventLike } = M
     MediaRemotePlaybackCapability,
     MediaControlsCapability,
     MediaAutoplayCapability,
-    MediaConfigCapability {}
+    MediaConfigCapability,
+    MediaContentTitleCapability,
+    MediaContentPosterCapability,
+    MediaContentPosterAltCapability {}
 
 export interface VideoEvents extends MediaFullEvents, MediaPictureInPictureEvents, MediaVideoDimensionsEvents {}
 
@@ -601,6 +672,9 @@ export interface MediaTargetLike
     MediaAutoplayCapability,
     Partial<MediaLiveCapability>,
     Partial<MediaStreamTypeCapability>,
+    Partial<MediaContentTitleCapability>,
+    Partial<MediaContentPosterCapability>,
+    Partial<MediaContentPosterAltCapability>,
     Partial<MediaConfigCapability> {
   title: string;
 }
