@@ -28,7 +28,10 @@ const stateContext: StateContext<unknown> = {
  */
 export function createSelector<S extends AnySlice>(slice: S): Selector<object, InferSliceState<S> | undefined> {
   const initialState = slice.state(stateContext);
-  const keys = Object.keys(initialState as object);
+  // Derived keys are not in `state()`, so they have to be unioned in explicitly
+  // or a slice's computed values would be missing from its own selector — and a
+  // slice whose keys are *all* derived would hit the always-undefined stub below.
+  const keys = [...Object.keys(initialState as object), ...(slice.derived ? Object.keys(slice.derived) : [])];
 
   const firstKey = keys[0];
 

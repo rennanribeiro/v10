@@ -119,8 +119,10 @@ const store = createStore<HTMLMediaElement>()(mediaSlice);
 
 Behavior:
 - State factories are called in order, results merged (last wins on conflict)
+- `derived` maps are merged too, with a `__DEV__` warning on duplicate keys
 - All attach handlers run; errors are caught and reported via `reportError`
-- Use `UnionSliceState<Slices>` for combined state type inference
+- Use `UnionSliceState<Slices>` for combined state type inference — it includes
+  derived keys, marked `readonly`
 
 ```ts
 import type { UnionSliceState } from '@videojs/store';
@@ -128,6 +130,48 @@ import type { UnionSliceState } from '@videojs/store';
 const slices = [volumeSlice, playbackSlice] as const;
 type MediaState = UnionSliceState<typeof slices>;
 ```
+
+### Derived State
+
+A slice can declare values the store computes from its own state. Declare them
+in `derived`, alongside `state`:
+
+```ts
+import { defineSlice } from '@videojs/store';
+
+const timeSlice = defineSlice<HTMLMediaElement>()<
+  { currentTime: number; duration: number },
+  { remaining: number }
+>({
+  state: () => ({ currentTime: 0, duration: 0 }),
+  derived: {
+    remaining: ({ get }) => Math.max(0, get('duration') - get('currentTime')),
+  },
+});
+
+const store = createStore<HTMLMediaElement>()(timeSlice);
+store.remaining; // read like any other state
+```
+
+Derived keys are ordinary values on the frozen snapshot, so store getters,
+selectors, `store.state`, and `shallowEqual` all treat them like anything else.
+
+Three rules keep the primitive small:
+
+- **Every formula reruns on every patch that changed something.** There is no
+  dependency tracking, so **formulas must be cheap** — `patch` runs on every
+  `timeupdate`.
+- **A formula reads source keys only.** Reading another formula's output is a
+  compile error, which is why there is no run order and no cycle detection.
+- **The formula is the only writer of its key.** Writing a derived key through
+  `patch` is dropped, with a `__DEV__` warning. It is a type error too, since a
+  slice's `set` is typed against source keys.
+
+`combine` merges the `derived` maps of every slice, warning in `__DEV__` on a
+duplicate key.
+
+Rationale and the alternatives considered are in
+[derived-state.md](https://github.com/videojs/v10/blob/main/internal/decisions/store/derived-state.md).
 
 ### Actions
 
@@ -310,6 +354,13 @@ import { createState, flush, isState } from '@videojs/store';
 // Create state container
 const state = createState({ volume: 1, muted: false });
 
+// Optionally with derived formulas, recomputed inside every patch that changed
+// something and folded into the same snapshot before subscribers are notified
+const withDerived = createState({ currentTime: 0, duration: 60 }, {
+  remaining: ({ get }) => get('duration') - get('currentTime'),
+});
+withDerived.current.remaining; // 60
+
 // Read via .current
 const { volume } = state.current; // 1
 
@@ -317,6 +368,10 @@ const { volume } = state.current; // 1
 state.patch({ volume: 0.5 });
 state.patch({ volume: 0.5, muted: true });
 // Only ONE notification fires (after microtask)
+
+// patch() ignores writes that change nothing, and only copies the state object
+// once it finds a real change. It iterates with Reflect.ownKeys, so symbol-keyed
+// entries participate — slices use those for private inputs to a derived value.
 
 // Subscribe to changes
 state.subscribe(() => {

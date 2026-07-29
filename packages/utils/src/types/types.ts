@@ -22,6 +22,16 @@ export type Falsy<T> = T | false | null | undefined;
 
 export type EnsureFunction<T> = T extends (...args: any[]) => any ? T : never;
 
+/**
+ * An object type with no members.
+ *
+ * Exists so generic defaults can say "nothing here" once, in a named way, rather
+ * than repeating a bare `{}` — which reads as "any non-nullish value" everywhere
+ * else and is linted accordingly.
+ */
+// biome-ignore lint/complexity/noBannedTypes: naming `{}` once is the point of this alias
+export type EmptyObject = {};
+
 export type Simplify<T> = { [KeyType in keyof T]: T[KeyType] } & {};
 
 export type NonNullableObject<T extends object> = {

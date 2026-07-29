@@ -1,21 +1,33 @@
 import { isNull, isObject } from '@videojs/utils/predicate';
+import type { EmptyObject } from '@videojs/utils/types';
 import { AbortControllerRegistry } from './abort-controller-registry';
 import type { StoreCallbacks } from './config';
 import { throwDestroyedError, throwNoTargetError } from './errors';
 import type { AttachContext, Slice, StateContext } from './slice';
-import type { StateChange, State as StateContainer, SubscribeOptions, UnknownState, WritableState } from './state';
+import type {
+  DerivedFormulas,
+  StateChange,
+  State as StateContainer,
+  SubscribeOptions,
+  UnknownState,
+  WritableState,
+} from './state';
 import { createState } from './state';
 
 const STORE_SYMBOL = Symbol.for('@videojs/store');
 
 export interface StoreOptions<Target, State> extends StoreCallbacks<Target, State> {}
 
-export function createStore<Target = unknown>(): <State>(
-  slice: Slice<Target, State>,
+export function createStore<Target = unknown>(): <State, Derived = EmptyObject>(
+  slice: Slice<Target, State, Derived>,
   options?: StoreOptions<Target, State>
-) => Store<Target, State> {
-  return <State>(slice: Slice<Target, State>, options: StoreOptions<Target, State> = {}): Store<Target, State> => {
-    type TargetStore = Store<Target, State>;
+) => Store<Target, State & Readonly<Derived>> {
+  return <State, Derived>(
+    slice: Slice<Target, State, Derived>,
+    options: StoreOptions<Target, State> = {}
+  ): Store<Target, State & Readonly<Derived>> => {
+    type StoreState = State & Readonly<Derived>;
+    type TargetStore = Store<Target, StoreState>;
 
     // Closure state
     let target: Target | null = null;
@@ -25,24 +37,33 @@ export function createStore<Target = unknown>(): <State>(
     const signals = new AbortControllerRegistry();
 
     // Reactive state - initialized after building slice state
-    let state: WritableState<State>;
+    let state: WritableState<StoreState>;
 
     function validate() {
       if (destroyed) throwDestroyedError();
       if (!target) throwNoTargetError();
     }
 
-    const initialState = slice.state({
+    const initialSourceState = slice.state({
       target: () => {
         validate();
         return target!;
       },
       signals,
       get: () => state.current as Readonly<Record<string, unknown>>,
-      set: (partial) => state.patch(partial as Partial<State>),
+      set: (partial) => state.patch(partial as Partial<StoreState>),
     } satisfies StateContext<Target>);
 
-    state = createState(initialState);
+    // Seed derived values before the getter loop below, so derived keys get
+    // accessors like any other state. Each formula runs with every tier slot
+    // still absent, which is how a library default gets stated once — in the
+    // formula — rather than duplicated into `state()`.
+    const derived = slice.derived as DerivedFormulas | undefined;
+    const initialState = derived
+      ? ({ ...initialSourceState, ...seedDerived(initialSourceState as object, derived) } as StoreState)
+      : (initialSourceState as unknown as StoreState);
+
+    state = createState(initialState, derived);
 
     const store = {
       [STORE_SYMBOL]: true,
@@ -63,9 +84,12 @@ export function createStore<Target = unknown>(): <State>(
       subscribe,
     } as unknown as TargetStore;
 
+    // `Object.keys` skips symbols by design: tier slots are internal symbol-keyed
+    // inputs and get no public getter. They are still enumerable via
+    // `Reflect.ownKeys` on the snapshot — internal, not secret.
     for (const key of Object.keys(initialState as object)) {
       Object.defineProperty(store, key, {
-        get: () => state.current[key as keyof State],
+        get: () => state.current[key as keyof StoreState],
         enumerable: true,
       });
     }
@@ -86,11 +110,11 @@ export function createStore<Target = unknown>(): <State>(
       target = newTarget;
 
       // Create attach context
-      const attachContext: AttachContext<Target, State> = {
+      const attachContext: AttachContext<Target, State, Derived> = {
         target: newTarget,
         signal: signals.base,
-        get: () => state.current,
-        set: (partial) => state.patch(partial),
+        get: () => state.current as Readonly<State & Derived>,
+        set: (partial) => state.patch(partial as Partial<StoreState>),
         reportError,
         store: {
           get state() {
@@ -123,7 +147,9 @@ export function createStore<Target = unknown>(): <State>(
       if (isNull(target)) return;
       signals.reset();
       target = null;
-      state.patch(initialState);
+      // Source keys only. `patch` would drop derived keys anyway, but passing
+      // them would trip its dev warning on every ordinary detach.
+      state.patch(initialSourceState as Partial<StoreState>);
     }
 
     function destroy(): void {
@@ -145,6 +171,18 @@ export function createStore<Target = unknown>(): <State>(
       }
     }
   };
+}
+
+/** Runs every formula once against the source state, for the initial snapshot. */
+function seedDerived(source: object, derived: DerivedFormulas): Record<PropertyKey, unknown> {
+  const get = (key: PropertyKey) => (source as Record<PropertyKey, unknown>)[key];
+  const seeded: Record<PropertyKey, unknown> = {};
+
+  for (const key of Reflect.ownKeys(derived)) {
+    seeded[key] = derived[key as string]!({ get });
+  }
+
+  return seeded;
 }
 
 export function isStore(value: unknown): value is AnyStore {

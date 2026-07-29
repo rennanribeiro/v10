@@ -1,4 +1,4 @@
-import type { Simplify, UnionToIntersection } from '@videojs/utils/types';
+import type { EmptyObject, Simplify, UnionToIntersection } from '@videojs/utils/types';
 import type { AbortControllerRegistry } from './abort-controller-registry';
 import type { UnknownState } from './state';
 
@@ -6,18 +6,20 @@ import type { UnknownState } from './state';
 // Attach
 // ----------------------------------------
 
-export type Attach<Target, State> = (ctx: AttachContext<Target, State>) => void;
+export type Attach<Target, State, Derived = EmptyObject> = (ctx: AttachContext<Target, State, Derived>) => void;
 
 export interface AttachStore {
   readonly state: UnknownState;
   subscribe: (callback: () => void) => () => void;
 }
 
-export interface AttachContext<Target, State> {
+export interface AttachContext<Target, State, Derived = EmptyObject> {
   target: Target;
   signal: AbortSignal;
   store: AttachStore;
-  get: () => Readonly<State>;
+  /** Reads everything, including this slice's derived values. */
+  get: () => Readonly<State & Derived>;
+  /** Writes source keys only. A derived key's formula is its own sole writer. */
   set: (partial: Partial<State>) => void;
   reportError: (error: unknown) => void;
 }
@@ -50,22 +52,57 @@ export interface StateContext<Target> {
 // Slice
 // ----------------------------------------
 
-export interface SliceConfig<Target, State> {
+// ----------------------------------------
+// Derived
+// ----------------------------------------
+
+/**
+ * Read access handed to a derived formula.
+ *
+ * Only *source* keys are readable. A formula that tried to read another
+ * formula's output would not compile, which is what removes the need for run
+ * ordering and cycle detection.
+ */
+export interface DerivedContext<Source> {
+  get: <K extends keyof Source>(key: K) => Source[K];
+}
+
+/** One formula per derived key, each a plain function of the slice's source state. */
+export type DerivedMap<Source, Derived> = {
+  [K in keyof Derived]: (ctx: DerivedContext<Source>) => Derived[K];
+};
+
+// ----------------------------------------
+// Slice
+// ----------------------------------------
+
+export interface SliceConfig<Target, State, Derived = EmptyObject> {
   /** Debug label. Used as `displayName` on selectors created from this slice. */
   name?: string;
   state: (ctx: StateContext<Target>) => State;
-  attach?: (ctx: AttachContext<Target, State>) => void;
+  /**
+   * Values the store computes from this slice's own state, recomputed inside
+   * every patch that changed something and folded into the same snapshot.
+   *
+   * Derived keys are readable on the store like any other state, but are
+   * `readonly` in the types and rejected by `patch` at runtime — the formula is
+   * the only writer.
+   */
+  derived?: DerivedMap<State, Derived>;
+  attach?: (ctx: AttachContext<Target, State, Derived>) => void;
 }
 
-export type Slice<Target, State> = SliceConfig<Target, State>;
+export type Slice<Target, State, Derived = EmptyObject> = SliceConfig<Target, State, Derived>;
 
-export type AnySlice<Target = any> = Slice<Target, any>;
+export type AnySlice<Target = any> = Slice<Target, any, any>;
 
 // ----------------------------------------
 // Factory
 // ----------------------------------------
 
-export type SliceFactory<Target> = <State>(config: SliceConfig<Target, State>) => Slice<Target, State>;
+export type SliceFactory<Target> = <State, Derived = EmptyObject>(
+  config: SliceConfig<Target, State, Derived>
+) => Slice<Target, State, Derived>;
 
 export function defineSlice<Target>(): SliceFactory<Target> {
   return (config) => config;
@@ -75,8 +112,23 @@ export function defineSlice<Target>(): SliceFactory<Target> {
 // Inference
 // ----------------------------------------
 
-export type InferSliceTarget<S> = S extends Slice<infer Target, any> ? Target : never;
+export type InferSliceTarget<S> = S extends Slice<infer Target, any, any> ? Target : never;
 
-export type InferSliceState<S> = S extends Slice<any, infer State> ? State : never;
+/** The keys a slice's `state()` returns — the only keys `set` accepts. */
+export type InferSliceSource<S> = S extends Slice<any, infer State, any> ? State : never;
+
+/** The keys a slice's formulas produce. */
+export type InferSliceDerived<S> = S extends Slice<any, any, infer Derived> ? Derived : never;
+
+/** Everything readable on a slice: its source state plus its derived keys, read-only. */
+export type InferSliceState<S> = InferSliceSource<S> & Readonly<InferSliceDerived<S>>;
+
+export type UnionSliceSource<Slices extends AnySlice[]> = Simplify<
+  UnionToIntersection<InferSliceSource<Slices[number]>>
+>;
+
+export type UnionSliceDerived<Slices extends AnySlice[]> = Simplify<
+  UnionToIntersection<InferSliceDerived<Slices[number]>>
+>;
 
 export type UnionSliceState<Slices extends AnySlice[]> = Simplify<UnionToIntersection<InferSliceState<Slices[number]>>>;
