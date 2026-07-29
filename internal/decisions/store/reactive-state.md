@@ -5,6 +5,10 @@ date: 2026-07-13
 
 # Use explicit store state and computed values
 
+> **Partly superseded 2026-07-29 by [derived-state.md](./derived-state.md).** Derivation is now eager rather than lazy, and a `derived` map means a patch can change keys the caller did not name — a real reduction in the explicitness this record valued. That record argues the trade-off. Everything else here still holds: no proxy mutation, no public queue, frozen snapshots, target-specific async in slices.
+>
+> Note also that "computed values" in the prose below most likely describes **selectors**, which exist and are lazy at read. It should not be read as a mandate that the newer `derived` primitive was fulfilling.
+
 ## Decision
 
 `@videojs/store` uses explicit state updates and computed values rather than proxy mutation, a public request queue, or implicit task orchestration.

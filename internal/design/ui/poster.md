@@ -42,6 +42,35 @@ Like Media Chrome — component owns the `<img>` internally.
 
 Our approach makes the flexible path the default.
 
+> **Amended 2026-07-29 — the poster URL can come from the store.** With
+> `content-poster` settable on the provider, the poster reaches the screen by
+> **filling in, not taking over**, so the reasoning above still holds. React's
+> `<Poster>` reads the resolved value only when given no `src`; HTML's
+> `<media-poster>` fills an empty `src` on the image the author supplied and never
+> creates one. `srcset`, `loading`, `<picture>`, and framework image components
+> all keep working, and a local `src` short-circuits the store entirely.
+>
+> A local `src` is therefore not a fourth precedence tier — the component only
+> decides *whether to ask*. See
+> [content-metadata.md](/internal/decisions/media/content-metadata.md).
+>
+> **The platform asymmetry is deliberate.** React's component owns its image;
+> HTML's element is a wrapper around yours. User-visible behaviour is identical
+> and each side follows its platform's grain. Giving `<media-poster>` a shadow
+> root with an owned image is the only shape where zero author markup works, but
+> it was rejected: it adds a shadow root to an element family that deliberately
+> has none, needs part-based styling for the fallback, and needs manual slot
+> assignment, since native fallback content is suppressed when an empty slot
+> element is itself the assigned content. Default skins get zero-markup behaviour
+> instead by putting a fallback `<img>` inside their own poster slot.
+>
+> **`alt` is decided by presence, never emptiness.** An author writing `alt=""` is
+> deliberately marking the image decorative — which is what this record's
+> accessibility section already says is the author's judgment — so the element
+> fills a *missing* `alt` and never an empty one. The store supplies it via
+> `content-poster-alt`, whose library default is the empty string: decorative
+> rather than an image with no accessible name.
+
 ## Future
 
 1. **`data-ended`** — Show poster when media ends.

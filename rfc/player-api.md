@@ -65,9 +65,23 @@ Reviewers cautioned against making one default skin account for every possible f
 
 There was also concern that feature bundles could become another preset taxonomy. Bundles remain ejectable convenience arrays, and the individual feature definitions remain the underlying contract.
 
+## Amendment 2026-07-29 — the provider takes configuration
+
+The provider now accepts developer-settable fields, as React props and HTML attributes. A feature declares which fields it exposes and which of its own actions writes each one; `createPlayer` collects those declarations and puts them on the provider. A field therefore exists only when the feature that declares it is composed — the same composition gating this RFC established for state, extended to the public provider surface.
+
+This is amended here rather than recorded elsewhere because it changes a public API this RFC settled: at the time of writing, neither provider accepted any configuration at all. React's `ProviderProps` was literally `{ children }`, and `<video-player>` declared no attributes. All developer configuration arrived on the *media* element and was read back by features.
+
+Two earlier positions need reconciling:
+
+- **This RFC deferred "symbol feature keys with `store.get` and `store.has`"** (see alternatives above) on the grounds that selectors gave typed lookup with less API surface. The metadata feature does use symbol keys — but for private tier slots with no public accessor, no lookup API, and no way for a consumer to obtain the symbol. The instinct that rejected them then (keep the store's public surface small) is the same instinct that keeps these private now. See [derived-state.md](/internal/decisions/store/derived-state.md).
+- **[provider-attach.md](/internal/decisions/player/provider-attach.md) flagged "provider mixin grows in complexity"**, and [context-media-discovery.md](/internal/decisions/player/context-media-discovery.md) values "no attribute ceremony". Both concerns are real and partly conceded: the provider does grow, and it does grow attributes. The mitigation is that features opt in — every feature shipping today declares nothing and contributes nothing — and that the mechanism reuses the element's existing `static properties` engine rather than inventing a third attribute system.
+
+The alternative was to keep configuration on the media element. Rejected because content metadata is a fact about the *content*, not about a media engine, and because the same value has to be settable when no media is attached at all.
+
 ## Consequences
 
 - The feature list is the type and bundle boundary for a player.
+- Provider props are part of that boundary: a declared field exists only when its feature is composed.
 - React and HTML share state and composition concepts while exposing platform-appropriate adapters.
 - Controls depend on selectors instead of the full store when practical.
 - Provider/container separation adds visible composition in HTML, but preserves cross-platform parity and enables extended player layouts.
