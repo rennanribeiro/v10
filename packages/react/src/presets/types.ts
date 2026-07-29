@@ -1,6 +1,4 @@
 import type { CSSProperties, PropsWithChildren } from 'react';
-import type { Poster } from '@/ui/poster';
-import type { RenderProp } from '@/utils/types';
 
 export type BaseSkinProps<T = unknown> = PropsWithChildren<
   T & {
@@ -10,7 +8,9 @@ export type BaseSkinProps<T = unknown> = PropsWithChildren<
 >;
 
 export type BaseVideoSkinProps<T = unknown> = BaseSkinProps<T> & {
-  poster?: string | RenderProp<Poster.State> | undefined;
-  /** Low-resolution placeholder shown behind the poster while it loads (blur-up effect). */
+  /**
+   * Low-resolution placeholder shown behind the poster while it loads (blur-up
+   * effect). A different concept from the poster itself, and a different image.
+   */
   placeholder?: string | undefined;
 };

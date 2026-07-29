@@ -16,7 +16,6 @@ import {
   root,
   slider,
 } from '@videojs/skins/default/tailwind/video.tailwind';
-import { isString } from '@videojs/utils/predicate';
 import { cn } from '@videojs/utils/style';
 import { type ComponentProps, type CSSProperties, forwardRef, type ReactNode } from 'react';
 import { useTranslator } from '@/i18n/context';
@@ -64,7 +63,6 @@ import { StatusIndicator } from '@/ui/status-indicator';
 import { Tooltip } from '@/ui/tooltip';
 import { VolumeIndicator } from '@/ui/volume-indicator';
 import { VolumeSlider } from '@/ui/volume-slider';
-import { isRenderProp } from '@/utils/use-render';
 import type { LiveVideoSkinProps } from './skin';
 
 const TOP_STATUS_ACTIONS = ['toggleSubtitles', 'toggleFullscreen', 'togglePictureInPicture'] as const;
@@ -200,7 +198,7 @@ function CaptionsTrigger(): ReactNode {
 }
 
 export function LiveVideoSkinTailwind(props: LiveVideoSkinProps): ReactNode {
-  const { children, className, poster: posterProp, placeholder, style, ...rest } = props;
+  const { children, className, placeholder, style, ...rest } = props;
 
   const containerStyle = placeholder
     ? ({ '--media-poster-placeholder': `url(${placeholder})`, ...style } as CSSProperties)
@@ -210,13 +208,7 @@ export function LiveVideoSkinTailwind(props: LiveVideoSkinProps): ReactNode {
     <Container className={cn(root(false), className)} style={containerStyle} {...rest}>
       {children}
 
-      {posterProp && (
-        <Poster
-          src={isString(posterProp) ? posterProp : undefined}
-          render={isRenderProp(posterProp) ? posterProp : undefined}
-          className={poster(false)}
-        />
-      )}
+      <Poster className={poster(false)} />
 
       <BufferingIndicator
         render={(props) => (
