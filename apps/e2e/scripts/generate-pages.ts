@@ -204,7 +204,8 @@ function reactVideoPage(media: string, resource: string, config: MediaTypeConfig
     ? `import { Video, VideoSkin, videoFeatures } from '@videojs/react/video';`
     : `import { ${reactMedia.component} } from '${reactMedia.importPath}';\nimport { VideoSkin, videoFeatures } from '@videojs/react/video';`;
 
-  const posterProp = config.hasPoster ? ` poster={MEDIA.${resource}.poster}` : '';
+  // The poster is a provider prop now; the skin reads the resolved value.
+  const posterProp = config.hasPoster ? ` contentPoster={MEDIA.${resource}.poster}` : '';
   const storyboardTrack = config.hasStoryboard
     ? `\n          <track kind="metadata" label="thumbnails" src={MEDIA.${resource}.storyboard} default />`
     : '';
@@ -219,8 +220,8 @@ const Player = createPlayer({ features: videoFeatures });
 
 function App() {
   return (
-    <Player.Provider>
-      <VideoSkin${posterProp} style={{ maxWidth: 800, aspectRatio: '16/9' }}>
+    <Player.Provider${posterProp}>
+      <VideoSkin style={{ maxWidth: 800, aspectRatio: '16/9' }}>
         <${reactMedia.component} src={MEDIA.${resource}.url} playsInline crossOrigin="anonymous">${storyboardTrack}
         </${reactMedia.component}>
       </VideoSkin>

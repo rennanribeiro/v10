@@ -17,7 +17,7 @@ function App() {
   const styling = useMemo(readStyling, []);
 
   return (
-    <VideoProvider>
+    <VideoProvider contentPoster={poster}>
       <VideoSkinComponent skin={skin} styling={styling} className="aspect-video max-w-4xl mx-auto">
         <VimeoVideo className="block w-full h-full" src={VIMEO_VIDEO_SRC} playsInline />
       </VideoSkinComponent>

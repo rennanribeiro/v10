@@ -29,7 +29,7 @@ function App() {
 
   return (
     <SandboxI18nProvider>
-      <VideoProvider>
+      <VideoProvider contentPoster={poster}>
         <VideoSkinComponent skin={skin} styling={styling} className="aspect-video max-w-4xl mx-auto">
           <DashVideo
             src={SOURCES[source].url}
