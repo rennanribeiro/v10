@@ -6,6 +6,7 @@ import {
   features,
   type PlayerStore,
   type PlayerTarget,
+  type ScreenOrientationLockType,
   type VideoPlayerStore,
   videoFeatures,
 } from '@videojs/core/dom';
@@ -53,14 +54,11 @@ describe('createPlayer', () => {
     assertType<CreatePlayerResult<PlayerStore<[Slice<PlayerTarget, CustomState>]>>>(result);
   });
 
-  it('accepts the orientation lock feature alias with and without config', () => {
-    const configuredOrientationLock = features.orientationLock({ type: 'portrait' });
+  it('accepts the orientation lock feature alias', () => {
+    const result = createPlayer({ features: [features.orientationLock] });
 
-    const defaultResult = createPlayer({ features: [features.orientationLock] });
-    const configuredResult = createPlayer({ features: [configuredOrientationLock] });
-
-    assertType<CreatePlayerResult<PlayerStore<[typeof features.orientationLock]>>>(defaultResult);
-    assertType<CreatePlayerResult<PlayerStore<[typeof configuredOrientationLock]>>>(configuredResult);
+    assertType<CreatePlayerResult<PlayerStore<[typeof features.orientationLock]>>>(result);
+    assertType<ScreenOrientationLockType>(result.create().orientationLock);
   });
 
   it('resolves extended video features to generic PlayerStore', () => {

@@ -42,7 +42,11 @@ function getTemplateHTML() {
       <slot></slot>
 
       <media-poster class="${poster(true)}">
-        <slot name="poster"></slot>
+        <slot name="poster">
+          <!-- Fallback image the skin owns. <media-poster> fills its src
+               from the store; an author-supplied poster replaces it. -->
+          <img />
+        </slot>
       </media-poster>
 
       <media-buffering-indicator class="${bufferingIndicator}">

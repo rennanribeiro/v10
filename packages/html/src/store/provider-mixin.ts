@@ -1,7 +1,17 @@
-import { createPopupGroup, type MediaContainer, type PlayerStore, type PlayerTarget } from '@videojs/core/dom';
+import {
+  assertNoProviderPropCollisions,
+  type CollectedProviderProp,
+  createPopupGroup,
+  type MediaContainer,
+  type PlayerStore,
+  type PlayerTarget,
+  writeProviderProps,
+} from '@videojs/core/dom';
+import type { PropertyDeclarationMap, PropertyValues, ReactiveElement } from '@videojs/element';
 import { ContextProvider } from '@videojs/element/context';
 import type { Media } from '@videojs/media/dom';
 import { isNull } from '@videojs/utils/predicate';
+import type { EmptyObject } from '@videojs/utils/types';
 import type { MediaElementConstructor } from '@/ui/media-element';
 import type { ContainerContext, MediaContext, PlayerContext } from '../player/context';
 import type { PlayerProvider, PlayerProviderConstructor } from './types';
@@ -11,11 +21,13 @@ export interface ProviderMixinConfig<Store extends PlayerStore> {
   mediaContext: MediaContext;
   containerContext: ContainerContext;
   factory: () => Store;
+  /** Provider props collected from the feature list, keyed by prop name. */
+  providerProps: Map<string, CollectedProviderProp>;
 }
 
-export type ProviderMixin<Store extends PlayerStore> = <Class extends MediaElementConstructor>(
+export type ProviderMixin<Store extends PlayerStore, Props = EmptyObject> = <Class extends MediaElementConstructor>(
   BaseClass: Class
-) => Class & PlayerProviderConstructor<Store>;
+) => Class & PlayerProviderConstructor<Store, Props>;
 
 /**
  * Create a mixin that provides player context to descendant elements and
@@ -28,13 +40,34 @@ export type ProviderMixin<Store extends PlayerStore> = <Class extends MediaEleme
  * As a fallback for plain `<video>`/`<audio>` that can't consume context,
  * the provider queries its subtree after a microtask.
  *
- * @param config - Provider configuration with contexts and store factory.
+ * Fields declared by the composed features become ordinary reactive properties,
+ * so `<video-player content-title="…">` works through the attribute engine the
+ * element already has rather than a mechanism invented for this.
+ *
+ * @param config - Provider configuration with contexts, store factory, and props.
  */
-export function createProviderMixin<Store extends PlayerStore>(
+export function createProviderMixin<Store extends PlayerStore, Props = EmptyObject>(
   config: ProviderMixinConfig<Store>
-): ProviderMixin<Store> {
+): ProviderMixin<Store, Props> {
+  const declaredProperties: PropertyDeclarationMap = {};
+
+  for (const { name, attribute, type } of config.providerProps.values()) {
+    declaredProperties[name] = { type, attribute };
+  }
+
   return <Class extends MediaElementConstructor>(BaseClass: Class) => {
+    if (__DEV__) {
+      // Checked against the *base* prototype chain, before this class installs
+      // its own accessors, so an inherited DOM property is still visible.
+      assertNoProviderPropCollisions(config.providerProps, BaseClass.prototype);
+    }
+
     class PlayerProviderElement extends BaseClass implements PlayerProvider<Store> {
+      static properties: PropertyDeclarationMap = {
+        ...(BaseClass as unknown as typeof ReactiveElement).properties,
+        ...declaredProperties,
+      };
+
       #store: Store | null = config.factory();
       #detach: (() => void) | null = null;
       #media: Media | null = null;
@@ -96,6 +129,13 @@ export function createProviderMixin<Store extends PlayerStore>(
           setContainer: this.#setContainer,
           popupGroup: this.#popupGroup,
         });
+        // Before `#tryAttach()`, deliberately. Attributes are parsed during
+        // upgrade, but the element's first `update()` only runs a microtask after
+        // connect — so without this line the store would attach, and the media
+        // would report its own metadata, before the developer's values had landed.
+        // The ordering lives here because this callback is already the one place a
+        // reviewer looks for it.
+        this.#syncProviderProps();
         this.#tryAttach();
         this.#queueFallbackDiscovery();
       }
@@ -110,6 +150,30 @@ export function createProviderMixin<Store extends PlayerStore>(
         this.#store?.destroy();
         this.#store = null;
         super.destroyCallback();
+      }
+
+      /**
+       * Later changes take the ordinary Lit path: setting a declared property, or
+       * changing its attribute, requests an update, and the write happens here.
+       *
+       * Note the property *getter* keeps returning the element's own last-set
+       * value rather than the store's resolved value, because `ReactiveElement`'s
+       * generated accessor stores it under a symbol. That matters: after
+       * `el.contentTitle = undefined` hands control back to the media, reading the
+       * property must not report the media's title instead.
+       */
+      protected override willUpdate(changed: PropertyValues): void {
+        super.willUpdate(changed);
+        this.#syncProviderProps();
+      }
+
+      #syncProviderProps(): void {
+        if (!config.providerProps.size) return;
+
+        const store = this.#store;
+        if (!store || store.destroyed) return;
+
+        writeProviderProps(store as never, config.providerProps, (name) => (this as Record<string, unknown>)[name]);
       }
 
       #tryAttach(): void {
@@ -158,6 +222,9 @@ export function createProviderMixin<Store extends PlayerStore>(
       }
     }
 
-    return PlayerProviderElement;
+    // The declared props exist on the prototype at runtime but are never written
+    // as class fields, so the class type cannot see them — hence the assertion
+    // rather than a structural match.
+    return PlayerProviderElement as unknown as Class & PlayerProviderConstructor<Store, Props>;
   };
 }
