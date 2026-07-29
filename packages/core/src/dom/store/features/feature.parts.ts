@@ -1,5 +1,6 @@
 import { audioTrackFeature } from './audio-track';
 import { bufferFeature } from './buffer';
+import { contentMetadataFeature } from './content-metadata';
 import { controlsFeature } from './controls';
 import { fullscreenFeature } from './fullscreen';
 import { liveFeature } from './live';
@@ -21,6 +22,7 @@ export { audioFeatures, backgroundFeatures, videoFeatures } from './presets';
 export {
   audioTrackFeature as audioTrack,
   bufferFeature as buffer,
+  contentMetadataFeature as contentMetadata,
   controlsFeature as controls,
   fullscreenFeature as fullscreen,
   liveFeature as live,

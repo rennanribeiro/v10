@@ -58,12 +58,13 @@ describe('orientationLockFeature', () => {
     });
   });
 
-  it('locks the configured orientation type when fullscreen starts', async () => {
+  it('locks the orientation type set on the provider when fullscreen starts', async () => {
     const orientation = stubOrientation();
     const video = createMockVideo();
     const container = document.createElement('div');
 
-    const store = createStore<PlayerTarget>()(orientationLockFeature({ type: 'portrait' }));
+    const store = createStore<PlayerTarget>()(orientationLockFeature);
+    store.setOrientationLock('portrait');
     store.attach({ media: video, container });
 
     setFullscreenElement(container);
@@ -72,6 +73,58 @@ describe('orientationLockFeature', () => {
     await vi.waitFor(() => {
       expect(orientation.lock).toHaveBeenCalledWith('portrait');
     });
+  });
+
+  it('reads the orientation type at lock time, not at attach time', async () => {
+    const orientation = stubOrientation();
+    const video = createMockVideo();
+    const container = document.createElement('div');
+
+    const store = createStore<PlayerTarget>()(orientationLockFeature);
+    store.attach({ media: video, container });
+
+    // Changed after attach. Capturing the value up front is the easy mistake
+    // here, because the store half looks finished while the lock still uses
+    // whatever was set when the media attached.
+    store.setOrientationLock('portrait');
+
+    setFullscreenElement(container);
+    document.dispatchEvent(new Event('fullscreenchange'));
+
+    await vi.waitFor(() => {
+      expect(orientation.lock).toHaveBeenCalledWith('portrait');
+    });
+  });
+
+  it('falls back to landscape when the provider clears the value', async () => {
+    const orientation = stubOrientation();
+    const video = createMockVideo();
+    const container = document.createElement('div');
+
+    const store = createStore<PlayerTarget>()(orientationLockFeature);
+    store.setOrientationLock('portrait');
+    store.setOrientationLock(null);
+    store.attach({ media: video, container });
+
+    setFullscreenElement(container);
+    document.dispatchEvent(new Event('fullscreenchange'));
+
+    await vi.waitFor(() => {
+      expect(orientation.lock).toHaveBeenCalledWith('landscape');
+    });
+  });
+
+  it('exposes the resolved value on the store', () => {
+    const store = createStore<PlayerTarget>()(orientationLockFeature);
+
+    expect(store.orientationLock).toBe('landscape');
+
+    store.setOrientationLock('portrait');
+    expect(store.orientationLock).toBe('portrait');
+  });
+
+  it('declares one provider prop, since nothing donates an orientation preference', () => {
+    expect(Object.keys(orientationLockFeature.providerProps ?? {})).toEqual(['orientationLock']);
   });
 
   it('unlocks when fullscreen exits', async () => {

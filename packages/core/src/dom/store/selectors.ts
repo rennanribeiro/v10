@@ -2,6 +2,7 @@ import { createSelector } from '@videojs/store';
 
 import { audioTrackFeature } from './features/audio-track';
 import { bufferFeature } from './features/buffer';
+import { contentMetadataFeature } from './features/content-metadata';
 import { controlsFeature } from './features/controls';
 import { errorFeature } from './features/error';
 import { fullscreenFeature } from './features/fullscreen';
@@ -21,6 +22,8 @@ import { volumeFeature } from './features/volume';
 export const selectAudioTrack = createSelector(audioTrackFeature);
 /** Select the buffer state (buffered ranges, percent buffered). */
 export const selectBuffer = createSelector(bufferFeature);
+/** Select the resolved content metadata (contentTitle, contentPoster, contentPosterAlt) and its setters. */
+export const selectContentMetadata = createSelector(contentMetadataFeature);
 /** Select the controls state (controls visible, user-active). */
 export const selectControls = createSelector(controlsFeature);
 /** Select the error state (error, dismissed, dismissError). */

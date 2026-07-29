@@ -1,4 +1,5 @@
 import { createSelector, type StateContext } from '@videojs/store';
+import type { EmptyObject } from '@videojs/utils/types';
 import { describe, expect, it } from 'vitest';
 import { definePlayerFeature } from '../feature';
 import type { PlayerTarget } from '../player';
@@ -23,19 +24,36 @@ describe('definePlayerFeature', () => {
     expect(feature.state(stateContext).enabled).toBe(true);
   });
 
-  it('defines a configurable player feature', () => {
-    const feature = definePlayerFeature(
-      {
-        name: 'configurable',
-        state: (_ctx, config: { enabled: boolean }) => ({ enabled: config.enabled }),
-      },
-      { enabled: true }
-    );
+  it('defines a feature that derives state', () => {
+    const feature = definePlayerFeature<{ count: number }, { doubled: number }>({
+      name: 'derives',
+      state: () => ({ count: 2 }),
+      derived: { doubled: ({ get }) => get('count') * 2 },
+    });
 
-    expect(feature.name).toBe('configurable');
-    expect(feature.state(stateContext).enabled).toBe(true);
-    expect(feature().state(stateContext).enabled).toBe(true);
-    expect(feature({ enabled: false }).state(stateContext).enabled).toBe(false);
-    expect(createSelector(feature).displayName).toBe('configurable');
+    expect(feature.derived?.doubled({ get: () => 3 })).toBe(6);
+    expect(createSelector(feature).displayName).toBe('derives');
+  });
+
+  it('defines a feature that declares provider props', () => {
+    const feature = definePlayerFeature<
+      { setLabel: (value: string | null | undefined) => void },
+      EmptyObject,
+      { label?: string | null | undefined }
+    >({
+      name: 'declares',
+      state: ({ set }) => ({ setLabel: (value) => set({ label: value } as never) }),
+      providerProps: {
+        label: { type: String, attribute: 'label', action: 'setLabel' },
+      },
+    });
+
+    expect(feature.providerProps?.label).toEqual({ type: String, attribute: 'label', action: 'setLabel' });
+  });
+
+  it('leaves a feature that declares nothing contributing no provider props', () => {
+    const feature = definePlayerFeature({ name: 'plain', state: () => ({ enabled: true }) });
+
+    expect(feature.providerProps).toBeUndefined();
   });
 });

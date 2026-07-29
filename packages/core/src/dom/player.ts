@@ -16,7 +16,15 @@ import type {
   MediaTimeState,
   MediaVolumeState,
 } from '@videojs/media';
-import type { AnySlice, Slice, Store, UnionSliceState } from '@videojs/store';
+import type { SliceConfig, Store, UnionSliceState } from '@videojs/store';
+import type { EmptyObject } from '@videojs/utils/types';
+import type { ProviderPropDeclarations } from './provider-props';
+// Type-only import, so the cycle back through `feature.ts` has no runtime edge.
+import type {
+  ContentMetadataDerived,
+  ContentMetadataProviderProps,
+  ContentMetadataSource,
+} from './store/features/content-metadata';
 
 export interface MediaContainer extends HTMLElement {}
 
@@ -25,9 +33,27 @@ export interface PlayerTarget {
   container: MediaContainer | null;
 }
 
-export type PlayerFeature<State> = Slice<PlayerTarget, State>;
+/**
+ * A store slice scoped to a player, optionally declaring fields the developer
+ * can set on the provider.
+ *
+ * `Derived` and `ProviderProps` both default to `{}`, so every existing
+ * `PlayerFeature<SomeState>` keeps compiling untouched.
+ */
+export interface PlayerFeature<State, Derived = EmptyObject, ProviderProps = EmptyObject>
+  extends SliceConfig<PlayerTarget, State, Derived> {
+  /**
+   * Fields this feature exposes on the player provider, as props in React and
+   * attributes in HTML.
+   *
+   * Named `providerProps` rather than `config`: "config" is already taken three
+   * times over in this codebase — store lifecycle callbacks, the media host's
+   * config bag, and the feature-configuration path this replaces.
+   */
+  providerProps?: ProviderPropDeclarations<State, ProviderProps>;
+}
 
-export type AnyPlayerFeature = AnySlice<PlayerTarget>;
+export type AnyPlayerFeature = PlayerFeature<any, any, any>;
 
 export type PlayerStore<Features extends AnyPlayerFeature[] = []> = Store<PlayerTarget, UnionSliceState<Features>>;
 
@@ -52,6 +78,7 @@ export type VideoFeatures = [
   PlayerFeature<MediaControlsState>,
   PlayerFeature<MediaTextTrackState>,
   PlayerFeature<MediaErrorState>,
+  PlayerFeature<ContentMetadataSource, ContentMetadataDerived, ContentMetadataProviderProps>,
 ];
 
 export type AudioFeatures = [
@@ -62,6 +89,7 @@ export type AudioFeatures = [
   PlayerFeature<MediaSourceState>,
   PlayerFeature<MediaBufferState>,
   PlayerFeature<MediaErrorState>,
+  PlayerFeature<ContentMetadataSource, ContentMetadataDerived, ContentMetadataProviderProps>,
 ];
 
 // TODO: Define background video features (e.g., playback, source, buffer)
@@ -86,6 +114,7 @@ export type LiveVideoFeatures = [
   PlayerFeature<MediaTextTrackState>,
   PlayerFeature<MediaErrorState>,
   PlayerFeature<MediaLiveState>,
+  PlayerFeature<ContentMetadataSource, ContentMetadataDerived, ContentMetadataProviderProps>,
 ];
 
 /**
@@ -102,6 +131,7 @@ export type LiveAudioFeatures = [
   PlayerFeature<MediaBufferState>,
   PlayerFeature<MediaErrorState>,
   PlayerFeature<MediaLiveState>,
+  PlayerFeature<ContentMetadataSource, ContentMetadataDerived, ContentMetadataProviderProps>,
 ];
 
 export type VideoPlayerStore = PlayerStore<VideoFeatures>;

@@ -7,6 +7,7 @@ import type {
 } from '../../player';
 import { audioTrackFeature } from './audio-track';
 import { bufferFeature } from './buffer';
+import { contentMetadataFeature } from './content-metadata';
 import { controlsFeature } from './controls';
 import { errorFeature } from './error';
 import { fullscreenFeature } from './fullscreen';
@@ -36,6 +37,7 @@ export const videoFeatures: VideoFeatures = [
   controlsFeature,
   textTrackFeature,
   errorFeature,
+  contentMetadataFeature,
 ];
 
 export const audioFeatures: AudioFeatures = [
@@ -46,6 +48,7 @@ export const audioFeatures: AudioFeatures = [
   sourceFeature,
   bufferFeature,
   errorFeature,
+  contentMetadataFeature,
 ];
 
 // TODO: Add background video features (e.g., playback, source, buffer)
@@ -70,6 +73,7 @@ export const liveVideoFeatures: LiveVideoFeatures = [
   textTrackFeature,
   errorFeature,
   liveFeature,
+  contentMetadataFeature,
 ];
 
 /**
@@ -86,4 +90,5 @@ export const liveAudioFeatures: LiveAudioFeatures = [
   bufferFeature,
   errorFeature,
   liveFeature,
+  contentMetadataFeature,
 ];

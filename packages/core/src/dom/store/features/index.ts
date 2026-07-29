@@ -1,5 +1,6 @@
 export * from './audio-track';
 export * from './buffer';
+export * from './content-metadata';
 export * from './controls';
 export * from './error';
 export * as features from './feature.parts';

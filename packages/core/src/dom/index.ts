@@ -9,6 +9,7 @@ export * from './hotkey/coordinator';
 export * from './hotkey/hotkey';
 export * from './hotkey/hotkey-events';
 export * from './player';
+export * from './provider-props';
 export * from './store/features';
 export * from './store/selectors';
 export * from './ui/alert-dialog';

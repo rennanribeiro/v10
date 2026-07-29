@@ -16,6 +16,11 @@ export type ScreenOrientationLockType =
   | 'portrait-secondary';
 
 export interface ScreenOrientationLockConfig {
+  /**
+   * Orientation to lock to. Read when the lock is requested rather than when the
+   * lock is created, so a caller may supply a getter that tracks a changing
+   * value.
+   */
   type?: ScreenOrientationLockType | undefined;
 }
 
@@ -24,9 +29,7 @@ interface ScreenOrientation {
   unlock?: (() => void) | undefined;
 }
 
-export function createScreenOrientationLock({
-  type = 'landscape',
-}: ScreenOrientationLockConfig = {}): ScreenOrientationLock {
+export function createScreenOrientationLock(config: ScreenOrientationLockConfig = {}): ScreenOrientationLock {
   let locked = false;
   let desired = false;
 
@@ -52,7 +55,7 @@ export function createScreenOrientationLock({
       if (!isFunction(lock)) return;
 
       try {
-        await lock.call(orientation, type);
+        await lock.call(orientation, config.type ?? 'landscape');
       } catch {
         return;
       }
