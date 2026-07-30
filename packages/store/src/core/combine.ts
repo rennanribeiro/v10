@@ -71,8 +71,12 @@ function mergeDerived(slices: readonly AnySlice[]): DerivedFormulas | undefined 
 
     for (const key of Reflect.ownKeys(formulas)) {
       if (__DEV__ && merged && key in merged) {
+        // Names the slice, unlike the duplicate-state-key warning above. That
+        // one leaves you grepping every feature for the key; a formula is even
+        // harder to find by hand, so the name is worth the interpolation.
+        const from = slice.name ? ` declared by "${slice.name}"` : '';
         console.warn(
-          `[vjs-store] combine(): duplicate derived key "${String(key)}" — later slice overwrites earlier one`
+          `[vjs-store] combine(): duplicate derived key "${String(key)}"${from} — later slice overwrites earlier one`
         );
       }
 

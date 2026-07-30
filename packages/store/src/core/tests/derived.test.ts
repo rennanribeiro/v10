@@ -334,6 +334,7 @@ describe('combine with derived', () => {
       derived: { total: ({ get }) => get('count') },
     });
     const b = slice<{ other: number }, { total: number }>({
+      name: 'second',
       state: () => ({ other: 2 }),
       derived: { total: ({ get }) => get('other') },
     });
@@ -341,6 +342,9 @@ describe('combine with derived', () => {
     createStore<MockTarget>()(combine(a, b));
 
     expect(warn).toHaveBeenCalledWith(expect.stringContaining('duplicate derived key "total"'));
+    // Names the offending slice, unlike the duplicate-state-key warning beside
+    // it — a formula is harder to find by grepping than a state key.
+    expect(warn).toHaveBeenCalledWith(expect.stringContaining('"second"'));
     warn.mockRestore();
   });
 

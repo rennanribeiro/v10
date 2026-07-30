@@ -53,17 +53,60 @@ describe('Poster', () => {
     expect(screen.getByTestId('poster').getAttribute('src')).toBe('local.jpg');
   });
 
-  it('renders no src when the resolved value is an empty string', () => {
+  it('renders nothing when the resolved value is an empty string', () => {
     const Wrapper = createWrapper({ contentPoster: '' });
 
-    render(
+    const { container } = render(
       <Wrapper>
         <Poster data-testid="poster" />
       </Wrapper>
     );
 
-    // Not `src=""`, which would request the current page.
-    expect(screen.getByTestId('poster').hasAttribute('src')).toBe(false);
+    // No element, rather than `src=""` (which requests the current page) or an
+    // `<img>` with no source at all. The skins render `<Poster />`
+    // unconditionally, so this is the only thing standing between a player with
+    // no poster and a stray image element.
+    expect(screen.queryByTestId('poster')).toBeNull();
+    expect(container.querySelector('img')).toBeNull();
+  });
+
+  it('renders nothing for a local empty src', () => {
+    const Wrapper = createWrapper({ contentPoster: 'from-store.jpg' });
+
+    render(
+      <Wrapper>
+        <Poster data-testid="poster" src="" />
+      </Wrapper>
+    );
+
+    // The deliberate local exception to "an empty string is a real value": an
+    // empty `src` short-circuits the store like any other local src, then means
+    // nothing to render.
+    expect(screen.queryByTestId('poster')).toBeNull();
+  });
+
+  it('still renders with no resolved src when srcSet supplies the image', () => {
+    const Wrapper = createWrapper({ contentPoster: '' });
+
+    render(
+      <Wrapper>
+        <Poster data-testid="poster" srcSet="wide.jpg 2x" />
+      </Wrapper>
+    );
+
+    expect(screen.getByTestId('poster').getAttribute('srcset')).toBe('wide.jpg 2x');
+  });
+
+  it('still renders with no resolved src when a render prop supplies the element', () => {
+    const Wrapper = createWrapper({ contentPoster: '' });
+
+    render(
+      <Wrapper>
+        <Poster render={() => <picture data-testid="custom" />} />
+      </Wrapper>
+    );
+
+    expect(screen.getByTestId('custom')).toBeTruthy();
   });
 
   it('reads the resolved alt text from the store', () => {

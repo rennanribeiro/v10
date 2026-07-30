@@ -47,10 +47,11 @@ export const Poster = forwardRef(function Poster(
   const localSrc = (elementProps as { src?: string }).src;
   const localAlt = (elementProps as { alt?: string }).alt;
 
-  // An absent `src` means nothing was provided, so the store wins. A resolved
-  // empty string means render nothing rather than an image whose empty `src`
-  // would request the current page.
-  const resolvedSrc = isUndefined(localSrc) ? contentMetadata?.contentPoster || undefined : localSrc;
+  // An absent `src` means nothing was provided, so the store wins. Empty is
+  // treated as absent on both sides — the deliberate local exception to Q3's
+  // "empty string is a real value", because `<img src="">` resolves to the
+  // current page URL and would request the document again.
+  const resolvedSrc = (isUndefined(localSrc) ? contentMetadata?.contentPoster : localSrc) || undefined;
 
   // Presence, never emptiness: an author writing `alt=""` is deliberately
   // marking the image decorative, and overwriting that would be an
@@ -79,6 +80,19 @@ export const Poster = forwardRef(function Poster(
 
   if (!playback) {
     if (__DEV__) logMissingFeature('Poster', 'playback');
+    return null;
+  }
+
+  // Nothing to show means no element, rather than an image with no source. The
+  // skins now render `<Poster />` unconditionally, so without this every player
+  // without a poster would carry a meaningless `<img>` — and the blur-up
+  // placeholder, which keys off `img[data-visible]:not([data-loaded])`, would
+  // stay on screen forever waiting for a load that can never happen.
+  //
+  // `srcSet` and `render` are the escape hatches for `<picture>` and framework
+  // image components, which supply their own source, so their presence means
+  // there is something to render after all.
+  if (!resolvedSrc && !(elementProps as { srcSet?: string }).srcSet && isUndefined(render)) {
     return null;
   }
 

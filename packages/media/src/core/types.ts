@@ -479,15 +479,18 @@ export interface MediaLiveCapability {
  */
 export type MediaContentValue = string | null | undefined;
 
+export interface MediaContentTitleEvents {
+  contenttitlechange: EventLike;
+}
+
 /**
  * Content metadata is deliberately separate from the element's own `title` and
- * `poster`.
+ * `poster`, and the two are never reconciled.
  *
- * `title` and `poster` are the *developer's* settings on the media element —
- * the native tooltip and the `<video poster>` frame. The `content*` properties
- * are *facts about the content itself*, usually supplied by a backend: a
- * `mux-video` that fetches a title from the Mux API reports it here. Merging the
- * two would erase that distinction, so they are not reconciled.
+ * `title` and `poster` are the *developer's* settings on the media element — the
+ * native tooltip and the `<video poster>` frame. The `content*` properties are
+ * *facts about the content itself*, usually supplied by a backend: a `mux-video`
+ * that fetches a title from the Mux API reports it here.
  *
  * A media that reports content metadata is expected to **clear it on source
  * change** and dispatch the change event. Only the dispatch half is
@@ -496,10 +499,6 @@ export type MediaContentValue = string | null | undefined;
  * it. The player wires no fallback listener; see
  * `internal/decisions/media/content-metadata.md`.
  */
-export interface MediaContentTitleEvents {
-  contenttitlechange: EventLike;
-}
-
 export interface MediaContentTitleCapability {
   /** Title of the content, or nothing if the media has no opinion. */
   readonly contentTitle: MediaContentValue;
@@ -509,6 +508,13 @@ export interface MediaContentPosterEvents {
   contentposterchange: EventLike;
 }
 
+/**
+ * A poster image describing the content, separate from the element's own
+ * `poster` attribute.
+ *
+ * @see {@link MediaContentTitleCapability} for why both exist and for the
+ * clearing contract every content-metadata field shares.
+ */
 export interface MediaContentPosterCapability {
   /** URL of a poster image for the content, or nothing if the media has no opinion. */
   readonly contentPoster: MediaContentValue;
@@ -518,6 +524,12 @@ export interface MediaContentPosterAltEvents {
   contentposteraltchange: EventLike;
 }
 
+/**
+ * Alternative text for {@link MediaContentPosterCapability}.
+ *
+ * @see {@link MediaContentTitleCapability} for why both exist and for the
+ * clearing contract every content-metadata field shares.
+ */
 export interface MediaContentPosterAltCapability {
   /**
    * Alternative text describing the content poster.
