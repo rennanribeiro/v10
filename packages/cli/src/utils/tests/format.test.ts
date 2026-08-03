@@ -58,4 +58,33 @@ describe('formatInstallationCode', () => {
     expect(result).not.toContain('<video-skin>');
     expect(result).not.toContain("'@videojs/html/video/skin'");
   });
+
+  it('formats the HTML live-video preset', () => {
+    const result = formatInstallationCode({ ...baseHTML, useCase: 'live-video', renderer: 'hls' });
+    expect(result).toContain('<live-video-player>');
+    expect(result).toContain("import '@videojs/html/live-video/skin'");
+  });
+
+  it('formats the React live-audio preset', () => {
+    const result = formatInstallationCode({
+      ...baseReact,
+      useCase: 'live-audio',
+      skin: 'audio',
+      renderer: 'mux-audio',
+    });
+    expect(result).toContain('liveAudioFeatures');
+    expect(result).toContain('<LiveAudioSkin>');
+  });
+
+  it('throws when asked to format CDN for a preset with no CDN bundle', () => {
+    expect(() =>
+      formatInstallationCode({
+        ...baseHTML,
+        useCase: 'live-audio',
+        skin: 'audio',
+        renderer: 'mux-audio',
+        installMethod: 'cdn',
+      })
+    ).toThrow('no CDN build');
+  });
 });

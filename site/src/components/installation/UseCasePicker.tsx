@@ -1,5 +1,5 @@
 import { useStore } from '@nanostores/react';
-import { Globe, Image } from 'lucide-react';
+import { Globe, Image, RadioTower } from 'lucide-react';
 import ImageRadioGroup from '@/components/ImageRadioGroup';
 import { useCase } from '@/stores/installation';
 import type { UseCase } from '@/utils/installation/types';
@@ -13,7 +13,9 @@ export default function UseCasePicker() {
       onChange={(value) => useCase.set(value as UseCase)}
       options={[
         { value: 'default-video' satisfies UseCase, label: 'Video', image: <Globe size={32} /> },
+        { value: 'live-video' satisfies UseCase, label: 'Live Video', image: <RadioTower size={32} /> },
         { value: 'default-audio' satisfies UseCase, label: 'Audio', image: <Globe size={32} /> },
+        { value: 'live-audio' satisfies UseCase, label: 'Live Audio', image: <RadioTower size={32} /> },
         { value: 'background-video' satisfies UseCase, label: 'Background Video', image: <Image size={32} /> },
       ]}
       aria-label="Select use case"
