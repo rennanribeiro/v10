@@ -37,8 +37,8 @@ export async function promptFramework(): Promise<Framework> {
 
 const PRESET_OPTIONS: Array<{ value: UseCase; label: string }> = [
   { value: 'default-video', label: 'Video' },
-  { value: 'live-video', label: 'Live Video' },
   { value: 'default-audio', label: 'Audio' },
+  { value: 'live-video', label: 'Live Video' },
   { value: 'live-audio', label: 'Live Audio' },
   { value: 'background-video', label: 'Background Video' },
 ];

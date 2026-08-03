@@ -10,7 +10,7 @@ export type Renderer =
 
 export type Skin = 'video' | 'audio' | 'minimal-video' | 'minimal-audio' | 'none';
 
-export type UseCase = 'default-video' | 'live-video' | 'default-audio' | 'live-audio' | 'background-video';
+export type UseCase = 'default-video' | 'default-audio' | 'live-video' | 'live-audio' | 'background-video';
 
 export type InstallMethod = 'cdn' | 'npm' | 'pnpm' | 'yarn' | 'bun';
 
@@ -24,8 +24,8 @@ export type InstallMethod = 'cdn' | 'npm' | 'pnpm' | 'yarn' | 'bun';
 // it.
 export const VALID_RENDERERS: Record<UseCase, Renderer[]> = {
   'default-video': ['html5-video', 'hls', 'dash', 'mux-video', 'vimeo'],
-  'live-video': ['hls', 'dash', 'mux-video'],
   'default-audio': ['html5-audio', 'mux-audio'],
+  'live-video': ['hls', 'dash', 'mux-video'],
   'live-audio': ['mux-audio'],
   'background-video': ['background-video'],
 };
@@ -38,8 +38,8 @@ export const VALID_RENDERERS: Record<UseCase, Renderer[]> = {
 export function getPresetGroup(useCase: UseCase): string {
   const map: Record<UseCase, string> = {
     'default-video': 'video',
-    'live-video': 'live-video',
     'default-audio': 'audio',
+    'live-video': 'live-video',
     'live-audio': 'live-audio',
     'background-video': 'background',
   };

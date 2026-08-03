@@ -43,7 +43,7 @@ videojs docs how-to/installation \
   --source-url https://example.com/video.m3u8
 ```
 
-Presets are `video`, `live-video`, `audio`, `live-audio`, and `background-video`. The live presets take streaming media only:
+Presets are `video`, `audio`, `live-video`, `live-audio`, and `background-video`. The live presets take streaming media only:
 
 ```bash
 videojs docs how-to/installation \

@@ -10,18 +10,23 @@ import {
 const CDN_BASE = 'https://cdn.jsdelivr.net/npm/@videojs/html/cdn';
 
 // Preset bundles published under `@videojs/html/cdn`, mirroring the `presets`
-// list in `packages/html/tsdown.cdn.config.ts`. The live presets only ship
-// skinned video bundles today — there is no `live-audio*` or `live-*-headless`
-// entry — so those combinations are package-manager only.
+// list in `packages/html/tsdown.cdn.config.ts`. Every preset the install page
+// offers ships all three skin variants; the set stays explicit so a preset added
+// to the picker without a matching CDN entry falls back to a package manager
+// instead of emitting a script tag that 404s.
 const CDN_PRESET_BUNDLES = new Set([
   'video',
-  'video-minimal',
   'video-headless',
-  'live-video',
-  'live-video-minimal',
+  'video-minimal',
   'audio',
-  'audio-minimal',
   'audio-headless',
+  'audio-minimal',
+  'live-video',
+  'live-video-headless',
+  'live-video-minimal',
+  'live-audio',
+  'live-audio-headless',
+  'live-audio-minimal',
   'background',
 ]);
 

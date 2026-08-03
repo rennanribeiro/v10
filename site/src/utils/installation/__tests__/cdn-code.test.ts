@@ -77,32 +77,49 @@ describe('generateCdnCode', () => {
     );
   });
 
-  it('returns null for headless live video, which ships no CDN bundle', () => {
-    expect(generateCdnCode('live-video', 'none', 'hls', manifest)).toBeNull();
+  it('generates the headless live video CDN tag when skin is none', () => {
+    expect(generateCdnCode('live-video', 'none', 'hls', manifest)).toEqual(
+      `<script type="module" src="https://cdn.jsdelivr.net/npm/@videojs/html/cdn/live-video-headless.js"></script>
+<script type="module" src="https://cdn.jsdelivr.net/npm/@videojs/html/cdn/media/hlsjs-video.js"></script>`
+    );
   });
 
-  it('returns null for live audio, which ships no CDN bundle', () => {
-    expect(generateCdnCode('live-audio', 'audio', 'mux-audio', manifest)).toBeNull();
-    expect(generateCdnCode('live-audio', 'minimal-audio', 'mux-audio', manifest)).toBeNull();
+  it('generates live audio CDN tags for each skin variant', () => {
+    expect(generateCdnCode('live-audio', 'audio', 'mux-audio', manifest)).toEqual(
+      `<script type="module" src="https://cdn.jsdelivr.net/npm/@videojs/html/cdn/live-audio.js"></script>
+<script type="module" src="https://cdn.jsdelivr.net/npm/@videojs/html/cdn/media/mux-audio.js"></script>`
+    );
+    expect(generateCdnCode('live-audio', 'minimal-audio', 'mux-audio', manifest)).toContain(
+      'cdn/live-audio-minimal.js'
+    );
+    expect(generateCdnCode('live-audio', 'none', 'mux-audio', manifest)).toContain('cdn/live-audio-headless.js');
   });
 });
 
 describe('presetSupportsCdn', () => {
-  it('returns true for the preset and skin combinations that ship bundles', () => {
-    expect(presetSupportsCdn('default-video', 'video')).toBe(true);
-    expect(presetSupportsCdn('default-video', 'minimal-video')).toBe(true);
-    expect(presetSupportsCdn('default-video', 'none')).toBe(true);
-    expect(presetSupportsCdn('default-audio', 'audio')).toBe(true);
-    expect(presetSupportsCdn('background-video', 'video')).toBe(true);
-    expect(presetSupportsCdn('live-video', 'video')).toBe(true);
-    expect(presetSupportsCdn('live-video', 'minimal-video')).toBe(true);
+  // Every preset the install page offers ships all three skin variants.
+  it.each([
+    ['default-video', 'video'],
+    ['default-video', 'minimal-video'],
+    ['default-video', 'none'],
+    ['default-audio', 'audio'],
+    ['default-audio', 'minimal-audio'],
+    ['default-audio', 'none'],
+    ['live-video', 'video'],
+    ['live-video', 'minimal-video'],
+    ['live-video', 'none'],
+    ['live-audio', 'audio'],
+    ['live-audio', 'minimal-audio'],
+    ['live-audio', 'none'],
+    ['background-video', 'video'],
+  ] as const)('returns true for %s + %s', (useCase, skin) => {
+    expect(presetSupportsCdn(useCase, skin)).toBe(true);
   });
 
-  it('returns false for the live combinations without bundles', () => {
-    expect(presetSupportsCdn('live-video', 'none')).toBe(false);
-    expect(presetSupportsCdn('live-audio', 'audio')).toBe(false);
-    expect(presetSupportsCdn('live-audio', 'minimal-audio')).toBe(false);
-    expect(presetSupportsCdn('live-audio', 'none')).toBe(false);
+  // The set is explicit rather than derived, so a preset added to the picker
+  // without a CDN entry degrades to a package manager instead of a broken tag.
+  it('returns false for a preset with no published bundle', () => {
+    expect(presetSupportsCdn('made-up-preset' as never, 'video')).toBe(false);
   });
 });
 
@@ -111,18 +128,15 @@ describe('getCdnUnsupportedReason', () => {
 
   it('returns null when preset and renderer both ship bundles', () => {
     expect(getCdnUnsupportedReason('live-video', 'video', 'hls', manifest)).toBeNull();
-  });
-
-  it('blames the preset when it ships no bundle', () => {
-    expect(getCdnUnsupportedReason('live-audio', 'audio', 'mux-audio', manifest)).toBe('preset');
+    expect(getCdnUnsupportedReason('live-audio', 'none', 'mux-audio', manifest)).toBeNull();
   });
 
   it('blames the renderer when only the media bundle is missing', () => {
     expect(getCdnUnsupportedReason('default-video', 'video', 'vimeo', manifest)).toBe('renderer');
   });
 
-  it('reports the preset first when neither ships', () => {
-    expect(getCdnUnsupportedReason('live-video', 'none', 'vimeo', manifest)).toBe('preset');
+  it('blames the preset when it ships no bundle', () => {
+    expect(getCdnUnsupportedReason('made-up-preset' as never, 'video', 'hls', manifest)).toBe('preset');
   });
 });
 

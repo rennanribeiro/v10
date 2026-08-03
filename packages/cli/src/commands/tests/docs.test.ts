@@ -333,23 +333,20 @@ describe('handleDocs', () => {
         expect(out).toContain('media/hlsjs-video.js');
       });
 
-      it('errors when requesting CDN for live-audio, which ships no CDN bundle', async () => {
-        await expect(
-          handleDocs(htmlFlags({ preset: 'live-audio', media: 'mux-audio', 'install-method': 'cdn' }), [
-            'how-to/installation',
-          ])
-        ).rejects.toThrow(ExitError);
-        expect(errors()).toContain('live audio');
-        expect(errors()).toContain('no CDN build');
+      it('generates a CDN script for live-audio', async () => {
+        await handleDocs(htmlFlags({ preset: 'live-audio', media: 'mux-audio', 'install-method': 'cdn' }), [
+          'how-to/installation',
+        ]);
+        const out = output();
+        expect(out).toContain('cdn/live-audio.js');
+        expect(out).toContain('media/mux-audio.js');
       });
 
-      it('errors when requesting CDN for a headless live-video player', async () => {
-        await expect(
-          handleDocs(htmlFlags({ preset: 'live-video', skin: 'none', media: 'hls', 'install-method': 'cdn' }), [
-            'how-to/installation',
-          ])
-        ).rejects.toThrow(ExitError);
-        expect(errors()).toContain('headless live video');
+      it('generates a CDN script for a headless live-video player', async () => {
+        await handleDocs(htmlFlags({ preset: 'live-video', skin: 'none', media: 'hls', 'install-method': 'cdn' }), [
+          'how-to/installation',
+        ]);
+        expect(output()).toContain('cdn/live-video-headless.js');
       });
     });
 

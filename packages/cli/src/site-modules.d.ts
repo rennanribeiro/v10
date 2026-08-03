@@ -17,7 +17,7 @@ declare module '@/utils/installation/types' {
     | 'mux-video'
     | 'vimeo';
   export type Skin = 'video' | 'audio' | 'minimal-video' | 'minimal-audio' | 'none';
-  export type UseCase = 'default-video' | 'live-video' | 'default-audio' | 'live-audio' | 'background-video';
+  export type UseCase = 'default-video' | 'default-audio' | 'live-video' | 'live-audio' | 'background-video';
   export type InstallMethod = 'cdn' | 'npm' | 'pnpm' | 'yarn' | 'bun';
   export const VALID_RENDERERS: Record<UseCase, Renderer[]>;
   export function getPresetGroup(useCase: UseCase): string;

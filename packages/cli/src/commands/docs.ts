@@ -48,8 +48,8 @@ async function resolveFramework(flags: ParsedFlags): Promise<Framework> {
 
 const PRESET_FLAGS: Record<string, UseCase> = {
   video: 'default-video',
-  'live-video': 'live-video',
   audio: 'default-audio',
+  'live-video': 'live-video',
   'live-audio': 'live-audio',
   'background-video': 'background-video',
 };
@@ -119,7 +119,7 @@ const DOCS_HELP = `Usage: @videojs/cli docs <slug> [--framework <html|react>]
        @videojs/cli docs --list [--framework <html|react>]
 
 Installation flags (for docs how-to/installation):
-  --preset <video|live-video|audio|live-audio|background-video>
+  --preset <video|audio|live-video|live-audio|background-video>
   --skin <default|minimal|none>
   --source-url <url>
   --media <html5-video|html5-audio|hls|dash|mux-video|mux-audio|vimeo|background-video>

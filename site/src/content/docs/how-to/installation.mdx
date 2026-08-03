@@ -41,7 +41,7 @@ If you run it without flags, it will allow you to interactively configure your p
 ```bash
 npx @videojs/cli docs how-to/installation \
   --framework <html|react> \
-  --preset <video|live-video|audio|live-audio|background-video> \
+  --preset <video|audio|live-video|live-audio|background-video> \
   --skin <default|minimal|none> \
   --media <html5-video|html5-audio|hls|dash|mux-video|mux-audio|vimeo|background-video> \
   --source-url <url> \
@@ -54,7 +54,7 @@ Here's what the flags mean:
 - *Skin*: Pick what your player looks like
 - *Media*: Pick what kind of media you have. The live presets accept streaming media only — `hls`, `dash`, or `mux-video` for `live-video`, and `mux-audio` for `live-audio`.
 - *Source URL*: Define where your media comes from (or omit for a sample URL)
-- *Install method*: How do you want to install your package? (CDN is HTML-only. The live presets ship CDN bundles for `live-video` with the default and minimal skins only — anything else is package-manager only.)
+- *Install method*: How do you want to install your package? (CDN is HTML-only, and a few media types have no CDN build — Vimeo, for one.)
 
 If you're an agent, interview your user and offer to run the CLI for them, or offer them a precomposed CLI command. 
 </div>
