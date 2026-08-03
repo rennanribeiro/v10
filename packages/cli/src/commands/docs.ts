@@ -2,7 +2,7 @@ import * as p from '@clack/prompts';
 import { getPresetLabel } from '@/utils/installation/cdn-code';
 import { validateInstallationOptions } from '@/utils/installation/codegen';
 import { RENDERER_LABELS } from '@/utils/installation/renderer-options';
-import type { InstallMethod, Renderer, UseCase } from '@/utils/installation/types';
+import { type InstallMethod, type Renderer, type UseCase, VALID_RENDERERS } from '@/utils/installation/types';
 import type { Framework } from '../utils/config.js';
 import { getConfigValue } from '../utils/config.js';
 import { docExistsInAnyFramework, readBundledDoc, readLlmsTxt } from '../utils/docs.js';
@@ -74,6 +74,24 @@ function validateMedia(media: string): Renderer {
     process.exit(1);
   }
   return media as Renderer;
+}
+
+function presetFlagFor(useCase: UseCase): string {
+  return Object.keys(PRESET_FLAGS).find((flag) => PRESET_FLAGS[flag] === useCase) ?? useCase;
+}
+
+// The interactive prompt only offers renderers valid for the chosen preset, and
+// the install page's dropdown does the same. Enforce it on the flag path too so
+// `--preset live-audio --media html5-video` can't generate a "live" player
+// pointed at a progressive file.
+function validateMediaForUseCase(renderer: Renderer, useCase: UseCase): void {
+  const valid = VALID_RENDERERS[useCase];
+  if (!valid.includes(renderer)) {
+    console.error(
+      `Invalid media type "${renderer}" for the "${presetFlagFor(useCase)}" preset. Valid options: ${valid.join(', ')}`
+    );
+    process.exit(1);
+  }
 }
 
 function validateInstallMethod(method: string, framework: Framework): InstallMethod {
@@ -187,6 +205,10 @@ export async function handleDocs(flags: ParsedFlags, positionals: string[]): Pro
     if (needsPrompting) {
       p.outro('');
     }
+
+    // Only ever fires for a `--media` flag; prompted values come from the
+    // per-preset option list and are valid by construction.
+    validateMediaForUseCase(opts.renderer, opts.useCase);
 
     const validation = validateInstallationOptions(opts);
     if (!validation.valid) {

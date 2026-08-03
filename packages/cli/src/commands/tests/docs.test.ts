@@ -161,6 +161,42 @@ describe('handleDocs', () => {
       expect(errors()).toContain('Invalid skin: "custom"');
     });
 
+    it('errors when the media type is not valid for the preset', async () => {
+      await expect(
+        handleDocs(
+          {
+            framework: 'html',
+            preset: 'live-audio',
+            skin: 'default',
+            media: 'html5-video',
+            'source-url': '',
+            'install-method': 'npm',
+          },
+          ['how-to/installation']
+        )
+      ).rejects.toThrow(ExitError);
+      expect(errors()).toContain('Invalid media type "html5-video" for the "live-audio" preset');
+      expect(errors()).toContain('mux-audio');
+    });
+
+    it('names the preset flag, not the internal use case, in the mismatch error', async () => {
+      await expect(
+        handleDocs(
+          {
+            framework: 'html',
+            preset: 'video',
+            skin: 'default',
+            media: 'mux-audio',
+            'source-url': '',
+            'install-method': 'npm',
+          },
+          ['how-to/installation']
+        )
+      ).rejects.toThrow(ExitError);
+      expect(errors()).toContain('for the "video" preset');
+      expect(errors()).not.toContain('default-video');
+    });
+
     it('errors with invalid install method for framework', async () => {
       await expect(
         handleDocs({ framework: 'react', 'install-method': 'cdn' }, ['how-to/installation'])
