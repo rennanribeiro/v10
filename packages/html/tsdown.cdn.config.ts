@@ -29,9 +29,13 @@ const presets = [
   'live-video',
   'live-video-headless',
   'live-video-minimal',
+  'live-video-ui',
+  'live-video-minimal-ui',
   'live-audio',
   'live-audio-headless',
   'live-audio-minimal',
+  'live-audio-ui',
+  'live-audio-minimal-ui',
   'background',
 ];
 const media = [
