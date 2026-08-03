@@ -9,11 +9,16 @@ import {
 
 const CDN_BASE = 'https://cdn.jsdelivr.net/npm/@videojs/html/cdn';
 
-// Preset bundles published under `@videojs/html/cdn`, mirroring the `presets`
-// list in `packages/html/tsdown.cdn.config.ts`. Every preset the install page
-// offers ships all three skin variants; the set stays explicit so a preset added
-// to the picker without a matching CDN entry falls back to a package manager
-// instead of emitting a script tag that 404s.
+// Skin-variant bundles published under `@videojs/html/cdn`, a subset of the
+// `presets` list in `packages/html/tsdown.cdn.config.ts`. Every preset the
+// install page offers ships all three variants; the set stays explicit so a
+// preset added to the picker without a matching CDN entry falls back to a
+// package manager instead of emitting a script tag that 404s. The
+// `CDN preset bundles` check in `build/scripts/check-workspace.mjs` fails CI if
+// this drifts from what the CDN config publishes.
+//
+// `background` is absent because it ships a single bundle for every skin, so
+// `getCdnFileName` resolves it before consulting this set.
 const CDN_PRESET_BUNDLES = new Set([
   'video',
   'video-headless',
@@ -27,7 +32,6 @@ const CDN_PRESET_BUNDLES = new Set([
   'live-audio',
   'live-audio-headless',
   'live-audio-minimal',
-  'background',
 ]);
 
 // Bundle name for a preset + skin, or null when that combination has no CDN
@@ -105,9 +109,10 @@ export function generateCdnCode(
 
 /** Human-readable label for a preset + skin, used in CDN-unavailable copy. */
 export function getPresetLabel(useCase: UseCase, skin: Skin): string {
+  if (useCase === 'background-video') return 'background video';
+
   const base = isAudioUseCase(useCase) ? 'audio' : 'video';
   const live = useCase === 'live-video' || useCase === 'live-audio' ? 'live ' : '';
-  if (useCase === 'background-video') return 'background video';
   if (skin === 'none') return `headless ${live}${base}`;
   if (skin === 'minimal-video' || skin === 'minimal-audio') return `minimal ${live}${base}`;
   return `${live}${base}`;
