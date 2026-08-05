@@ -1,0 +1,83 @@
+name: Standardize Eject epic titles and assignments
+
+on:
+  push:
+    paths:
+      - .github/workflows/standardize-eject-issues.yml
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Update epic titles and assignments
+        uses: actions/github-script@v8
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const assignee = 'mihar-22';
+
+            const epicTitles = new Map([
+              [1055, 'Epic: Eject and Source-Owned UI'],
+              [247, 'Epic: Eject CLI'],
+              [1949, 'Epic: Canonical Skin Components and Composition'],
+              [245, 'Epic: Compiler and Source Artifact Pipeline'],
+              [1950, 'Epic: Skin Styling, Tokens, and Themes'],
+              [1951, 'Epic: Video.js GitHub Registry and CLI Integration'],
+              [1952, 'Epic: Skin Parity, Cutover, and Rollout'],
+            ]);
+
+            const issueNumbers = [
+              1055, 247,
+              1949, 245, 1950, 1951, 1952,
+              1953, 1954, 1955, 1956, 1967, 1968, 1969,
+              1957, 1958, 1959, 1960, 1961, 1962, 1963, 1966, 253, 1923, 1926,
+              1964, 1965, 570, 571, 1741,
+              1970, 1971, 1974, 1975,
+              1972, 1973, 1352, 1484, 1385, 840, 1767,
+            ];
+
+            for (const issue_number of issueNumbers) {
+              const { data: issue } = await github.rest.issues.get({
+                owner,
+                repo,
+                issue_number,
+              });
+
+              const assignees = issue.assignees.map((item) => item.login);
+              if (!assignees.includes(assignee)) assignees.push(assignee);
+
+              const title = epicTitles.get(issue_number) ?? issue.title;
+
+              await github.rest.issues.update({
+                owner,
+                repo,
+                issue_number,
+                title,
+                assignees,
+              });
+
+              core.info(`Updated #${issue_number}: ${title}`);
+            }
+
+            for (const issue_number of issueNumbers) {
+              const { data: issue } = await github.rest.issues.get({
+                owner,
+                repo,
+                issue_number,
+              });
+
+              const expectedTitle = epicTitles.get(issue_number);
+              if (expectedTitle && issue.title !== expectedTitle) {
+                core.setFailed(`#${issue_number} expected title '${expectedTitle}', found '${issue.title}'`);
+              }
+
+              if (!issue.assignees.some((item) => item.login === assignee)) {
+                core.setFailed(`#${issue_number} is not assigned to ${assignee}`);
+              }
+            }
