@@ -4,6 +4,9 @@ on:
   push:
     paths:
       - .github/workflows/standardize-eject-issues.yml
+  pull_request:
+    paths:
+      - .github/workflows/standardize-eject-issues.yml
 
 permissions:
   contents: read
