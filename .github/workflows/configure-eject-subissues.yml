@@ -1,7 +1,8 @@
 name: Configure Eject issue hierarchy
 
 on:
-  push:
+  pull_request:
+    types: [opened, synchronize, reopened]
     paths:
       - .github/workflows/configure-eject-subissues.yml
 
