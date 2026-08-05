@@ -1,0 +1,117 @@
+name: Configure Eject issue hierarchy
+
+on:
+  push:
+    paths:
+      - .github/workflows/configure-eject-subissues.yml
+
+permissions:
+  contents: read
+  issues: write
+
+jobs:
+  configure:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Configure native issue hierarchy
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const owner = context.repo.owner;
+            const repo = context.repo.repo;
+            const apiVersion = '2022-11-28';
+
+            const hierarchy = new Map([
+              [1055, [1949, 245, 1950, 1951, 1952]],
+              [1949, [1953, 1954, 1955, 1956, 1967, 1968, 1969]],
+              [245, [1957, 1958, 1959, 1960, 1961, 1962, 1963, 1966, 253, 1923, 1926]],
+              [1950, [1964, 1965, 570, 571, 1741]],
+              [1951, [1970, 1971, 1974, 1975]],
+              [1952, [1972, 1973, 1352, 1484, 1385, 840, 1767]],
+            ]);
+
+            const headers = { 'X-GitHub-Api-Version': apiVersion };
+            const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+            async function getIssue(number) {
+              const response = await github.rest.issues.get({
+                owner,
+                repo,
+                issue_number: number,
+                headers,
+              });
+              return response.data;
+            }
+
+            async function listSubIssues(parentNumber) {
+              return github.paginate(
+                'GET /repos/{owner}/{repo}/issues/{issue_number}/sub_issues',
+                {
+                  owner,
+                  repo,
+                  issue_number: parentNumber,
+                  per_page: 100,
+                  headers,
+                },
+              );
+            }
+
+            for (const [parentNumber, childNumbers] of hierarchy) {
+              core.startGroup(`Configure #${parentNumber}`);
+
+              const desired = await Promise.all(childNumbers.map(getIssue));
+              const desiredIds = new Set(desired.map((issue) => issue.id));
+              const current = await listSubIssues(parentNumber);
+
+              for (const issue of current) {
+                if (desiredIds.has(issue.id)) continue;
+
+                core.info(`Remove #${issue.number} from #${parentNumber}`);
+                await github.request(
+                  'DELETE /repos/{owner}/{repo}/issues/{issue_number}/sub_issue',
+                  {
+                    owner,
+                    repo,
+                    issue_number: parentNumber,
+                    sub_issue_id: issue.id,
+                    headers,
+                  },
+                );
+                await sleep(250);
+              }
+
+              const currentIds = new Set(current.map((issue) => issue.id));
+              for (const issue of desired) {
+                if (currentIds.has(issue.id)) continue;
+
+                core.info(`Add #${issue.number} to #${parentNumber}`);
+                await github.request(
+                  'POST /repos/{owner}/{repo}/issues/{issue_number}/sub_issues',
+                  {
+                    owner,
+                    repo,
+                    issue_number: parentNumber,
+                    sub_issue_id: issue.id,
+                    replace_parent: true,
+                    headers,
+                  },
+                );
+                await sleep(250);
+              }
+
+              const verified = await listSubIssues(parentNumber);
+              const actualNumbers = verified.map((issue) => issue.number);
+              core.info(`Sub-issues: ${actualNumbers.map((number) => `#${number}`).join(', ')}`);
+
+              if (
+                actualNumbers.length !== childNumbers.length ||
+                childNumbers.some((number) => !actualNumbers.includes(number))
+              ) {
+                core.setFailed(
+                  `#${parentNumber} expected [${childNumbers.join(', ')}] but found [${actualNumbers.join(', ')}]`,
+                );
+              }
+
+              core.endGroup();
+            }
