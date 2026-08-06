@@ -88,6 +88,8 @@ jobs:
           - '@videojs/cli'
           - '@videojs/compiler'
           - '@videojs/core'
+          - '@videojs/icons'
+          - '@videojs/jsx'
           - '@videojs/media'
           - '@videojs/skins'
           - '@videojs/store'

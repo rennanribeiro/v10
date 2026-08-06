@@ -4,7 +4,7 @@ This directory contains target-neutral, authored source for source-owned Video.j
 
 Canonical source:
 
-- Uses constrained JSX from `@videojs/core`.
+- Uses constrained JSX from `@videojs/jsx`.
 - Imports Video.js primitives only through stable package exports.
 - Keeps independently installable components in role-based directories.
 - Contains semantic structure without React- or HTML-specific markup.
@@ -16,4 +16,4 @@ The initial component paths are:
 - `components/sliders/volume-slider.skin.tsx`
 - `components/sliders/time-slider.skin.tsx`
 
-PlayButton source waits for the named canonical icon export owned by #1956. Artifact entries, styles, complete Skin compositions, and generated target output are separate stack boundaries.
+Canonical components import icon roles from `@videojs/icons/components`; target lowering replaces that compiler-only source contract with local named React exports or exact HTML registrations. Artifact entries are authored in `../artifacts.ts`; styles, complete Skin compositions, and generated target output remain separate stack boundaries.

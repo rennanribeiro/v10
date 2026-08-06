@@ -4,18 +4,18 @@ import { listen } from '@videojs/utils/dom';
 import { definePlayerFeature } from '../../feature';
 import type { PlayerFeatureConfig } from '../../player';
 
-const MEDIA_CONTENT_TITLE = Symbol('vjs.contentTitle.media');
-const USER_CONTENT_TITLE = Symbol('vjs.contentTitle.user');
-const USER_DEFAULT_CONTENT_TITLE = Symbol('vjs.defaultContentTitle.user');
-const SET_USER_CONTENT_TITLE = Symbol('vjs.contentTitle.user.set');
-const SET_USER_DEFAULT_CONTENT_TITLE = Symbol('vjs.defaultContentTitle.user.set');
+const MEDIA_CONTENT_TITLE = Symbol('@videojs/media-content-title');
+const USER_CONTENT_TITLE = Symbol('@videojs/user-content-title');
+const USER_DEFAULT_CONTENT_TITLE = Symbol('@videojs/user-default-content-title');
+const SET_USER_CONTENT_TITLE = Symbol('@videojs/set-user-content-title');
+const SET_USER_DEFAULT_CONTENT_TITLE = Symbol('@videojs/set-user-default-content-title');
 const DEFAULT_CONTENT_TITLE = '';
 
-const MEDIA_CONTENT_POSTER = Symbol('vjs.contentPoster.media');
-const USER_CONTENT_POSTER = Symbol('vjs.contentPoster.user');
-const USER_DEFAULT_CONTENT_POSTER = Symbol('vjs.defaultContentPoster.user');
-const SET_USER_CONTENT_POSTER = Symbol('vjs.contentPoster.user.set');
-const SET_USER_DEFAULT_CONTENT_POSTER = Symbol('vjs.defaultContentPoster.user.set');
+const MEDIA_CONTENT_POSTER = Symbol('@videojs/media-content-poster');
+const USER_CONTENT_POSTER = Symbol('@videojs/user-content-poster');
+const USER_DEFAULT_CONTENT_POSTER = Symbol('@videojs/user-default-content-poster');
+const SET_USER_CONTENT_POSTER = Symbol('@videojs/set-user-content-poster');
+const SET_USER_DEFAULT_CONTENT_POSTER = Symbol('@videojs/set-user-default-content-poster');
 const DEFAULT_CONTENT_POSTER = '';
 
 interface MetadataSourceState extends Omit<MediaMetadataState, 'contentTitle' | 'contentPoster'> {
@@ -55,29 +55,22 @@ export const metadataFeature = definePlayerFeature({
       state: USER_DEFAULT_CONTENT_POSTER,
     },
   } satisfies PlayerFeatureConfig<MetadataSourceState>,
-  state: ({ set }): MetadataSourceState => {
-    const setUserContentTitle = (value: MediaContentValue) => set({ [USER_CONTENT_TITLE]: value });
-    const setUserDefaultContentTitle = (value: MediaContentValue) => set({ [USER_DEFAULT_CONTENT_TITLE]: value });
-    const setUserContentPoster = (value: MediaContentValue) => set({ [USER_CONTENT_POSTER]: value });
-    const setUserDefaultContentPoster = (value: MediaContentValue) => set({ [USER_DEFAULT_CONTENT_POSTER]: value });
-
-    return {
-      [MEDIA_CONTENT_TITLE]: undefined,
-      [USER_CONTENT_TITLE]: undefined,
-      [USER_DEFAULT_CONTENT_TITLE]: undefined,
-      [SET_USER_CONTENT_TITLE]: setUserContentTitle,
-      [SET_USER_DEFAULT_CONTENT_TITLE]: setUserDefaultContentTitle,
-      [MEDIA_CONTENT_POSTER]: undefined,
-      [USER_CONTENT_POSTER]: undefined,
-      [USER_DEFAULT_CONTENT_POSTER]: undefined,
-      [SET_USER_CONTENT_POSTER]: setUserContentPoster,
-      [SET_USER_DEFAULT_CONTENT_POSTER]: setUserDefaultContentPoster,
-      setContentTitle: setUserContentTitle,
-      setDefaultContentTitle: setUserDefaultContentTitle,
-      setContentPoster: setUserContentPoster,
-      setDefaultContentPoster: setUserDefaultContentPoster,
-    };
-  },
+  state: ({ set }): MetadataSourceState => ({
+    [MEDIA_CONTENT_TITLE]: undefined,
+    [USER_CONTENT_TITLE]: undefined,
+    [USER_DEFAULT_CONTENT_TITLE]: undefined,
+    [SET_USER_CONTENT_TITLE]: (value) => set({ [USER_CONTENT_TITLE]: value }),
+    [SET_USER_DEFAULT_CONTENT_TITLE]: (value) => set({ [USER_DEFAULT_CONTENT_TITLE]: value }),
+    [MEDIA_CONTENT_POSTER]: undefined,
+    [USER_CONTENT_POSTER]: undefined,
+    [USER_DEFAULT_CONTENT_POSTER]: undefined,
+    [SET_USER_CONTENT_POSTER]: (value) => set({ [USER_CONTENT_POSTER]: value }),
+    [SET_USER_DEFAULT_CONTENT_POSTER]: (value) => set({ [USER_DEFAULT_CONTENT_POSTER]: value }),
+    setContentTitle: (value) => set({ [USER_CONTENT_TITLE]: value }),
+    setDefaultContentTitle: (value) => set({ [USER_DEFAULT_CONTENT_TITLE]: value }),
+    setContentPoster: (value) => set({ [USER_CONTENT_POSTER]: value }),
+    setDefaultContentPoster: (value) => set({ [USER_DEFAULT_CONTENT_POSTER]: value }),
+  }),
   derived: {
     contentTitle: ({ get }) =>
       get()[USER_CONTENT_TITLE] ??
