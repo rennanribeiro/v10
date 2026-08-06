@@ -45,20 +45,10 @@ const checkboxItemClass = [menuItemClass, 'pl-8'].join(' ');
 const subMenuTriggerClass = [menuItemClass, 'justify-between'].join(' ');
 
 const subMenuContentClass = [
-  'absolute inset-0 z-10 bg-white rounded-[inherit] p-1 outline-none overflow-hidden translate-x-0',
-  'transition-transform duration-300 ease-in-out will-change-transform',
-  '[&[data-starting-style][data-direction=forward]]:translate-x-full',
-  '[&[data-ending-style][data-direction=forward]]:-translate-x-full',
-  '[&[data-starting-style][data-direction=back]]:-translate-x-full',
-  '[&[data-ending-style][data-direction=back]]:translate-x-full',
+  'absolute inset-x-0 top-0 z-10 bg-white rounded-[inherit] p-1 outline-none overflow-auto',
 ].join(' ');
 
-// Root and submenu views share the same viewport so they can slide over each other.
-const rootViewClass = [
-  'absolute inset-0 p-1 translate-x-0',
-  'transition-transform duration-300 ease-in-out will-change-transform',
-  'data-[menu-view-state=inactive]:-translate-x-full',
-].join(' ');
+const rootViewClass = 'absolute inset-x-0 top-0 p-1 overflow-auto';
 
 const backButtonClass = [
   'flex items-center gap-1.5 w-full rounded-[calc(0.375rem-2px)] px-2 py-1.5 mb-0.5',
@@ -69,8 +59,8 @@ const backButtonClass = [
 const menuNavPopupClass = [
   'group relative',
   menuNavSurfaceClass,
-  'w-(--media-menu-width) h-(--media-menu-height)',
-  'transition-[opacity,scale,translate,filter,width,height] duration-150 ease-in-out',
+  'w-64 max-w-(--media-popover-available-width) h-(--media-menu-height)',
+  'transition-[opacity,scale,translate,filter,height] duration-150 ease-in-out',
   menuContentPlacementClass,
 ].join(' ');
 
@@ -246,10 +236,10 @@ function App() {
                     </span>
                   </Menu.Trigger>
                   <Menu.Content className={subMenuContentClass}>
-                    <Menu.Back className={backButtonClass}>
+                    <Menu.Item className={backButtonClass}>
                       <ChevronLeft />
                       Quality
-                    </Menu.Back>
+                    </Menu.Item>
                     <Menu.RadioGroup aria-label="Resolution" value={quality} onValueChange={setQuality}>
                       {['auto', '1080p', '720p', '480p'].map((v) => (
                         <Menu.RadioItem key={v} value={v} className={radioItemClass}>
@@ -271,10 +261,10 @@ function App() {
                     </span>
                   </Menu.Trigger>
                   <Menu.Content className={subMenuContentClass}>
-                    <Menu.Back className={backButtonClass}>
+                    <Menu.Item className={backButtonClass}>
                       <ChevronLeft />
                       Speed
-                    </Menu.Back>
+                    </Menu.Item>
                     <Menu.RadioGroup aria-label="Speed" value={speed} onValueChange={setSpeed}>
                       {[
                         { value: '0.5', label: '0.5x' },

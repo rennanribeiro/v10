@@ -165,10 +165,10 @@ function getTemplateHTML() {
               </media-menu-view>
 
               <media-menu id="settings-quality-menu" class="${menu.submenuPanel}">
-                <media-menu-back class="${menu.back}">
+                <media-menu-item class="${menu.back}">
                   ${renderIcon('chevron', { class: cn(icon, menu.icon, menu.chevron, iconFlipped) })}
                   ${renderText(qualityText)}
-                </media-menu-back>
+                </media-menu-item>
                 <div class="${menu.separator}"></div>
                 <media-quality-radio-group class="${menu.group}">
                   <template>
@@ -187,10 +187,10 @@ function getTemplateHTML() {
               </media-menu>
 
               <media-menu id="settings-audio-menu" class="${menu.submenuPanel}">
-                <media-menu-back class="${menu.back}">
+                <media-menu-item class="${menu.back}">
                   ${renderIcon('chevron', { class: cn(icon, menu.chevron, iconFlipped) })}
                   ${renderText(audioText)}
-                </media-menu-back>
+                </media-menu-item>
                 <div class="${menu.separator}"></div>
                 <media-audio-track-radio-group class="${menu.group}">
                   <template>
@@ -205,10 +205,10 @@ function getTemplateHTML() {
               </media-menu>
 
               <media-menu id="settings-speed-menu" class="${menu.submenuPanel}">
-                <media-menu-back class="${menu.back}">
+                <media-menu-item class="${menu.back}">
                   ${renderIcon('chevron', { class: cn(icon, menu.icon, menu.chevron, iconFlipped) })}
                   ${renderText(speedText)}
-                </media-menu-back>
+                </media-menu-item>
                 <div class="${menu.separator}"></div>
                 <media-playback-rate-radio-group class="${menu.group}">
                   <template>
@@ -223,10 +223,10 @@ function getTemplateHTML() {
               </media-menu>
 
               <media-menu id="settings-captions-menu" class="${menu.submenuPanel}">
-                <media-menu-back class="${menu.back}">
+                <media-menu-item class="${menu.back}">
                   ${renderIcon('chevron', { class: cn(icon, menu.icon, menu.chevron, iconFlipped) })}
                   ${renderText(captionsText)}
-                </media-menu-back>
+                </media-menu-item>
                 <div class="${menu.separator}"></div>
                 <media-captions-radio-group class="${menu.group}">
                   <template>

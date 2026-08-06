@@ -2,7 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { MenuItemDataAttrs } from '../../../../core/ui/menu/menu-item-data-attrs';
 import type { UIFocusEvent, UIKeyboardEvent } from '../../event';
 import { createPopupGroup } from '../../popover/popup-group';
-import { completeMenuItemSelection, getRootPositionOptions, isMenuNavigationKey } from '../create-menu';
+import { getRootPositionOptions, isMenuNavigationKey } from '../create-menu';
 import { cleanupElement, createItemElement, createTestMenu } from './create-menu-helpers';
 
 // ---------------------------------------------------------------------------
@@ -277,34 +277,6 @@ describe('createMenu', () => {
       menu.contentProps.onFocusOut(makeFocusEvent(trigger));
 
       expect(onOpenChange).not.toHaveBeenCalled();
-    });
-  });
-
-  describe('completeMenuItemSelection', () => {
-    it('closes the menu when selection happens in a root menu', () => {
-      const { menu, onOpenChange } = createTestMenu();
-
-      menu.open();
-      onOpenChange.mockClear();
-
-      completeMenuItemSelection(menu);
-
-      expect(onOpenChange).toHaveBeenCalledWith(false, { reason: 'click' });
-    });
-
-    it('pops the parent menu when selection happens in a submenu', () => {
-      const { menu } = createTestMenu();
-      const { menu: parentMenu, onOpenChange: parentOpenChange } = createTestMenu();
-
-      parentMenu.open();
-      parentOpenChange.mockClear();
-      parentMenu.push('quality-menu', 'quality-trigger');
-
-      completeMenuItemSelection(menu, parentMenu);
-
-      expect(parentMenu.navigationInput.current.stack).toEqual([]);
-      expect(parentMenu.navigationInput.current.direction).toBe('back');
-      expect(parentOpenChange).not.toHaveBeenCalled();
     });
   });
 
@@ -738,42 +710,6 @@ describe('createMenu', () => {
       const { menu } = createTestMenu();
 
       expect(() => menu.contentProps.onKeyDown(makeKeyEvent('ArrowDown'))).not.toThrow();
-    });
-  });
-
-  // -------------------------------------------------------------------------
-  // Submenu navigation
-  // -------------------------------------------------------------------------
-
-  describe('submenu navigation', () => {
-    it('pushes and pops submenu entries', () => {
-      const { menu } = createTestMenu();
-
-      menu.push('quality-menu', 'quality-trigger');
-      menu.pop();
-
-      expect(menu.navigationInput.current).toEqual({ stack: [], direction: 'back' });
-    });
-
-    it('ignores duplicate pushes for the active submenu', () => {
-      const { menu } = createTestMenu();
-
-      menu.push('quality-menu', 'quality-trigger');
-      menu.push('quality-menu', 'quality-trigger');
-      menu.pop();
-
-      expect(menu.navigationInput.current.stack).toEqual([]);
-    });
-
-    it('does not emit a navigation update when popping at root', () => {
-      const { menu } = createTestMenu();
-      const listener = vi.fn();
-      const cleanup = menu.navigationInput.subscribe(listener);
-
-      menu.pop();
-
-      expect(listener).not.toHaveBeenCalled();
-      cleanup();
     });
   });
 

@@ -1,5 +1,4 @@
 import type { AnyPlayerStore } from '@videojs/core/dom';
-import type { Text } from '@videojs/core/i18n';
 import { ContextProvider } from '@videojs/element/context';
 import type { MediaControlsState } from '@videojs/media';
 import { createStore, flush } from '@videojs/store';
@@ -8,7 +7,6 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import { playerContext } from '../../../player/context';
 import { ControlsElement } from '../../controls/controls-element';
 import { MediaElement } from '../../media-element';
-import { MenuBackElement } from '../menu-back-element';
 import { MenuCheckboxItemElement } from '../menu-checkbox-item-element';
 import { MenuElement } from '../menu-element';
 import { MenuGroupElement } from '../menu-group-element';
@@ -147,53 +145,6 @@ describe('MenuElement', () => {
     expect(root.getAttribute('data-side')).toBe('bottom');
   });
 
-  it('resizes the menu view when the positioning boundary changes', async () => {
-    const trigger = document.createElement('button');
-    const root = createElement(MenuElement);
-    const view = createElement(MenuViewElement);
-    let boundaryWidth = 300;
-
-    root.id = 'menu';
-    root.open = true;
-    root.side = 'top';
-    root.boundary = 'viewport';
-    trigger.setAttribute('commandfor', root.id);
-    view.setAttribute('data-menu-root-view', '');
-    view.setAttribute('data-menu-view', '');
-
-    vi.spyOn(trigger, 'getBoundingClientRect').mockReturnValue(new DOMRect(100, 100, 40, 20));
-    vi.spyOn(root, 'getBoundingClientRect').mockReturnValue(new DOMRect(0, 0, 260, 80));
-    vi.spyOn(document.documentElement, 'getBoundingClientRect').mockImplementation(
-      () => new DOMRect(0, 0, boundaryWidth, 300)
-    );
-    vi.spyOn(view, 'getBoundingClientRect').mockReturnValue(new DOMRect(0, 0, 260, 80));
-    Object.defineProperty(root, 'offsetWidth', { configurable: true, value: 260 });
-    Object.defineProperty(root, 'offsetHeight', { configurable: true, value: 80 });
-    Object.defineProperty(root, 'scrollHeight', { configurable: true, value: 80 });
-    Object.defineProperty(view, 'scrollWidth', { configurable: true, value: 260 });
-    Object.defineProperty(view, 'scrollHeight', { configurable: true, value: 80 });
-
-    root.append(view);
-    document.body.append(trigger, root);
-    await root.updateComplete;
-
-    await waitForAssertion(() => {
-      expect(root.style.getPropertyValue('--media-menu-width')).toBe('260px');
-    });
-    await nextFrame();
-    await root.updateComplete;
-
-    // Isolate positioner-driven sizing from unrelated reactive updates.
-    vi.spyOn(root, 'requestUpdate').mockImplementation(() => {});
-    boundaryWidth = 180;
-    window.dispatchEvent(new Event('resize'));
-
-    await waitForAssertion(() => {
-      expect(root.style.getPropertyValue('--media-popover-available-width')).toBe('180px');
-      expect(root.style.getPropertyValue('--media-menu-width')).toBe('180px');
-    });
-  });
-
   it('scopes menu state data attributes to menu elements', async () => {
     const root = createElement(MenuElement);
     const label = createElement(MenuGroupLabelElement);
@@ -207,7 +158,7 @@ describe('MenuElement', () => {
     const rootView = createElement(MenuViewElement);
     const trigger = createElement(MenuItemElement);
     const child = createElement(MenuElement);
-    const back = createElement(MenuBackElement);
+    const back = createElement(MenuItemElement);
     const childItem = createElement(MenuItemElement);
 
     root.open = true;
@@ -279,15 +230,6 @@ describe('MenuElement', () => {
     expect(child.hasAttribute('data-align')).toBe(false);
     expectNoMenuStateAttrs(back);
     expectNoMenuStateAttrs(childItem);
-    expect(back.getAttribute('aria-label')).toBe('Back');
-
-    back.label = { key: 'custom.back', text: 'Go back' } as const satisfies Text;
-    await back.updateComplete;
-    expect(back.getAttribute('aria-label')).toBe('Go back');
-
-    back.label = 'menu.back';
-    await back.updateComplete;
-    expect(back.getAttribute('aria-label')).toBe('menu.back');
   });
 
   it('marks root and nested menu views with generic view attributes', async () => {
@@ -306,7 +248,6 @@ describe('MenuElement', () => {
     await rootView.updateComplete;
     await child.updateComplete;
 
-    expect(root.hasAttribute('data-menu-viewport')).toBe(true);
     expect(rootView.hasAttribute('data-menu-root-view')).toBe(true);
     expect(rootView.hasAttribute('data-menu-view')).toBe(true);
     expect(child.hasAttribute('data-menu-view')).toBe(true);
@@ -609,66 +550,6 @@ describe('MenuElement', () => {
     expect(onOpenChange).not.toHaveBeenCalledWith(
       expect.objectContaining({ detail: expect.objectContaining({ open: false }) })
     );
-  });
-
-  it('allows Escape from an inactive sibling nested menu to close the root menu', async () => {
-    const root = createElement(MenuElement);
-    const rootView = createElement(MenuViewElement);
-    const qualityTrigger = createElement(MenuItemElement);
-    const speedTrigger = createElement(MenuItemElement);
-    const quality = createElement(MenuElement);
-    const speed = createElement(MenuElement);
-    const qualityItem = createElement(MenuItemElement);
-    const speedItem = createElement(MenuItemElement);
-    const onOpenChange = vi.fn();
-
-    root.open = true;
-    qualityTrigger.id = 'quality-trigger';
-    qualityTrigger.commandfor = 'quality-menu';
-    speedTrigger.id = 'speed-trigger';
-    speedTrigger.commandfor = 'speed-menu';
-    quality.id = 'quality-menu';
-    speed.id = 'speed-menu';
-    qualityItem.textContent = 'Auto';
-    speedItem.textContent = 'Normal';
-
-    root.addEventListener('open-change', onOpenChange);
-    rootView.append(qualityTrigger, speedTrigger);
-    quality.append(qualityItem);
-    speed.append(speedItem);
-    root.append(rootView, quality, speed);
-    document.body.append(root);
-
-    await root.updateComplete;
-    await rootView.updateComplete;
-    await qualityTrigger.updateComplete;
-    await speedTrigger.updateComplete;
-    await quality.updateComplete;
-    await speed.updateComplete;
-    await qualityItem.updateComplete;
-    await speedItem.updateComplete;
-    onOpenChange.mockClear();
-
-    qualityTrigger.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
-
-    await root.updateComplete;
-    await quality.updateComplete;
-    await waitForAssertion(() => {
-      expect(quality.getAttribute('data-menu-view-state')).toBe('active');
-    });
-
-    speedTrigger.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
-    quality.dispatchEvent(new KeyboardEvent('keydown', { key: 'Escape', bubbles: true, cancelable: true }));
-
-    await root.updateComplete;
-    await quality.updateComplete;
-    await speed.updateComplete;
-    await waitForAssertion(() => {
-      expect(root.open).toBe(false);
-      expect(onOpenChange).toHaveBeenCalledWith(
-        expect.objectContaining({ detail: expect.objectContaining({ open: false, reason: 'escape' }) })
-      );
-    });
   });
 
   it('only stops propagation for nested menu-owned keyboard events', async () => {

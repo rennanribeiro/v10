@@ -33,7 +33,6 @@ export * from './ui/input-feedback/volume-indicator-data-attrs';
 export * from './ui/live-button/live-button-core';
 export * from './ui/live-button/live-button-data-attrs';
 export * from './ui/menu/menu-core';
-export * from './ui/menu/menu-css-vars';
 export * from './ui/menu/menu-data-attrs';
 export * from './ui/menu/menu-item-data-attrs';
 export * from './ui/mute-button/mute-button-core';

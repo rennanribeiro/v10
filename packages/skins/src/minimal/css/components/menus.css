@@ -30,58 +30,13 @@
 
   & .media-menu__panel {
     position: absolute;
-    inset: 0;
+    inset-inline: 0;
+    top: 0;
+    max-height: inherit;
     padding: var(--menu-padding);
     overflow: auto;
     overscroll-behavior: none;
     outline: none;
-    translate: 0 0;
-    transition-timing-function: ease-in-out;
-    transition-duration: var(--menu-transition-duration);
-    transition-property: translate, filter;
-    will-change: translate, filter;
-
-    &[data-starting-style],
-    &[data-ending-style] {
-      overflow: hidden;
-    }
-
-    /* Root settings view — slides out when a submenu is active */
-    &[data-menu-root-view][data-menu-view-state="inactive"] {
-      filter: blur(8px);
-      translate: -100% 0;
-
-      /* Hide the indicator while transitioning */
-      & .media-menu__group::before {
-        display: none;
-      }
-    }
-
-    /* Submenu panels — slide in/out alongside the root view */
-    &[data-submenu] {
-      z-index: 10;
-
-      &:not([data-open], [data-ending-style]) {
-        translate: -100% 0;
-        transition-property: none;
-      }
-
-      &[data-starting-style],
-      &[data-ending-style] {
-        pointer-events: none;
-        filter: blur(8px);
-      }
-
-      &[data-starting-style][data-direction="forward"],
-      &[data-ending-style][data-direction="back"] {
-        translate: 100% 0;
-      }
-
-      &[data-ending-style][data-direction="forward"],
-      &[data-starting-style][data-direction="back"] {
-        translate: -100% 0;
-      }
-    }
   }
 
   & .media-menu__separator {
@@ -217,17 +172,15 @@
 
   /* Settings menu */
   &.media-menu--settings {
-    width: var(--media-menu-width);
-    min-width: calc(var(--spacing) * 48);
+    width: min(calc(var(--spacing) * 64), var(--media-popover-available-width, calc(var(--spacing) * 64)));
     height: var(--media-menu-height);
     overflow: hidden;
-    /* Add height and width transitions. */
+    /* Only the viewport height changes between panels. */
     transition:
       var(--media-popup-transition),
-      height var(--media-popup-transition-timing-function) var(--menu-transition-duration),
-      width var(--media-popup-transition-timing-function) var(--menu-transition-duration);
+      height var(--media-popup-transition-timing-function) var(--menu-transition-duration);
 
-    /* Don't transition width and height on open/close. */
+    /* Don't transition height on open/close. */
     &[data-starting-style],
     &[data-ending-style] {
       transition: var(--media-popup-transition);

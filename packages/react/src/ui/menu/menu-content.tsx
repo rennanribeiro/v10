@@ -1,28 +1,22 @@
 'use client';
 
-import { type MenuState, PopoverCSSVars } from '@videojs/core';
+import type { MenuState } from '@videojs/core';
 import {
-  createMenuViewTransition,
-  getMenuViewportAttrs,
-  getMenuViewportElement,
-  getMenuViewTransitionAttrs,
   getRootPositionOptions,
   isMenuNavigationKey,
-  observeMenuViewContent,
-  syncMenuViewRoot,
-  syncMenuViewTransition,
+  observeMenuHeight,
+  syncMenuHeight,
   type UIFocusEvent,
   type UIKeyboardEvent,
 } from '@videojs/core/dom';
-import { useSnapshot } from '@videojs/store/react';
-import { forwardRef, useCallback, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { forwardRef, useCallback, useLayoutEffect, useMemo, useRef } from 'react';
 import { createPortal } from 'react-dom';
 
 import type { UIComponentProps } from '../../utils/types';
 import { useComposedRefs } from '../../utils/use-composed-refs';
 import { renderElement } from '../../utils/use-render';
 import { usePopupPosition } from '../popover/use-popup-position';
-import { useMenuContext, useSubMenuContext } from './context';
+import { useMenuContext } from './context';
 
 export interface MenuContentProps extends UIComponentProps<'div', MenuState> {}
 
@@ -65,23 +59,16 @@ function preventMenuKeyDefault(event: React.KeyboardEvent<HTMLDivElement>): void
   }
 }
 
-function wasDefaultPreventedByMenu(event: React.KeyboardEvent<HTMLDivElement>): boolean {
-  return menuPreventedNativeEvents.has(event.nativeEvent);
-}
-
 function callKeyDownHandler(
   handler: React.KeyboardEventHandler<HTMLDivElement> | undefined,
   event: React.KeyboardEvent<HTMLDivElement>
 ): boolean {
-  const defaultPreventedBeforeHandler = event.defaultPrevented && !wasDefaultPreventedByMenu(event);
+  const defaultPreventedBeforeHandler = event.defaultPrevented && !menuPreventedNativeEvents.has(event.nativeEvent);
 
   if (!handler) return defaultPreventedBeforeHandler;
 
   let defaultPreventedByHandler = false;
   const preventDefault = event.preventDefault;
-
-  // Capture-phase menu handling may have already prevented default; track
-  // whether the consumer also calls preventDefault while their handler runs.
   event.preventDefault = () => {
     defaultPreventedByHandler = true;
     preventDefault.call(event);
@@ -104,6 +91,7 @@ export const MenuContent = forwardRef<HTMLDivElement, MenuContentProps>(function
   const {
     core,
     menu,
+    parent,
     state,
     preferredSide,
     setPositionedSide,
@@ -112,57 +100,37 @@ export const MenuContent = forwardRef<HTMLDivElement, MenuContentProps>(function
     contentId,
     boundary,
     container,
-    activeSubMenuId,
   } = useMenuContext();
-  const subMenuCtx = useSubMenuContext();
   const isSubmenu = state.isSubmenu;
-
-  const parentMenu = subMenuCtx?.parentMenu ?? null;
-  const subMenuId = subMenuCtx?.subMenuId ?? null;
-
-  const isActive =
-    isSubmenu && parentMenu !== null && subMenuId !== null ? parentMenu.activeSubMenuId === subMenuId : false;
-
-  const [menuViewTransition] = useState(() =>
-    createMenuViewTransition({
-      focusFirstItem() {
-        menu.highlightFirstItem({ preventScroll: true });
-      },
-      restoreFocus(triggerId) {
-        if (triggerId) {
-          document.getElementById(triggerId)?.focus({ preventScroll: true });
-        }
-      },
-    })
-  );
-  const menuViewTransitionState = useSnapshot(menuViewTransition.input);
-  const menuViewElementRef = useRef<HTMLDivElement | null>(null);
-  const parentContentElementRef = useRef<HTMLElement | null>(null);
-  const activeSubMenuIdRef = useRef(activeSubMenuId);
-
-  activeSubMenuIdRef.current = activeSubMenuId;
+  const isActive = isSubmenu && state.open;
+  const wasActiveRef = useRef(false);
 
   useLayoutEffect(() => {
-    return () => menuViewTransition.destroy();
-  }, [menuViewTransition]);
+    if (!isSubmenu) return undefined;
 
-  useLayoutEffect(() => {
-    if (!isSubmenu) return;
+    const wasActive = wasActiveRef.current;
+    wasActiveRef.current = isActive;
 
-    menuViewTransition.sync({
-      active: isActive,
-      direction: parentMenu?.navigationDirection ?? 'forward',
-      triggerId: parentMenu?.activeSubMenuTriggerId ?? null,
-    });
-  }, [isActive, isSubmenu, parentMenu, menuViewTransition]);
+    if (isActive && !wasActive) {
+      const frame = requestAnimationFrame(() => menu.highlightFirstItem({ preventScroll: true }));
+      return () => cancelAnimationFrame(frame);
+    }
+
+    if (!isActive && wasActive) {
+      menu.triggerElement?.focus({ preventScroll: true });
+    }
+
+    return undefined;
+  }, [isActive, isSubmenu, menu]);
 
   const setMenuViewElement = useCallback(
     (element: HTMLDivElement | null) => {
-      menuViewElementRef.current = element;
       menu.setContentElement(element);
-      menuViewTransition.setElement(element);
+      if (!element) {
+        requestAnimationFrame(() => syncMenuHeight(parent?.menu.contentElement ?? null));
+      }
     },
-    [menu, menuViewTransition]
+    [menu, parent]
   );
 
   const handleSubMenuKeyDown = useCallback(
@@ -176,22 +144,14 @@ export const MenuContent = forwardRef<HTMLDivElement, MenuContentProps>(function
       menu.contentProps.onKeyDown(keyboardEvent);
       const isBackNavigationKey = event.key === 'ArrowLeft' || event.key === 'Escape';
 
-      const ownsActiveSubmenu =
-        parentMenu !== null &&
-        subMenuId !== null &&
-        parentMenu.menu.navigationInput.current.stack[parentMenu.menu.navigationInput.current.stack.length - 1]
-          ?.menuId === subMenuId;
-
-      if (isBackNavigationKey && ownsActiveSubmenu && !defaultPreventedByUser) {
+      if (isBackNavigationKey && !defaultPreventedByUser) {
         event.preventDefault();
-        parentMenu.pop();
+        menu.close('escape');
       }
 
-      if (isNavigationKey && (!isBackNavigationKey || ownsActiveSubmenu)) {
-        event.stopPropagation();
-      }
+      if (isNavigationKey) event.stopPropagation();
     },
-    [onKeyDown, parentMenu, subMenuId, menu]
+    [onKeyDown, menu]
   );
 
   const handleRootMenuKeyDown = useCallback(
@@ -200,9 +160,7 @@ export const MenuContent = forwardRef<HTMLDivElement, MenuContentProps>(function
       const keyboardEvent = toUIKeyboardEvent(event);
       menu.contentProps.onKeyDown(keyboardEvent);
       if (event.key === 'Escape') return;
-      if (isMenuNavigationKey(keyboardEvent)) {
-        event.stopPropagation();
-      }
+      if (isMenuNavigationKey(keyboardEvent)) event.stopPropagation();
     },
     [onKeyDown, menu]
   );
@@ -215,39 +173,18 @@ export const MenuContent = forwardRef<HTMLDivElement, MenuContentProps>(function
     [onBlur, menu]
   );
 
-  // ─── Root content state (always declared — Rules of Hooks) ───────────────
   const internalRef = useRef<HTMLDivElement>(null);
-
   const contentRef = useCallback(
     (element: HTMLDivElement | null) => {
-      if (isSubmenu) return;
-      menu.setContentElement(element);
+      if (!isSubmenu) menu.setContentElement(element);
     },
     [isSubmenu, menu]
   );
-
   const rootComposedRef = useComposedRefs(forwardedRef, contentRef, internalRef);
   const menuViewComposedRef = useComposedRefs(forwardedRef, setMenuViewElement);
-
   const positionOptions = useMemo(
     () => getRootPositionOptions(preferredSide, state.align),
     [preferredSide, state.align]
-  );
-  const handlePosition = useCallback(
-    (side: NonNullable<MenuState['side']>) => {
-      setPositionedSide(side);
-
-      const contentElement = internalRef.current;
-      if (!contentElement) return;
-
-      const availableWidth = contentElement.style.getPropertyValue(PopoverCSSVars.availableWidth);
-      syncMenuViewRoot(
-        contentElement,
-        activeSubMenuIdRef.current !== null,
-        availableWidth ? { availableWidth } : undefined
-      );
-    },
-    [setPositionedSide]
   );
   const positioningStyle = usePopupPosition({
     open: state.open && !isSubmenu,
@@ -257,35 +194,43 @@ export const MenuContent = forwardRef<HTMLDivElement, MenuContentProps>(function
     popupRef: internalRef,
     boundary,
     container,
-    onSideChange: handlePosition,
+    onSideChange: setPositionedSide,
   });
 
   useLayoutEffect(() => {
-    if (isSubmenu) return;
-    if (!state.open) return;
-
-    syncMenuViewRoot(internalRef.current, activeSubMenuId !== null);
+    if (isSubmenu || !state.open) return;
 
     const contentElement = internalRef.current;
     if (!contentElement) return;
 
-    return observeMenuViewContent(contentElement, () => {
-      syncMenuViewRoot(contentElement, activeSubMenuId !== null);
-    });
-  }, [isSubmenu, state.open, activeSubMenuId]);
+    const sync = () => syncMenuHeight(contentElement);
+    sync();
+    const frame = requestAnimationFrame(sync);
+    const stopObserving = observeMenuHeight(contentElement, sync);
+
+    return () => {
+      cancelAnimationFrame(frame);
+      stopObserving();
+    };
+  }, [isSubmenu, state.open]);
 
   useLayoutEffect(() => {
     if (!isSubmenu) return;
 
-    const parentContentElement = parentMenu?.menu.contentElement ?? parentContentElementRef.current;
-    parentContentElementRef.current = parentContentElement;
-    syncMenuViewTransition(parentContentElement, menuViewElementRef.current, menuViewTransitionState);
-  });
+    const parentContentElement = parent?.menu.contentElement ?? null;
+    const sync = () => syncMenuHeight(parentContentElement);
+    sync();
+    const frame = requestAnimationFrame(sync);
+    const stopObserving = state.open && parentContentElement ? observeMenuHeight(parentContentElement, sync) : null;
 
-  // ─── Render ───────────────────────────────────────────────────────────────
+    return () => {
+      cancelAnimationFrame(frame);
+      stopObserving?.();
+    };
+  }, [isSubmenu, parent, state.open]);
 
   if (isSubmenu) {
-    if (menuViewTransitionState.phase === 'hidden') return null;
+    if (!isActive) return null;
 
     const subMenuContent = renderElement(
       'div',
@@ -295,7 +240,10 @@ export const MenuContent = forwardRef<HTMLDivElement, MenuContentProps>(function
         ref: menuViewComposedRef,
         props: [
           {
-            ...getMenuViewTransitionAttrs(menuViewTransitionState),
+            id: contentId,
+            'data-menu-view': '',
+            'data-menu-view-state': 'active',
+            'data-open': '',
             role: 'menu' as const,
             tabIndex: -1,
             'data-submenu': '',
@@ -308,11 +256,8 @@ export const MenuContent = forwardRef<HTMLDivElement, MenuContentProps>(function
       }
     );
 
-    const parentContentElement = parentMenu?.menu.contentElement ?? parentContentElementRef.current;
-
-    const parentViewportElement = getMenuViewportElement(parentContentElement);
-
-    return parentViewportElement ? createPortal(subMenuContent, parentViewportElement) : subMenuContent;
+    const parentContentElement = parent?.menu.contentElement ?? null;
+    return parentContentElement ? createPortal(subMenuContent, parentContentElement) : subMenuContent;
   }
 
   if (!state.open) return null;
@@ -329,7 +274,6 @@ export const MenuContent = forwardRef<HTMLDivElement, MenuContentProps>(function
           id: contentId,
           style: positioningStyle,
           ...core.getContentAttrs(state),
-          ...getMenuViewportAttrs(),
         },
         { onKeyDownCapture: preventMenuKeyDefault, onKeyDown: handleRootMenuKeyDown, onBlur: handleRootMenuBlur },
         elementProps,

@@ -1,4 +1,4 @@
-import { createState, type State } from '@videojs/store';
+import type { State } from '@videojs/store';
 import type { MenuInput, MenuState } from '../../../core/ui/menu/menu-core';
 import { MenuItemDataAttrs } from '../../../core/ui/menu/menu-item-data-attrs';
 import type { UIFocusEvent, UIKeyboardEvent } from '../event';
@@ -10,20 +10,6 @@ import type { TransitionApi } from '../transition';
 export type MenuOpenChangeReason = PopoverOpenChangeReason;
 
 export type MenuChangeDetails = PopoverChangeDetails;
-
-export interface NavigationEntry {
-  /** ID of the nested menu (submenu) that was pushed. */
-  menuId: string;
-  /** ID of the Trigger element that initiated the push, for focus restoration. */
-  triggerId: string;
-}
-
-export interface NavigationState {
-  /** Stack of active submenus (last = current). */
-  stack: NavigationEntry[];
-  /** Direction of the most recent navigation. */
-  direction: 'forward' | 'back';
-}
 
 export interface MenuOptions {
   transition: TransitionApi;
@@ -79,8 +65,6 @@ export function getRootPositionOptions(side: MenuState['side'], align: MenuState
 export interface MenuApi {
   /** Reactive transition state for platforms to subscribe to. */
   input: State<MenuInput>;
-  /** Reactive navigation state for submenu stack. */
-  navigationInput: State<NavigationState>;
   /** Attach to the trigger element. */
   triggerProps: MenuTriggerProps;
   /** Attach to the content element. */
@@ -97,21 +81,9 @@ export interface MenuApi {
   highlight: (element: HTMLElement | null, options?: MenuHighlightOptions) => void;
   /** Programmatically highlight the first registered item. */
   highlightFirstItem: (options?: MenuHighlightOptions) => void;
-  /** Push a submenu onto the navigation stack. */
-  push: (menuId: string, triggerId: string) => void;
-  /** Pop the current submenu from the navigation stack. */
-  pop: () => void;
   open: (reason?: MenuOpenChangeReason) => void;
   close: (reason?: MenuOpenChangeReason) => void;
   destroy: () => void;
-}
-
-export function completeMenuItemSelection(menu: MenuApi, parentMenu: MenuApi | null = null): void {
-  if (parentMenu) {
-    parentMenu.pop();
-  } else {
-    menu.close();
-  }
 }
 
 export function createMenu(options: MenuOptions): MenuApi {
@@ -125,31 +97,6 @@ export function createMenu(options: MenuOptions): MenuApi {
   let typeaheadTimer: ReturnType<typeof setTimeout> | null = null;
   let openRafId = 0;
   let lastCloseReason: MenuOpenChangeReason | null = null;
-
-  const navigationState = createState<NavigationState>({ stack: [], direction: 'forward' });
-
-  function push(menuId: string, triggerId: string): void {
-    const stack = navigationState.current.stack;
-    const topEntry = stack[stack.length - 1];
-
-    if (topEntry?.menuId === menuId) return;
-
-    navigationState.patch({
-      stack: [...stack, { menuId, triggerId }],
-      direction: 'forward',
-    });
-  }
-
-  function pop(): void {
-    const stack = navigationState.current.stack;
-
-    if (stack.length === 0) return;
-
-    navigationState.patch({
-      stack: stack.slice(0, -1),
-      direction: 'back',
-    });
-  }
 
   // --- Highlight ---
 
@@ -257,8 +204,6 @@ export function createMenu(options: MenuOptions): MenuApi {
       } else {
         clearHighlight();
         clearTypeahead();
-        // Reset navigation stack so the menu starts at root next time it opens.
-        navigationState.patch({ stack: [], direction: 'forward' });
       }
     },
     onOpenChangeComplete(open) {
@@ -388,7 +333,6 @@ export function createMenu(options: MenuOptions): MenuApi {
 
   return {
     input: popover.input as State<MenuInput>,
-    navigationInput: navigationState,
     // Menus open/close on trigger click — forward the popover's click handler.
     // Hover and focus-based open are disabled (openOnHover not set).
     triggerProps: {
@@ -407,8 +351,6 @@ export function createMenu(options: MenuOptions): MenuApi {
     registerItem,
     highlight,
     highlightFirstItem,
-    push,
-    pop,
     open: popover.open,
     close: popover.close,
     destroy,

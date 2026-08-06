@@ -141,10 +141,10 @@ function getTemplateHTML() {
                 </media-menu-view>
 
                 <media-menu id="settings-quality-menu" class="media-menu__panel">
-                  <media-menu-back class="media-menu__back">
+                  <media-menu-item class="media-menu__back">
                     ${renderIcon('chevron', { class: 'media-icon media-menu__chevron media-icon--flipped' })}
                     ${renderText(qualityText)}
-                  </media-menu-back>
+                  </media-menu-item>
                   <div class="media-menu__separator"></div>
                   <media-quality-radio-group class="media-menu__group">
                     <template>
@@ -163,10 +163,10 @@ function getTemplateHTML() {
                 </media-menu>
 
                 <media-menu id="settings-audio-menu" class="media-menu__panel">
-                  <media-menu-back class="media-menu__back">
+                  <media-menu-item class="media-menu__back">
                     ${renderIcon('chevron', { class: 'media-icon media-menu__chevron media-icon--flipped' })}
                     ${renderText(audioText)}
-                  </media-menu-back>
+                  </media-menu-item>
                   <div class="media-menu__separator"></div>
                   <media-audio-track-radio-group class="media-menu__group">
                     <template>
@@ -181,10 +181,10 @@ function getTemplateHTML() {
                 </media-menu>
 
                 <media-menu id="settings-speed-menu" class="media-menu__panel">
-                  <media-menu-back class="media-menu__back">
+                  <media-menu-item class="media-menu__back">
                     ${renderIcon('chevron', { class: 'media-icon media-menu__chevron media-icon--flipped' })}
                     ${renderText(speedText)}
-                  </media-menu-back>
+                  </media-menu-item>
                   <div class="media-menu__separator"></div>
                   <media-playback-rate-radio-group class="media-menu__group">
                     <template>
@@ -199,10 +199,10 @@ function getTemplateHTML() {
                 </media-menu>
 
                 <media-menu id="settings-captions-menu" class="media-menu__panel">
-                  <media-menu-back class="media-menu__back">
+                  <media-menu-item class="media-menu__back">
                     ${renderIcon('chevron', { class: 'media-icon media-menu__chevron media-icon--flipped' })}
                     ${renderText(captionsText)}
-                  </media-menu-back>
+                  </media-menu-item>
                   <div class="media-menu__separator"></div>
                   <media-captions-radio-group class="media-menu__group">
                     <template>

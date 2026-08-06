@@ -164,10 +164,10 @@ function SettingsMenu(): ReactNode {
                   )}
                 />
                 <Menu.Content className="media-menu__panel">
-                  <Menu.Back className="media-menu__back">
+                  <Menu.Item className="media-menu__back">
                     <MenuChevron flipped />
                     {t(qualityText)}
-                  </Menu.Back>
+                  </Menu.Item>
                   <Menu.Separator className="media-menu__separator" />
                   <Menu.RadioGroup
                     className="media-menu__group"
@@ -218,10 +218,10 @@ function SettingsMenu(): ReactNode {
                   )}
                 />
                 <Menu.Content className="media-menu__panel">
-                  <Menu.Back className="media-menu__back">
+                  <Menu.Item className="media-menu__back">
                     <MenuChevron flipped />
                     {t(audioText)}
-                  </Menu.Back>
+                  </Menu.Item>
                   <Menu.Separator className="media-menu__separator" />
                   <Menu.RadioGroup
                     className="media-menu__group"
@@ -268,10 +268,10 @@ function SettingsMenu(): ReactNode {
                   )}
                 />
                 <Menu.Content className="media-menu__panel">
-                  <Menu.Back className="media-menu__back">
+                  <Menu.Item className="media-menu__back">
                     <MenuChevron flipped />
                     {t(speedText)}
-                  </Menu.Back>
+                  </Menu.Item>
                   <Menu.Separator className="media-menu__separator" />
                   <Menu.RadioGroup
                     className="media-menu__group"
@@ -318,10 +318,10 @@ function SettingsMenu(): ReactNode {
                   )}
                 />
                 <Menu.Content className="media-menu__panel">
-                  <Menu.Back className="media-menu__back">
+                  <Menu.Item className="media-menu__back">
                     <MenuChevron flipped />
                     {t(captionsText)}
-                  </Menu.Back>
+                  </Menu.Item>
                   <Menu.Separator className="media-menu__separator" />
                   <Menu.RadioGroup
                     className="media-menu__group"

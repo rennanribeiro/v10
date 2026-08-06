@@ -7,7 +7,6 @@ import {
 import type { AnyPlayerStore } from '@videojs/core/dom';
 import {
   applyElementProps,
-  completeMenuItemSelection,
   selectAudioTrack,
   selectPlaybackRate,
   selectQuality,
@@ -99,10 +98,10 @@ export class MenuItemElement extends MediaElement {
 
             const target = this.commandfor;
             if (target) {
-              currentCtx.menu.push(target, this.id);
+              this.#openSubmenu(target);
             } else {
               this.dispatchEvent(new CustomEvent('select', { bubbles: true }));
-              completeMenuItemSelection(currentCtx.menu, currentCtx.parentMenu);
+              currentCtx.menu.close();
             }
             event.preventDefault();
           },
@@ -113,7 +112,7 @@ export class MenuItemElement extends MediaElement {
             const target = this.commandfor;
             if (!target) return;
 
-            currentCtx.menu.push(target, this.id);
+            this.#openSubmenu(target);
             event.preventDefault();
           },
           onPointerenter: () => {
@@ -126,19 +125,23 @@ export class MenuItemElement extends MediaElement {
     }
 
     const hasSubmenu = Boolean(this.commandfor);
-    const topEntry = ctx.navigation.stack[ctx.navigation.stack.length - 1];
-    const activeSubMenuId = topEntry?.menuId ?? null;
-    const isExpanded = hasSubmenu ? activeSubMenuId === this.commandfor : undefined;
-
     applyElementProps(this, {
       role: 'menuitem',
       'aria-disabled': this.#isDisabled() ? 'true' : undefined,
       ...(hasSubmenu && {
         'aria-haspopup': 'menu',
-        'aria-expanded': isExpanded ? 'true' : 'false',
+        'aria-expanded': 'false',
         'data-has-submenu': '',
       }),
     });
+  }
+
+  #openSubmenu(id: string): void {
+    const root = this.getRootNode() as Document | ShadowRoot;
+    const submenu = root.querySelector<HTMLElement>(`#${CSS.escape(id)}`) as HTMLElement & {
+      show?: (reason?: 'click') => void;
+    };
+    submenu?.show?.('click');
   }
 
   #syncMenuItemSetting(): void {

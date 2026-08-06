@@ -1,4 +1,3 @@
-import { MenuBackElement } from '../../ui/menu/menu-back-element';
 import { MenuCheckboxItemElement } from '../../ui/menu/menu-checkbox-item-element';
 import { MenuElement } from '../../ui/menu/menu-element';
 import { MenuGroupElement } from '../../ui/menu/menu-group-element';
@@ -17,7 +16,6 @@ defineMenu();
 declare global {
   interface HTMLElementTagNameMap {
     [MenuElement.tagName]: MenuElement;
-    [MenuBackElement.tagName]: MenuBackElement;
     [MenuItemElement.tagName]: MenuItemElement;
     [MenuGroupLabelElement.tagName]: MenuGroupLabelElement;
     [MenuItemValueElement.tagName]: MenuItemValueElement;

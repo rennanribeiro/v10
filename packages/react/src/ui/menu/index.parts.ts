@@ -1,4 +1,3 @@
-export { MenuBack as Back, type MenuBackProps as BackProps } from './menu-back';
 export {
   MenuCheckboxItem as CheckboxItem,
   type MenuCheckboxItemProps as CheckboxItemProps,

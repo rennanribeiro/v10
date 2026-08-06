@@ -107,7 +107,6 @@ export {
   menuGroupContext,
   menuRadioGroupContext,
 } from './ui/menu/context';
-export { MenuBackElement } from './ui/menu/menu-back-element';
 export { MenuCheckboxItemElement } from './ui/menu/menu-checkbox-item-element';
 export { MenuElement } from './ui/menu/menu-element';
 export { MenuGroupElement } from './ui/menu/menu-group-element';

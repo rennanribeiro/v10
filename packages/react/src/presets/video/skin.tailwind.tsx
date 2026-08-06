@@ -226,10 +226,10 @@ function SettingsMenu(): ReactNode {
                   )}
                 />
                 <Menu.Content className={menu.submenuPanel}>
-                  <Menu.Back className={menu.back}>
+                  <Menu.Item className={menu.back}>
                     <MenuChevron flipped />
                     {t(qualityText)}
-                  </Menu.Back>
+                  </Menu.Item>
                   <Menu.Separator className={menu.separator} />
                   <Menu.RadioGroup
                     className={menu.group}
@@ -280,10 +280,10 @@ function SettingsMenu(): ReactNode {
                   )}
                 />
                 <Menu.Content className={menu.submenuPanel}>
-                  <Menu.Back className={menu.back}>
+                  <Menu.Item className={menu.back}>
                     <MenuChevron flipped />
                     {t(audioText)}
-                  </Menu.Back>
+                  </Menu.Item>
                   <Menu.Separator className={menu.separator} />
                   <Menu.RadioGroup
                     className={menu.group}
@@ -330,10 +330,10 @@ function SettingsMenu(): ReactNode {
                   )}
                 />
                 <Menu.Content className={menu.submenuPanel}>
-                  <Menu.Back className={menu.back}>
+                  <Menu.Item className={menu.back}>
                     <MenuChevron flipped />
                     {t(speedText)}
-                  </Menu.Back>
+                  </Menu.Item>
                   <Menu.Separator className={menu.separator} />
                   <Menu.RadioGroup
                     className={menu.group}
@@ -380,10 +380,10 @@ function SettingsMenu(): ReactNode {
                   )}
                 />
                 <Menu.Content className={menu.submenuPanel}>
-                  <Menu.Back className={menu.back}>
+                  <Menu.Item className={menu.back}>
                     <MenuChevron flipped />
                     {t(captionsText)}
-                  </Menu.Back>
+                  </Menu.Item>
                   <Menu.Separator className={menu.separator} />
                   <Menu.RadioGroup
                     className={menu.group}

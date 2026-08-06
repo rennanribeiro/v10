@@ -4,29 +4,12 @@ import { popup } from './popup';
 import { surface } from './surface';
 
 const panelBase = cn(
-  'absolute inset-0 overflow-auto overscroll-none p-(--menu-padding) outline-none translate-none',
-  'data-starting-style:overflow-hidden data-ending-style:overflow-hidden',
-  'transition-[translate,filter] duration-(--menu-transition-duration) ease-in-out will-change-[translate,filter]'
+  'absolute inset-x-0 top-0 [max-height:inherit] overflow-auto overscroll-none p-(--menu-padding) outline-none'
 );
 
-const rootView = cn(
-  panelBase,
-  'group/menu-root-view',
-  'data-[menu-view-state=inactive]:-translate-x-full data-[menu-view-state=inactive]:blur'
-);
+const rootView = panelBase;
 
-const submenuPanel = cn(
-  panelBase,
-  'z-10',
-  'not-data-open:not-data-ending-style:-translate-x-full',
-  'not-data-open:not-data-ending-style:transition-none',
-  'data-starting-style:pointer-events-none data-ending-style:pointer-events-none',
-  'data-starting-style:blur data-ending-style:blur',
-  'data-starting-style:data-[direction=forward]:translate-x-full',
-  'data-ending-style:data-[direction=forward]:-translate-x-full',
-  'data-starting-style:data-[direction=back]:-translate-x-full',
-  'data-ending-style:data-[direction=back]:translate-x-full'
-);
+const submenuPanel = cn(panelBase, 'z-10');
 
 const itemBase = cn(
   'flex cursor-pointer select-none items-center gap-1.5 rounded-(--menu-item-border-radius) py-1.5 px-2',
@@ -62,8 +45,7 @@ const group = cn(
   'supports-[top:anchor(top)]:before:rounded-(--menu-item-border-radius)',
   'supports-[top:anchor(top)]:before:transition-[inset]',
   'supports-[top:anchor(top)]:before:duration-100',
-  'supports-[top:anchor(top)]:before:ease-in-out',
-  'group-data-[menu-view-state=inactive]/menu-root-view:before:hidden'
+  'supports-[top:anchor(top)]:before:ease-in-out'
 );
 
 const menuHostShell = cn(
@@ -80,12 +62,12 @@ export const menu = {
   /** Settings menu viewport host with nested submenu navigation. */
   settings: cn(
     menuHostShell,
-    // Add height and width transitions.
-    '[--media-popup-transition:var(--media-popup-base-transition),height_var(--media-popup-transition-timing-function)_var(--menu-transition-duration),width_var(--media-popup-transition-timing-function)_var(--menu-transition-duration)]',
-    // Don't transition width and height on open/close.
+    // Only the viewport height changes between panels.
+    '[--media-popup-transition:var(--media-popup-base-transition),height_var(--media-popup-transition-timing-function)_var(--menu-transition-duration)]',
+    // Don't transition height on open/close.
     'data-starting-style:[--media-popup-transition:var(--media-popup-base-transition)]',
     'data-ending-style:[--media-popup-transition:var(--media-popup-base-transition)]',
-    'min-w-48! w-(--media-menu-width) h-(--media-menu-height)',
+    'w-64 max-w-(--media-popover-available-width) h-(--media-menu-height)',
     'overflow-hidden!'
   ),
   group,
@@ -99,9 +81,9 @@ export const menu = {
   tier: 'pl-0.5 pt-px text-(length:--font-size-tiny) font-semibold leading-none text-current/70',
   indicator: 'ml-auto -mr-1 shrink-0 opacity-0 group-aria-checked/menu-item:opacity-100',
   icon: 'shrink-0 text-current/65 drop-shadow-[0_1px_0_var(--media-current-shadow-color)]',
-  /** Root settings view — slides out when a submenu is active. */
+  /** Root settings view. */
   rootView,
-  /** Submenu panel — slides in/out alongside the root view. */
+  /** Active submenu panel. */
   submenuPanel,
   back: cn(itemBase, 'mb-0.5 w-full'),
   hint: 'ml-auto inline-flex min-w-0 items-center gap-1 pl-2 text-current/65',

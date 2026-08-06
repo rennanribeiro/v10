@@ -1,4 +1,4 @@
-import { applyElementProps, completeMenuItemSelection } from '@videojs/core/dom';
+import { applyElementProps } from '@videojs/core/dom';
 import type { PropertyDeclarationMap, PropertyValues } from '@videojs/element';
 import { ContextConsumer } from '@videojs/element/context';
 
@@ -59,7 +59,7 @@ export class MenuRadioItemElement extends MediaElement {
             if (!currentMenuCtx || !currentGroupCtx || this.disabled) return;
 
             currentGroupCtx.onValueChange(this.value);
-            completeMenuItemSelection(currentMenuCtx.menu, currentMenuCtx.parentMenu);
+            currentMenuCtx.menu.close();
           },
           onPointerenter: () => {
             const currentMenuCtx = this.#menuCtx.value;

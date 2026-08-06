@@ -1,12 +1,11 @@
 'use client';
 
 import type { MenuState } from '@videojs/core';
-import { completeMenuItemSelection } from '@videojs/core/dom';
 import { forwardRef, useCallback, useEffect, useRef } from 'react';
 
 import type { UIComponentProps } from '../../utils/types';
 import { renderElement } from '../../utils/use-render';
-import { useMenuContext, useOptionalMenuItemSettingContext, useSubMenuContext } from './context';
+import { useMenuContext, useOptionalMenuItemSettingContext } from './context';
 import { MenuItemSettingProvider } from './menu-item-setting-provider';
 import type { MenuItemSettingType } from './menu-item-type';
 
@@ -25,8 +24,6 @@ export const MenuItem = forwardRef<HTMLDivElement, MenuItemProps>(function MenuI
   forwardedRef
 ) {
   const { menu, state } = useMenuContext();
-  const subMenuCtx = useSubMenuContext();
-  const parentMenu = subMenuCtx?.parentMenu.menu ?? null;
   const elementRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -40,9 +37,9 @@ export const MenuItem = forwardRef<HTMLDivElement, MenuItemProps>(function MenuI
       if (disabled) return;
       onClick?.(event);
       onSelect?.();
-      completeMenuItemSelection(menu, parentMenu);
+      menu.close();
     },
-    [disabled, onClick, onSelect, menu, parentMenu]
+    [disabled, onClick, onSelect, menu]
   );
 
   const handlePointerEnter = useCallback(() => {

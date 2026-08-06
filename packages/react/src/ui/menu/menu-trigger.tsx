@@ -7,12 +7,7 @@ import { forwardRef, useCallback, useEffect, useMemo, useRef } from 'react';
 import type { UIComponentProps } from '../../utils/types';
 import { renderElement } from '../../utils/use-render';
 import { useSafeId } from '../../utils/use-safe-id';
-import {
-  MenuTriggerChildContextProvider,
-  useMenuContext,
-  useOptionalMenuItemSettingContext,
-  useSubMenuContext,
-} from './context';
+import { MenuTriggerChildContextProvider, useMenuContext, useOptionalMenuItemSettingContext } from './context';
 import { MenuItemSettingProvider } from './menu-item-setting-provider';
 import type { MenuItemSettingType } from './menu-item-type';
 
@@ -51,42 +46,41 @@ function preventMenuKeyDefault(event: React.KeyboardEvent<HTMLElement>): void {
 /**
  * Button that toggles the menu visibility. At root level renders a `<button>`.
  * When inside a parent menu (as a submenu trigger), renders as a `<div role="menuitem">`
- * that pushes the submenu on click or ArrowRight.
+ * that opens the submenu on click or ArrowRight.
  */
 export const MenuTrigger = forwardRef<HTMLButtonElement | HTMLDivElement, MenuTriggerProps>(function MenuTrigger(
   { render, className, style, disabled, type, onClick, onKeyDown, ...elementProps },
   forwardedRef
 ) {
-  const { core, menu, state, contentId } = useMenuContext();
-  const subMenuCtx = useSubMenuContext();
-  const isSubMenuTrigger = subMenuCtx !== null;
+  const { core, menu, parent, state, contentId } = useMenuContext();
+  const isSubMenuTrigger = parent !== null;
 
   const elementRef = useRef<HTMLElement>(null);
   const triggerId = useSafeId('sub-trigger');
 
-  const parentMenu = subMenuCtx?.parentMenu ?? null;
-  const parentMenuApi = parentMenu?.menu ?? null;
-  const parentState = parentMenu?.state ?? state;
-  const parentPush = parentMenu?.push ?? null;
-  const subMenuId = subMenuCtx?.subMenuId ?? null;
-  const isExpanded = isSubMenuTrigger ? parentMenu?.activeSubMenuId === subMenuId : state.open;
+  const parentMenuApi = parent?.menu ?? null;
 
   // Register with the parent menu's item list when acting as a submenu trigger.
   useEffect(() => {
     if (!isSubMenuTrigger || !parentMenuApi) return;
     const element = elementRef.current;
     if (!element) return;
-    return parentMenuApi.registerItem(element);
-  }, [isSubMenuTrigger, parentMenuApi]);
+    menu.setTriggerElement(element);
+    const unregister = parentMenuApi.registerItem(element);
+    return () => {
+      unregister();
+      menu.setTriggerElement(null);
+    };
+  }, [isSubMenuTrigger, menu, parentMenuApi]);
 
   const openSubMenu = useCallback(() => {
-    if (disabled || !parentPush || !subMenuId) return;
-    parentPush(subMenuId, triggerId);
-  }, [disabled, parentPush, subMenuId, triggerId]);
+    if (!disabled) menu.open('click');
+  }, [disabled, menu]);
 
   const handleSubMenuClick = useCallback(
     (event: React.MouseEvent<HTMLDivElement>) => {
       (onClick as React.MouseEventHandler<HTMLDivElement> | undefined)?.(event);
+      if (event.defaultPrevented) return;
       openSubMenu();
     },
     [onClick, openSubMenu]
@@ -95,7 +89,7 @@ export const MenuTrigger = forwardRef<HTMLButtonElement | HTMLDivElement, MenuTr
   const handleSubMenuKeyDown = useCallback(
     (event: React.KeyboardEvent<HTMLDivElement>) => {
       (onKeyDown as React.KeyboardEventHandler<HTMLDivElement> | undefined)?.(event);
-      if (disabled) return;
+      if (disabled || event.defaultPrevented) return;
       if (event.key === 'ArrowRight') {
         event.preventDefault();
         openSubMenu();
@@ -146,8 +140,8 @@ export const MenuTrigger = forwardRef<HTMLButtonElement | HTMLDivElement, MenuTr
         forwardedRef={forwardedRef}
         elementRef={elementRef}
         triggerId={triggerId}
-        parentState={parentState}
-        isExpanded={isExpanded}
+        state={state}
+        contentId={contentId}
         onSubMenuClick={handleSubMenuClick}
         onSubMenuKeyDown={handleSubMenuKeyDown}
         onPointerEnter={handlePointerEnter}
@@ -198,8 +192,8 @@ interface MenuTriggerSubmenuProps {
   forwardedRef: React.ForwardedRef<HTMLButtonElement | HTMLDivElement>;
   elementRef: React.RefObject<HTMLElement | null>;
   triggerId: string;
-  parentState: MenuState;
-  isExpanded: boolean;
+  state: MenuState;
+  contentId: string;
   onSubMenuClick: (event: React.MouseEvent<HTMLDivElement>) => void;
   onSubMenuKeyDown: (event: React.KeyboardEvent<HTMLDivElement>) => void;
   onPointerEnter: () => void;
@@ -214,8 +208,8 @@ function MenuTriggerSubmenu({
   forwardedRef,
   elementRef,
   triggerId,
-  parentState,
-  isExpanded,
+  state,
+  contentId,
   onSubMenuClick,
   onSubMenuKeyDown,
   onPointerEnter,
@@ -227,14 +221,15 @@ function MenuTriggerSubmenu({
     'div',
     { render, className, style },
     {
-      state: parentState,
+      state,
       ref: [forwardedRef, elementRef as React.Ref<HTMLDivElement>],
       props: [
         {
           id: triggerId,
           role: 'menuitem' as const,
           'aria-haspopup': 'menu' as const,
-          'aria-expanded': isExpanded,
+          'aria-controls': contentId,
+          'aria-expanded': state.open,
           'aria-disabled': disabled ? true : undefined,
           'data-has-submenu': '',
           onClick: onSubMenuClick,
