@@ -10,9 +10,15 @@ Canonical source:
 - Contains semantic structure without React- or HTML-specific markup.
 - Does not copy Media, Store, feature, or SVG implementations.
 
-The initial component paths are:
+The current canonical paths are:
 
+- `skins/default/video-controls.skin.tsx`
+- `components/buttons/button-tooltip.skin.tsx`
+- `components/buttons/fullscreen-button.skin.tsx`
+- `components/buttons/mute-button.skin.tsx`
 - `components/buttons/play-button.skin.tsx`
+- `components/buttons/seek-button.skin.tsx`
+- `components/controls/volume-popover.skin.tsx`
 - `components/sliders/volume-slider.skin.tsx`
 - `components/sliders/time-slider.skin.tsx`
 

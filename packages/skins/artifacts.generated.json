@@ -2,6 +2,86 @@
   "version": 1,
   "artifacts": [
     {
+      "id": "button-tooltip",
+      "kind": "component",
+      "entry": "./canonical/components/buttons/button-tooltip.skin.tsx",
+      "files": [
+        {
+          "path": "./canonical/components/buttons/button-tooltip.skin.tsx",
+          "role": "entry"
+        }
+      ],
+      "resources": {},
+      "dependencies": {
+        "artifacts": [],
+        "packages": ["@videojs/core"],
+        "symbols": {
+          "components": ["Tooltip"],
+          "icons": []
+        }
+      }
+    },
+    {
+      "id": "default-video-controls",
+      "kind": "component",
+      "entry": "./canonical/skins/default/video-controls.skin.tsx",
+      "files": [
+        {
+          "path": "./canonical/skins/default/video-controls.skin.tsx",
+          "role": "entry"
+        }
+      ],
+      "resources": {},
+      "dependencies": {
+        "artifacts": ["fullscreen-button", "play-button", "seek-button", "time-slider", "volume-popover"],
+        "packages": ["@videojs/core"],
+        "symbols": {
+          "components": ["Controls", "Time", "Tooltip"],
+          "icons": []
+        }
+      }
+    },
+    {
+      "id": "fullscreen-button",
+      "kind": "component",
+      "entry": "./canonical/components/buttons/fullscreen-button.skin.tsx",
+      "files": [
+        {
+          "path": "./canonical/components/buttons/fullscreen-button.skin.tsx",
+          "role": "entry"
+        }
+      ],
+      "resources": {},
+      "dependencies": {
+        "artifacts": ["button-tooltip"],
+        "packages": ["@videojs/core", "@videojs/icons"],
+        "symbols": {
+          "components": ["FullscreenButton"],
+          "icons": ["FullscreenEnterIcon", "FullscreenExitIcon"]
+        }
+      }
+    },
+    {
+      "id": "mute-button",
+      "kind": "component",
+      "entry": "./canonical/components/buttons/mute-button.skin.tsx",
+      "files": [
+        {
+          "path": "./canonical/components/buttons/mute-button.skin.tsx",
+          "role": "entry"
+        }
+      ],
+      "resources": {},
+      "dependencies": {
+        "artifacts": [],
+        "packages": ["@videojs/core", "@videojs/icons"],
+        "symbols": {
+          "components": ["MuteButton"],
+          "icons": ["VolumeHighIcon", "VolumeLowIcon", "VolumeOffIcon"]
+        }
+      }
+    },
+    {
       "id": "play-button",
       "kind": "component",
       "entry": "./canonical/components/buttons/play-button.skin.tsx",
@@ -13,11 +93,31 @@
       ],
       "resources": {},
       "dependencies": {
-        "artifacts": [],
+        "artifacts": ["button-tooltip"],
         "packages": ["@videojs/core", "@videojs/icons"],
         "symbols": {
-          "components": ["PlayButton", "Tooltip"],
+          "components": ["PlayButton"],
           "icons": ["PauseIcon", "PlayIcon", "RestartIcon"]
+        }
+      }
+    },
+    {
+      "id": "seek-button",
+      "kind": "component",
+      "entry": "./canonical/components/buttons/seek-button.skin.tsx",
+      "files": [
+        {
+          "path": "./canonical/components/buttons/seek-button.skin.tsx",
+          "role": "entry"
+        }
+      ],
+      "resources": {},
+      "dependencies": {
+        "artifacts": ["button-tooltip"],
+        "packages": ["@videojs/core", "@videojs/icons"],
+        "symbols": {
+          "components": ["SeekButton", "Text"],
+          "icons": ["SeekIcon"]
         }
       }
     },
@@ -34,9 +134,29 @@
       "resources": {},
       "dependencies": {
         "artifacts": [],
-        "packages": ["@videojs/core"],
+        "packages": ["@videojs/core", "@videojs/icons"],
         "symbols": {
           "components": ["Slider", "TimeSlider"],
+          "icons": ["SpinnerIcon"]
+        }
+      }
+    },
+    {
+      "id": "volume-popover",
+      "kind": "component",
+      "entry": "./canonical/components/controls/volume-popover.skin.tsx",
+      "files": [
+        {
+          "path": "./canonical/components/controls/volume-popover.skin.tsx",
+          "role": "entry"
+        }
+      ],
+      "resources": {},
+      "dependencies": {
+        "artifacts": ["mute-button", "volume-slider"],
+        "packages": ["@videojs/core"],
+        "symbols": {
+          "components": ["Popover"],
           "icons": []
         }
       }
