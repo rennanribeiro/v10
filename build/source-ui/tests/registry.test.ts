@@ -32,13 +32,18 @@ describe('createRegistryCatalog', () => {
           `${target.framework}/${target.style}/volume-slider`,
         ]
       );
-      assert.deepEqual(catalog.items[0]?.registryDependencies, [
-        `videojs/v10/${target.framework}/${target.style}/fullscreen-button#eject/11-registry-catalog`,
-        `videojs/v10/${target.framework}/${target.style}/play-button#eject/11-registry-catalog`,
-        `videojs/v10/${target.framework}/${target.style}/seek-button#eject/11-registry-catalog`,
-        `videojs/v10/${target.framework}/${target.style}/time-slider#eject/11-registry-catalog`,
-        `videojs/v10/${target.framework}/${target.style}/volume-popover#eject/11-registry-catalog`,
-      ]);
+      assert.deepEqual(
+        catalog.items[0]?.registryDependencies,
+        target.framework === 'react'
+          ? [
+              `videojs/v10/${target.framework}/${target.style}/fullscreen-button#eject/11-registry-catalog`,
+              `videojs/v10/${target.framework}/${target.style}/play-button#eject/11-registry-catalog`,
+              `videojs/v10/${target.framework}/${target.style}/seek-button#eject/11-registry-catalog`,
+              `videojs/v10/${target.framework}/${target.style}/time-slider#eject/11-registry-catalog`,
+              `videojs/v10/${target.framework}/${target.style}/volume-popover#eject/11-registry-catalog`,
+            ]
+          : undefined
+      );
       assert.deepEqual(catalog.items[0]?.meta, {
         framework: target.framework,
         style: target.style,

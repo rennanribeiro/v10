@@ -1,9 +1,15 @@
 import { existsSync } from 'node:fs';
 import { readFile } from 'node:fs/promises';
 import { basename, dirname, extname, posix, relative, resolve, sep } from 'node:path';
-import type { ArtifactGraph, ArtifactGraphNode } from '../../packages/compiler/src/artifacts/index.ts';
-import { type CompilerConfig, compile } from '../../packages/compiler/src/index.ts';
-import htmlSourceConfig, { resolveHtmlElementImports } from '../../packages/html/skins.compiler.config.ts';
+import { format } from 'prettier';
+import {
+  type ArtifactGraph,
+  type ArtifactGraphNode,
+  resolveArtifactClosure,
+} from '../../packages/compiler/src/artifacts/index.ts';
+import { compile } from '../../packages/compiler/src/index.ts';
+import { renderSkinSource } from '../../packages/html/scripts/render-skin-source.ts';
+import { resolveHtmlElementImports } from '../../packages/html/skins.compiler.config.ts';
 import { createHtmlIconsSource, createReactIconsSource } from '../../packages/icons/scripts/source.ts';
 import reactSourceConfig from '../../packages/react/skins.compiler.config.ts';
 import { compileVanillaStyles } from '../../packages/skins/scripts/compile-styles.ts';
@@ -38,7 +44,7 @@ export async function createSourceOutput(
   const rootDir = resolve(options.rootDir);
   const registryRoot = options.registryRoot ?? 'registry';
   const targetRoot = options.targetRoot ?? 'components/videojs';
-  const contexts = createArtifactContexts(graph, rootDir, targetRoot, options.target.style);
+  const contexts = createArtifactContexts(graph, rootDir, targetRoot, options.target);
   const entryArtifacts = new Map(
     [...contexts.values()].map((context) => [absoluteGraphPath(rootDir, context.artifact.entry), context])
   );
@@ -52,6 +58,7 @@ export async function createSourceOutput(
       iconSet: options.iconSet ?? 'default',
       registryRoot,
       targetRoot,
+      graph,
       entryArtifacts,
     });
     artifacts[context.artifact.id] = files;
@@ -69,12 +76,14 @@ async function emitArtifact(
     iconSet: string;
     registryRoot: string;
     targetRoot: string;
+    graph: ArtifactGraph;
     entryArtifacts: ReadonlyMap<string, ArtifactOutputContext>;
   }
 ): Promise<RegistryOutputFile[]> {
   const { artifact } = context;
   const outputFiles: RegistryOutputFile[] = [];
-  const sourceFiles = artifact.files.filter((file) => file.role === 'source');
+  const sourceFiles =
+    options.target.framework === 'react' ? artifact.files.filter((file) => file.role === 'source') : [];
 
   for (const file of sourceFiles) {
     const inputFile = absoluteGraphPath(options.rootDir, file.path);
@@ -85,22 +94,34 @@ async function emitArtifact(
   }
 
   const inputFile = absoluteGraphPath(options.rootDir, artifact.entry);
-  const canonical = await readFile(inputFile, 'utf8');
-  const config = targetConfig(options.target);
-  const result = await compile(canonical, {
-    filename: inputFile,
-    config,
-    configDir: resolve(options.rootDir, context.artifactDir),
-    outputFile: resolve(options.rootDir, context.entryFile),
-  });
-  if (result.diagnostics.some((diagnostic) => diagnostic.severity === 'error')) {
-    throw new Error(`Artifact \`${artifact.id}\` failed ${options.target.framework} lowering.`);
+  let entrySource: string;
+  if (options.target.framework === 'html') {
+    entrySource = await format(await renderSkinSource(inputFile), {
+      parser: 'html',
+      printWidth: 120,
+      htmlWhitespaceSensitivity: 'ignore',
+    });
+  } else {
+    const canonical = await readFile(inputFile, 'utf8');
+    const result = await compile(canonical, {
+      filename: inputFile,
+      config: reactSourceConfig,
+      configDir: resolve(options.rootDir, context.artifactDir),
+      outputFile: resolve(options.rootDir, context.entryFile),
+    });
+    if (result.diagnostics.some((diagnostic) => diagnostic.severity === 'error')) {
+      throw new Error(`Artifact \`${artifact.id}\` failed ${options.target.framework} lowering.`);
+    }
+    entrySource = rewriteRelativeImports(result.code, inputFile, context, options);
   }
 
-  let entrySource = rewriteRelativeImports(result.code, inputFile, context, options);
   const supportImports: string[] = [];
-  const icons = artifact.dependencies.symbols.icons ?? [];
-  const components = artifact.dependencies.symbols.components ?? [];
+  const symbols =
+    options.target.framework === 'html'
+      ? resolveArtifactClosure(options.graph, artifact.id).symbols
+      : artifact.dependencies.symbols;
+  const icons = symbols.icons ?? [];
+  const components = symbols.components ?? [];
 
   if (icons.length > 0) {
     const content =
@@ -108,7 +129,6 @@ async function emitArtifact(
         ? await createReactIconsSource(icons, options.iconSet)
         : await createHtmlIconsSource(icons, options.iconSet);
     outputFiles.push(outputFile(options, posix.join(context.artifactDir, 'icons.ts'), content));
-    if (options.target.framework === 'html') supportImports.push(`import './icons';`);
   }
 
   if (options.target.framework === 'html') {
@@ -116,7 +136,6 @@ async function emitArtifact(
     if (elementImports.length > 0) {
       const content = `${elementImports.map((specifier) => `import '${specifier}';`).join('\n')}\n`;
       outputFiles.push(outputFile(options, posix.join(context.artifactDir, 'elements.ts'), content));
-      supportImports.push(`import './elements';`);
     }
   }
 
@@ -129,7 +148,7 @@ async function emitArtifact(
     options
   );
   outputFiles.push(...styleFiles.files);
-  supportImports.unshift(`import '${styleFiles.entryImport}';`);
+  if (styleFiles.entryImport) supportImports.unshift(`import '${styleFiles.entryImport}';`);
 
   if (supportImports.length > 0) entrySource = `${supportImports.join('\n')}\n${entrySource}`;
   outputFiles.push(outputFile(options, context.entryFile, entrySource));
@@ -141,12 +160,12 @@ function createArtifactContexts(
   graph: ArtifactGraph,
   rootDir: string,
   targetRoot: string,
-  style: RegistryTarget['style']
+  target: RegistryTarget
 ): ReadonlyMap<string, ArtifactOutputContext> {
   return new Map(
     graph.artifacts.map((artifact) => {
       const artifactDir = posix.join(targetRoot, artifact.id);
-      const entryFile = posix.join(artifactDir, outputEntryName(artifact.entry));
+      const entryFile = posix.join(artifactDir, outputEntryName(artifact.entry, target.framework));
       const files = new Map<string, string>();
 
       for (const file of artifact.files) {
@@ -155,7 +174,7 @@ function createArtifactContexts(
           absolute,
           file.role === 'entry'
             ? entryFile
-            : styleSourceTarget(posix.join(targetRoot, stripCanonicalPrefix(normalizePath(file.path))), style)
+            : styleSourceTarget(posix.join(targetRoot, stripCanonicalPrefix(normalizePath(file.path))), target.style)
         );
       }
 
@@ -173,7 +192,7 @@ async function emitStyleFiles(
     targetRoot: string;
     registryRoot: string;
   }
-): Promise<{ files: RegistryOutputFile[]; entryImport: string }> {
+): Promise<{ files: RegistryOutputFile[]; entryImport?: string | undefined }> {
   const resources = artifact.resources.styles ?? [];
   const files: RegistryOutputFile[] = [];
   let tailwindSource: string | undefined;
@@ -200,7 +219,10 @@ async function emitStyleFiles(
 
   if (!tailwindSource) throw new Error(`Artifact \`${artifact.id}\` has no Tailwind style resource.`);
   if (options.target.style === 'tailwind') {
-    return { files, entryImport: '../styles/tailwind.css' };
+    return {
+      files,
+      ...(options.target.framework === 'react' ? { entryImport: '../styles/tailwind.css' } : {}),
+    };
   }
 
   const artifactStyles = posix.join(options.targetRoot, artifact.id, 'styles.css');
@@ -209,7 +231,10 @@ async function emitStyleFiles(
     '\n'
   );
   files.push(outputFile(options, artifactStyles, content));
-  return { files, entryImport: './styles.css' };
+  return {
+    files,
+    ...(options.target.framework === 'react' ? { entryImport: './styles.css' } : {}),
+  };
 }
 
 function rewriteRelativeImports(
@@ -264,12 +289,9 @@ function collectPackageDependencies(files: readonly RegistryOutputFile[]): strin
   return [...packages].sort();
 }
 
-function targetConfig(target: RegistryTarget): CompilerConfig {
-  return target.framework === 'react' ? reactSourceConfig : htmlSourceConfig;
-}
-
-function outputEntryName(entry: string): string {
-  return basename(entry).replace(/\.skin(?=\.[^.]+$)/, '');
+function outputEntryName(entry: string, framework: RegistryTarget['framework']): string {
+  const base = basename(entry).replace(/\.skin(?=\.[^.]+$)/, '');
+  return framework === 'html' ? base.replace(/\.[^.]+$/, '.html') : base;
 }
 
 function stripCanonicalPrefix(path: string): string {

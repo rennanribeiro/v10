@@ -55,19 +55,18 @@ describe('createSourceOutput', () => {
       target: { framework: 'html', style: 'tailwind' },
     });
     const files = output.artifacts['time-slider'] ?? [];
-    const entry = files.find((file) => file.target?.endsWith('/time-slider.tsx'));
+    const entry = files.find((file) => file.target?.endsWith('/time-slider.html'));
     const elements = files.find((file) => file.target?.endsWith('/elements.ts'));
     const icons = files.find((file) => file.target?.endsWith('/icons.ts'));
 
-    assert.match(
-      entry?.content ?? '',
-      /^import '\.\.\/styles\/tailwind\.css';\nimport '\.\/icons';\nimport '\.\/elements';/
-    );
+    assert.doesNotMatch(entry?.content ?? '', /\bimport\b|\bexport\b/);
     assert.match(entry?.content ?? '', /<media-time-slider/);
+    assert.match(entry?.content ?? '', /thumb-alignment="edge"/);
+    assert.doesNotMatch(entry?.content ?? '', /thumbAlignment|class="[^"]*,/);
     assert.equal(elements?.content, "import '@videojs/html/ui/time-slider';\n");
     assert.match(icons?.content ?? '', /'spinner': `<svg/);
     assert.doesNotMatch(icons?.content ?? '', /'play':|'volume-high':/);
-    assert.deepEqual(output.dependencies?.['time-slider'], ['@videojs/html', '@videojs/utils']);
+    assert.deepEqual(output.dependencies?.['time-slider'], ['@videojs/html']);
     assertNoPrivateImports(files);
   });
 
@@ -98,6 +97,27 @@ describe('createSourceOutput', () => {
     assert.match(tailwind?.content ?? '', /@source "\.\.\/\*\*\/\*\.\{ts,tsx,html\}";/);
     assert.match(tailwind?.content ?? '', /@theme inline/);
     assert.doesNotMatch(tailwind?.content ?? '', /\.skin\.tsx/);
+  });
+
+  it('inlines complete HTML Skin composition with transitive registrations', async () => {
+    const { graph } = await buildSkinArtifactGraph();
+    const output = await createSourceOutput(graph, {
+      rootDir: skinsRoot,
+      target: { framework: 'html', style: 'tailwind' },
+    });
+    const files = output.artifacts['default-video-controls'] ?? [];
+    const entry = files.find((file) => file.target?.endsWith('/video-controls.html'));
+    const elements = files.find((file) => file.target?.endsWith('/elements.ts'));
+    const icons = files.find((file) => file.target?.endsWith('/icons.ts'));
+
+    assert.match(entry?.content ?? '', /<media-play-button/);
+    assert.match(entry?.content ?? '', /<media-seek-button[^>]+seconds="-10"/);
+    assert.match(entry?.content ?? '', /<media-volume-slider[^>]+orientation="vertical"/);
+    assert.match(entry?.content ?? '', /<media-fullscreen-button/);
+    assert.match(elements?.content ?? '', /@videojs\/html\/ui\/play-button/);
+    assert.match(elements?.content ?? '', /@videojs\/html\/ui\/volume-slider/);
+    assert.match(icons?.content ?? '', /'play': `<svg/);
+    assert.match(icons?.content ?? '', /'volume-high': `<svg/);
   });
 
   it('emits ordinary CSS from the artifact style-module candidates', async () => {

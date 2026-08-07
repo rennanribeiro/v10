@@ -69,7 +69,7 @@ export function createRegistryCatalog(
     name: 'videojs',
     homepage: 'https://videojs.org',
     items: published.map((artifact) => {
-      const { included, dependencies } = partitionDependencies(artifact, artifacts, publishedIds);
+      const { included, dependencies } = partitionDependencies(artifact, artifacts, publishedIds, target.framework);
       const files = uniqueFiles(
         included.flatMap((id) => {
           const artifactFiles = output.artifacts[id];
@@ -119,8 +119,10 @@ function hasRegistryMetadata(
 function partitionDependencies(
   root: ArtifactGraphNode,
   artifacts: ReadonlyMap<string, ArtifactGraphNode>,
-  publishedIds: ReadonlySet<string>
+  publishedIds: ReadonlySet<string>,
+  framework: RegistryFramework
 ): { included: string[]; dependencies: string[] } {
+  if (framework === 'html') return { included: [root.id], dependencies: [] };
   const included = new Set<string>();
   const dependencies = new Set<string>();
 
