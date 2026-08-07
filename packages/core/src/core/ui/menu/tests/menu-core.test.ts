@@ -20,7 +20,6 @@ describe('MenuCore', () => {
         defaultOpen: false,
         closeOnEscape: true,
         closeOnOutsideClick: true,
-        isSubmenu: false,
       });
     });
   });
@@ -35,7 +34,6 @@ describe('MenuCore', () => {
       expect(state.status).toBe('idle');
       expect(state.side).toBe('bottom');
       expect(state.align).toBe('start');
-      expect(state.isSubmenu).toBe(false);
       expect(state.transitionStarting).toBe(false);
       expect(state.transitionEnding).toBe(false);
     });
@@ -73,23 +71,6 @@ describe('MenuCore', () => {
 
       expect(state.side).toBe('top');
       expect(state.align).toBe('end');
-    });
-
-    it('reflects isSubmenu from props', () => {
-      const core = new MenuCore({ isSubmenu: true });
-      core.setInput(createInput());
-      const state = core.getState();
-
-      expect(state.isSubmenu).toBe(true);
-    });
-
-    it('omits root positioning for submenus', () => {
-      const core = new MenuCore({ side: 'right', align: 'end', isSubmenu: true });
-      core.setInput(createInput());
-      const state = core.getState();
-
-      expect(state.side).toBeUndefined();
-      expect(state.align).toBeUndefined();
     });
   });
 
@@ -135,7 +116,7 @@ describe('MenuCore', () => {
   });
 
   describe('getContentAttrs', () => {
-    it('returns menu ARIA attrs with popover for root menu', () => {
+    it('returns menu ARIA attrs with popover', () => {
       const core = new MenuCore();
       core.setInput(createInput());
       const state = core.getState();
@@ -144,17 +125,6 @@ describe('MenuCore', () => {
       expect(attrs.role).toBe('menu');
       expect(attrs.tabIndex).toBe(-1);
       expect(attrs.popover).toBe('manual');
-    });
-
-    it('omits popover attr for submenus', () => {
-      const core = new MenuCore({ isSubmenu: true });
-      core.setInput(createInput());
-      const state = core.getState();
-      const attrs = core.getContentAttrs(state);
-
-      expect(attrs.role).toBe('menu');
-      expect(attrs.tabIndex).toBe(-1);
-      expect('popover' in attrs).toBe(false);
     });
   });
 
@@ -177,7 +147,6 @@ describe('MenuCore', () => {
 
       expect(state.side).toBe('left');
       expect(state.align).toBe('start');
-      expect(state.isSubmenu).toBe(false);
     });
   });
 

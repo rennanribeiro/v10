@@ -2,12 +2,19 @@ import { audioText, captionsText, qualityText, settingsText, speedText } from '@
 import { renderIcon } from '@videojs/icons/render/minimal';
 import { createShadowStyle, createTemplate } from '@videojs/utils/dom';
 import { renderText } from '../../i18n/render-text';
+import { MenuItemValueElement } from '../../ui/menu/menu-item-value-element';
+import { MenuTransitionRootElement } from '../../ui/menu/menu-transition-root-element';
+import { MenuTransitionViewElement } from '../../ui/menu/menu-transition-view-element';
 import { safeDefine } from '../safe-define';
 import { SkinElement } from '../skin-element';
 import styles from './minimal-skin.css?inline';
 
 // Register the player, container, and all UI custom elements.
 import './minimal-ui';
+
+safeDefine(MenuItemValueElement);
+safeDefine(MenuTransitionRootElement);
+safeDefine(MenuTransitionViewElement);
 
 function getTemplateHTML() {
   return /*html*/ `
@@ -107,8 +114,8 @@ function getTemplateHTML() {
               ${renderIcon('gear', { class: 'media-icon media-icon--settings' })}
               ${renderText(settingsText, { id: 'settings-label', class: 'media-sr-only' })}
             </button>
-            <media-menu id="settings-menu" side="top" align="center" class="media-popover media-menu media-menu--settings">
-              <media-menu-view class="media-menu__panel">
+            <media-menu-transition-root>
+              <media-menu id="settings-menu" side="top" align="center" class="media-popover media-menu media-menu--settings">
                 <div class="media-menu__group">
                   <media-menu-item commandfor="settings-quality-menu" type="quality" data-setting="quality" class="media-menu__item media-menu__item--submenu">
                     ${renderIcon('switches', { class: 'media-icon' })}
@@ -143,13 +150,12 @@ function getTemplateHTML() {
                     </span>
                   </media-menu-item>
                 </div>
-              </media-menu-view>
-
-              <media-menu id="settings-quality-menu" class="media-menu__panel">
-                <media-menu-back class="media-menu__back">
+              <media-menu-transition-view>
+                <media-menu id="settings-quality-menu" class="media-menu__panel">
+                <media-menu-item class="media-menu__back">
                   ${renderIcon('chevron', { class: 'media-icon media-menu__chevron media-icon--flipped' })}
                   ${renderText(qualityText)}
-                </media-menu-back>
+                </media-menu-item>
                 <div class="media-menu__separator"></div>
                 <media-quality-radio-group class="media-menu__group">
                   <template>
@@ -165,13 +171,15 @@ function getTemplateHTML() {
                     </media-menu-radio-item>
                   </template>
                 </media-quality-radio-group>
-              </media-menu>
+                </media-menu>
+              </media-menu-transition-view>
 
-              <media-menu id="settings-audio-menu" class="media-menu__panel">
-                <media-menu-back class="media-menu__back">
+              <media-menu-transition-view>
+                <media-menu id="settings-audio-menu" class="media-menu__panel">
+                <media-menu-item class="media-menu__back">
                   ${renderIcon('chevron', { class: 'media-icon media-menu__chevron media-icon--flipped' })}
                   ${renderText(audioText)}
-                </media-menu-back>
+                </media-menu-item>
                 <div class="media-menu__separator"></div>
                 <media-audio-track-radio-group class="media-menu__group">
                   <template>
@@ -183,13 +191,15 @@ function getTemplateHTML() {
                     </media-menu-radio-item>
                   </template>
                 </media-audio-track-radio-group>
-              </media-menu>
+                </media-menu>
+              </media-menu-transition-view>
 
-              <media-menu id="settings-speed-menu" class="media-menu__panel">
-                <media-menu-back class="media-menu__back">
+              <media-menu-transition-view>
+                <media-menu id="settings-speed-menu" class="media-menu__panel">
+                <media-menu-item class="media-menu__back">
                   ${renderIcon('chevron', { class: 'media-icon media-menu__chevron media-icon--flipped' })}
                   ${renderText(speedText)}
-                </media-menu-back>
+                </media-menu-item>
                 <div class="media-menu__separator"></div>
                 <media-playback-rate-radio-group class="media-menu__group">
                   <template>
@@ -201,13 +211,15 @@ function getTemplateHTML() {
                     </media-menu-radio-item>
                   </template>
                 </media-playback-rate-radio-group>
-              </media-menu>
+                </media-menu>
+              </media-menu-transition-view>
 
-              <media-menu id="settings-captions-menu" class="media-menu__panel">
-                <media-menu-back class="media-menu__back">
+              <media-menu-transition-view>
+                <media-menu id="settings-captions-menu" class="media-menu__panel">
+                <media-menu-item class="media-menu__back">
                   ${renderIcon('chevron', { class: 'media-icon media-menu__chevron media-icon--flipped' })}
                   ${renderText(captionsText)}
-                </media-menu-back>
+                </media-menu-item>
                 <div class="media-menu__separator"></div>
                 <media-captions-radio-group class="media-menu__group">
                   <template>
@@ -219,8 +231,10 @@ function getTemplateHTML() {
                     </media-menu-radio-item>
                   </template>
                 </media-captions-radio-group>
+                </media-menu>
+              </media-menu-transition-view>
               </media-menu>
-            </media-menu>
+            </media-menu-transition-root>
             <media-tooltip id="settings-tooltip" trigger="settings-trigger" side="top" class="media-tooltip">
               ${renderText(settingsText)}
             </media-tooltip>

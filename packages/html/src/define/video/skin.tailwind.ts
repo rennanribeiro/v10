@@ -26,11 +26,18 @@ import {
 import { createTemplate } from '@videojs/utils/dom';
 import { cn } from '@videojs/utils/style';
 import { renderText } from '../../i18n/render-text';
+import { MenuItemValueElement } from '../../ui/menu/menu-item-value-element';
+import { MenuTransitionRootElement } from '../../ui/menu/menu-transition-root-element';
+import { MenuTransitionViewElement } from '../../ui/menu/menu-transition-view-element';
 import { safeDefine } from '../safe-define';
 import { SkinElement } from '../skin-element';
 
 // Register the player, container, and all UI custom elements.
 import './ui';
+
+safeDefine(MenuItemValueElement);
+safeDefine(MenuTransitionRootElement);
+safeDefine(MenuTransitionViewElement);
 
 function getTemplateHTML() {
   return /*html*/ `
@@ -124,8 +131,8 @@ function getTemplateHTML() {
                 ${renderIcon('gear', { class: cn(icon, menu.settingsIcon) })}
                 ${renderText(settingsText, { id: 'settings-label', class: 'sr-only' })}
               </button>
-              <media-menu id="settings-menu" side="top" align="center" class="${menu.settings}">
-                <media-menu-view class="${menu.rootView}">
+              <media-menu-transition-root root-view-class="${menu.rootView}">
+                <media-menu id="settings-menu" side="top" align="center" class="${menu.settings}">
                   <div class="${menu.group}">
                     <media-menu-item commandfor="settings-quality-menu" type="quality" data-setting="quality" class="${menu.item}">
                       ${renderIcon('switches', { class: cn(icon, menu.icon) })}
@@ -160,13 +167,12 @@ function getTemplateHTML() {
                       </span>
                     </media-menu-item>
                   </div>
-                </media-menu-view>
-
-                <media-menu id="settings-quality-menu" class="${menu.submenuPanel}">
-                  <media-menu-back class="${menu.back}">
+                <media-menu-transition-view>
+                  <media-menu id="settings-quality-menu" class="${menu.submenuPanel}">
+                  <media-menu-item class="${menu.back}">
                     ${renderIcon('chevron', { class: cn(icon, menu.icon, menu.chevron, iconFlipped) })}
                     ${renderText(qualityText)}
-                  </media-menu-back>
+                  </media-menu-item>
                   <div class="${menu.separator}"></div>
                   <media-quality-radio-group class="${menu.group}">
                     <template>
@@ -182,13 +188,15 @@ function getTemplateHTML() {
                       </media-menu-radio-item>
                     </template>
                   </media-quality-radio-group>
-                </media-menu>
+                  </media-menu>
+                </media-menu-transition-view>
 
-                <media-menu id="settings-audio-menu" class="${menu.submenuPanel}">
-                  <media-menu-back class="${menu.back}">
+                <media-menu-transition-view>
+                  <media-menu id="settings-audio-menu" class="${menu.submenuPanel}">
+                  <media-menu-item class="${menu.back}">
                     ${renderIcon('chevron', { class: cn(icon, menu.chevron, iconFlipped) })}
                     ${renderText(audioText)}
-                  </media-menu-back>
+                  </media-menu-item>
                   <div class="${menu.separator}"></div>
                   <media-audio-track-radio-group class="${menu.group}">
                     <template>
@@ -200,13 +208,15 @@ function getTemplateHTML() {
                       </media-menu-radio-item>
                     </template>
                   </media-audio-track-radio-group>
-                </media-menu>
+                  </media-menu>
+                </media-menu-transition-view>
 
-                <media-menu id="settings-speed-menu" class="${menu.submenuPanel}">
-                  <media-menu-back class="${menu.back}">
+                <media-menu-transition-view>
+                  <media-menu id="settings-speed-menu" class="${menu.submenuPanel}">
+                  <media-menu-item class="${menu.back}">
                     ${renderIcon('chevron', { class: cn(icon, menu.icon, menu.chevron, iconFlipped) })}
                     ${renderText(speedText)}
-                  </media-menu-back>
+                  </media-menu-item>
                   <div class="${menu.separator}"></div>
                   <media-playback-rate-radio-group class="${menu.group}">
                     <template>
@@ -218,13 +228,15 @@ function getTemplateHTML() {
                       </media-menu-radio-item>
                     </template>
                   </media-playback-rate-radio-group>
-                </media-menu>
+                  </media-menu>
+                </media-menu-transition-view>
 
-                <media-menu id="settings-captions-menu" class="${menu.submenuPanel}">
-                  <media-menu-back class="${menu.back}">
+                <media-menu-transition-view>
+                  <media-menu id="settings-captions-menu" class="${menu.submenuPanel}">
+                  <media-menu-item class="${menu.back}">
                     ${renderIcon('chevron', { class: cn(icon, menu.icon, menu.chevron, iconFlipped) })}
                     ${renderText(captionsText)}
-                  </media-menu-back>
+                  </media-menu-item>
                   <div class="${menu.separator}"></div>
                   <media-captions-radio-group class="${menu.group}">
                     <template>
@@ -236,8 +248,10 @@ function getTemplateHTML() {
                       </media-menu-radio-item>
                     </template>
                   </media-captions-radio-group>
+                  </media-menu>
+                </media-menu-transition-view>
                 </media-menu>
-              </media-menu>
+              </media-menu-transition-root>
               <media-tooltip id="settings-tooltip" trigger="settings-trigger" side="top" class="${cn(popup.tooltip)}">
                 ${renderText(settingsText)}
               </media-tooltip>

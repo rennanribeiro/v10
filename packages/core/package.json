@@ -29,6 +29,11 @@
       "development": "./dist/dev/dom.js",
       "default": "./dist/default/dom.js"
     },
+    "./dom/menu-transition": {
+      "types": "./dist/dev/dom/menu-transition.d.ts",
+      "development": "./dist/dev/dom/menu-transition.js",
+      "default": "./dist/default/dom/menu-transition.js"
+    },
     "./components": {
       "types": "./dist/dev/components.d.ts",
       "development": "./dist/dev/components.js",
@@ -94,6 +99,11 @@
         "types": "./dist/dev/dom.d.ts",
         "development": "./dist/dev/dom.js",
         "default": "./dist/default/dom.js"
+      },
+      "./dom/menu-transition": {
+        "types": "./dist/dev/dom/menu-transition.d.ts",
+        "development": "./dist/dev/dom/menu-transition.js",
+        "default": "./dist/default/dom/menu-transition.js"
       },
       "./i18n": {
         "types": "./dist/dev/i18n.d.ts",

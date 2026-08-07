@@ -19,8 +19,6 @@ export interface MenuProps {
   closeOnEscape?: boolean | undefined;
   /** Close the menu when clicking outside. Root menus only. */
   closeOnOutsideClick?: boolean | undefined;
-  /** True when this menu instance is nested inside a parent menu's content. */
-  isSubmenu?: boolean | undefined;
 }
 
 /** Raw transition state provided by `createTransition`. */
@@ -29,11 +27,9 @@ export interface MenuInput extends TransitionState {}
 export interface MenuState extends TransitionFlags {
   open: boolean;
   status: TransitionStatus;
-  /** Preferred side of the trigger for the menu. Root menus only. */
+  /** Preferred side of the trigger for the menu. */
   side: PopoverSide | undefined;
   align: PopoverAlign | undefined;
-  /** Whether this menu is nested inside another menu's content. */
-  isSubmenu: boolean;
 }
 
 /** Base menu logic: ARIA attributes and open/close state computation. */
@@ -45,7 +41,6 @@ export class MenuCore {
     defaultOpen: false,
     closeOnEscape: true,
     closeOnOutsideClick: true,
-    isSubmenu: false,
   };
 
   #props = { ...MenuCore.defaultProps };
@@ -69,14 +64,11 @@ export class MenuCore {
 
   getState(): MenuState {
     const input = this.#input!;
-    const isSubmenu = this.#props.isSubmenu;
-
     return {
       open: input.active,
       status: input.status,
-      side: isSubmenu ? undefined : this.#props.side,
-      align: isSubmenu ? undefined : this.#props.align,
-      isSubmenu,
+      side: this.#props.side,
+      align: this.#props.align,
       ...getTransitionFlags(input.status),
     };
   }
@@ -89,13 +81,11 @@ export class MenuCore {
     };
   }
 
-  getContentAttrs(state: MenuState) {
+  getContentAttrs(_state: MenuState) {
     return {
       role: 'menu' as const,
       tabIndex: -1,
-      // Root menus use the Popover API for dismiss and focus handling.
-      // Submenus render inline inside the parent viewport — no popover.
-      ...(!state.isSubmenu && { popover: 'manual' as const }),
+      popover: 'manual' as const,
     };
   }
 }
