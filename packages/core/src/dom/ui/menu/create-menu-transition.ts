@@ -4,8 +4,8 @@ import { MenuTransitionDataAttrs } from '../../../core/ui/menu/menu-data-attrs';
 import { PopoverCSSVars } from '../../../core/ui/popover/popover-css-vars';
 import { TransitionDataAttrs } from '../../../core/ui/transition';
 import { forceLayout } from '../../utils/layout';
-import type { MenuApi } from '../menu/create-menu';
 import { waitForAnimations as waitForElementAnimations } from '../transition';
+import type { MenuApi } from './create-menu';
 
 export type MenuTransitionDirection = 'forward' | 'back';
 export type MenuTransitionPhase = 'hidden' | 'entering' | 'active' | 'exiting';

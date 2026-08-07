@@ -102,7 +102,7 @@ Base positioning aliases Popover constraints into the available-size variables. 
 
 ## Package boundaries
 
-- `@videojs/core/dom/menu-transition` owns the shared coordinator; the main DOM barrel does not export it.
+- `@videojs/core/dom` exports the shared coordinator, following the existing core DOM utility convention.
 - `@videojs/react` exposes transition parts on its existing `Menu` namespace. There is no separate React transition export.
 - `@videojs/html/ui/menu-transition` registers transition wrappers and nested command routing.
 - `@videojs/html/ui/menu-settings` registers optional setting value and availability behavior.

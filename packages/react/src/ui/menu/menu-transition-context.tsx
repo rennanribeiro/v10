@@ -1,6 +1,6 @@
 'use client';
 
-import type { MenuTransitionApi, MenuTransitionViewApi } from '@videojs/core/dom/menu-transition';
+import type { MenuTransitionApi, MenuTransitionViewApi } from '@videojs/core/dom';
 import { createContext, useContext } from 'react';
 import type { MenuContextValue } from './context';
 

@@ -1,7 +1,7 @@
 'use client';
 
 import { MenuTransitionDataAttrs } from '@videojs/core';
-import { createMenuTransition } from '@videojs/core/dom/menu-transition';
+import { createMenuTransition } from '@videojs/core/dom';
 import {
   type CSSProperties,
   cloneElement,

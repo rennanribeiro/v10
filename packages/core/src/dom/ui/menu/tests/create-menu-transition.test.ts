@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
-import { createMenu, type MenuApi } from '../../menu/create-menu';
 import { createTransition } from '../../transition';
+import { createMenu, type MenuApi } from '../create-menu';
 import { createMenuTransition } from '../create-menu-transition';
 
 function rect(width: number, height: number): DOMRect {

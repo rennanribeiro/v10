@@ -1,6 +1,6 @@
 'use client';
 
-import type { MenuTransitionApi, MenuTransitionViewApi } from '@videojs/core/dom/menu-transition';
+import type { MenuTransitionApi, MenuTransitionViewApi } from '@videojs/core/dom';
 import { cloneElement, isValidElement, type ReactElement, type ReactNode, useEffect, useState } from 'react';
 import { useMenuContext } from './context';
 import type { MenuRootProps } from './menu-root';

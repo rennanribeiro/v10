@@ -18,6 +18,7 @@ export * from './ui/dismiss-layer';
 export * from './ui/event';
 export * from './ui/input-action';
 export * from './ui/menu/create-menu';
+export * from './ui/menu/create-menu-transition';
 export * from './ui/popover/popover';
 export type { PositioningCSSVars, PositioningOptions } from './ui/popover/popover-positioning';
 export * from './ui/popover/popup-group';

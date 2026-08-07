@@ -1,9 +1,5 @@
 import { MenuTransitionDataAttrs } from '@videojs/core';
-import {
-  createMenuTransition,
-  type MenuTransitionApi,
-  type MenuTransitionViewApi,
-} from '@videojs/core/dom/menu-transition';
+import { createMenuTransition, type MenuTransitionApi, type MenuTransitionViewApi } from '@videojs/core/dom';
 import type { PropertyDeclarationMap, PropertyValues } from '@videojs/element';
 import { MediaElement } from '../media-element';
 import { MenuElement } from './menu-element';

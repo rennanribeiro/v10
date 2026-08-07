@@ -23,7 +23,6 @@ const createConfig = (mode: PackageBuildMode): UserConfig => ({
     i18n: './src/core/i18n/index.ts',
     ...localeEntries,
     dom: './src/dom/index.ts',
-    'dom/menu-transition': './src/dom/menu-transition.ts',
   },
   define: {
     __DEV__: mode === 'dev' ? 'true' : 'false',
