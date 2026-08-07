@@ -23,10 +23,10 @@ describe('reactSourceConfig', () => {
     const result = await compileCanonical('components/buttons/seek-button.skin.tsx');
 
     expect(result.diagnostics).toEqual([]);
-    expect(result.code).toContain('import type { SeekButtonProps } from "@videojs/react"');
+    expect(result.code).toMatch(/import type \{ SeekButtonProps \} from ['"]@videojs\/core['"]/);
     expect(result.code).toContain('import { SeekButton as SeekButtonPrimitive } from "@videojs/react"');
     expect(result.code).toContain('import { SeekIcon } from "../../icons"');
-    expect(result.code).toContain('<span className={seekLabel}>');
+    expect(result.code).toContain('<span className={cn(seekLabel)}>');
     expect(result.code).not.toContain('@videojs/core/components');
     expect(result.code).not.toContain('@videojs/icons/components');
   });
@@ -36,7 +36,27 @@ describe('reactSourceConfig', () => {
 
     expect(result.diagnostics).toEqual([]);
     expect(result.code).toContain('from "@videojs/react"');
+    expect(result.code).toContain('import type { ReactElement } from "react"');
+    expect(result.code).toContain('children: ReactElement');
     expect(result.code).toContain('<TooltipPrimitive.Trigger render={children}/>');
     expect(result.code).not.toContain('<TooltipPrimitive.Trigger>{children}</TooltipPrimitive.Trigger>');
+  });
+
+  it('lowers target-owned thumbnail markup and class values', async () => {
+    const result = await compileCanonical('components/sliders/time-slider.skin.tsx');
+
+    expect(result.diagnostics).toEqual([]);
+    expect(result.code).toContain('<div className={cn(thumbnail.root)}>');
+    expect(result.code).toContain('<Slider.Thumbnail className={cn(thumbnail.image)}/>');
+    expect(result.code).not.toContain('Slider.Thumbnail.Root');
+    expect(result.code).not.toContain('Slider.Thumbnail.Image');
+  });
+
+  it('keeps public core prop types separate from React component imports', async () => {
+    const result = await compileCanonical('components/sliders/volume-slider.skin.tsx');
+
+    expect(result.diagnostics).toEqual([]);
+    expect(result.code).toMatch(/import type \{ VolumeSliderProps \} from ['"]@videojs\/core['"]/);
+    expect(result.code).toContain('import { VolumeSlider as VolumeSliderPrimitive } from "@videojs/react"');
   });
 });

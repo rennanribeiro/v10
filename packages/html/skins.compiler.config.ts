@@ -73,10 +73,7 @@ const htmlSourceConfig = defineConfig({
             code.jsx.element(source).addProp('name', name),
             code.jsx.element(source).replace('media-icon'),
           ]),
-          code.jsx
-            .props('className')
-            .where(code.value.isArray())
-            .replace(({ value }) => code.value.call(cn, code.value.arrayItems(value))),
+          code.jsx.props('className').replace(({ value }) => code.value.call(cn, [value])),
           replaceCanonicalTooltipProps(TooltipProps),
           renameClassNameToClass(),
           removeCanonicalImports(),
@@ -102,7 +99,7 @@ export function resolveHtmlElementImports(componentSymbols: readonly string[]): 
 }
 
 function removeCanonicalImports(): CompilerTransform {
-  const canonicalSources = new Set(['@videojs/core/components', '@videojs/icons/components']);
+  const canonicalSources = new Set(['@videojs/core/components', '@videojs/icons/components', '@videojs/jsx']);
 
   return (context) => (sourceFile) =>
     context.factory.updateSourceFile(
@@ -182,6 +179,9 @@ function replaceCanonicalTooltipProps(tooltipProps: ts.TypeNode): CompilerTransf
 
     const visit = (node: ts.Node): ts.VisitResult<ts.Node> => {
       if (isCanonicalTooltipProps(node)) return replacement;
+      if (ts.isTypeReferenceNode(node) && ts.isIdentifier(node.typeName) && node.typeName.text === 'ReactElement') {
+        return factory.createKeywordTypeNode(ts.SyntaxKind.UnknownKeyword);
+      }
       return ts.visitEachChild(node, visit, context);
     };
 

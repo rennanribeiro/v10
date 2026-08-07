@@ -4,9 +4,9 @@ import { anyTag, childAsProp } from '@videojs/compiler/ast';
 const reactSourceConfig = defineConfig({
   target: jsx({
     imports: {
-      '@videojs/core': '@videojs/react',
       '@videojs/core/components': '@videojs/react',
       '@videojs/icons/components': './icons',
+      '@videojs/jsx': (name) => ({ source: 'react', name: name === 'ComponentNode' ? 'ReactElement' : name }),
     },
     transforms: [
       childAsProp({
@@ -22,10 +22,9 @@ const reactSourceConfig = defineConfig({
 
         return [
           code.jsx.element('Text').replace('span'),
-          code.jsx
-            .props('className')
-            .where(code.value.isArray())
-            .replace(({ value }) => code.value.call(cn, code.value.arrayItems(value))),
+          code.jsx.element('Slider.Thumbnail.Root').replace('div'),
+          code.jsx.element('Slider.Thumbnail.Image').replace('Slider.Thumbnail'),
+          code.jsx.props('className').replace(({ value }) => code.value.call(cn, [value])),
         ];
       },
       { name: '@videojs/react:source-ui' }

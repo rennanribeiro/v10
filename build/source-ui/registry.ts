@@ -19,11 +19,12 @@ export interface RegistryOutputFile {
   path: string;
   type: RegistryFileType;
   target?: string | undefined;
+  content: string;
 }
 
 export interface RegistryOutputManifest {
   artifacts: Readonly<Record<string, readonly RegistryOutputFile[]>>;
-  dependencies?: readonly string[] | undefined;
+  dependencies?: Readonly<Record<string, readonly string[]>> | undefined;
 }
 
 export interface RegistryCatalogItem {
@@ -77,6 +78,7 @@ export function createRegistryCatalog(
         })
       );
       const registry = artifact.metadata.registry;
+      const packageDependencies = [...new Set(included.flatMap((id) => output.dependencies?.[id] ?? []))].sort();
 
       return {
         name: itemName(target, artifact.id),
@@ -84,7 +86,7 @@ export function createRegistryCatalog(
         title: `${registry.title} (${frameworkTitle(target.framework)}, ${styleTitle(target.style)})`,
         description: `${registry.description} ${frameworkTitle(target.framework)} source with ${styleDescription(target.style)}.`,
         files,
-        ...(output.dependencies?.length ? { dependencies: [...output.dependencies].sort() } : {}),
+        ...(packageDependencies.length ? { dependencies: packageDependencies } : {}),
         ...(dependencies.length
           ? {
               registryDependencies: dependencies.map(

@@ -55,7 +55,14 @@ describe('createRegistryCatalog', () => {
     );
     const catalog = createRegistryCatalog(graph, {
       target: { framework: 'react', style: 'css' },
-      output,
+      output: {
+        ...output,
+        dependencies: {
+          ...output.dependencies,
+          'button-tooltip': ['@videojs/utils'],
+          'play-button': ['@videojs/react'],
+        },
+      },
     });
 
     assert.equal(
@@ -71,12 +78,18 @@ describe('createRegistryCatalog', () => {
         path: 'registry/react/button-tooltip.tsx',
         type: 'registry:component',
         target: '@ui/videojs/button-tooltip.tsx',
+        content: '// button-tooltip',
       },
       {
         path: 'registry/react/play-button.tsx',
         type: 'registry:component',
         target: '@ui/videojs/play-button.tsx',
+        content: '// play-button',
       },
+    ]);
+    assert.deepEqual(catalog.items.find((item) => item.name.endsWith('/play-button'))?.dependencies, [
+      '@videojs/react',
+      '@videojs/utils',
     ]);
   });
 });
@@ -92,10 +105,13 @@ function outputManifest(artifactIds: readonly string[], framework: 'html' | 'rea
             path: `registry/${framework}/${id}.${extension}`,
             type: 'registry:component' as const,
             target: `@ui/videojs/${id}.${extension}`,
+            content: `// ${id}`,
           },
         ],
       ])
     ),
-    dependencies: [framework === 'react' ? '@videojs/react' : '@videojs/html'],
+    dependencies: Object.fromEntries(
+      artifactIds.map((id) => [id, [framework === 'react' ? '@videojs/react' : '@videojs/html']])
+    ),
   };
 }
