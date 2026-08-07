@@ -1,8 +1,21 @@
-import { MenuTransitionDataAttrs } from '@videojs/core';
-import { createMenuTransition, type MenuTransitionApi, type MenuTransitionViewApi } from '@videojs/core/dom';
+import {
+  getMenuTransitionPanelAttrs,
+  MenuCSSVars,
+  MenuTransitionDataAttrs,
+  type MenuTransitionPanelState,
+  MenuTransitionStateDataAttrs,
+} from '@videojs/core';
+import {
+  applyElementProps,
+  applyStateDataAttrs,
+  createMenuTransition,
+  type MenuTransitionApi,
+  type MenuTransitionViewApi,
+} from '@videojs/core/dom';
 import type { PropertyDeclarationMap, PropertyValues } from '@videojs/element';
 import { MediaElement } from '../media-element';
 import { MenuElement } from './menu-element';
+import { measureMenuTransitionPanel } from './menu-transition-measure';
 import { MenuTransitionViewElement } from './menu-transition-view-element';
 
 interface RegisteredView {
@@ -10,6 +23,7 @@ interface RegisteredView {
   menu: MenuElement;
   trigger: HTMLElement;
   view: MenuTransitionViewApi;
+  unsubscribeState: () => void;
 }
 
 /** Binds one direct root menu to explicit child menu destination views. */
@@ -23,7 +37,10 @@ export class MenuTransitionRootElement extends MediaElement {
   /** Class applied to the generated root panel. */
   rootViewClass = '';
 
-  readonly #controller: MenuTransitionApi = createMenuTransition();
+  readonly #controller: MenuTransitionApi = createMenuTransition({
+    onViewEnter: (view) => view.menu.highlightFirstItem({ preventScroll: true }),
+    onViewExit: (view) => view.triggerElement?.focus({ preventScroll: true }),
+  });
   readonly #views = new Map<MenuTransitionViewElement, RegisteredView>();
   #rootMenu: MenuElement | null = null;
   #rootPanel: HTMLDivElement | null = null;
@@ -32,10 +49,14 @@ export class MenuTransitionRootElement extends MediaElement {
   #abort: AbortController | null = null;
   #syncQueued = false;
   #movingChildren = false;
+  #resizeObserver: ResizeObserver | null = null;
+  #measureFrame = 0;
 
   override connectedCallback(): void {
     super.connectedCallback();
     this.#abort = new AbortController();
+    this.#controller.rootState.subscribe(() => this.requestUpdate(), { signal: this.#abort.signal });
+    this.#controller.size.subscribe(() => this.requestUpdate(), { signal: this.#abort.signal });
     this.addEventListener('select', this.#handleSelect as EventListener, { signal: this.#abort.signal });
     this.addEventListener('keydown', this.#handleKeyDown, { signal: this.#abort.signal });
 
@@ -54,12 +75,18 @@ export class MenuTransitionRootElement extends MediaElement {
     this.#observer = null;
     this.#abort?.abort();
     this.#abort = null;
+    this.#resizeObserver?.disconnect();
+    this.#resizeObserver = null;
+    cancelAnimationFrame(this.#measureFrame);
+    this.#measureFrame = 0;
     this.#clearViews();
     this.#controller.destroy();
   }
 
   protected override updated(changed: PropertyValues): void {
     super.updated(changed);
+    this.#applyTransitionState();
+    this.#observeActivePanel();
     this.#scheduleSync();
   }
 
@@ -87,7 +114,6 @@ export class MenuTransitionRootElement extends MediaElement {
       this.#rootPanel.setAttribute(MenuTransitionDataAttrs.rootView, '');
       this.#rootPanel.setAttribute(MenuTransitionDataAttrs.view, '');
       rootMenu.prepend(this.#rootPanel);
-      this.#controller.setContainerElement(rootMenu);
       this.#controller.setRootPanelElement(this.#rootPanel);
     }
 
@@ -105,6 +131,8 @@ export class MenuTransitionRootElement extends MediaElement {
     for (const [element, registered] of this.#views) {
       if (authoredViews.includes(element)) continue;
       registered.view.destroy();
+      registered.unsubscribeState();
+      applyElementProps(registered.trigger, { [MenuTransitionDataAttrs.hasSubmenu]: undefined });
       registered.menu.setInlineTrigger(null);
       this.#views.delete(element);
     }
@@ -126,7 +154,9 @@ export class MenuTransitionRootElement extends MediaElement {
       const view = this.#controller.registerView(menuApi);
       view.setTriggerElement(trigger);
       view.setPanelElement(menu);
-      this.#views.set(element, { element, menu, trigger, view });
+      applyElementProps(trigger, { [MenuTransitionDataAttrs.hasSubmenu]: '' });
+      const unsubscribeState = view.state.subscribe(() => this.requestUpdate());
+      this.#views.set(element, { element, menu, trigger, view, unsubscribeState });
     }
 
     if (!this.#unsubscribeRoot && rootMenu.menuApi) {
@@ -136,6 +166,59 @@ export class MenuTransitionRootElement extends MediaElement {
         if (!current.active || current.status === 'ending') this.#controller.reset();
       });
     }
+
+    this.#applyTransitionState();
+    this.#observeActivePanel();
+  }
+
+  #applyPanelState(element: HTMLElement, state: MenuTransitionPanelState): void {
+    applyStateDataAttrs(element, state, MenuTransitionStateDataAttrs);
+    applyElementProps(element, getMenuTransitionPanelAttrs(state));
+  }
+
+  #applyTransitionState(): void {
+    const rootMenu = this.#rootMenu;
+    const rootPanel = this.#rootPanel;
+    if (!rootMenu || !rootPanel) return;
+
+    this.#applyPanelState(rootPanel, this.#controller.rootState.current);
+    for (const { menu, view } of this.#views.values()) {
+      this.#applyPanelState(menu, view.state.current);
+      applyElementProps(menu, { [MenuTransitionDataAttrs.view]: '' });
+    }
+
+    const { width, height } = this.#controller.size.current;
+    if (width === null) rootMenu.style.removeProperty(MenuCSSVars.width);
+    else rootMenu.style.setProperty(MenuCSSVars.width, `${width}px`);
+    if (height === null) rootMenu.style.removeProperty(MenuCSSVars.height);
+    else rootMenu.style.setProperty(MenuCSSVars.height, `${height}px`);
+  }
+
+  #getActivePanel(): HTMLElement | null {
+    return this.#controller.activeView?.panelElement ?? this.#rootPanel;
+  }
+
+  #measureActivePanel = (): void => {
+    const rootMenu = this.#rootMenu;
+    const panel = this.#getActivePanel();
+    if (rootMenu && panel) this.#controller.setSize(measureMenuTransitionPanel(rootMenu, panel));
+  };
+
+  #observeActivePanel(): void {
+    this.#resizeObserver?.disconnect();
+    this.#resizeObserver = null;
+    const panel = this.#getActivePanel();
+    if (!panel) return;
+
+    this.#measureActivePanel();
+    cancelAnimationFrame(this.#measureFrame);
+    this.#measureFrame = requestAnimationFrame(() => {
+      this.#measureFrame = 0;
+      this.#measureActivePanel();
+    });
+    if (typeof ResizeObserver !== 'function') return;
+    this.#resizeObserver = new ResizeObserver(this.#measureActivePanel);
+    this.#resizeObserver.observe(panel);
   }
 
   #groupRootChildren(rootMenu: MenuElement): void {
@@ -187,13 +270,18 @@ export class MenuTransitionRootElement extends MediaElement {
   #clearViews(): void {
     for (const registered of this.#views.values()) {
       registered.view.destroy();
+      registered.unsubscribeState();
+      applyElementProps(registered.trigger, { [MenuTransitionDataAttrs.hasSubmenu]: undefined });
       registered.menu.setInlineTrigger(null);
     }
     this.#views.clear();
     this.#unsubscribeRoot?.();
     this.#unsubscribeRoot = null;
     this.#controller.setRootPanelElement(null);
-    this.#controller.setContainerElement(null);
+    this.#resizeObserver?.disconnect();
+    this.#resizeObserver = null;
+    cancelAnimationFrame(this.#measureFrame);
+    this.#measureFrame = 0;
     this.#rootPanel?.replaceWith(...this.#rootPanel.childNodes);
     this.#rootMenu = null;
     this.#rootPanel = null;

@@ -19,6 +19,8 @@ export interface MenuProps {
   closeOnEscape?: boolean | undefined;
   /** Close the menu when clicking outside. Root menus only. */
   closeOnOutsideClick?: boolean | undefined;
+  /** Whether this menu is bound as a submenu. */
+  isSubmenu?: boolean | undefined;
 }
 
 /** Raw transition state provided by `createTransition`. */
@@ -27,9 +29,11 @@ export interface MenuInput extends TransitionState {}
 export interface MenuState extends TransitionFlags {
   open: boolean;
   status: TransitionStatus;
-  /** Preferred side of the trigger for the menu. */
+  /** Preferred side of the trigger for the menu. Root menus only. */
   side: PopoverSide | undefined;
   align: PopoverAlign | undefined;
+  /** Whether this menu is bound as a submenu. */
+  isSubmenu: boolean;
 }
 
 /** Base menu logic: ARIA attributes and open/close state computation. */
@@ -41,6 +45,7 @@ export class MenuCore {
     defaultOpen: false,
     closeOnEscape: true,
     closeOnOutsideClick: true,
+    isSubmenu: false,
   };
 
   #props = { ...MenuCore.defaultProps };
@@ -64,11 +69,13 @@ export class MenuCore {
 
   getState(): MenuState {
     const input = this.#input!;
+    const isSubmenu = this.#props.isSubmenu;
     return {
       open: input.active,
       status: input.status,
-      side: this.#props.side,
-      align: this.#props.align,
+      side: isSubmenu ? undefined : this.#props.side,
+      align: isSubmenu ? undefined : this.#props.align,
+      isSubmenu,
       ...getTransitionFlags(input.status),
     };
   }
@@ -81,11 +88,11 @@ export class MenuCore {
     };
   }
 
-  getContentAttrs(_state: MenuState) {
+  getContentAttrs(state: MenuState) {
     return {
       role: 'menu' as const,
       tabIndex: -1,
-      popover: 'manual' as const,
+      ...(!state.isSubmenu && { popover: 'manual' as const }),
     };
   }
 }

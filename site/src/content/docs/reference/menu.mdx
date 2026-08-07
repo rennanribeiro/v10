@@ -105,7 +105,7 @@ Use data attributes to style open state, highlighted items, selected radio items
 
 On root menu content, `data-side` reflects the rendered side and can differ from the preferred `side` prop after collision handling. Submenus do not have `data-side`.
 
-Transition panels use `data-view-state="active|inactive"`, `data-direction="forward|back"`, `data-starting-style`, and `data-ending-style`. Every panel has `data-menu-view`; the root has `data-menu-root-view`, while child panels have `data-submenu`. The outer content publishes `--media-menu-width`, `--media-menu-height`, `--media-menu-available-width`, and `--media-menu-available-height`. CSS controls the motion, duration, and easing. With reduced motion or no animation CSS, navigation completes without waiting for an animation.
+Transition panels use `data-view-state="active|inactive"`, `data-direction="forward|back"`, `data-starting-style`, and `data-ending-style`. Every panel has `data-menu-view`; the root has `data-menu-root-view`. Child content keeps the base Menu `data-submenu` attribute, so it can be styled as a submenu independently of transition state. The outer content publishes `--media-menu-width`, `--media-menu-height`, `--media-menu-available-width`, and `--media-menu-available-height`. CSS controls the motion, duration, and easing. With reduced motion or no animation CSS, navigation completes without waiting for an animation.
 
 <FrameworkCase frameworks={["react"]}>
   ```css

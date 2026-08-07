@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import { createTransition } from '../../transition';
 import { createMenu, type MenuApi } from '../create-menu';
-import { createMenuTransition } from '../create-menu-transition';
+import { createMenuTransition, getMenuTransitionSize } from '../create-menu-transition';
 
 function rect(width: number, height: number): DOMRect {
   return new DOMRect(0, 0, width, height);
@@ -48,24 +48,20 @@ describe('createMenuTransition', () => {
     for (const cleanup of cleanups.splice(0)) cleanup();
     document.body.replaceChildren();
     vi.restoreAllMocks();
-    vi.unstubAllGlobals();
   });
 
   function setup(menu = createCommittedMenu()) {
-    const container = document.createElement('div');
     const root = document.createElement('div');
     const child = document.createElement('div');
     const trigger = document.createElement('button');
     const item = document.createElement('button');
     root.append(trigger);
     child.append(item);
-    container.append(root, child);
-    document.body.append(container);
-    mockSize(root, 180, 80);
-    mockSize(child, 240, 120);
+    document.body.append(root, child);
     const unregisterItem = menu.registerItem(item);
-    const controller = createMenuTransition();
-    controller.setContainerElement(container);
+    const onViewEnter = vi.fn((view) => view.menu.highlightFirstItem({ preventScroll: true }));
+    const onViewExit = vi.fn();
+    const controller = createMenuTransition({ onViewEnter, onViewExit });
     controller.setRootPanelElement(root);
     const view = controller.registerView(menu);
     view.setTriggerElement(trigger);
@@ -75,123 +71,106 @@ describe('createMenuTransition', () => {
       () => menu.destroy(),
       () => controller.destroy()
     );
-    return { container, root, child, trigger, item, menu, controller, view };
+    return { root, child, trigger, item, menu, controller, view, onViewEnter, onViewExit };
   }
 
-  it('starts with one accessible root panel and measures both dimensions', () => {
-    const { container, root, child, trigger } = setup();
+  it('publishes initial panel state without mutating platform elements', () => {
+    const { root, child, trigger, controller, view } = setup();
 
-    expect(root.getAttribute('data-view-state')).toBe('active');
-    expect(root.hasAttribute('data-menu-root-view')).toBe(true);
-    expect(root.hasAttribute('data-submenu')).toBe(false);
-    expect(child.hasAttribute('data-submenu')).toBe(true);
-    expect(trigger.hasAttribute('data-has-submenu')).toBe(true);
-    expect(root.inert).toBe(false);
-    expect(child.hidden).toBe(true);
-    expect(child.inert).toBe(true);
-    expect(child.getAttribute('aria-hidden')).toBe('true');
-    expect(container.style.getPropertyValue('--media-menu-width')).toBe('180px');
-    expect(container.style.getPropertyValue('--media-menu-height')).toBe('80px');
+    expect(controller.rootState.current).toMatchObject({ phase: 'active', viewState: 'active', open: true });
+    expect(view.state.current).toMatchObject({ phase: 'hidden', viewState: 'inactive', open: false });
+    expect(root.attributes).toHaveLength(0);
+    expect(child.attributes).toHaveLength(0);
+    expect(trigger.attributes).toHaveLength(0);
   });
 
-  it('remeasures the active destination when its content size changes', () => {
-    let resize: ResizeObserverCallback = () => {};
-    class TestResizeObserver {
-      constructor(callback: ResizeObserverCallback) {
-        resize = callback;
-      }
-      observe() {}
-      disconnect() {}
-    }
-    vi.stubGlobal('ResizeObserver', TestResizeObserver);
-    const { container, root } = setup();
+  it('measures a rendered panel without changing its DOM', () => {
+    const container = document.createElement('div');
+    const panel = document.createElement('div');
+    container.style.setProperty('--media-menu-available-width', '200px');
+    mockSize(panel, 240, 120);
+    const before = panel.getAttribute('style');
 
-    mockSize(root, 220, 110);
-    resize([], {} as ResizeObserver);
-
-    expect(container.style.getPropertyValue('--media-menu-width')).toBe('220px');
-    expect(container.style.getPropertyValue('--media-menu-height')).toBe('110px');
+    expect(getMenuTransitionSize(container, panel)).toEqual({ width: 200, height: 120 });
+    expect(panel.getAttribute('style')).toBe(before);
+    expect(panel.hidden).toBe(false);
   });
 
-  it('keeps outgoing content live while a committed child enters', async () => {
-    const { root, child, menu } = setup();
+  it('publishes size supplied by a platform adapter', () => {
+    const { controller } = setup();
+
+    controller.setSize({ width: 220, height: 110 });
+
+    expect(controller.size.current).toEqual({ width: 220, height: 110 });
+  });
+
+  it('keeps outgoing state live while a committed child enters', async () => {
+    const { controller, view, menu } = setup();
 
     menu.open();
     await Promise.resolve();
 
-    expect(root.hidden).toBe(false);
-    expect(root.getAttribute('data-view-state')).toBe('inactive');
-    expect(root.hasAttribute('data-ending-style')).toBe(true);
-    expect(child.getAttribute('data-view-state')).toBe('active');
-    expect(child.hasAttribute('data-starting-style')).toBe(true);
-    expect(child.getAttribute('data-direction')).toBe('forward');
+    expect(controller.rootState.current).toMatchObject({ phase: 'exiting', direction: 'forward', open: true });
+    expect(view.state.current).toMatchObject({ phase: 'entering', direction: 'forward', open: true });
 
     await frames();
 
-    expect(root.hidden).toBe(true);
-    expect(child.hasAttribute('data-starting-style')).toBe(false);
+    expect(controller.rootState.current.phase).toBe('hidden');
+    expect(view.state.current.phase).toBe('active');
   });
 
-  it('returns to the root and restores focus to the bound trigger', async () => {
-    const { root, child, trigger, menu } = setup();
-    const focus = vi.spyOn(trigger, 'focus');
+  it('returns to root state and delegates focus restoration', async () => {
+    const { controller, view, menu, onViewExit } = setup();
     menu.open();
-    await Promise.resolve();
     await frames();
 
     menu.close();
     await Promise.resolve();
 
-    expect(root.getAttribute('data-direction')).toBe('back');
-    expect(root.hasAttribute('data-starting-style')).toBe(true);
-    expect(child.hasAttribute('data-ending-style')).toBe(true);
+    expect(controller.rootState.current).toMatchObject({ phase: 'entering', direction: 'back' });
+    expect(view.state.current).toMatchObject({ phase: 'exiting', direction: 'back' });
     await frames();
     await Promise.resolve();
 
-    expect(child.hidden).toBe(true);
-    expect(focus).toHaveBeenCalledWith({ preventScroll: true });
+    expect(view.state.current.phase).toBe('hidden');
+    expect(onViewExit).toHaveBeenCalledWith(view);
   });
 
   it('does not navigate for a rejected controlled request', async () => {
     const request = vi.fn();
     const menu = createControlledMenu(request);
-    const { root, child } = setup(menu);
+    const { controller, view } = setup(menu);
 
     menu.open();
 
     expect(request).toHaveBeenCalledWith(true, { reason: 'click' });
     expect(menu.input.current.active).toBe(false);
-    expect(root.getAttribute('data-view-state')).toBe('active');
-    expect(child.hidden).toBe(true);
+    expect(controller.rootState.current.phase).toBe('active');
+    expect(view.state.current.phase).toBe('hidden');
 
     menu.syncOpen(true);
     await Promise.resolve();
 
-    expect(child.getAttribute('data-view-state')).toBe('active');
+    expect(view.state.current.phase).toBe('entering');
   });
 
   it('cancels stale forward work when navigation reverses rapidly', async () => {
-    const { root, child, menu } = setup();
+    const { controller, view, menu } = setup();
 
     menu.open();
     menu.close();
     await frames(3);
 
-    expect(root.hidden).toBe(false);
-    expect(root.getAttribute('data-view-state')).toBe('active');
-    expect(child.hidden).toBe(true);
+    expect(controller.rootState.current.phase).toBe('active');
+    expect(view.state.current.phase).toBe('hidden');
   });
 
   it('shows the most recently opened controlled child and falls back when it closes', async () => {
     const firstMenu = createControlledMenu();
-    const { container, child: firstPanel, controller } = setup(firstMenu);
+    const { controller, view: firstView } = setup(firstMenu);
     const secondMenu = createControlledMenu();
     const secondPanel = document.createElement('div');
-    const secondTrigger = document.createElement('button');
-    container.append(secondPanel);
-    mockSize(secondPanel, 260, 140);
     const secondView = controller.registerView(secondMenu);
-    secondView.setTriggerElement(secondTrigger);
     secondView.setPanelElement(secondPanel);
     const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
     cleanups.push(
@@ -204,16 +183,16 @@ describe('createMenuTransition', () => {
     await Promise.resolve();
 
     expect(controller.activeView).toBe(secondView);
-    expect(secondPanel.getAttribute('data-view-state')).toBe('active');
-    expect(firstPanel.getAttribute('data-view-state')).toBe('inactive');
+    expect(secondView.state.current.viewState).toBe('active');
+    expect(firstView.state.current.viewState).toBe('inactive');
     expect(warn).toHaveBeenCalledWith(expect.stringContaining('Multiple controlled child menus'));
 
     secondMenu.syncOpen(false);
     await Promise.resolve();
 
     expect(controller.activeView?.menu).toBe(firstMenu);
-    expect(firstPanel.getAttribute('data-view-state')).toBe('active');
-    expect(secondPanel.hidden).toBe(true);
+    expect(firstView.state.current.viewState).toBe('active');
+    expect(secondView.state.current.phase).toBe('hidden');
   });
 
   it('warns when the same child root is registered twice', () => {

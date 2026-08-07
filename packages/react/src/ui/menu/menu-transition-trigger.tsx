@@ -1,6 +1,6 @@
 'use client';
 
-import type { MenuState } from '@videojs/core';
+import { type MenuState, MenuTransitionDataAttrs } from '@videojs/core';
 import { forwardRef, useCallback, useEffect, useRef } from 'react';
 import type { UIComponentProps } from '../../utils/types';
 import { renderElement } from '../../utils/use-render';
@@ -84,6 +84,7 @@ const TransitionViewTrigger = forwardRef<HTMLDivElement, TransitionViewTriggerPr
       props: [
         {
           role: 'menuitem' as const,
+          [MenuTransitionDataAttrs.hasSubmenu]: '',
           ...child.core.getTriggerAttrs(child.state, child.contentId),
           'aria-disabled': disabled ? true : undefined,
           onClick: handleClick,

@@ -42,7 +42,7 @@ export function MenuRoot({
   const controlsState = useOptionalPlayer(selectControls);
   const container = useOptionalContainer();
   const popupGroup = useOptionalPopupGroup();
-  const { side, align, closeOnEscape, closeOnOutsideClick } = coreProps;
+  const { side, align, closeOnEscape, closeOnOutsideClick, isSubmenu } = coreProps;
 
   const [core] = useState(() => new MenuCore(coreProps));
 
@@ -55,6 +55,7 @@ export function MenuRoot({
   const closeOnEscapeRef = useLatestRef(closeOnEscape);
   const closeOnOutsideClickRef = useLatestRef(closeOnOutsideClick);
   const popupGroupRef = useLatestRef(popupGroup);
+  const isSubmenuRef = useLatestRef(isSubmenu);
 
   const [menu] = useState(() => {
     const instance = createMenu({
@@ -68,7 +69,7 @@ export function MenuRoot({
       },
       closeOnEscape: () => closeOnEscapeRef.current ?? MenuCore.defaultProps.closeOnEscape,
       closeOnOutsideClick: () => closeOnOutsideClickRef.current ?? MenuCore.defaultProps.closeOnOutsideClick,
-      group: () => popupGroupRef.current,
+      group: () => (isSubmenuRef.current ? undefined : popupGroupRef.current),
     });
 
     return instance;
@@ -83,26 +84,26 @@ export function MenuRoot({
   }, [menu, resolvedOpen]);
 
   useEffect(() => {
-    if (controls?.state.visible !== false) return;
+    if (isSubmenu || controls?.state.visible !== false) return;
 
     menu.close('imperative-action');
-  }, [controls?.state.visible, menu]);
+  }, [controls?.state.visible, isSubmenu, menu]);
 
   useDestroy(menu);
 
   const input = useSnapshot(menu.input);
 
   useEffect(() => {
-    if (!input.active) return;
+    if (!input.active || isSubmenu) return;
 
     return controlsState?.requestControlsLock();
-  }, [controlsState?.requestControlsLock, input.active]);
+  }, [controlsState?.requestControlsLock, input.active, isSubmenu]);
 
   const preferredState = useMemo(() => {
-    core.setProps({ side, align, closeOnEscape, closeOnOutsideClick });
+    core.setProps({ side, align, closeOnEscape, closeOnOutsideClick, isSubmenu });
     core.setInput(input);
     return core.getState();
-  }, [core, input, side, align, closeOnEscape, closeOnOutsideClick]);
+  }, [core, input, side, align, closeOnEscape, closeOnOutsideClick, isSubmenu]);
   const { state, preferredSide, setPositionedSide } = usePositionedState(preferredState);
 
   const contextValue = useMemo(

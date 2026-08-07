@@ -140,6 +140,7 @@ export class MenuElement extends MediaElement {
       align: this.align,
       closeOnEscape: this.closeOnEscape,
       closeOnOutsideClick: this.closeOnOutsideClick,
+      isSubmenu: this.#inlineTrigger !== null,
     });
 
     if (this.#menu && changed.has('open')) {

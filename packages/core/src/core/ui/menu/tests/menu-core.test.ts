@@ -1,6 +1,8 @@
 import { describe, expect, it } from 'vitest';
 
 import { MenuCore, type MenuInput } from '../menu-core';
+import { MenuDataAttrs } from '../menu-data-attrs';
+import { MenuTransitionDataAttrs } from '../menu-transition';
 
 function createInput(overrides: Partial<MenuInput> = {}): MenuInput {
   return {
@@ -11,6 +13,11 @@ function createInput(overrides: Partial<MenuInput> = {}): MenuInput {
 }
 
 describe('MenuCore', () => {
+  it('owns the submenu styling attribute independently of transitions', () => {
+    expect(MenuDataAttrs.isSubmenu).toBe('data-submenu');
+    expect(MenuTransitionDataAttrs).not.toHaveProperty('submenu');
+  });
+
   describe('defaultProps', () => {
     it('has expected defaults', () => {
       expect(MenuCore.defaultProps).toEqual({
@@ -20,6 +27,7 @@ describe('MenuCore', () => {
         defaultOpen: false,
         closeOnEscape: true,
         closeOnOutsideClick: true,
+        isSubmenu: false,
       });
     });
   });
@@ -34,6 +42,7 @@ describe('MenuCore', () => {
       expect(state.status).toBe('idle');
       expect(state.side).toBe('bottom');
       expect(state.align).toBe('start');
+      expect(state.isSubmenu).toBe(false);
       expect(state.transitionStarting).toBe(false);
       expect(state.transitionEnding).toBe(false);
     });
@@ -71,6 +80,13 @@ describe('MenuCore', () => {
 
       expect(state.side).toBe('top');
       expect(state.align).toBe('end');
+    });
+
+    it('identifies a submenu and omits root positioning state', () => {
+      const core = new MenuCore({ isSubmenu: true });
+      core.setInput(createInput());
+
+      expect(core.getState()).toMatchObject({ isSubmenu: true, side: undefined, align: undefined });
     });
   });
 
@@ -125,6 +141,14 @@ describe('MenuCore', () => {
       expect(attrs.role).toBe('menu');
       expect(attrs.tabIndex).toBe(-1);
       expect(attrs.popover).toBe('manual');
+    });
+
+    it('omits popover behavior for a submenu', () => {
+      const core = new MenuCore({ isSubmenu: true });
+      core.setInput(createInput());
+      const attrs = core.getContentAttrs(core.getState());
+
+      expect(attrs).not.toHaveProperty('popover');
     });
   });
 

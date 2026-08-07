@@ -10,7 +10,7 @@ Nested settings menus need coordinated panel and size transitions, but the previ
 
 ## Decision
 
-Base Menu owns one independent root: resolved open state, trigger, content, items, focus, positioning, and ordinary selection. It has no parent lookup, submenu mode, navigation stack, command-target routing, player-setting behavior, or panel transitions. An unwrapped nested root remains an independent popup.
+Base Menu owns one independent root: resolved open state, trigger, content, items, focus, positioning, ordinary selection, and the `data-submenu` styling contract when an adapter explicitly binds it as a child. It has no parent lookup, implicit nested navigation, navigation stack, command-target routing, player-setting behavior, or panel transitions. An unwrapped nested root remains an independent popup.
 
 Interactions request open changes; adapters commit their resolved value through `syncOpen(open)`. Controlled requests do not become visible until the controlled value changes, and completion callbacks describe committed transitions.
 
@@ -67,12 +67,12 @@ nested item event
   -> optional binding requests child open/close
   -> adapter resolves controlled or uncontrolled state
   -> child Menu commits open state
-  -> coordinator derives active panel and direction
-  -> panels receive presence attributes and target measurement
+  -> coordinator publishes active panel, direction, and lifecycle state
+  -> React or HTML renders presence, accessibility, and target size
   -> CSS owns motion and container presentation
 ```
 
-The coordinator keeps outgoing and incoming live DOM until visual completion, cancels stale work during interruption, and measures the destination with `ResizeObserver`. The most recently opened child wins if invalid controlled state leaves several children open; development builds warn rather than mutating controlled state.
+The coordinator keeps outgoing and incoming lifecycle state until visual completion and cancels stale work during interruption. It does not set attributes, element properties, or CSS variables. React and HTML subscribe to that state, render the established contract, measure the active destination, and observe it with `ResizeObserver`. The most recently opened child wins if invalid controlled state leaves several children open; development builds warn rather than mutating controlled state.
 
 Only the active panel is interactive and accessibility-visible. Inactive and exiting panels receive `inert` and `aria-hidden`; completed hidden panels also receive `hidden`. Forward navigation focuses the first child item. Back navigation restores focus to the bound trigger. ArrowRight, ArrowLeft, Escape, direction, and child exclusivity belong only to the optional binding.
 
@@ -85,7 +85,7 @@ Internal phases map onto established styling hooks:
 | active | active, `data-open`, direction |
 | exiting | inactive, `data-open`, `data-ending-style`, direction |
 
-Every panel has `data-menu-view`. The generated root also has `data-menu-root-view`, and child panels have `data-submenu`, so root and submenu presentation can be styled independently. Direction remains `data-direction="forward|back"`. The old `data-menu-view-state` becomes `data-view-state`.
+Every panel has `data-menu-view`. The generated root also has `data-menu-root-view`. Child content receives `data-submenu` from the base `MenuDataAttrs` contract, not from transition state, so submenu presentation remains available independently of this integration. Direction remains `data-direction="forward|back"`. The old `data-menu-view-state` becomes `data-view-state`.
 
 The outer `Menu.Content` is the stable viewport and the generated element is the moving root panel. They cannot be the same node: hiding or making the outer content inert would also hide or disable its active submenu descendants, and transforming it would transform both outgoing and incoming panels. React applies `TransitionRoot`'s `className` and `style` to the generated root panel. HTML exposes the equivalent `root-view-class` attribute for utility-class skins.
 
@@ -98,7 +98,7 @@ CSS retains all four Menu variables:
 --media-menu-available-height
 ```
 
-Base positioning aliases Popover constraints into the available-size variables. The optional controller writes destination width and height. Keeping the names in `MenuCSSVars` does not pull the controller into base Menu. CSS owns transforms, blur, opacity, duration, easing, and reduced-motion behavior.
+Base positioning aliases Popover constraints into the available-size variables. The platform transition adapters publish measured destination width and height. Keeping the names in `MenuCSSVars` does not pull transition behavior into base Menu. CSS owns transforms, blur, opacity, duration, easing, and reduced-motion behavior.
 
 ## Package boundaries
 
@@ -115,8 +115,8 @@ Bundle measurements are recorded only after building the complete root `Menu` na
 ## Implementation and verification
 
 1. Make Menu requests distinct from committed open state and remove parent navigation, Back, View, and old viewport machinery.
-2. Add the menu-specific coordinator with explicit root/view registration, live-DOM phases, focus, measurement, interruption handling, and controlled-state diagnostics.
-3. Add React and HTML bindings, generated root panels, separate registrations, and migrate presets and examples.
+2. Add the menu-specific coordinator with explicit root/view registration, reactive lifecycle state, interruption handling, and controlled-state diagnostics.
+3. Add React and HTML bindings that render attributes, accessibility isolation, focus restoration, measurement, generated root panels, and separate registrations; migrate presets and examples.
 4. Move HTML setting behavior behind its own registration entry and keep generic items neutral.
 5. Migrate skins to existing transition attributes and retained CSS variables; update reference and design documentation.
 6. Build bundle metafiles, measure the complete React `Menu` namespace, and assert base Core and HTML graphs exclude transition/navigation/settings modules while optional entries include only their intended graph.

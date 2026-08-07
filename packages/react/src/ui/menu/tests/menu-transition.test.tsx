@@ -46,7 +46,7 @@ describe('Menu transition parts', () => {
     expect(child.getAttribute('data-direction')).toBe('forward');
     expect(root?.getAttribute('data-view-state')).toBe('inactive');
     expect(root?.getAttribute('aria-hidden')).toBe('true');
-    expect(root?.inert).toBe(true);
+    expect(root?.hasAttribute('inert')).toBe(true);
   });
 
   it('uses an ordinary item as a back row and restores the root panel', async () => {
