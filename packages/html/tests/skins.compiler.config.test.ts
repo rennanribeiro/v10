@@ -15,7 +15,7 @@ describe('htmlSourceConfig', () => {
     expect(result.diagnostics).toEqual([]);
     expect(result.code).toContain('<media-time-slider class={cn(slider.root)}');
     expect(result.code).toContain('<media-slider-track class={cn(slider.track)}>');
-    expect(result.code).toContain('<media-slider-fill class={cn([slider.fillBase, slider.fill])}/>');
+    expect(result.code).toContain('<media-slider-fill class={cn(slider.fill)}/>');
     expect(result.code).toContain('<media-slider-thumbnail class={cn(thumbnail.image)}/>');
     expect(result.code).toContain('<media-icon class={cn("size-media-icon drop-shadow-media-icon")} name="spinner"/>');
     expect(result.code).not.toContain('className=');

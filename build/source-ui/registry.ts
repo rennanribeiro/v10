@@ -142,7 +142,15 @@ function partitionDependencies(
 }
 
 function uniqueFiles(files: readonly RegistryOutputFile[]): RegistryOutputFile[] {
-  const unique = new Map(files.map((file) => [`${file.path}\0${file.target ?? ''}`, file]));
+  const unique = new Map<string, RegistryOutputFile>();
+  for (const file of files) {
+    const key = `${file.path}\0${file.target ?? ''}`;
+    const existing = unique.get(key);
+    if (existing && existing.content !== file.content) {
+      throw new Error(`Registry output collision: ${file.path}`);
+    }
+    unique.set(key, file);
+  }
   return [...unique.values()].sort((a, b) => a.path.localeCompare(b.path));
 }
 
