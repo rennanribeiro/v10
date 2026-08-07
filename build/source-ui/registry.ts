@@ -27,12 +27,14 @@ export interface RegistryOutputManifest {
   dependencies?: Readonly<Record<string, readonly string[]>> | undefined;
 }
 
+export type RegistryCatalogFile = Omit<RegistryOutputFile, 'content'>;
+
 export interface RegistryCatalogItem {
   name: string;
   type: RegistryItemType;
   title: string;
   description: string;
-  files: readonly RegistryOutputFile[];
+  files: readonly RegistryCatalogFile[];
   dependencies?: readonly string[] | undefined;
   registryDependencies?: readonly string[] | undefined;
   meta: {
@@ -54,11 +56,12 @@ export interface CreateRegistryCatalogOptions {
   output: RegistryOutputManifest;
   ref?: string | undefined;
   repository?: `${string}/${string}` | undefined;
+  inlineBlocks?: boolean | undefined;
 }
 
 export function createRegistryCatalog(
   graph: ArtifactGraph,
-  { target, output, ref, repository = 'videojs/v10' }: CreateRegistryCatalogOptions
+  { target, output, ref, repository = 'videojs/v10', inlineBlocks = false }: CreateRegistryCatalogOptions
 ): RegistryCatalog {
   const artifacts = new Map(graph.artifacts.map((artifact) => [artifact.id, artifact]));
   const published = graph.artifacts.filter(hasRegistryMetadata);
@@ -69,14 +72,20 @@ export function createRegistryCatalog(
     name: 'videojs',
     homepage: 'https://videojs.org',
     items: published.map((artifact) => {
-      const { included, dependencies } = partitionDependencies(artifact, artifacts, publishedIds, target.framework);
+      const { included, dependencies } = partitionDependencies(
+        artifact,
+        artifacts,
+        publishedIds,
+        target.framework,
+        inlineBlocks && artifact.kind === 'skin'
+      );
       const files = uniqueFiles(
         included.flatMap((id) => {
           const artifactFiles = output.artifacts[id];
           if (!artifactFiles) throw new Error(`Registry output is missing artifact \`${id}\`.`);
           return artifactFiles;
         })
-      );
+      ).map(({ content: _, ...file }) => file);
       const registry = artifact.metadata.registry;
       const packageDependencies = [...new Set(included.flatMap((id) => output.dependencies?.[id] ?? []))].sort();
 
@@ -120,14 +129,15 @@ function partitionDependencies(
   root: ArtifactGraphNode,
   artifacts: ReadonlyMap<string, ArtifactGraphNode>,
   publishedIds: ReadonlySet<string>,
-  framework: RegistryFramework
+  framework: RegistryFramework,
+  inlineDependencies: boolean
 ): { included: string[]; dependencies: string[] } {
   if (framework === 'html') return { included: [root.id], dependencies: [] };
   const included = new Set<string>();
   const dependencies = new Set<string>();
 
   const visit = (id: string): void => {
-    if (id !== root.id && publishedIds.has(id)) {
+    if (!inlineDependencies && id !== root.id && publishedIds.has(id)) {
       dependencies.add(id);
       return;
     }

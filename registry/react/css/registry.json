@@ -1,0 +1,494 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry.json",
+  "items": [
+    {
+      "name": "react/css/default-video-controls",
+      "type": "registry:block",
+      "title": "Core Video Controls (React, CSS)",
+      "description": "A video control bar with play, seek, current and remaining time, volume, fullscreen, tooltips, and thumbnail previews. React source with vanilla CSS.",
+      "files": [
+        {
+          "path": "components/videojs/button-tooltip/button-tooltip.tsx",
+          "type": "registry:component",
+          "target": "@components/videojs/button-tooltip/button-tooltip.tsx"
+        },
+        {
+          "path": "components/videojs/button-tooltip/styles.css",
+          "type": "registry:file",
+          "target": "@components/videojs/button-tooltip/styles.css"
+        },
+        {
+          "path": "components/videojs/default-video-controls/styles.css",
+          "type": "registry:file",
+          "target": "@components/videojs/default-video-controls/styles.css"
+        },
+        {
+          "path": "components/videojs/default-video-controls/video-controls.tsx",
+          "type": "registry:component",
+          "target": "@components/videojs/default-video-controls/video-controls.tsx"
+        },
+        {
+          "path": "components/videojs/fullscreen-button/fullscreen-button.tsx",
+          "type": "registry:component",
+          "target": "@components/videojs/fullscreen-button/fullscreen-button.tsx"
+        },
+        {
+          "path": "components/videojs/fullscreen-button/icons.ts",
+          "type": "registry:component",
+          "target": "@components/videojs/fullscreen-button/icons.ts"
+        },
+        {
+          "path": "components/videojs/fullscreen-button/styles.css",
+          "type": "registry:file",
+          "target": "@components/videojs/fullscreen-button/styles.css"
+        },
+        {
+          "path": "components/videojs/mute-button/icons.ts",
+          "type": "registry:component",
+          "target": "@components/videojs/mute-button/icons.ts"
+        },
+        {
+          "path": "components/videojs/mute-button/mute-button.tsx",
+          "type": "registry:component",
+          "target": "@components/videojs/mute-button/mute-button.tsx"
+        },
+        {
+          "path": "components/videojs/mute-button/styles.css",
+          "type": "registry:file",
+          "target": "@components/videojs/mute-button/styles.css"
+        },
+        {
+          "path": "components/videojs/play-button/icons.ts",
+          "type": "registry:component",
+          "target": "@components/videojs/play-button/icons.ts"
+        },
+        {
+          "path": "components/videojs/play-button/play-button.tsx",
+          "type": "registry:component",
+          "target": "@components/videojs/play-button/play-button.tsx"
+        },
+        {
+          "path": "components/videojs/play-button/styles.css",
+          "type": "registry:file",
+          "target": "@components/videojs/play-button/styles.css"
+        },
+        {
+          "path": "components/videojs/seek-button/icons.ts",
+          "type": "registry:component",
+          "target": "@components/videojs/seek-button/icons.ts"
+        },
+        {
+          "path": "components/videojs/seek-button/seek-button.tsx",
+          "type": "registry:component",
+          "target": "@components/videojs/seek-button/seek-button.tsx"
+        },
+        {
+          "path": "components/videojs/seek-button/styles.css",
+          "type": "registry:file",
+          "target": "@components/videojs/seek-button/styles.css"
+        },
+        {
+          "path": "components/videojs/styles/base.css",
+          "type": "registry:file",
+          "target": "@components/videojs/styles/base.css"
+        },
+        {
+          "path": "components/videojs/styles/components/button.styles.ts",
+          "type": "registry:component",
+          "target": "@components/videojs/styles/components/button.styles.ts"
+        },
+        {
+          "path": "components/videojs/styles/components/popup.styles.ts",
+          "type": "registry:component",
+          "target": "@components/videojs/styles/components/popup.styles.ts"
+        },
+        {
+          "path": "components/videojs/styles/components/slider.styles.ts",
+          "type": "registry:component",
+          "target": "@components/videojs/styles/components/slider.styles.ts"
+        },
+        {
+          "path": "components/videojs/styles/skins/default-video-controls.styles.ts",
+          "type": "registry:component",
+          "target": "@components/videojs/styles/skins/default-video-controls.styles.ts"
+        },
+        {
+          "path": "components/videojs/styles/themes/default.css",
+          "type": "registry:file",
+          "target": "@components/videojs/styles/themes/default.css"
+        },
+        {
+          "path": "components/videojs/time-slider/icons.ts",
+          "type": "registry:component",
+          "target": "@components/videojs/time-slider/icons.ts"
+        },
+        {
+          "path": "components/videojs/time-slider/styles.css",
+          "type": "registry:file",
+          "target": "@components/videojs/time-slider/styles.css"
+        },
+        {
+          "path": "components/videojs/time-slider/time-slider.tsx",
+          "type": "registry:component",
+          "target": "@components/videojs/time-slider/time-slider.tsx"
+        },
+        {
+          "path": "components/videojs/volume-popover/styles.css",
+          "type": "registry:file",
+          "target": "@components/videojs/volume-popover/styles.css"
+        },
+        {
+          "path": "components/videojs/volume-popover/volume-popover.tsx",
+          "type": "registry:component",
+          "target": "@components/videojs/volume-popover/volume-popover.tsx"
+        },
+        {
+          "path": "components/videojs/volume-slider/styles.css",
+          "type": "registry:file",
+          "target": "@components/videojs/volume-slider/styles.css"
+        },
+        {
+          "path": "components/videojs/volume-slider/volume-slider.tsx",
+          "type": "registry:component",
+          "target": "@components/videojs/volume-slider/volume-slider.tsx"
+        }
+      ],
+      "dependencies": ["@videojs/core", "@videojs/react", "@videojs/utils", "react"],
+      "meta": {
+        "framework": "react",
+        "style": "css",
+        "ownership": "source"
+      }
+    },
+    {
+      "name": "react/css/fullscreen-button",
+      "type": "registry:component",
+      "title": "Fullscreen Button (React, CSS)",
+      "description": "A button that enters and exits fullscreen with state-aware icons and an accessible tooltip. React source with vanilla CSS.",
+      "files": [
+        {
+          "path": "components/videojs/button-tooltip/button-tooltip.tsx",
+          "type": "registry:component",
+          "target": "@components/videojs/button-tooltip/button-tooltip.tsx"
+        },
+        {
+          "path": "components/videojs/button-tooltip/styles.css",
+          "type": "registry:file",
+          "target": "@components/videojs/button-tooltip/styles.css"
+        },
+        {
+          "path": "components/videojs/fullscreen-button/fullscreen-button.tsx",
+          "type": "registry:component",
+          "target": "@components/videojs/fullscreen-button/fullscreen-button.tsx"
+        },
+        {
+          "path": "components/videojs/fullscreen-button/icons.ts",
+          "type": "registry:component",
+          "target": "@components/videojs/fullscreen-button/icons.ts"
+        },
+        {
+          "path": "components/videojs/fullscreen-button/styles.css",
+          "type": "registry:file",
+          "target": "@components/videojs/fullscreen-button/styles.css"
+        },
+        {
+          "path": "components/videojs/styles/base.css",
+          "type": "registry:file",
+          "target": "@components/videojs/styles/base.css"
+        },
+        {
+          "path": "components/videojs/styles/components/button.styles.ts",
+          "type": "registry:component",
+          "target": "@components/videojs/styles/components/button.styles.ts"
+        },
+        {
+          "path": "components/videojs/styles/components/popup.styles.ts",
+          "type": "registry:component",
+          "target": "@components/videojs/styles/components/popup.styles.ts"
+        },
+        {
+          "path": "components/videojs/styles/themes/default.css",
+          "type": "registry:file",
+          "target": "@components/videojs/styles/themes/default.css"
+        }
+      ],
+      "dependencies": ["@videojs/react", "@videojs/utils", "react"],
+      "meta": {
+        "framework": "react",
+        "style": "css",
+        "ownership": "source"
+      }
+    },
+    {
+      "name": "react/css/play-button",
+      "type": "registry:component",
+      "title": "Play Button (React, CSS)",
+      "description": "A three-state button that plays, pauses, or restarts media with matching icons and an accessible tooltip. React source with vanilla CSS.",
+      "files": [
+        {
+          "path": "components/videojs/button-tooltip/button-tooltip.tsx",
+          "type": "registry:component",
+          "target": "@components/videojs/button-tooltip/button-tooltip.tsx"
+        },
+        {
+          "path": "components/videojs/button-tooltip/styles.css",
+          "type": "registry:file",
+          "target": "@components/videojs/button-tooltip/styles.css"
+        },
+        {
+          "path": "components/videojs/play-button/icons.ts",
+          "type": "registry:component",
+          "target": "@components/videojs/play-button/icons.ts"
+        },
+        {
+          "path": "components/videojs/play-button/play-button.tsx",
+          "type": "registry:component",
+          "target": "@components/videojs/play-button/play-button.tsx"
+        },
+        {
+          "path": "components/videojs/play-button/styles.css",
+          "type": "registry:file",
+          "target": "@components/videojs/play-button/styles.css"
+        },
+        {
+          "path": "components/videojs/styles/base.css",
+          "type": "registry:file",
+          "target": "@components/videojs/styles/base.css"
+        },
+        {
+          "path": "components/videojs/styles/components/button.styles.ts",
+          "type": "registry:component",
+          "target": "@components/videojs/styles/components/button.styles.ts"
+        },
+        {
+          "path": "components/videojs/styles/components/popup.styles.ts",
+          "type": "registry:component",
+          "target": "@components/videojs/styles/components/popup.styles.ts"
+        },
+        {
+          "path": "components/videojs/styles/themes/default.css",
+          "type": "registry:file",
+          "target": "@components/videojs/styles/themes/default.css"
+        }
+      ],
+      "dependencies": ["@videojs/react", "@videojs/utils", "react"],
+      "meta": {
+        "framework": "react",
+        "style": "css",
+        "ownership": "source"
+      }
+    },
+    {
+      "name": "react/css/seek-button",
+      "type": "registry:component",
+      "title": "Seek Button (React, CSS)",
+      "description": "A button that skips playback forward or backward by a configurable number of seconds, with a direction-aware icon and accessible tooltip. React source with vanilla CSS.",
+      "files": [
+        {
+          "path": "components/videojs/button-tooltip/button-tooltip.tsx",
+          "type": "registry:component",
+          "target": "@components/videojs/button-tooltip/button-tooltip.tsx"
+        },
+        {
+          "path": "components/videojs/button-tooltip/styles.css",
+          "type": "registry:file",
+          "target": "@components/videojs/button-tooltip/styles.css"
+        },
+        {
+          "path": "components/videojs/seek-button/icons.ts",
+          "type": "registry:component",
+          "target": "@components/videojs/seek-button/icons.ts"
+        },
+        {
+          "path": "components/videojs/seek-button/seek-button.tsx",
+          "type": "registry:component",
+          "target": "@components/videojs/seek-button/seek-button.tsx"
+        },
+        {
+          "path": "components/videojs/seek-button/styles.css",
+          "type": "registry:file",
+          "target": "@components/videojs/seek-button/styles.css"
+        },
+        {
+          "path": "components/videojs/styles/base.css",
+          "type": "registry:file",
+          "target": "@components/videojs/styles/base.css"
+        },
+        {
+          "path": "components/videojs/styles/components/button.styles.ts",
+          "type": "registry:component",
+          "target": "@components/videojs/styles/components/button.styles.ts"
+        },
+        {
+          "path": "components/videojs/styles/components/popup.styles.ts",
+          "type": "registry:component",
+          "target": "@components/videojs/styles/components/popup.styles.ts"
+        },
+        {
+          "path": "components/videojs/styles/themes/default.css",
+          "type": "registry:file",
+          "target": "@components/videojs/styles/themes/default.css"
+        }
+      ],
+      "dependencies": ["@videojs/core", "@videojs/react", "@videojs/utils", "react"],
+      "meta": {
+        "framework": "react",
+        "style": "css",
+        "ownership": "source"
+      }
+    },
+    {
+      "name": "react/css/time-slider",
+      "type": "registry:component",
+      "title": "Time Slider (React, CSS)",
+      "description": "A playback timeline for seeking, with current and buffered progress plus time and thumbnail previews. React source with vanilla CSS.",
+      "files": [
+        {
+          "path": "components/videojs/styles/base.css",
+          "type": "registry:file",
+          "target": "@components/videojs/styles/base.css"
+        },
+        {
+          "path": "components/videojs/styles/components/popup.styles.ts",
+          "type": "registry:component",
+          "target": "@components/videojs/styles/components/popup.styles.ts"
+        },
+        {
+          "path": "components/videojs/styles/components/slider.styles.ts",
+          "type": "registry:component",
+          "target": "@components/videojs/styles/components/slider.styles.ts"
+        },
+        {
+          "path": "components/videojs/styles/themes/default.css",
+          "type": "registry:file",
+          "target": "@components/videojs/styles/themes/default.css"
+        },
+        {
+          "path": "components/videojs/time-slider/icons.ts",
+          "type": "registry:component",
+          "target": "@components/videojs/time-slider/icons.ts"
+        },
+        {
+          "path": "components/videojs/time-slider/styles.css",
+          "type": "registry:file",
+          "target": "@components/videojs/time-slider/styles.css"
+        },
+        {
+          "path": "components/videojs/time-slider/time-slider.tsx",
+          "type": "registry:component",
+          "target": "@components/videojs/time-slider/time-slider.tsx"
+        }
+      ],
+      "dependencies": ["@videojs/react", "@videojs/utils", "react"],
+      "meta": {
+        "framework": "react",
+        "style": "css",
+        "ownership": "source"
+      }
+    },
+    {
+      "name": "react/css/volume-popover",
+      "type": "registry:component",
+      "title": "Volume Control (React, CSS)",
+      "description": "A mute toggle with a vertical slider for adjusting playback volume in a popover. React source with vanilla CSS.",
+      "files": [
+        {
+          "path": "components/videojs/mute-button/icons.ts",
+          "type": "registry:component",
+          "target": "@components/videojs/mute-button/icons.ts"
+        },
+        {
+          "path": "components/videojs/mute-button/mute-button.tsx",
+          "type": "registry:component",
+          "target": "@components/videojs/mute-button/mute-button.tsx"
+        },
+        {
+          "path": "components/videojs/mute-button/styles.css",
+          "type": "registry:file",
+          "target": "@components/videojs/mute-button/styles.css"
+        },
+        {
+          "path": "components/videojs/styles/base.css",
+          "type": "registry:file",
+          "target": "@components/videojs/styles/base.css"
+        },
+        {
+          "path": "components/videojs/styles/components/button.styles.ts",
+          "type": "registry:component",
+          "target": "@components/videojs/styles/components/button.styles.ts"
+        },
+        {
+          "path": "components/videojs/styles/components/popup.styles.ts",
+          "type": "registry:component",
+          "target": "@components/videojs/styles/components/popup.styles.ts"
+        },
+        {
+          "path": "components/videojs/styles/themes/default.css",
+          "type": "registry:file",
+          "target": "@components/videojs/styles/themes/default.css"
+        },
+        {
+          "path": "components/videojs/volume-popover/styles.css",
+          "type": "registry:file",
+          "target": "@components/videojs/volume-popover/styles.css"
+        },
+        {
+          "path": "components/videojs/volume-popover/volume-popover.tsx",
+          "type": "registry:component",
+          "target": "@components/videojs/volume-popover/volume-popover.tsx"
+        }
+      ],
+      "dependencies": ["@videojs/react", "@videojs/utils", "react"],
+      "registryDependencies": ["videojs/v10/react/css/volume-slider"],
+      "meta": {
+        "framework": "react",
+        "style": "css",
+        "ownership": "source"
+      }
+    },
+    {
+      "name": "react/css/volume-slider",
+      "type": "registry:component",
+      "title": "Volume Slider (React, CSS)",
+      "description": "A horizontal or vertical slider for adjusting playback volume by dragging, using the keyboard, or scrolling. React source with vanilla CSS.",
+      "files": [
+        {
+          "path": "components/videojs/styles/base.css",
+          "type": "registry:file",
+          "target": "@components/videojs/styles/base.css"
+        },
+        {
+          "path": "components/videojs/styles/components/popup.styles.ts",
+          "type": "registry:component",
+          "target": "@components/videojs/styles/components/popup.styles.ts"
+        },
+        {
+          "path": "components/videojs/styles/components/slider.styles.ts",
+          "type": "registry:component",
+          "target": "@components/videojs/styles/components/slider.styles.ts"
+        },
+        {
+          "path": "components/videojs/styles/themes/default.css",
+          "type": "registry:file",
+          "target": "@components/videojs/styles/themes/default.css"
+        },
+        {
+          "path": "components/videojs/volume-slider/styles.css",
+          "type": "registry:file",
+          "target": "@components/videojs/volume-slider/styles.css"
+        },
+        {
+          "path": "components/videojs/volume-slider/volume-slider.tsx",
+          "type": "registry:component",
+          "target": "@components/videojs/volume-slider/volume-slider.tsx"
+        }
+      ],
+      "dependencies": ["@videojs/core", "@videojs/react", "@videojs/utils"],
+      "meta": {
+        "framework": "react",
+        "style": "css",
+        "ownership": "source"
+      }
+    }
+  ]
+}

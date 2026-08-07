@@ -83,13 +83,11 @@ describe('createRegistryCatalog', () => {
         path: 'registry/react/button-tooltip.tsx',
         type: 'registry:component',
         target: '@ui/videojs/button-tooltip.tsx',
-        content: '// button-tooltip',
       },
       {
         path: 'registry/react/play-button.tsx',
         type: 'registry:component',
         target: '@ui/videojs/play-button.tsx',
-        content: '// play-button',
       },
     ]);
     assert.deepEqual(catalog.items.find((item) => item.name.endsWith('/play-button'))?.dependencies, [

@@ -175,6 +175,9 @@ jobs:
       - name: Check workspace consistency
         run: pnpm check:workspace
 
+      - name: Check generated source registry
+        run: pnpm check:registry
+
   build:
     needs: install
     runs-on: ubuntu-latest

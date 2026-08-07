@@ -1,0 +1,22 @@
+<media-play-button
+  class="grid size-media-control shrink-0 place-items-center rounded-media-pill border-0 bg-transparent p-0 text-inherit cursor-pointer outline-2 outline-transparent -outline-offset-2 hover:bg-media-control-hover focus-visible:bg-media-control-hover aria-expanded:bg-media-control-hover focus-visible:outline-current focus-visible:outline-offset-2 aria-disabled:cursor-not-allowed aria-disabled:opacity-50 group/play"
+>
+  <media-icon
+    class="size-media-icon drop-shadow-media-icon hidden opacity-0 group-data-ended/play:block group-data-ended/play:opacity-100"
+    name="restart"
+  ></media-icon>
+  <media-icon
+    class="size-media-icon drop-shadow-media-icon hidden opacity-0 group-not-data-ended/play:group-data-paused/play:block group-not-data-ended/play:group-data-paused/play:opacity-100 group-not-data-ended/play:group-not-data-started/play:block group-not-data-ended/play:group-not-data-started/play:opacity-100"
+    name="play"
+  ></media-icon>
+  <media-icon
+    class="size-media-icon drop-shadow-media-icon hidden opacity-0 group-data-started/play:group-not-data-paused/play:group-not-data-ended/play:block group-data-started/play:group-not-data-paused/play:group-not-data-ended/play:opacity-100"
+    name="pause"
+  ></media-icon>
+</media-play-button>
+<media-tooltip
+  class="bg-media-surface text-media-controls shadow-media-surface backdrop-blur-media-surface m-0 whitespace-nowrap rounded-media-pill border-0 px-2.5 py-[0.35rem] data-open:flex data-open:items-center data-open:gap-1"
+>
+  <media-tooltip-label></media-tooltip-label>
+  <media-tooltip-shortcut class="text-[0.75em] font-semibold"></media-tooltip-shortcut>
+</media-tooltip>

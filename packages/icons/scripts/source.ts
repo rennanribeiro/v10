@@ -53,17 +53,9 @@ export function buildHtmlExport(svgContent: string, varName: string): string {
 
 export async function createReactIconsSource(componentNames: readonly string[], iconSet = 'default'): Promise<string> {
   const icons = await resolveIcons(componentNames, iconSet);
-  const components = await Promise.all(
-    icons.map(async ({ componentName, source }) => {
-      const { tsx } = await buildReactComponent(source, componentName);
-      return tsx
-        .replace(/^import type \{ SVGProps \} from ['"]react['"];?\s*/m, '')
-        .replace(`const ${componentName} =`, `export const ${componentName} =`)
-        .replace(new RegExp(`\\s*export default ${componentName};?\\s*$`), '');
-    })
-  );
+  const components = icons.map(({ componentName, source }) => reactIconSource(source, componentName));
 
-  return [`import type { SVGProps } from 'react';`, ``, ...components, ``].join('\n');
+  return [`import { createElement, type SVGProps } from 'react';`, ``, ...components, ``].join('\n');
 }
 
 export async function createHtmlIconsSource(componentNames: readonly string[], iconSet = 'default'): Promise<string> {
@@ -111,4 +103,31 @@ async function resolveIcons(
       };
     })
   );
+}
+
+function reactIconSource(source: string, componentName: string): string {
+  const optimized = optimizeSvg(source);
+  const match = /^<svg\s*([^>]*)>([\s\S]*)<\/svg>$/.exec(optimized);
+  if (!match) throw new Error(`Cannot generate React source for \`${componentName}\`.`);
+
+  const attributes = [...(match[1] ?? '').matchAll(/([^\s=]+)="([^"]*)"/g)].map((attribute) => {
+    const name = reactAttributeName(attribute[1] ?? '');
+    return `    ${JSON.stringify(name)}: ${JSON.stringify(attribute[2] ?? '')},`;
+  });
+
+  return [
+    `export function ${componentName}(props: SVGProps<SVGSVGElement>) {`,
+    `  return createElement('svg', {`,
+    ...attributes,
+    `    ...props,`,
+    `    dangerouslySetInnerHTML: { __html: ${JSON.stringify(match[2] ?? '')} },`,
+    `  });`,
+    `}`,
+  ].join('\n');
+}
+
+function reactAttributeName(name: string): string {
+  if (name === 'class') return 'className';
+  if (name.startsWith('aria-') || name.startsWith('data-')) return name;
+  return name.replace(/-([a-z])/g, (_, letter: string) => letter.toUpperCase());
 }

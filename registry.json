@@ -1,0 +1,11 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry.json",
+  "name": "videojs",
+  "homepage": "https://videojs.org",
+  "include": [
+    "registry/react/tailwind/registry.json",
+    "registry/react/css/registry.json",
+    "registry/html/tailwind/registry.json",
+    "registry/html/css/registry.json"
+  ]
+}

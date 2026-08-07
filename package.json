@@ -29,6 +29,7 @@
     "dev": "turbo run dev",
     "dev:packages": "turbo run dev --filter='./packages/*'",
     "dev:sandbox": "turbo run build --filter=@videojs/sandbox^... && turbo run dev --filter=@videojs/sandbox... --only",
+    "generate:registry": "node --import tsx build/source-ui/generate.ts && shadcn registry validate registry.json",
     "lint": "biome check .",
     "lint:fix": "biome check . --write",
     "lint:fix:file": "biome check --write",
@@ -42,6 +43,7 @@
     "test:e2e:update": "pnpm --dir apps/e2e test:update",
     "test:e2e:install": "pnpm --dir apps/e2e run install:browsers && pnpm --dir apps/e2e run install:deps",
     "test:size": "node --test .github/scripts/tests/*.test.js",
+    "check:registry": "node --import tsx build/source-ui/generate.ts --check && shadcn registry validate registry.json",
     "format:astro": "prettier --write 'site/src/**/*.astro'",
     "typecheck": "tsgo --build",
     "changelog": "git-cliff --config cliff.toml --output CHANGELOG.md",
@@ -68,6 +70,7 @@
     "react-compiler-runtime": "^1.0.0",
     "react-dom": "^18.3.1",
     "simple-git-hooks": "^2.13.1",
+    "shadcn": "^4.16.2",
     "tsx": "^4.23.1",
     "turbo": "^2.10.6",
     "@typescript/native-preview": "beta"

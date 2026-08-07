@@ -43,7 +43,7 @@ export async function createSourceOutput(
 ): Promise<RegistryOutputManifest> {
   const rootDir = resolve(options.rootDir);
   const registryRoot = options.registryRoot ?? 'registry';
-  const targetRoot = options.targetRoot ?? 'components/videojs';
+  const targetRoot = options.targetRoot ?? '@components/videojs';
   const contexts = createArtifactContexts(graph, rootDir, targetRoot, options.target);
   const entryArtifacts = new Map(
     [...contexts.values()].map((context) => [absoluteGraphPath(rootDir, context.artifact.entry), context])
@@ -270,11 +270,15 @@ function outputFile(
   content: string
 ): RegistryOutputFile {
   return {
-    path: posix.join(options.registryRoot, options.target.framework, options.target.style, target),
+    path: posix.join(options.registryRoot, options.target.framework, options.target.style, registrySourcePath(target)),
     type: target.endsWith('.css') ? 'registry:file' : 'registry:component',
     target,
     content,
   };
+}
+
+function registrySourcePath(target: string): string {
+  return target.replace(/^~\//, '').replace(/^@components\//, 'components/');
 }
 
 function collectPackageDependencies(files: readonly RegistryOutputFile[]): string[] {

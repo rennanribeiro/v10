@@ -5,8 +5,8 @@ describe('createReactIconsSource', () => {
   it('generates only the requested named icon components', async () => {
     const source = await createReactIconsSource(['PlayIcon', 'PauseIcon']);
 
-    expect(source).toContain('export const PlayIcon');
-    expect(source).toContain('export const PauseIcon');
+    expect(source).toContain('export function PlayIcon');
+    expect(source).toContain('export function PauseIcon');
     expect(source).not.toContain('RestartIcon');
     expect(source).not.toContain('export default');
   });

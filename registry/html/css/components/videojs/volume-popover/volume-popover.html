@@ -1,0 +1,40 @@
+<media-mute-button
+  class="grid size-media-control shrink-0 place-items-center rounded-media-pill border-0 bg-transparent p-0 text-inherit cursor-pointer outline-2 outline-transparent -outline-offset-2 hover:bg-media-control-hover focus-visible:bg-media-control-hover aria-expanded:bg-media-control-hover focus-visible:outline-current focus-visible:outline-offset-2 aria-disabled:cursor-not-allowed aria-disabled:opacity-50 group/mute"
+>
+  <media-icon
+    class="size-media-icon drop-shadow-media-icon hidden opacity-0 group-data-muted/mute:block group-data-muted/mute:opacity-100"
+    name="volume-off"
+  ></media-icon>
+  <media-icon
+    class="size-media-icon drop-shadow-media-icon hidden opacity-0 group-not-data-muted/mute:group-data-[volume-level=low]/mute:block group-not-data-muted/mute:group-data-[volume-level=low]/mute:opacity-100"
+    name="volume-low"
+  ></media-icon>
+  <media-icon
+    class="size-media-icon drop-shadow-media-icon hidden opacity-0 group-not-data-muted/mute:group-not-data-[volume-level=low]/mute:block group-not-data-muted/mute:group-not-data-[volume-level=low]/mute:opacity-100"
+    name="volume-high"
+  ></media-icon>
+</media-mute-button>
+<media-popover
+  open-on-hover
+  delay="200"
+  close-delay="100"
+  side="top"
+  class="bg-media-surface text-media-controls shadow-media-surface backdrop-blur-media-surface m-0 rounded-media-pill border-0 py-3"
+>
+  <media-volume-slider
+    class="group/slider relative flex min-h-media-control min-w-20 flex-1 cursor-pointer items-center justify-center outline-none data-[orientation=vertical]:h-20 data-[orientation=vertical]:w-media-control data-[orientation=vertical]:min-w-0"
+    thumb-alignment="edge"
+    orientation="vertical"
+  >
+    <media-slider-track
+      class="relative h-media-slider-track w-full overflow-hidden rounded-media-pill bg-media-slider-track data-[orientation=vertical]:h-full data-[orientation=vertical]:w-media-slider-track"
+    >
+      <media-slider-fill
+        class="absolute inset-y-0 left-0 rounded-[inherit] data-[orientation=vertical]:inset-x-0 data-[orientation=vertical]:top-auto data-[orientation=vertical]:bottom-0 data-[orientation=vertical]:w-auto w-(--media-slider-fill) bg-current data-[orientation=vertical]:h-(--media-slider-fill)"
+      ></media-slider-fill>
+    </media-slider-track>
+    <media-slider-thumb
+      class="absolute top-1/2 left-(--media-slider-fill) size-media-slider-thumb -translate-x-1/2 -translate-y-1/2 rounded-media-pill bg-current data-[orientation=vertical]:top-[calc(100%-var(--media-slider-fill))] data-[orientation=vertical]:left-1/2"
+    ></media-slider-thumb>
+  </media-volume-slider>
+</media-popover>

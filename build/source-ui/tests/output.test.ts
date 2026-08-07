@@ -27,12 +27,12 @@ describe('createSourceOutput', () => {
     assert.deepEqual(
       files.map((file) => file.target),
       [
-        'components/videojs/play-button/icons.ts',
-        'components/videojs/play-button/play-button.tsx',
-        'components/videojs/styles/base.css',
-        'components/videojs/styles/components/button.tailwind.ts',
-        'components/videojs/styles/tailwind.css',
-        'components/videojs/styles/themes/default.css',
+        '@components/videojs/play-button/icons.ts',
+        '@components/videojs/play-button/play-button.tsx',
+        '@components/videojs/styles/base.css',
+        '@components/videojs/styles/components/button.tailwind.ts',
+        '@components/videojs/styles/tailwind.css',
+        '@components/videojs/styles/themes/default.css',
       ]
     );
     assert.match(entry?.content ?? '', /^import '\.\.\/styles\/tailwind\.css';/);
@@ -40,9 +40,9 @@ describe('createSourceOutput', () => {
     assert.match(entry?.content ?? '', /from '\.\.\/button-tooltip\/button-tooltip'/);
     assert.match(entry?.content ?? '', /from '\.\.\/styles\/components\/button\.tailwind'/);
     assert.match(entry?.content ?? '', /className=\{cn\(button\.play\)\}/);
-    assert.match(icons?.content ?? '', /export const PlayIcon/);
-    assert.match(icons?.content ?? '', /export const PauseIcon/);
-    assert.match(icons?.content ?? '', /export const RestartIcon/);
+    assert.match(icons?.content ?? '', /export function PlayIcon/);
+    assert.match(icons?.content ?? '', /export function PauseIcon/);
+    assert.match(icons?.content ?? '', /export function RestartIcon/);
     assert.doesNotMatch(icons?.content ?? '', /FullscreenEnterIcon|VolumeHighIcon/);
     assert.deepEqual(output.dependencies?.['play-button'], ['@videojs/react', '@videojs/utils', 'react']);
     assertNoPrivateImports(files);
@@ -160,10 +160,10 @@ describe('createSourceOutput', () => {
 
       assert.equal(catalog.items.length, 7);
       assert.equal(
-        catalog.items.every((item) => item.files.every((file) => file.content.length > 0)),
+        catalog.items.every((item) => item.files.every((file) => file.path.length > 0)),
         true
       );
-      assertNoPrivateImports(catalog.items.flatMap((item) => item.files));
+      assertNoPrivateImports(Object.values(output.artifacts).flat());
     });
   }
 });
