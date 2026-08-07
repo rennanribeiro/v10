@@ -29,6 +29,10 @@ export const slider = {
 };
 
 export const thumbnail = {
-  root: [surface, 'absolute bottom-[calc(100%+0.75rem)] overflow-hidden rounded-media-surface'],
+  root: [
+    surface,
+    'pointer-events-none invisible absolute bottom-[calc(100%+0.75rem)] overflow-hidden rounded-media-surface',
+    'group-data-interactive/slider:visible',
+  ],
   image: 'block max-h-28 max-w-48',
 };

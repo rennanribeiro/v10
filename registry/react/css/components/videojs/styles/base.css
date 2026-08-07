@@ -5,4 +5,8 @@
   .vjs-skin *::after {
     box-sizing: border-box;
   }
+
+  .vjs-skin media-tooltip-group {
+    display: contents;
+  }
 }

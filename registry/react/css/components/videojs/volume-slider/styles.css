@@ -5,6 +5,12 @@
 @layer properties;
 @layer theme, base, components, utilities;
 @layer utilities {
+  .pointer-events-none {
+    pointer-events: none;
+  }
+  .invisible {
+    visibility: hidden;
+  }
   .absolute {
     position: absolute;
   }
@@ -158,6 +164,9 @@
   .outline-none {
     --tw-outline-style: none;
     outline-style: none;
+  }
+  .group-data-interactive\/slider\:visible:is(:where(.group\/slider)[data-interactive] *) {
+    visibility: visible;
   }
   .data-open\:flex[data-open] {
     display: flex;

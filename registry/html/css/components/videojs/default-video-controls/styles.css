@@ -5,6 +5,12 @@
 @layer properties;
 @layer theme, base, components, utilities;
 @layer utilities {
+  .pointer-events-none {
+    pointer-events: none;
+  }
+  .invisible {
+    visibility: hidden;
+  }
   .absolute {
     position: absolute;
   }
@@ -264,6 +270,9 @@
   }
   .group-data-fullscreen\/fullscreen\:opacity-100:is(:where(.group\/fullscreen)[data-fullscreen] *) {
     opacity: 100%;
+  }
+  .group-data-interactive\/slider\:visible:is(:where(.group\/slider)[data-interactive] *) {
+    visibility: visible;
   }
   .group-data-muted\/mute\:block:is(:where(.group\/mute)[data-muted] *) {
     display: block;

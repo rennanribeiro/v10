@@ -16,7 +16,7 @@
     class="absolute top-1/2 left-(--media-slider-fill) size-media-slider-thumb -translate-x-1/2 -translate-y-1/2 rounded-media-pill bg-current data-[orientation=vertical]:top-[calc(100%-var(--media-slider-fill))] data-[orientation=vertical]:left-1/2"
   ></media-slider-thumb>
   <div
-    class="bg-media-surface text-media-controls shadow-media-surface backdrop-blur-media-surface absolute bottom-[calc(100%+0.75rem)] overflow-hidden rounded-media-surface"
+    class="bg-media-surface text-media-controls shadow-media-surface backdrop-blur-media-surface pointer-events-none invisible absolute bottom-[calc(100%+0.75rem)] overflow-hidden rounded-media-surface group-data-interactive/slider:visible"
   >
     <media-slider-thumbnail class="block max-h-28 max-w-48"></media-slider-thumbnail>
     <media-slider-value class="tabular-nums" type="pointer"></media-slider-value>

@@ -3,9 +3,9 @@ import { MuteButton as MuteButtonPrimitive } from '@videojs/react';
 import { VolumeHighIcon, VolumeLowIcon, VolumeOffIcon } from './icons';
 import { button, buttonIcon } from '../styles/components/button.styles';
 import { cn } from '@videojs/utils/style';
-export function MuteButton() {
+export function MuteButton(props: Parameters<typeof MuteButtonPrimitive>[0]) {
   return (
-    <MuteButtonPrimitive className={cn(button.mute)}>
+    <MuteButtonPrimitive {...props} className={cn(button.mute)}>
       <VolumeOffIcon className={cn(buttonIcon.volumeOff)} />
       <VolumeLowIcon className={cn(buttonIcon.volumeLow)} />
       <VolumeHighIcon className={cn(buttonIcon.volumeHigh)} />
