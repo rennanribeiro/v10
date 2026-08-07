@@ -2,19 +2,14 @@ import { audioText, captionsText, qualityText, settingsText, speedText } from '@
 import { renderIcon } from '@videojs/icons/render/minimal';
 import { createShadowStyle, createTemplate } from '@videojs/utils/dom';
 import { renderText } from '../../i18n/render-text';
-import { MenuItemValueElement } from '../../ui/menu/menu-item-value-element';
-import { MenuTransitionRootElement } from '../../ui/menu/menu-transition-root-element';
-import { MenuTransitionViewElement } from '../../ui/menu/menu-transition-view-element';
 import { safeDefine } from '../safe-define';
 import { SkinElement } from '../skin-element';
 import styles from './minimal-skin.css?inline';
 
 // Register the player, container, and all UI custom elements.
+import '../ui/menu-settings';
+import '../ui/menu-transition';
 import './minimal-ui';
-
-safeDefine(MenuItemValueElement);
-safeDefine(MenuTransitionRootElement);
-safeDefine(MenuTransitionViewElement);
 
 function getTemplateHTML() {
   return /*html*/ `

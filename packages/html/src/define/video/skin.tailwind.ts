@@ -26,18 +26,13 @@ import {
 import { createTemplate } from '@videojs/utils/dom';
 import { cn } from '@videojs/utils/style';
 import { renderText } from '../../i18n/render-text';
-import { MenuItemValueElement } from '../../ui/menu/menu-item-value-element';
-import { MenuTransitionRootElement } from '../../ui/menu/menu-transition-root-element';
-import { MenuTransitionViewElement } from '../../ui/menu/menu-transition-view-element';
 import { safeDefine } from '../safe-define';
 import { SkinElement } from '../skin-element';
 
 // Register the player, container, and all UI custom elements.
+import '../ui/menu-settings';
+import '../ui/menu-transition';
 import './ui';
-
-safeDefine(MenuItemValueElement);
-safeDefine(MenuTransitionRootElement);
-safeDefine(MenuTransitionViewElement);
 
 function getTemplateHTML() {
   return /*html*/ `
