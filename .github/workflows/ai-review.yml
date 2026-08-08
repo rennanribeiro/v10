@@ -71,7 +71,7 @@ jobs:
               job validates and publishes the structured result.
           claude_args: |
             --model opus
-            --max-turns 24
+            --max-turns 36
             --allowedTools "Agent,Bash(git:*),Bash(rg:*),Bash(pnpm:*)"
             --disallowedTools "Edit,Write,NotebookEdit"
             --json-schema '{"type":"object","additionalProperties":false,"properties":{"overview":{"type":"string","maxLength":35000},"dry_summary":{"type":"string","maxLength":8000},"test_gaps":{"type":"string","maxLength":4000},"findings":{"type":"array","maxItems":10,"items":{"type":"object","additionalProperties":false,"properties":{"path":{"type":"string"},"line":{"type":"integer","minimum":1},"severity":{"type":"string","enum":["critical","high","medium","low"]},"title":{"type":"string","maxLength":200},"body":{"type":"string","maxLength":4000}},"required":["path","line","severity","title","body"]}}},"required":["overview","dry_summary","test_gaps","findings"]}'
