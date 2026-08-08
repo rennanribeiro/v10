@@ -234,14 +234,15 @@ Video.js 10 includes portable tooling for AI-assisted development. Read [`AGENTS
 
 ### Slash Commands
 
-| Command          | Purpose                                           |
-| ---------------- | ------------------------------------------------- |
-| `/commit-pr`     | Commit changes and create/update a PR             |
-| `/review-branch` | Review changes in the current branch              |
-| `/investigate-issue <n>` | Analyze an issue and generate a plan       |
-| `/create-issue`  | Create a GitHub issue following repo conventions  |
-| `/maintain-agent-docs` | Update agent guidance and skills             |
-| `/create-skill`  | Scaffold a new skill                              |
+| Command                  | Purpose                                             |
+| ------------------------ | --------------------------------------------------- |
+| `/commit-pr`             | Commit changes and create/update a PR               |
+| `/review-architecture`   | Review a change with an architectural overview      |
+| `/review-dry`            | Review a change for reuse and abstraction           |
+| `/investigate-issue <n>` | Analyze an issue and generate a plan                 |
+| `/create-issue`          | Create a GitHub issue following repo conventions    |
+| `/maintain-agent-docs`   | Update agent guidance and skills                    |
+| `/create-skill`          | Scaffold a new skill                                |
 
 ### Skills
 

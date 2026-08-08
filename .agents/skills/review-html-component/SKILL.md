@@ -1,6 +1,6 @@
 ---
 name: review-html-component
-description: Review Video.js custom-element UI components without editing code. Use for HTML data flow, element boundaries, markup, styling APIs, transitions, rendered presence, opt-outs, registration, lifecycle, or bundle impact.
+description: Review Video.js custom-element UI without editing code. Use for HTML data flow, component boundaries, public contracts, lifecycle, registration, or bundle impact.
 ---
 
 # HTML component review

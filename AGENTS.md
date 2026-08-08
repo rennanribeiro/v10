@@ -71,12 +71,13 @@ Use the narrowest relevant test/build while iterating. Before handoff, run check
 Checked-in skills are direct children of `.agents/skills/`. `pnpm install` exposes that canonical catalog through generated `.claude/skills/` and `.opencode/skills/` directory aliases. Load only the specialized workflow needed after inspecting relevant project sources.
 
 - API: `design-api`, `review-api`
+- Cross-cutting review: `review-architecture`, `review-dry`
 - UI implementation: `create-html-component`, `create-react-component`, `implement-ui-transition`, `implement-accessible-ui`
 - UI review: `review-html-component`, `review-react-component`, `review-accessibility`
 - UI design: `write-html-component-design`, `write-react-component-design`, `review-html-component-design`, `review-react-component-design`
 - Docs and records: `write-docs`, `review-docs`, `write-api-reference`, `write-design-doc`, `write-rfc`
 - Site styling: `migrate-css-to-tailwind`, `review-tailwind-migration`
-- Delivery: `investigate-issue`, `create-issue`, `review-branch`, `commit-pr`
+- Delivery: `investigate-issue`, `create-issue`, `commit-pr`
 - SPF behaviors: `create-spf-behavior`, `change-spf-behavior`
 - SPF registry: `document-spf-feature`, `document-spf-use-case`, `implement-spf-feature`, `implement-spf-use-case`
 - Agent guidance: `maintain-agent-docs`, `create-skill`
