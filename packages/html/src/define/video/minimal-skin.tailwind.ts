@@ -28,8 +28,6 @@ import { safeDefine } from '../safe-define';
 import { SkinElement } from '../skin-element';
 
 // Register the player, container, and all UI custom elements.
-import '../ui/menu-settings';
-import '../ui/menu-transition';
 import './minimal-ui';
 
 function getTemplateHTML() {
