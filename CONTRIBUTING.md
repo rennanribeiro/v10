@@ -232,6 +232,8 @@ pnpm up <package>@<version> -r
 
 Video.js 10 includes portable tooling for AI-assisted development. Read [`AGENTS.md`](./AGENTS.md) for repo-wide conventions and source routing; Claude Code imports it through [`CLAUDE.md`](./CLAUDE.md).
 
+Same-repository pull requests receive an automated architecture and DRY review. The review explains the changed flow and may add inline findings, but it is advisory and never approves or requests changes. Fork pull requests are skipped.
+
 ### Slash Commands
 
 | Command                  | Purpose                                             |
