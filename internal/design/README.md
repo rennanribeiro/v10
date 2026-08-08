@@ -71,4 +71,4 @@ Add consequences, alternatives, or source links only when they materially explai
 - When a record becomes wrong, update it, mark it superseded with a successor, or delete it if no rationale remains.
 - Keep implemented records only when their constraints, alternatives, or tradeoffs still help future changes.
 
-After an explicit request, use `write-component-design` for UI component records, `write-design-doc` for other designs or decisions, and `write-rfc` for wider proposals.
+After an explicit request, use `write-html-component-design` or `write-react-component-design` for framework-specific UI component records, `write-design-doc` for other designs or decisions, and `write-rfc` for wider proposals.

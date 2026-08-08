@@ -73,7 +73,8 @@ Checked-in skills are direct children of `.agents/skills/`. `pnpm install` expos
 - API: `design-api`, `review-api`
 - UI implementation: `create-html-component`, `create-react-component`, `implement-ui-transition`, `implement-accessible-ui`
 - UI review: `review-html-component`, `review-react-component`, `review-accessibility`
-- Docs and records: `write-docs`, `review-docs`, `write-api-reference`, `write-component-design`, `review-component-design`, `write-design-doc`, `write-rfc`
+- UI design: `write-html-component-design`, `write-react-component-design`, `review-html-component-design`, `review-react-component-design`
+- Docs and records: `write-docs`, `review-docs`, `write-api-reference`, `write-design-doc`, `write-rfc`
 - Site styling: `migrate-css-to-tailwind`, `review-tailwind-migration`
 - Delivery: `investigate-issue`, `create-issue`, `review-branch`, `commit-pr`
 - SPF behaviors: `create-spf-behavior`, `change-spf-behavior`

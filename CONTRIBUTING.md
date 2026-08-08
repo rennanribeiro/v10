@@ -256,8 +256,10 @@ Focused workflows live as direct children of `.agents/skills/`; host-specific di
 | `implement-ui-transition`| Implementing UI transition and rendered-presence logic  |
 | `review-html-component`  | Reviewing custom-element component architecture         |
 | `review-react-component` | Reviewing React component architecture                  |
-| `write-component-design` | Writing UI component design records                     |
-| `review-component-design`| Reviewing proposed UI component designs                 |
+| `write-html-component-design`  | Writing custom-element component design records    |
+| `write-react-component-design` | Writing React component design records             |
+| `review-html-component-design` | Reviewing proposed custom-element designs           |
+| `review-react-component-design`| Reviewing proposed React component designs           |
 | `implement-accessible-ui`| Implementing accessible interaction                     |
 | `review-accessibility`   | Auditing accessibility                                  |
 | `write-docs`             | Writing guides, READMEs, and JSDoc                      |
