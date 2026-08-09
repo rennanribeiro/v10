@@ -2,6 +2,7 @@ import { audioText, captionsText, qualityText, settingsText, speedText } from '@
 import { renderIcon } from '@videojs/icons/render';
 import { createShadowStyle, createTemplate } from '@videojs/utils/dom';
 import { renderText } from '../../i18n/render-text';
+import { installVideoMenuSettings } from '../../skin/video-menu-settings-controller';
 import { safeDefine } from '../safe-define';
 import { SkinElement } from '../skin-element';
 import styles from './skin.css?inline';
@@ -105,35 +106,35 @@ function getTemplateHTML() {
               <media-menu-transition-root>
                 <media-menu id="settings-menu" side="top" align="center" class="media-surface media-popover media-menu media-menu--settings">
                   <div class="media-menu__group">
-                    <media-menu-item commandfor="settings-quality-menu" type="quality" data-setting="quality" class="media-menu__item media-menu__item--submenu">
+                    <media-menu-item commandfor="settings-quality-menu" data-setting="quality" class="media-menu__item media-menu__item--submenu">
                       ${renderIcon('switches', { class: 'media-icon' })}
                       ${renderText(qualityText)}
                       <span class="media-menu__hint">
-                        <media-menu-item-value class="media-menu__hint-label"></media-menu-item-value>
+                        <span data-setting-value class="media-menu__hint-label"></span>
                         ${renderIcon('chevron', { class: 'media-icon media-menu__chevron' })}
                       </span>
                     </media-menu-item>
-                    <media-menu-item commandfor="settings-audio-menu" type="audio-track" data-setting="audio-track" class="media-menu__item media-menu__item--submenu">
+                    <media-menu-item commandfor="settings-audio-menu" data-setting="audio-track" class="media-menu__item media-menu__item--submenu">
                       ${renderIcon('speech', { class: 'media-icon' })}
                       ${renderText(audioText)}
                       <span class="media-menu__hint">
-                        <media-menu-item-value class="media-menu__hint-label"></media-menu-item-value>
+                        <span data-setting-value class="media-menu__hint-label"></span>
                         ${renderIcon('chevron', { class: 'media-icon media-menu__chevron' })}
                       </span>
                     </media-menu-item>
-                    <media-menu-item commandfor="settings-speed-menu" type="playback-rate" data-setting="playback-rate" class="media-menu__item media-menu__item--submenu">
+                    <media-menu-item commandfor="settings-speed-menu" data-setting="playback-rate" class="media-menu__item media-menu__item--submenu">
                       ${renderIcon('speed', { class: 'media-icon' })}
                       ${renderText(speedText)}
                       <span class="media-menu__hint">
-                        <media-menu-item-value class="media-menu__hint-label"></media-menu-item-value>
+                        <span data-setting-value class="media-menu__hint-label"></span>
                         ${renderIcon('chevron', { class: 'media-icon media-menu__chevron' })}
                       </span>
                     </media-menu-item>
-                    <media-menu-item commandfor="settings-captions-menu" type="captions" data-setting="captions" class="media-menu__item media-menu__item--submenu">
+                    <media-menu-item commandfor="settings-captions-menu" data-setting="captions" class="media-menu__item media-menu__item--submenu">
                       ${renderIcon('captions-off', { class: 'media-icon' })}
                       ${renderText(captionsText)}
                       <span class="media-menu__hint">
-                        <media-menu-item-value class="media-menu__hint-label"></media-menu-item-value>
+                        <span data-setting-value class="media-menu__hint-label"></span>
                         ${renderIcon('chevron', { class: 'media-icon media-menu__chevron' })}
                       </span>
                     </media-menu-item>
@@ -342,6 +343,11 @@ export class VideoSkinElement extends SkinElement {
   static readonly tagName = 'video-skin';
   static styles = createShadowStyle(styles);
   static template = createTemplate(getTemplateHTML());
+
+  constructor() {
+    super();
+    installVideoMenuSettings(this);
+  }
 }
 
 safeDefine(VideoSkinElement);
