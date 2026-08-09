@@ -62,7 +62,9 @@ A submenu is a menu inside another menu. The submenu trigger lives in the parent
   <media-menu-transition-root>
     <media-menu id="settings-menu">
       <!-- Parent menu item that opens a submenu -->
-      <media-menu-item commandfor="submenu"></media-menu-item>
+      <media-menu-item commandfor="submenu">
+        <media-menu-item-value></media-menu-item-value>
+      </media-menu-item>
 
       <!-- Other parent menu items -->
       <media-menu-group>
@@ -93,7 +95,7 @@ Menus open from a trigger and close when you select an item, click outside, move
 
 `Menu.TransitionRoot` binds the outer content, and each `Menu.TransitionView` binds one child root. In HTML, import `@videojs/html/ui/menu-transition`, wrap the root `<media-menu>` in `<media-menu-transition-root>`, and wrap each child menu in `<media-menu-transition-view>`. The transition root creates the root panel; you do not author a root-view element.
 
-Base Menu stays independent of nested navigation, transitions, and player settings. Current setting labels and availability belong to the player or skin composition rather than the Menu API. In React, render them from the option hooks. See <DocsLink slug="reference/playback-rate-radio-group">PlaybackRateRadioGroup</DocsLink>, <DocsLink slug="reference/quality-radio-group">QualityRadioGroup</DocsLink>, <DocsLink slug="reference/audio-track-radio-group">AudioTrackRadioGroup</DocsLink>, and <DocsLink slug="reference/captions-radio-group">CaptionsRadioGroup</DocsLink>.
+Base Menu stays independent of nested navigation, transitions, and player settings. In React, render current setting labels from the option hooks. In HTML, import `@videojs/html/ui/menu-settings` to use `<media-menu-item-value>` with a `type="playback-rate|quality|audio-track|captions"` parent item. See <DocsLink slug="reference/playback-rate-radio-group">PlaybackRateRadioGroup</DocsLink>, <DocsLink slug="reference/quality-radio-group">QualityRadioGroup</DocsLink>, <DocsLink slug="reference/audio-track-radio-group">AudioTrackRadioGroup</DocsLink>, and <DocsLink slug="reference/captions-radio-group">CaptionsRadioGroup</DocsLink>.
 
 ## Styling
 

@@ -24,7 +24,6 @@ import {
 import { createTemplate } from '@videojs/utils/dom';
 import { cn } from '@videojs/utils/style';
 import { renderText } from '../../i18n/render-text';
-import { installVideoMenuSettings } from '../../skin/video-menu-settings-controller';
 import { safeDefine } from '../safe-define';
 import { SkinElement } from '../skin-element';
 
@@ -130,35 +129,35 @@ function getTemplateHTML() {
             <media-menu-transition-root root-view-class="${menu.rootView}">
               <media-menu id="settings-menu" side="top" align="center" class="${menu.settings}">
                 <div class="${menu.group}">
-                  <media-menu-item commandfor="settings-quality-menu" data-setting="quality" class="${menu.item}">
+                  <media-menu-item commandfor="settings-quality-menu" type="quality" data-setting="quality" class="${menu.item}">
                     ${renderIcon('switches', { class: cn(icon, menu.icon) })}
                     ${renderText(qualityText)}
                     <span class="${menu.hint}">
-                      <span data-setting-value class="${menu.hintLabel}"></span>
+                      <media-menu-item-value class="${menu.hintLabel}"></media-menu-item-value>
                       ${renderIcon('chevron', { class: cn(icon, menu.icon, menu.chevron) })}
                     </span>
                   </media-menu-item>
-                  <media-menu-item commandfor="settings-audio-menu" data-setting="audio-track" class="${menu.item}">
+                  <media-menu-item commandfor="settings-audio-menu" type="audio-track" data-setting="audio-track" class="${menu.item}">
                     ${renderIcon('speech', { class: icon })}
                     ${renderText(audioText)}
                     <span class="${menu.hint}">
-                      <span data-setting-value class="${menu.hintLabel}"></span>
+                      <media-menu-item-value class="${menu.hintLabel}"></media-menu-item-value>
                       ${renderIcon('chevron', { class: cn(icon, menu.chevron) })}
                     </span>
                   </media-menu-item>
-                  <media-menu-item commandfor="settings-speed-menu" data-setting="playback-rate" class="${menu.item}">
+                  <media-menu-item commandfor="settings-speed-menu" type="playback-rate" data-setting="playback-rate" class="${menu.item}">
                     ${renderIcon('speed', { class: cn(icon, menu.icon) })}
                     ${renderText(speedText)}
                     <span class="${menu.hint}">
-                      <span data-setting-value class="${menu.hintLabel}"></span>
+                      <media-menu-item-value class="${menu.hintLabel}"></media-menu-item-value>
                       ${renderIcon('chevron', { class: cn(icon, menu.icon, menu.chevron) })}
                     </span>
                   </media-menu-item>
-                  <media-menu-item commandfor="settings-captions-menu" data-setting="captions" class="${menu.item}">
+                  <media-menu-item commandfor="settings-captions-menu" type="captions" data-setting="captions" class="${menu.item}">
                     ${renderIcon('captions-off', { class: cn(icon, menu.icon) })}
                     ${renderText(captionsText)}
                     <span class="${menu.hint}">
-                      <span data-setting-value class="${menu.hintLabel}"></span>
+                      <media-menu-item-value class="${menu.hintLabel}"></media-menu-item-value>
                       ${renderIcon('chevron', { class: cn(icon, menu.icon, menu.chevron) })}
                     </span>
                   </media-menu-item>
@@ -361,11 +360,6 @@ function getTemplateHTML() {
 export class MinimalVideoSkinTailwindElement extends SkinElement {
   static readonly tagName = 'video-minimal-skin-tailwind';
   static template = createTemplate(getTemplateHTML());
-
-  constructor() {
-    super();
-    installVideoMenuSettings(this);
-  }
 }
 
 safeDefine(MinimalVideoSkinTailwindElement);

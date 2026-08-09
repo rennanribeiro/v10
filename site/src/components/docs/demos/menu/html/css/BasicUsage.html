@@ -16,27 +16,31 @@
             <button type="button" commandfor="settings-menu" class="settings-trigger">Settings</button>
             <media-menu-transition-root>
             <media-menu id="settings-menu" side="top" align="end" class="menu">
-                    <media-menu-item commandfor="quality-menu" class="menu-item">
+                    <media-menu-item commandfor="quality-menu" type="quality" class="menu-item">
                         <span>Quality</span>
                         <span class="menu-value">
+                            <media-menu-item-value></media-menu-item-value>
                             <span aria-hidden="true">›</span>
                         </span>
                     </media-menu-item>
-                    <media-menu-item commandfor="audio-menu" class="menu-item">
+                    <media-menu-item commandfor="audio-menu" type="audio-track" class="menu-item">
                         <span>Audio</span>
                         <span class="menu-value">
+                            <media-menu-item-value></media-menu-item-value>
                             <span aria-hidden="true">›</span>
                         </span>
                     </media-menu-item>
-                    <media-menu-item commandfor="speed-menu" class="menu-item">
+                    <media-menu-item commandfor="speed-menu" type="playback-rate" class="menu-item">
                         <span>Speed</span>
                         <span class="menu-value">
+                            <media-menu-item-value></media-menu-item-value>
                             <span aria-hidden="true">›</span>
                         </span>
                     </media-menu-item>
-                    <media-menu-item commandfor="captions-menu" class="menu-item">
+                    <media-menu-item commandfor="captions-menu" type="captions" class="menu-item">
                         <span>Captions</span>
                         <span class="menu-value">
+                            <media-menu-item-value></media-menu-item-value>
                             <span aria-hidden="true">›</span>
                         </span>
                     </media-menu-item>
