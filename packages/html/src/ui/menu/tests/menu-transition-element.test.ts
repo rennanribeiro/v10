@@ -32,7 +32,7 @@ async function settle(...elements: HTMLElement[]): Promise<void> {
   );
 }
 
-function setup() {
+function setup({ rootOpen = true }: { rootOpen?: boolean } = {}) {
   const transition = document.createElement(MenuTransitionRootElement.tagName) as MenuTransitionRootElement;
   transition.rootViewClass = 'root-panel';
   const root = document.createElement(MenuElement.tagName) as MenuElement;
@@ -42,7 +42,7 @@ function setup() {
   const back = document.createElement(MenuItemElement.tagName) as MenuItemElement;
   const option = document.createElement(MenuItemElement.tagName) as MenuItemElement;
 
-  root.open = true;
+  root.open = rootOpen;
   child.id = 'quality-menu';
   trigger.setAttribute('commandfor', child.id);
   trigger.textContent = 'Quality';
@@ -140,6 +140,22 @@ describe('MenuTransitionRootElement', () => {
     expect(fixture.root.style.getPropertyValue('--media-menu-width')).toBe(
       fixture.root.style.getPropertyValue('--media-menu-available-width')
     );
+    expect(fixture.root.style.getPropertyValue('--media-menu-height')).toBe('120px');
+  });
+
+  it('remeasures the root panel after the outer menu opens', async () => {
+    vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockImplementation(function (this: HTMLElement) {
+      const root = this.closest(MenuElement.tagName) as MenuElement | null;
+      return new DOMRect(0, 0, root?.open ? 240 : 0, root?.open ? 120 : 0);
+    });
+    const fixture = setup({ rootOpen: false });
+
+    await settle(...Object.values(fixture));
+    expect(fixture.root.style.getPropertyValue('--media-menu-height')).toBe('0px');
+
+    fixture.root.open = true;
+    await settle(fixture.root, fixture.transition);
+
     expect(fixture.root.style.getPropertyValue('--media-menu-height')).toBe('120px');
   });
 

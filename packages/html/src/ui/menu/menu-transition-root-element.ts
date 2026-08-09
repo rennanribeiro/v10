@@ -147,7 +147,6 @@ export class MenuTransitionRootElement extends MediaElement {
       );
       if (!trigger) continue;
 
-      await menu.updateComplete;
       const menuApi = menu.menuApi;
       if (!menuApi || !this.isConnected) continue;
 
@@ -163,6 +162,10 @@ export class MenuTransitionRootElement extends MediaElement {
       this.#unsubscribeRoot = input.subscribe(() => {
         const current = input.current;
         if (!current.active || current.status === 'ending') controller.reset();
+        this.requestUpdate();
+        void rootMenu.updateComplete.then(() => {
+          if (this.#rootMenu === rootMenu) this.#scheduleMeasure();
+        });
       });
     }
 
@@ -210,6 +213,14 @@ export class MenuTransitionRootElement extends MediaElement {
     if (rootMenu && panel) this.#controller?.setSize(getMenuTransitionSize(rootMenu, panel));
   };
 
+  #scheduleMeasure(): void {
+    cancelAnimationFrame(this.#measureFrame);
+    this.#measureFrame = requestAnimationFrame(() => {
+      this.#measureFrame = 0;
+      this.#measureActivePanel();
+    });
+  }
+
   #observeActivePanel(): void {
     const panel = this.#getActivePanel();
     if (!panel) return;
@@ -220,11 +231,7 @@ export class MenuTransitionRootElement extends MediaElement {
     this.#resizeObserver?.disconnect();
     this.#resizeObserver = null;
     this.#observedPanel = panel;
-    cancelAnimationFrame(this.#measureFrame);
-    this.#measureFrame = requestAnimationFrame(() => {
-      this.#measureFrame = 0;
-      this.#measureActivePanel();
-    });
+    this.#scheduleMeasure();
     if (typeof ResizeObserver !== 'function') return;
     this.#resizeObserver = new ResizeObserver(this.#measureActivePanel);
     this.#resizeObserver.observe(panel);
