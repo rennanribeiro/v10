@@ -105,8 +105,7 @@ Base positioning aliases Popover constraints into the available-size variables. 
 - `@videojs/core/dom` exports the shared coordinator, following the existing core DOM utility convention.
 - `@videojs/react` exposes transition parts on its existing `Menu` namespace. There is no separate React transition export.
 - `@videojs/html/ui/menu-transition` registers transition wrappers and nested command routing.
-- `@videojs/html/ui/menu-settings` registers optional setting value and availability behavior.
-- Base React and HTML Menu modules contain no player-setting cores or selectors. React presets render values from their existing option hooks.
+- Base React and HTML Menu modules contain no player-setting cores or selectors. React presets render values from their existing option hooks; HTML video skins own their setting labels and availability through private template-part outlets.
 
 The optional core and HTML modules import base Menu primitives; base core and base HTML never import or dynamically select them. Module absence is the acceptance gate for those graphs. React intentionally has a different boundary: `Menu` is a complete ESM namespace, so its post-refactor byte and gzip totals are the acceptance signal rather than assumed per-property tree shaking.
 
@@ -117,7 +116,7 @@ Bundle measurements are recorded only after building the complete root `Menu` na
 1. Make Menu requests distinct from committed open state and remove parent navigation, Back, View, and old viewport machinery.
 2. Add the menu-specific coordinator with explicit root/view registration, reactive lifecycle state, interruption handling, and controlled-state diagnostics.
 3. Add React and HTML bindings that render attributes, accessibility isolation, focus restoration, measurement, generated root panels, and separate registrations; migrate presets and examples.
-4. Move HTML setting behavior behind its own registration entry and keep generic items neutral.
+4. Move setting labels and availability into the React and HTML skin compositions and keep generic items neutral.
 5. Migrate skins to existing transition attributes and retained CSS variables; update reference and design documentation.
 6. Build bundle metafiles, measure the complete React `Menu` namespace, and assert base Core and HTML graphs exclude transition/navigation/settings modules while optional entries include only their intended graph.
 7. Verify controlled state, preventDefault, keyboard/back behavior, focus, one accessible panel, outgoing presence, reconnect/shadow DOM, interruption, dynamic size, and multiple controlled children.

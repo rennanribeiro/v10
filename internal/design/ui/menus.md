@@ -19,7 +19,7 @@ Applications need lightweight, independent menus. Player settings also need opti
 - Bind nested settings explicitly through the shared core DOM coordinator, the existing React `Menu.TransitionRoot` and `Menu.TransitionView` parts, or `@videojs/html/ui/menu-transition`. The binding derives the active view from child menu roots and owns forward/back policy.
 - Generate the root panel inside the transition binding. Consumers wrap child roots only; they do not author a root-view part.
 - Use an ordinary menu item for a back row. Selecting it closes the child menu that owns it.
-- Keep player-setting labels separate. React presets render labels from option hooks; HTML registers `<media-menu-item-value>` through `@videojs/html/ui/menu-settings`.
+- Keep player-setting labels separate. React presets render labels from option hooks; HTML video skins render them through private skin composition behavior and template-part outlets.
 - Express panel state through `data-view-state`, `data-direction`, and the shared starting/ending transition attributes. CSS owns presentation and motion.
 - Keep the shared coordinator state-only for rendered output. React and HTML subscribe to it and own data attributes, accessibility properties, focus effects, measurement, and CSS-variable publication.
 - Publish destination size through `--media-menu-width` and `--media-menu-height`; base positioning publishes `--media-menu-available-width` and `--media-menu-available-height`.
@@ -28,7 +28,7 @@ Applications need lightweight, independent menus. Player settings also need opti
 
 ## Consequences
 
-Base core and HTML imports exclude nested navigation, transition measurement, and setting integrations. React exposes transition parts on its complete `Menu` namespace and measures that namespace as a unit. React and HTML retain matching transition concepts while adapting rendering and registration to each platform. Unwrapped child menus remain independent popups.
+Base core and HTML imports exclude nested navigation, transition measurement, and setting composition. React exposes transition parts on its complete `Menu` namespace and measures that namespace as a unit. React and HTML retain matching transition concepts while adapting rendering and registration to each platform. Unwrapped child menus remain independent popups.
 
 ## Current sources of truth
 

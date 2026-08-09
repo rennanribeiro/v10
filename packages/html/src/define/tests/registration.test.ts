@@ -141,7 +141,6 @@ describe('composite define registration', () => {
       const batch = batchSince(before);
 
       expect(batch).toContain('media-text');
-      expect(batch).toContain('media-menu-item-value');
       expect(batch).toContain('media-menu-transition-root');
       expect(batch).toContain('media-menu-transition-view');
     });
