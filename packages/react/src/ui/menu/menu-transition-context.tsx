@@ -1,6 +1,6 @@
 'use client';
 
-import type { MenuTransitionApi, MenuTransitionViewApi } from '@videojs/core/dom';
+import type { MenuTransitionApi } from '@videojs/core/dom';
 import { createContext, useContext } from 'react';
 import type { MenuContextValue } from './context';
 
@@ -11,7 +11,7 @@ export interface MenuTransitionRootContextValue {
 }
 
 const MenuTransitionRootContext = createContext<MenuTransitionRootContextValue | null>(null);
-const MenuTransitionViewContext = createContext<MenuTransitionViewApi | null>(null);
+const MenuTransitionViewContext = createContext(false);
 
 export const MenuTransitionRootContextProvider = MenuTransitionRootContext.Provider;
 export const MenuTransitionViewContextProvider = MenuTransitionViewContext.Provider;
@@ -22,6 +22,6 @@ export function useMenuTransitionRootContext(): MenuTransitionRootContextValue {
   return context;
 }
 
-export function useOptionalMenuTransitionViewContext(): MenuTransitionViewApi | null {
+export function useOptionalMenuTransitionViewContext(): boolean {
   return useContext(MenuTransitionViewContext);
 }

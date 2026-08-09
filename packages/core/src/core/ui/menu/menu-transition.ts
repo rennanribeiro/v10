@@ -1,16 +1,12 @@
-import type { TransitionFlags } from '../transition';
-import { getTransitionFlags, TransitionDataAttrs } from '../transition';
 import type { StateAttrMap } from '../types';
-import { MenuDataAttrs } from './menu-data-attrs';
+import type { MenuInput } from './menu-core';
 
 export type MenuTransitionDirection = 'forward' | 'back';
-export type MenuTransitionPhase = 'hidden' | 'entering' | 'active' | 'exiting';
 export type MenuViewState = 'active' | 'inactive';
 
-/** Render state for one live-DOM panel participating in a Menu transition. */
-export interface MenuTransitionPanelState extends TransitionFlags {
-  phase: MenuTransitionPhase;
-  open: boolean;
+/** Presentation state for one live-DOM panel participating in a Menu transition. */
+export interface MenuTransitionPanelState {
+  visible: boolean;
   interactive: boolean;
   viewState: MenuViewState;
   direction: MenuTransitionDirection;
@@ -30,35 +26,46 @@ export const MenuTransitionDataAttrs = {
   direction: 'data-direction',
 } as const;
 
-/** Maps reactive transition state to the existing styling contract. */
+/** Maps Menu transition presentation state to stable styling attributes. */
 export const MenuTransitionStateDataAttrs = {
-  open: MenuDataAttrs.open,
   viewState: MenuTransitionDataAttrs.viewState,
   direction: MenuTransitionDataAttrs.direction,
-  ...TransitionDataAttrs,
 } as const satisfies StateAttrMap<MenuTransitionPanelState>;
 
-/** Derives render state without mutating a platform element. */
-export function getMenuTransitionPanelState(
-  phase: MenuTransitionPhase,
+/** Derives the permanently mounted root panel's presentation. */
+export function getMenuTransitionRootState(
+  childActive: boolean,
   direction: MenuTransitionDirection
 ): MenuTransitionPanelState {
-  const interactive = phase === 'entering' || phase === 'active';
+  return {
+    visible: true,
+    interactive: !childActive,
+    viewState: childActive ? 'inactive' : 'active',
+    direction,
+  };
+}
+
+/** Derives a destination panel's presentation from its bound Menu lifecycle. */
+export function getMenuTransitionViewState(
+  input: MenuInput,
+  selected: boolean,
+  direction: MenuTransitionDirection
+): MenuTransitionPanelState {
+  const exiting = input.active && input.status === 'ending';
+  const interactive = selected && input.active && !exiting;
 
   return {
-    phase,
-    open: phase !== 'hidden',
+    visible: selected || exiting,
     interactive,
     viewState: interactive ? 'active' : 'inactive',
     direction,
-    ...getTransitionFlags(phase === 'entering' ? 'starting' : phase === 'exiting' ? 'ending' : 'idle'),
   };
 }
 
 /** Returns the attributes a platform adapter should apply to a transition panel. */
 export function getMenuTransitionPanelAttrs(state: MenuTransitionPanelState) {
   return {
-    hidden: state.open ? undefined : true,
+    hidden: state.visible ? undefined : true,
     inert: state.interactive ? undefined : true,
     'aria-hidden': state.interactive ? undefined : ('true' as const),
   };

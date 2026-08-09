@@ -35,6 +35,9 @@ describe('Menu transition parts', () => {
     expect(root).not.toBeNull();
     expect(root?.classList.contains('root-panel')).toBe(true);
     expect(root?.getAttribute('data-view-state')).toBe('active');
+    expect(root?.hasAttribute('data-open')).toBe(false);
+    expect(root?.hasAttribute('data-starting-style')).toBe(false);
+    expect(root?.hasAttribute('data-ending-style')).toBe(false);
     expect(container.querySelectorAll('[data-menu-root-view]')).toHaveLength(1);
 
     fireEvent.click(screen.getByRole('menuitem', { name: 'Quality' }));
@@ -42,11 +45,13 @@ describe('Menu transition parts', () => {
     const child = await screen.findByTestId('quality-panel');
     expect(child.parentElement).toBe(container);
     expect(child.hasAttribute('data-submenu')).toBe(true);
+    expect(child.hasAttribute('data-open')).toBe(true);
     expect(child.getAttribute('data-view-state')).toBe('active');
     expect(child.getAttribute('data-direction')).toBe('forward');
     expect(root?.getAttribute('data-view-state')).toBe('inactive');
     expect(root?.getAttribute('aria-hidden')).toBe('true');
     expect(root?.hasAttribute('inert')).toBe(true);
+    expect(root?.hasAttribute('hidden')).toBe(false);
   });
 
   it('uses an ordinary item as a back row and restores the root panel', async () => {
@@ -59,6 +64,49 @@ describe('Menu transition parts', () => {
     const root = screen.getByTestId('container').querySelector('[data-menu-root-view]');
     expect(root?.getAttribute('data-view-state')).toBe('active');
     expect(root?.getAttribute('data-direction')).toBe('back');
+  });
+
+  it('delegates initial and restored focus to the bound child Menu lifecycle', async () => {
+    render(<Fixture />);
+    const trigger = await screen.findByRole('menuitem', { name: 'Quality' });
+    const child = await screen.findByTestId('quality-panel');
+    const back = child.querySelector<HTMLElement>('[role="menuitem"]')!;
+    const triggerFocus = vi.spyOn(trigger, 'focus');
+    const backFocus = vi.spyOn(back, 'focus');
+
+    fireEvent.click(trigger);
+
+    await waitFor(() => expect(backFocus).toHaveBeenCalledTimes(1));
+    fireEvent.click(back);
+    await waitFor(() => expect(child.getAttribute('data-view-state')).toBe('inactive'));
+    await waitFor(() => expect(triggerFocus).toHaveBeenCalledTimes(1));
+  });
+
+  it('publishes measured size through the stable Menu CSS variables', async () => {
+    vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockReturnValue(new DOMRect(0, 0, 240, 120));
+
+    render(
+      <Menu.Root defaultOpen>
+        <Menu.Trigger>Settings</Menu.Trigger>
+        <Menu.TransitionRoot
+          render={
+            <Menu.Content
+              data-testid="sized-container"
+              style={{ '--media-menu-available-width': '200px' } as React.CSSProperties}
+            />
+          }
+        >
+          <Menu.Item>Copy link</Menu.Item>
+        </Menu.TransitionRoot>
+      </Menu.Root>
+    );
+
+    const container = await screen.findByTestId('sized-container');
+    await waitFor(() => expect(container.style.getPropertyValue('--media-menu-width')).not.toBe(''));
+    expect(container.style.getPropertyValue('--media-menu-width')).toBe(
+      container.style.getPropertyValue('--media-menu-available-width')
+    );
+    expect(container.style.getPropertyValue('--media-menu-height')).toBe('120px');
   });
 
   it('supports ArrowRight, ArrowLeft, and Escape only in the opt-in binding', async () => {

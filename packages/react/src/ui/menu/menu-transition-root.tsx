@@ -2,6 +2,7 @@
 
 import {
   getMenuTransitionPanelAttrs,
+  getMenuTransitionRootState,
   MenuCSSVars,
   MenuTransitionDataAttrs,
   type MenuTransitionPanelState,
@@ -22,7 +23,6 @@ import {
   type ReactNode,
   useCallback,
   useEffect,
-  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -31,7 +31,7 @@ import { composeRefs } from '../../utils/use-composed-refs';
 import { useMenuContext } from './context';
 import type { MenuContentProps } from './menu-content';
 import { MenuTransitionRootContextProvider } from './menu-transition-context';
-import { measureMenuTransitionPanel } from './menu-transition-measure';
+import { useMenuTransitionMeasure } from './menu-transition-measure';
 
 export interface MenuTransitionRootProps {
   /** The outer Menu.Content to bind as the transition container. */
@@ -63,40 +63,15 @@ interface RootPanelProps {
 }
 
 function RootPanel({ controller, container, className, style, children }: RootPanelProps): ReactNode {
-  const state = useSnapshot(controller.rootState);
+  const selection = useSnapshot(controller.state);
+  const state = getMenuTransitionRootState(selection.activeMenu !== null, selection.direction);
   const panelRef = useRef<HTMLDivElement>(null);
 
-  const measure = useCallback(() => {
-    const panel = panelRef.current;
-    if (container && panel) controller.setSize(measureMenuTransitionPanel(container, panel));
-  }, [container, controller]);
+  useMenuTransitionMeasure(controller, container, panelRef, state.interactive);
 
-  useLayoutEffect(() => {
-    if (state.interactive) measure();
-  }, [measure, state.interactive]);
-
-  useEffect(() => {
-    if (!state.interactive) return;
-    measure();
-    const frame = requestAnimationFrame(measure);
-    return () => cancelAnimationFrame(frame);
-  }, [measure, state.interactive]);
-
-  useEffect(() => {
-    const panel = panelRef.current;
-    if (!state.interactive || !panel || typeof ResizeObserver !== 'function') return;
-    const observer = new ResizeObserver(measure);
-    observer.observe(panel);
-    return () => observer.disconnect();
-  }, [measure, state.interactive]);
-
-  const setPanelElement = useCallback(
-    (element: HTMLDivElement | null) => {
-      panelRef.current = element;
-      controller.setRootPanelElement(element);
-    },
-    [controller]
-  );
+  const setPanelElement = useCallback((element: HTMLDivElement | null) => {
+    panelRef.current = element;
+  }, []);
 
   return (
     <div
@@ -118,12 +93,7 @@ function RootPanel({ controller, container, className, style, children }: RootPa
 /** Binds an outer Menu.Content to its root panel and registered child views. */
 export function MenuTransitionRoot({ render, className, style, children }: MenuTransitionRootProps): ReactNode {
   const parentMenu = useMenuContext();
-  const [controller] = useState(() =>
-    createMenuTransition({
-      onViewEnter: (view) => view.menu.highlightFirstItem({ preventScroll: true }),
-      onViewExit: (view) => view.triggerElement?.focus({ preventScroll: true }),
-    })
-  );
+  const [controller] = useState(createMenuTransition);
   const [container, setContainer] = useState<HTMLElement | null>(null);
   const size = useSnapshot(controller.size);
 

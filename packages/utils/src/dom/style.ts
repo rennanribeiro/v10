@@ -45,6 +45,7 @@ export function applyStyles(element: HTMLElement, styles: Record<string, string 
 
 /** Applies inline styles for one synchronous operation, then restores the previous declarations. */
 export function withTemporaryStyles<T>(element: HTMLElement, styles: Record<string, string>, callback: () => T): T {
+  const hadStyleAttribute = element.hasAttribute('style');
   const snapshot = Object.keys(styles).map((property) => ({
     property,
     value: element.style.getPropertyValue(property),
@@ -59,6 +60,7 @@ export function withTemporaryStyles<T>(element: HTMLElement, styles: Record<stri
       if (value) element.style.setProperty(property, value, priority);
       else element.style.removeProperty(property);
     }
+    if (!hadStyleAttribute && element.style.length === 0) element.removeAttribute('style');
   }
 }
 

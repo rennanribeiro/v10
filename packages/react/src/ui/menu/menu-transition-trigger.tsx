@@ -21,16 +21,12 @@ export const MenuTrigger = forwardRef<HTMLButtonElement | HTMLDivElement, MenuTr
         <BaseMenuTrigger {...(props as BaseMenuTriggerProps)} ref={forwardedRef as React.Ref<HTMLButtonElement>} />
       );
     }
-    return <TransitionViewTrigger {...props} ref={forwardedRef as React.Ref<HTMLDivElement>} view={view} />;
+    return <TransitionViewTrigger {...props} ref={forwardedRef as React.Ref<HTMLDivElement>} />;
   }
 );
 
-interface TransitionViewTriggerProps extends MenuTriggerProps {
-  view: NonNullable<ReturnType<typeof useOptionalMenuTransitionViewContext>>;
-}
-
-const TransitionViewTrigger = forwardRef<HTMLDivElement, TransitionViewTriggerProps>(function TransitionViewTrigger(
-  { view, render, className, style, disabled, onClick, onKeyDown, ...elementProps },
+const TransitionViewTrigger = forwardRef<HTMLDivElement, MenuTriggerProps>(function TransitionViewTrigger(
+  { render, className, style, disabled, onClick, onKeyDown, ...elementProps },
   forwardedRef
 ) {
   const child = useMenuContext();
@@ -40,15 +36,13 @@ const TransitionViewTrigger = forwardRef<HTMLDivElement, TransitionViewTriggerPr
   useEffect(() => {
     const element = elementRef.current;
     if (!element) return;
-    view.setTriggerElement(element);
     child.menu.setTriggerElement(element);
     const unregister = parentMenu.menu.registerItem(element);
     return () => {
       unregister();
-      view.setTriggerElement(null);
       child.menu.setTriggerElement(null);
     };
-  }, [child.menu, parentMenu.menu, view]);
+  }, [child.menu, parentMenu.menu]);
 
   const open = useCallback(() => {
     if (!disabled) child.menu.open('click');

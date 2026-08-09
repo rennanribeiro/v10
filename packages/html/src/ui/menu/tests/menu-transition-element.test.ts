@@ -71,6 +71,9 @@ describe('MenuTransitionRootElement', () => {
     expect(panels).toHaveLength(1);
     expect(panels[0]?.classList.contains('root-panel')).toBe(true);
     expect(panels[0]?.getAttribute('data-view-state')).toBe('active');
+    expect(panels[0]?.hasAttribute('data-open')).toBe(false);
+    expect(panels[0]?.hasAttribute('data-starting-style')).toBe(false);
+    expect(panels[0]?.hasAttribute('data-ending-style')).toBe(false);
     expect(panels[0]?.contains(fixture.trigger)).toBe(true);
     expect(fixture.child.hidden).toBe(true);
     expect(fixture.child.hasAttribute('data-submenu')).toBe(true);
@@ -106,6 +109,38 @@ describe('MenuTransitionRootElement', () => {
     expect(fixture.child.open).toBe(false);
     expect(fixture.child.getAttribute('data-view-state')).toBe('inactive');
     expect(fixture.root.querySelector('[data-menu-root-view]')?.getAttribute('data-view-state')).toBe('active');
+  });
+
+  it('delegates initial and restored focus to the bound child menu lifecycle', async () => {
+    const fixture = setup();
+    await settle(...Object.values(fixture));
+    const triggerFocus = vi.spyOn(fixture.trigger, 'focus');
+    const backFocus = vi.spyOn(fixture.back, 'focus');
+
+    fixture.trigger.click();
+    await settle(fixture.child, fixture.transition);
+
+    expect(backFocus).toHaveBeenCalledTimes(1);
+    fixture.back.click();
+    await settle(fixture.root, fixture.child, fixture.transition);
+    await frame();
+    await frame();
+    await Promise.resolve();
+
+    expect(triggerFocus).toHaveBeenCalledTimes(1);
+  });
+
+  it('publishes measured size through the stable menu CSS variables', async () => {
+    vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockReturnValue(new DOMRect(0, 0, 240, 120));
+    const fixture = setup();
+    fixture.root.style.setProperty('--media-menu-available-width', '200px');
+
+    await settle(...Object.values(fixture));
+
+    expect(fixture.root.style.getPropertyValue('--media-menu-width')).toBe(
+      fixture.root.style.getPropertyValue('--media-menu-available-width')
+    );
+    expect(fixture.root.style.getPropertyValue('--media-menu-height')).toBe('120px');
   });
 
   it('supports ArrowRight and ArrowLeft in the optional binding', async () => {

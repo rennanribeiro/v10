@@ -2,6 +2,7 @@
 
 import {
   getMenuTransitionPanelAttrs,
+  getMenuTransitionViewState,
   MenuDataAttrs,
   type MenuState,
   MenuTransitionDataAttrs,
@@ -9,7 +10,7 @@ import {
 } from '@videojs/core';
 import { getStateDataAttrs, isMenuNavigationKey } from '@videojs/core/dom';
 import { useSnapshot } from '@videojs/store/react';
-import { forwardRef, useCallback, useEffect, useLayoutEffect, useRef } from 'react';
+import { forwardRef, useCallback, useRef } from 'react';
 import { createPortal } from 'react-dom';
 import type { UIComponentProps } from '../../utils/types';
 import { renderElement } from '../../utils/use-render';
@@ -17,7 +18,7 @@ import { useMenuContext } from './context';
 import { MenuContent as BaseMenuContent, type MenuContentProps as BaseMenuContentProps } from './menu-content';
 import { toUIFocusEvent, toUIKeyboardEvent } from './menu-events';
 import { useMenuTransitionRootContext, useOptionalMenuTransitionViewContext } from './menu-transition-context';
-import { measureMenuTransitionPanel } from './menu-transition-measure';
+import { useMenuTransitionMeasure } from './menu-transition-measure';
 
 export interface MenuContentProps extends UIComponentProps<'div', MenuState> {}
 
@@ -25,52 +26,30 @@ export interface MenuContentProps extends UIComponentProps<'div', MenuState> {}
 export const MenuContent = forwardRef<HTMLDivElement, MenuContentProps>(function MenuContent(props, forwardedRef) {
   const view = useOptionalMenuTransitionViewContext();
   if (!view) return <BaseMenuContent {...(props as BaseMenuContentProps)} ref={forwardedRef} />;
-  return <TransitionViewContent {...props} ref={forwardedRef} view={view} />;
+  return <TransitionViewContent {...props} ref={forwardedRef} />;
 });
 
-interface TransitionViewContentProps extends MenuContentProps {
-  view: NonNullable<ReturnType<typeof useOptionalMenuTransitionViewContext>>;
-}
-
-const TransitionViewContent = forwardRef<HTMLDivElement, TransitionViewContentProps>(function TransitionViewContent(
-  { view, render, className, style, onKeyDown, onBlur, ...elementProps },
+const TransitionViewContent = forwardRef<HTMLDivElement, MenuContentProps>(function TransitionViewContent(
+  { render, className, style, onKeyDown, onBlur, ...elementProps },
   forwardedRef
 ) {
   const child = useMenuContext();
   const { container, controller } = useMenuTransitionRootContext();
-  const transitionState = useSnapshot(view.state);
+  const selection = useSnapshot(controller.state);
+  const transitionState = getMenuTransitionViewState(
+    { active: child.state.open, status: child.state.status },
+    selection.activeMenu === child.menu,
+    selection.direction
+  );
   const panelRef = useRef<HTMLDivElement>(null);
   const setPanel = useCallback(
     (element: HTMLDivElement | null) => {
       panelRef.current = element;
-      view.setPanelElement(element);
       child.menu.setContentElement(element);
     },
-    [child.menu, view]
+    [child.menu]
   );
-  const measure = useCallback(() => {
-    const panel = panelRef.current;
-    if (container && panel) controller.setSize(measureMenuTransitionPanel(container, panel));
-  }, [container, controller]);
-
-  useLayoutEffect(() => {
-    if (transitionState.interactive) measure();
-  }, [measure, transitionState.interactive]);
-
-  useEffect(() => {
-    if (!transitionState.interactive) return;
-    measure();
-    const frame = requestAnimationFrame(measure);
-    return () => cancelAnimationFrame(frame);
-  }, [measure, transitionState.interactive]);
-
-  useEffect(() => {
-    const panel = panelRef.current;
-    if (!transitionState.interactive || !panel || typeof ResizeObserver !== 'function') return;
-    const observer = new ResizeObserver(measure);
-    observer.observe(panel);
-    return () => observer.disconnect();
-  }, [measure, transitionState.interactive]);
+  useMenuTransitionMeasure(controller, container, panelRef, transitionState.interactive);
   const handleKeyDown = useCallback(
     (event: React.KeyboardEvent<HTMLDivElement>) => {
       onKeyDown?.(event);

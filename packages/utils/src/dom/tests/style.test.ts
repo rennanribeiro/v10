@@ -64,6 +64,14 @@ describe('withTemporaryStyles', () => {
     expect(element.style.getPropertyValue('position')).toBe('relative');
     expect(element.style.getPropertyValue('width')).toBe('');
   });
+
+  it('does not leave an empty style attribute behind', () => {
+    const element = document.createElement('div');
+
+    withTemporaryStyles(element, { position: 'absolute' }, () => {});
+
+    expect(element.hasAttribute('style')).toBe(false);
+  });
 });
 
 describe('resolveCSSLength', () => {
