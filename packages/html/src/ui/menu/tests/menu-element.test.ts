@@ -46,7 +46,7 @@ describe('MenuElement', () => {
     expect(trigger.getAttribute('aria-expanded')).toBe('true');
   });
 
-  it('publishes Menu available-size aliases from Popover positioning', async () => {
+  it('publishes Menu available sizes directly from positioning', async () => {
     const trigger = document.createElement('button');
     const menu = document.createElement(MenuElement.tagName) as MenuElement;
     menu.id = 'settings';
@@ -67,14 +67,10 @@ describe('MenuElement', () => {
     await frame();
 
     expect(menu.getAttribute('data-side')).toBe('bottom');
-    expect(menu.style.getPropertyValue('--media-menu-available-width')).toBe(
-      menu.style.getPropertyValue('--media-popover-available-width')
-    );
-    expect(menu.style.getPropertyValue('--media-menu-available-height')).toBe(
-      menu.style.getPropertyValue('--media-popover-available-height')
-    );
-    expect(menu.style.getPropertyValue('--media-menu-available-width')).not.toBe('');
-    expect(menu.style.getPropertyValue('--media-menu-available-height')).not.toBe('');
+    expect(menu.style.getPropertyValue('--media-menu-available-width')).toBe('300px');
+    expect(menu.style.getPropertyValue('--media-menu-available-height')).toBe('170px');
+    expect(menu.style.getPropertyValue('--media-popover-available-width')).toBe('');
+    expect(menu.style.getPropertyValue('--media-popover-available-height')).toBe('');
   });
 
   it('allows a controlled consumer to reject an open request', async () => {

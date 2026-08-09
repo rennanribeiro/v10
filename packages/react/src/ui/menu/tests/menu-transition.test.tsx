@@ -83,19 +83,16 @@ describe('Menu transition parts', () => {
   });
 
   it('publishes measured size through the stable Menu CSS variables', async () => {
-    vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockReturnValue(new DOMRect(0, 0, 240, 120));
+    vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockImplementation(function (this: HTMLElement) {
+      if (this === document.documentElement) return new DOMRect(0, 0, 200, 200);
+      const constrained = this.style.getPropertyValue('max-width').includes('--media-menu-available-width');
+      return new DOMRect(0, 0, constrained ? 200 : 240, 120);
+    });
 
     render(
-      <Menu.Root defaultOpen>
+      <Menu.Root defaultOpen boundary="viewport">
         <Menu.Trigger>Settings</Menu.Trigger>
-        <Menu.TransitionRoot
-          render={
-            <Menu.Content
-              data-testid="sized-container"
-              style={{ '--media-menu-available-width': '200px' } as React.CSSProperties}
-            />
-          }
-        >
+        <Menu.TransitionRoot render={<Menu.Content data-testid="sized-container" />}>
           <Menu.Item>Copy link</Menu.Item>
         </Menu.TransitionRoot>
       </Menu.Root>

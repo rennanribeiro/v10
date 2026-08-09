@@ -1,9 +1,11 @@
 import type { State } from '@videojs/store';
 import type { MenuInput, MenuState } from '../../../core/ui/menu/menu-core';
+import { MenuCSSVars } from '../../../core/ui/menu/menu-css-vars';
 import { MenuItemDataAttrs } from '../../../core/ui/menu/menu-item-data-attrs';
+import { PopoverCSSVars } from '../../../core/ui/popover/popover-css-vars';
 import type { UIFocusEvent, UIKeyboardEvent } from '../event';
 import { createPopover, type PopoverChangeDetails, type PopoverOpenChangeReason } from '../popover/popover';
-import type { PositioningOptions } from '../popover/popover-positioning';
+import type { PositioningCSSVars, PositioningOptions } from '../popover/popover-positioning';
 import type { PopupGroup } from '../popover/popup-group';
 import type { TransitionApi } from '../transition';
 
@@ -61,6 +63,13 @@ export function getRootPositionOptions(side: MenuState['side'], align: MenuState
 
   return { side, align };
 }
+
+/** Uses shared Popover offset inputs while publishing Menu-owned available-size outputs. */
+export const MenuPositioningCSSVars = {
+  ...PopoverCSSVars,
+  availableWidth: MenuCSSVars.availableWidth,
+  availableHeight: MenuCSSVars.availableHeight,
+} as const satisfies PositioningCSSVars;
 
 export interface MenuApi {
   /** Reactive transition state for platforms to subscribe to. */

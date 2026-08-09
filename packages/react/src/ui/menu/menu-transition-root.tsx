@@ -56,18 +56,17 @@ function getSizedContentStyle(style: MenuContentProps['style'], size: MenuTransi
 
 interface RootPanelProps {
   controller: MenuTransitionApi;
-  container: HTMLElement | null;
   className?: string | undefined;
   style?: CSSProperties | undefined;
   children?: ReactNode | undefined;
 }
 
-function RootPanel({ controller, container, className, style, children }: RootPanelProps): ReactNode {
+function RootPanel({ controller, className, style, children }: RootPanelProps): ReactNode {
   const selection = useSnapshot(controller.state);
   const state = getMenuTransitionRootState(selection.activeMenu !== null, selection.direction);
   const panelRef = useRef<HTMLDivElement>(null);
 
-  useMenuTransitionMeasure(controller, container, panelRef, state.interactive);
+  useMenuTransitionMeasure(controller, panelRef, state.interactive);
 
   const setPanelElement = useCallback((element: HTMLDivElement | null) => {
     panelRef.current = element;
@@ -113,7 +112,7 @@ export function MenuTransitionRoot({ render, className, style, children }: MenuT
     render,
     { ref: composeRefs(renderRef, setContainer), style: contentStyle },
     <MenuTransitionRootContextProvider value={context}>
-      <RootPanel controller={controller} container={container} className={className} style={style}>
+      <RootPanel controller={controller} className={className} style={style}>
         {children}
       </RootPanel>
     </MenuTransitionRootContextProvider>

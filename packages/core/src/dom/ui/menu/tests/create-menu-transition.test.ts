@@ -12,14 +12,6 @@ function rect(width: number, height: number): DOMRect {
   return new DOMRect(0, 0, width, height);
 }
 
-function mockSize(element: HTMLElement, width: number, height: number): void {
-  element.getBoundingClientRect = vi.fn(() => rect(width, height));
-  Object.defineProperties(element, {
-    scrollWidth: { configurable: true, get: () => width },
-    scrollHeight: { configurable: true, get: () => height },
-  });
-}
-
 function createCommittedMenu(): MenuApi {
   let menu!: MenuApi;
   menu = createMenu({
@@ -82,10 +74,19 @@ describe('createMenuTransition', () => {
     const container = document.createElement('div');
     const panel = document.createElement('div');
     container.style.setProperty('--media-menu-available-width', '200px');
-    mockSize(panel, 240, 120);
+    panel.getBoundingClientRect = vi.fn(() => {
+      expect(panel.style.getPropertyValue('max-width')).toBe('var(--media-menu-available-width, none)');
+      return rect(200, 120);
+    });
+    Object.defineProperties(panel, {
+      scrollWidth: { configurable: true, get: () => 240 },
+      scrollHeight: { configurable: true, get: () => 120 },
+    });
+    container.append(panel);
+    document.body.append(container);
     const before = panel.getAttribute('style');
 
-    expect(getMenuTransitionSize(container, panel)).toEqual({ width: 200, height: 120 });
+    expect(getMenuTransitionSize(panel)).toEqual({ width: 200, height: 120 });
     expect(panel.getAttribute('style')).toBe(before);
     expect(panel.hidden).toBe(false);
   });

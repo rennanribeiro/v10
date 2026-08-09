@@ -49,7 +49,7 @@ const TransitionViewContent = forwardRef<HTMLDivElement, MenuContentProps>(funct
     },
     [child.menu]
   );
-  useMenuTransitionMeasure(controller, container, panelRef, transitionState.interactive);
+  useMenuTransitionMeasure(controller, panelRef, transitionState.interactive);
   const handleKeyDown = useCallback(
     (event: React.KeyboardEvent<HTMLDivElement>) => {
       onKeyDown?.(event);

@@ -1,7 +1,7 @@
 'use client';
 
-import { MenuCSSVars, type MenuState, PopoverCSSVars } from '@videojs/core';
-import { getRootPositionOptions, isMenuNavigationKey } from '@videojs/core/dom';
+import type { MenuState } from '@videojs/core';
+import { getRootPositionOptions, isMenuNavigationKey, MenuPositioningCSSVars } from '@videojs/core/dom';
 import { forwardRef, useCallback, useMemo, useRef } from 'react';
 
 import type { UIComponentProps } from '../../utils/types';
@@ -60,14 +60,6 @@ export const MenuContent = forwardRef<HTMLDivElement, MenuContentProps>(function
   const handlePosition = useCallback(
     (side: NonNullable<MenuState['side']>) => {
       setPositionedSide(side);
-
-      const content = internalRef.current;
-      if (!content) return;
-
-      const availableWidth = content.style.getPropertyValue(PopoverCSSVars.availableWidth);
-      const availableHeight = content.style.getPropertyValue(PopoverCSSVars.availableHeight);
-      if (availableWidth) content.style.setProperty(MenuCSSVars.availableWidth, availableWidth);
-      if (availableHeight) content.style.setProperty(MenuCSSVars.availableHeight, availableHeight);
     },
     [setPositionedSide]
   );
@@ -79,6 +71,7 @@ export const MenuContent = forwardRef<HTMLDivElement, MenuContentProps>(function
     popupRef: internalRef,
     boundary,
     container,
+    cssVars: MenuPositioningCSSVars,
     onSideChange: handlePosition,
   });
 

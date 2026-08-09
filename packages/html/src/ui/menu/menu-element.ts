@@ -1,4 +1,4 @@
-import { MenuCore, MenuCSSVars, MenuDataAttrs, type MenuInput, POPUP_HOST_ATTR, PopoverCSSVars } from '@videojs/core';
+import { MenuCore, MenuDataAttrs, type MenuInput, POPUP_HOST_ATTR } from '@videojs/core';
 import {
   applyElementProps,
   applyStateDataAttrs,
@@ -9,6 +9,7 @@ import {
   type MenuApi,
   type MenuChangeDetails,
   type MenuOpenChangeReason,
+  MenuPositioningCSSVars,
   type PositioningBoundary,
   selectControls,
   type UIFocusEvent,
@@ -196,12 +197,9 @@ export class MenuElement extends MediaElement {
       trigger: this.#currentTrigger,
       boundary: this.boundary,
       container: this.#containerCtx.value?.container ?? null,
+      cssVars: MenuPositioningCSSVars,
       onSideChange: (side) => {
         this.setAttribute(MenuDataAttrs.side, side);
-        const availableWidth = this.style.getPropertyValue(PopoverCSSVars.availableWidth);
-        const availableHeight = this.style.getPropertyValue(PopoverCSSVars.availableHeight);
-        if (availableWidth) this.style.setProperty(MenuCSSVars.availableWidth, availableWidth);
-        if (availableHeight) this.style.setProperty(MenuCSSVars.availableHeight, availableHeight);
       },
     });
   }

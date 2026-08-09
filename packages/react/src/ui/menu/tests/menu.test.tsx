@@ -44,7 +44,7 @@ describe('Menu', () => {
     expect(content.hasAttribute('data-menu-view')).toBe(false);
   });
 
-  it('publishes Menu available-size aliases from Popover positioning', async () => {
+  it('publishes Menu available sizes directly from positioning', async () => {
     vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockImplementation(function (this: HTMLElement) {
       if (this.dataset.testid === 'trigger') return makeDOMRect(100, 10, 40, 20);
       if (this.dataset.testid === 'content') return makeDOMRect(0, 0, 100, 60);
@@ -68,14 +68,10 @@ describe('Menu', () => {
 
     await waitFor(() => expect(screen.getByTestId('content').getAttribute('data-side')).toBe('bottom'));
     const content = screen.getByTestId('content');
-    expect(content.style.getPropertyValue('--media-menu-available-width')).toBe(
-      content.style.getPropertyValue('--media-popover-available-width')
-    );
-    expect(content.style.getPropertyValue('--media-menu-available-height')).toBe(
-      content.style.getPropertyValue('--media-popover-available-height')
-    );
-    expect(content.style.getPropertyValue('--media-menu-available-width')).not.toBe('');
-    expect(content.style.getPropertyValue('--media-menu-available-height')).not.toBe('');
+    expect(content.style.getPropertyValue('--media-menu-available-width')).toBe('300px');
+    expect(content.style.getPropertyValue('--media-menu-available-height')).toBe('170px');
+    expect(content.style.getPropertyValue('--media-popover-available-width')).toBe('');
+    expect(content.style.getPropertyValue('--media-popover-available-height')).toBe('');
   });
 
   it('does not commit a controlled request until the open prop changes', async () => {

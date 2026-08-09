@@ -1,8 +1,7 @@
 import { createState, type State } from '@videojs/store';
-import { resolveCSSLength, withTemporaryStyles } from '@videojs/utils/dom';
+import { withTemporaryStyles } from '@videojs/utils/dom';
 import { MenuCSSVars } from '../../../core/ui/menu/menu-css-vars';
 import type { MenuTransitionDirection } from '../../../core/ui/menu/menu-transition';
-import { PopoverCSSVars } from '../../../core/ui/popover/popover-css-vars';
 import type { MenuApi } from './create-menu';
 
 export interface MenuTransitionSize {
@@ -20,30 +19,18 @@ const measureStyles = {
   left: '0px',
   width: 'max-content',
   height: 'auto',
+  'box-sizing': 'border-box',
   'min-width': `${DEFAULT_MIN_WIDTH}px`,
-  'max-width': 'none',
+  'max-width': `var(${MenuCSSVars.availableWidth}, none)`,
 };
 
 /** Measures a rendered panel without mutating it. */
-export function getMenuTransitionSize(
-  container: HTMLElement,
-  panel: HTMLElement,
-  minWidth = DEFAULT_MIN_WIDTH
-): MenuTransitionSize {
+export function getMenuTransitionSize(panel: HTMLElement, minWidth = DEFAULT_MIN_WIDTH): MenuTransitionSize {
   return withTemporaryStyles(panel, { ...measureStyles, 'min-width': `${minWidth}px` }, () => {
-    const availableValue =
-      container.style.getPropertyValue(MenuCSSVars.availableWidth) ||
-      container.style.getPropertyValue(PopoverCSSVars.availableWidth) ||
-      getComputedStyle(container).getPropertyValue(MenuCSSVars.availableWidth) ||
-      getComputedStyle(container).getPropertyValue(PopoverCSSVars.availableWidth);
-    const resolvedAvailableWidth = resolveCSSLength(container, availableValue);
-    const availableWidth =
-      Number.isFinite(resolvedAvailableWidth) && resolvedAvailableWidth > 0 ? resolvedAvailableWidth : null;
     const rect = panel.getBoundingClientRect();
-    const naturalWidth = Math.ceil(Math.max(minWidth, rect.width, panel.scrollWidth));
 
     return {
-      width: Math.ceil(availableWidth ? Math.min(naturalWidth, Math.max(minWidth, availableWidth)) : naturalWidth),
+      width: Math.ceil(Math.max(minWidth, rect.width)),
       height: Math.ceil(Math.max(rect.height, panel.scrollHeight)),
     };
   });

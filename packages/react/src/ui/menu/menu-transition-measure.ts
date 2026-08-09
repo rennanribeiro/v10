@@ -4,14 +4,13 @@ import { type RefObject, useCallback, useEffect, useLayoutEffect } from 'react';
 /** Keeps the transition container sized to one live panel. */
 export function useMenuTransitionMeasure(
   controller: MenuTransitionApi,
-  container: HTMLElement | null,
   panelRef: RefObject<HTMLElement | null>,
   active: boolean
 ): void {
   const measure = useCallback(() => {
     const panel = panelRef.current;
-    if (container && panel) controller.setSize(getMenuTransitionSize(container, panel));
-  }, [container, controller, panelRef]);
+    if (panel) controller.setSize(getMenuTransitionSize(panel));
+  }, [controller, panelRef]);
 
   useLayoutEffect(() => {
     if (active) measure();

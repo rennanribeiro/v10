@@ -131,7 +131,10 @@ describe('MenuTransitionRootElement', () => {
   });
 
   it('publishes measured size through the stable menu CSS variables', async () => {
-    vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockReturnValue(new DOMRect(0, 0, 240, 120));
+    vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockImplementation(function (this: HTMLElement) {
+      const constrained = this.style.getPropertyValue('max-width').includes('--media-menu-available-width');
+      return new DOMRect(0, 0, constrained ? 200 : 240, 120);
+    });
     const fixture = setup();
     fixture.root.style.setProperty('--media-menu-available-width', '200px');
 

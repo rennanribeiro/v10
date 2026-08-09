@@ -208,9 +208,8 @@ export class MenuTransitionRootElement extends MediaElement {
   }
 
   #measureActivePanel = (): void => {
-    const rootMenu = this.#rootMenu;
     const panel = this.#getActivePanel();
-    if (rootMenu && panel) this.#controller?.setSize(getMenuTransitionSize(rootMenu, panel));
+    if (panel) this.#controller?.setSize(getMenuTransitionSize(panel));
   };
 
   #scheduleMeasure(): void {
