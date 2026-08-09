@@ -76,7 +76,7 @@ class VideoMenuSettingsController implements ReactiveController {
 
   #updateSetting(setting: VideoMenuSetting): void {
     const item = this.#host.shadowRoot?.querySelector<HTMLElement>(`[data-setting="${setting}"]`);
-    const value = item?.querySelector<HTMLElement>('[data-part~="hint-label"]');
+    const value = item?.querySelector<HTMLElement>('[data-part~="value"]');
     if (!item || !value) return;
 
     const state = this.#getSettingState(setting);

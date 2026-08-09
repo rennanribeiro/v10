@@ -110,7 +110,7 @@ function getTemplateHTML() {
                       ${renderIcon('switches', { class: 'media-icon' })}
                       ${renderText(qualityText)}
                       <span class="media-menu__hint">
-                        <span data-part="hint-label" class="media-menu__hint-label"></span>
+                        <span data-part="value" class="media-menu__hint-label"></span>
                         ${renderIcon('chevron', { class: 'media-icon media-menu__chevron' })}
                       </span>
                     </media-menu-item>
@@ -118,7 +118,7 @@ function getTemplateHTML() {
                       ${renderIcon('speech', { class: 'media-icon' })}
                       ${renderText(audioText)}
                       <span class="media-menu__hint">
-                        <span data-part="hint-label" class="media-menu__hint-label"></span>
+                        <span data-part="value" class="media-menu__hint-label"></span>
                         ${renderIcon('chevron', { class: 'media-icon media-menu__chevron' })}
                       </span>
                     </media-menu-item>
@@ -126,7 +126,7 @@ function getTemplateHTML() {
                       ${renderIcon('speed', { class: 'media-icon' })}
                       ${renderText(speedText)}
                       <span class="media-menu__hint">
-                        <span data-part="hint-label" class="media-menu__hint-label"></span>
+                        <span data-part="value" class="media-menu__hint-label"></span>
                         ${renderIcon('chevron', { class: 'media-icon media-menu__chevron' })}
                       </span>
                     </media-menu-item>
@@ -134,7 +134,7 @@ function getTemplateHTML() {
                       ${renderIcon('captions-off', { class: 'media-icon' })}
                       ${renderText(captionsText)}
                       <span class="media-menu__hint">
-                        <span data-part="hint-label" class="media-menu__hint-label"></span>
+                        <span data-part="value" class="media-menu__hint-label"></span>
                         ${renderIcon('chevron', { class: 'media-icon media-menu__chevron' })}
                       </span>
                     </media-menu-item>

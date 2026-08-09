@@ -73,10 +73,10 @@ class TestVideoSkinElement extends MediaElement {
     super();
     this.attachShadow({ mode: 'open' });
     this.shadowRoot!.innerHTML = `
-      <div data-setting="quality"><span data-part="hint-label"></span></div>
-      <div data-setting="audio-track"><span data-part="hint-label"></span></div>
-      <div data-setting="playback-rate"><span data-part="hint-label"></span></div>
-      <div data-setting="captions"><span data-part="hint-label"></span></div>
+      <div data-setting="quality"><span data-part="value"></span></div>
+      <div data-setting="audio-track"><span data-part="value"></span></div>
+      <div data-setting="playback-rate"><span data-part="value"></span></div>
+      <div data-setting="captions"><span data-part="value"></span></div>
     `;
     installVideoMenuSettings(this);
   }

@@ -134,7 +134,7 @@ function getTemplateHTML() {
                     ${renderIcon('switches', { class: cn(icon, menu.icon) })}
                     ${renderText(qualityText)}
                     <span class="${menu.hint}">
-                      <span data-part="hint-label" class="${menu.hintLabel}"></span>
+                      <span data-part="value" class="${menu.hintLabel}"></span>
                       ${renderIcon('chevron', { class: cn(icon, menu.icon, menu.chevron) })}
                     </span>
                   </media-menu-item>
@@ -142,7 +142,7 @@ function getTemplateHTML() {
                     ${renderIcon('speech', { class: icon })}
                     ${renderText(audioText)}
                     <span class="${menu.hint}">
-                      <span data-part="hint-label" class="${menu.hintLabel}"></span>
+                      <span data-part="value" class="${menu.hintLabel}"></span>
                       ${renderIcon('chevron', { class: cn(icon, menu.chevron) })}
                     </span>
                   </media-menu-item>
@@ -150,7 +150,7 @@ function getTemplateHTML() {
                     ${renderIcon('speed', { class: cn(icon, menu.icon) })}
                     ${renderText(speedText)}
                     <span class="${menu.hint}">
-                      <span data-part="hint-label" class="${menu.hintLabel}"></span>
+                      <span data-part="value" class="${menu.hintLabel}"></span>
                       ${renderIcon('chevron', { class: cn(icon, menu.icon, menu.chevron) })}
                     </span>
                   </media-menu-item>
@@ -158,7 +158,7 @@ function getTemplateHTML() {
                     ${renderIcon('captions-off', { class: cn(icon, menu.icon) })}
                     ${renderText(captionsText)}
                     <span class="${menu.hint}">
-                      <span data-part="hint-label" class="${menu.hintLabel}"></span>
+                      <span data-part="value" class="${menu.hintLabel}"></span>
                       ${renderIcon('chevron', { class: cn(icon, menu.icon, menu.chevron) })}
                     </span>
                   </media-menu-item>
