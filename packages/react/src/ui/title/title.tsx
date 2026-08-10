@@ -41,15 +41,12 @@ export const Title = forwardRef(function Title(
     return null;
   }
 
-  if (!playback) {
-    if (__DEV__) logMissingFeature('Title', 'playback');
-    return null;
-  }
-
+  // A player without playback or controls has nothing that hides the title,
+  // so both fall back to the value that keeps it on screen.
   core.setMedia({
     contentTitle: metadata.contentTitle,
-    paused: playback.paused,
-    controlsVisible: controls?.controlsVisible,
+    paused: playback?.paused ?? true,
+    controlsVisible: controls?.controlsVisible ?? true,
   });
   const state = core.getState();
 

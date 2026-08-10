@@ -76,22 +76,4 @@ describe('TitleCore', () => {
       expect(core.getState().visible).toBe(false);
     });
   });
-
-  describe('without the controls feature', () => {
-    it('treats controls as always visible', () => {
-      const core = new TitleCore();
-
-      core.setMedia({ contentTitle: 'Sintel', paused: true });
-
-      expect(core.getState().visible).toBe(true);
-    });
-
-    it('still follows playback', () => {
-      const core = new TitleCore();
-
-      core.setMedia({ contentTitle: 'Sintel', paused: false });
-
-      expect(core.getState().visible).toBe(false);
-    });
-  });
 });

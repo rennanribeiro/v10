@@ -80,6 +80,11 @@ function createNoControlsStore() {
   return createStore<PlayerTarget>()(combine(metadataFeature, playbackFeature));
 }
 
+/** A player composed of `metadataFeature` alone, like the metadata sandbox. */
+function createMetadataOnlyStore() {
+  return createStore<PlayerTarget>()(combine(metadataFeature));
+}
+
 type TitleStore = ReturnType<typeof createTitleStore>;
 
 class TestPlayerProviderElement extends MediaElement {
@@ -173,6 +178,18 @@ describe('TitleElement', () => {
 
   it('keeps the title visible without the controls feature', async () => {
     const store = createNoControlsStore();
+    const { title } = await setup(store);
+
+    store.setContentTitle('Sintel');
+
+    await waitForAssertion(() => {
+      expect(title.textContent).toBe('Sintel');
+      expect(title.hasAttribute('data-visible')).toBe(true);
+    });
+  });
+
+  it('keeps the title visible without the playback feature', async () => {
+    const store = createMetadataOnlyStore();
     const { title } = await setup(store);
 
     store.setContentTitle('Sintel');
