@@ -39,18 +39,25 @@ export class TitleElement extends MediaElement {
     if (__DEV__ && !this.#metadataState.value) {
       logMissingFeature(this.localName, this.#metadataState.displayName!);
     }
+
+    if (__DEV__ && !this.#playbackState.value) {
+      logMissingFeature(this.localName, this.#playbackState.displayName!);
+    }
   }
 
   protected override update(changed: PropertyValues): void {
     super.update(changed);
 
     const metadata = this.#metadataState.value;
+    const playback = this.#playbackState.value;
 
-    if (!metadata) return;
+    if (!metadata || !playback) return;
 
-    // Controls and playback are optional — `TitleCore` falls back to a title
-    // that stays visible when either feature is absent.
-    this.#core.setMedia({ ...metadata, ...this.#controlsState.value, ...this.#playbackState.value });
+    this.#core.setMedia({
+      contentTitle: metadata.contentTitle,
+      paused: playback.paused,
+      controlsVisible: this.#controlsState.value?.controlsVisible,
+    });
     const state = this.#core.getState();
 
     this.#textNode.textContent = state.title;

@@ -19,7 +19,6 @@ import { PlayButtonElement } from '../../ui/play-button/play-button-element';
 import { PopoverElement } from '../../ui/popover/popover-element';
 import { PosterElement } from '../../ui/poster/poster-element';
 import { TextElement } from '../../ui/text/text-element';
-import { TitleElement } from '../../ui/title/title-element';
 import { safeDefine } from '../safe-define';
 import {
   defineControls,
@@ -65,4 +64,3 @@ safeDefine(PlayButtonElement);
 safeDefine(PopoverElement);
 safeDefine(PosterElement);
 safeDefine(TextElement);
-safeDefine(TitleElement);

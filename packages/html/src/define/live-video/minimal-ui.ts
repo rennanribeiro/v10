@@ -17,7 +17,6 @@ import { PiPButtonElement } from '../../ui/pip-button/pip-button-element';
 import { PlayButtonElement } from '../../ui/play-button/play-button-element';
 import { PopoverElement } from '../../ui/popover/popover-element';
 import { PosterElement } from '../../ui/poster/poster-element';
-import { TitleElement } from '../../ui/title/title-element';
 import { safeDefine } from '../safe-define';
 import {
   defineControls,
@@ -63,4 +62,3 @@ safeDefine(PiPButtonElement);
 safeDefine(PlayButtonElement);
 safeDefine(PopoverElement);
 safeDefine(PosterElement);
-safeDefine(TitleElement);

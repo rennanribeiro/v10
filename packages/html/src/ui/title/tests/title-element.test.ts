@@ -75,9 +75,9 @@ function createTitleStore() {
   return createStore<PlayerTarget>()(combine(metadataFeature, controlsFeature, playbackFeature));
 }
 
-/** A player without the controls and playback features. */
-function createMetadataOnlyStore() {
-  return createStore<PlayerTarget>()(metadataFeature);
+/** A player without the controls feature, like the audio presets. */
+function createNoControlsStore() {
+  return createStore<PlayerTarget>()(combine(metadataFeature, playbackFeature));
 }
 
 type TitleStore = ReturnType<typeof createTitleStore>;
@@ -171,8 +171,8 @@ describe('TitleElement', () => {
     });
   });
 
-  it('keeps the title visible without the controls and playback features', async () => {
-    const store = createMetadataOnlyStore();
+  it('keeps the title visible without the controls feature', async () => {
+    const store = createNoControlsStore();
     const { title } = await setup(store);
 
     store.setContentTitle('Sintel');

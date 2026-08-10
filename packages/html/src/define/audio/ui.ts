@@ -14,7 +14,6 @@ import { PlaybackRateRadioGroupElement } from '../../ui/playback-rate-radio-grou
 import { PopoverElement } from '../../ui/popover/popover-element';
 import { SeekButtonElement } from '../../ui/seek-button/seek-button-element';
 import { TextElement } from '../../ui/text/text-element';
-import { TitleElement } from '../../ui/title/title-element';
 import { safeDefine } from '../safe-define';
 import { defineErrorDialog, defineMenu, defineSliders, defineTime, defineTooltip } from '../ui/compounds';
 
@@ -46,4 +45,3 @@ safeDefine(PlaybackRateRadioGroupElement);
 safeDefine(PopoverElement);
 safeDefine(SeekButtonElement);
 safeDefine(TextElement);
-safeDefine(TitleElement);

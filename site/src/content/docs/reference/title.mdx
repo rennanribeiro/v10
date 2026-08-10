@@ -37,8 +37,8 @@ import basicUsageHtmlTs from "@/components/docs/demos/title/html/css/BasicUsage.
 
 ## Behavior
 
-The component displays the title resolved by the metadata feature. It owns its own
-text content — set the title on the player rather than by passing children.
+The component shows the name of what is playing. It writes its own text, so set the
+title on the player instead of passing children.
 
 <FrameworkCase frameworks={["react"]}>
   ```tsx
@@ -52,14 +52,20 @@ text content — set the title on the player rather than by passing children.
   ```
 </FrameworkCase>
 
-The metadata feature resolves one value from several sources, in order: the title you
-set, the title the media reports, the fallback you set with `defaultContentTitle`, and
-finally an empty string. You can also update it at any time by calling `setContentTitle`
-on the store.
+A title can come from three places. The player uses the first one that has a value:
 
-The component is visible when a title exists, the controls are visible, and playback is
-paused. A player without the controls and playback features has no show-and-hide
-choreography to join, so the title stays visible for as long as one resolves.
+1. `contentTitle`, the title you set.
+2. The title the media reports about itself.
+3. `defaultContentTitle`, the fallback you set for media that does not name itself.
+
+If none of them has a value, the title is empty and the component renders nothing. To
+change the title while the player is running, call `setContentTitle`.
+
+The title shows when three things are true: a title exists, the controls are on screen,
+and playback is paused. Press play and it hides, so it stays out of the way of the video.
+
+Audio players are the exception. Their controls never hide on their own, so the title
+follows playback alone.
 
 ## Styling
 

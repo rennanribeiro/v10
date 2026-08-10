@@ -105,8 +105,15 @@ describe('Title', () => {
     expect(getByTestId('title').hasAttribute('data-visible')).toBe(false);
   });
 
-  it('keeps the title visible without the controls and playback features', () => {
-    const { Wrapper } = createPlayerWrapper(metadataState('Sintel'));
+  it('renders nothing without the playback feature', () => {
+    const { Wrapper } = createPlayerWrapper({ ...metadataState('Sintel'), ...controlsState(true) });
+    const { queryByTestId } = render(<Title data-testid="title" />, { wrapper: Wrapper });
+
+    expect(queryByTestId('title')).toBeNull();
+  });
+
+  it('keeps the title visible without the controls feature', () => {
+    const { Wrapper } = createPlayerWrapper({ ...metadataState('Sintel'), ...playbackState(true) });
     const { getByTestId } = render(<Title data-testid="title" />, { wrapper: Wrapper });
 
     const title = getByTestId('title');

@@ -1,13 +1,11 @@
-import { describe, expect, it, vi } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import { TitleCore, type TitleMediaState } from '../title-core';
 
 function createMediaState(overrides: Partial<TitleMediaState> = {}): TitleMediaState {
   return {
     contentTitle: 'Big Buck Bunny',
-    setContentTitle: vi.fn(),
-    setDefaultContentTitle: vi.fn(),
-    controlsVisible: true,
     paused: true,
+    controlsVisible: true,
     ...overrides,
   };
 }
@@ -79,43 +77,19 @@ describe('TitleCore', () => {
     });
   });
 
-  describe('without the controls and playback features', () => {
-    it('is visible whenever a title exists', () => {
+  describe('without the controls feature', () => {
+    it('treats controls as always visible', () => {
       const core = new TitleCore();
 
-      core.setMedia({
-        contentTitle: 'Sintel',
-        setContentTitle: vi.fn(),
-        setDefaultContentTitle: vi.fn(),
-      });
+      core.setMedia({ contentTitle: 'Sintel', paused: true });
 
       expect(core.getState().visible).toBe(true);
     });
 
-    it('is still hidden without a title', () => {
+    it('still follows playback', () => {
       const core = new TitleCore();
 
-      core.setMedia({
-        contentTitle: '',
-        setContentTitle: vi.fn(),
-        setDefaultContentTitle: vi.fn(),
-      });
-
-      expect(core.getState().visible).toBe(false);
-    });
-
-    it('applies the playback fallback when only controls are present', () => {
-      const core = new TitleCore();
-
-      core.setMedia({
-        contentTitle: 'Sintel',
-        setContentTitle: vi.fn(),
-        setDefaultContentTitle: vi.fn(),
-        userActive: true,
-        controlsVisible: false,
-        requestControlsLock: vi.fn(() => vi.fn()),
-        toggleControls: vi.fn(() => true),
-      });
+      core.setMedia({ contentTitle: 'Sintel', paused: false });
 
       expect(core.getState().visible).toBe(false);
     });

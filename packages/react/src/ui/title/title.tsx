@@ -31,9 +31,8 @@ export const Title = forwardRef(function Title(
   const { render, className, style, ...elementProps } = componentProps;
 
   const metadata = usePlayer(selectMetadata);
-  // Optional — without them the title stays visible for as long as it exists.
-  const controls = usePlayer(selectControls);
   const playback = usePlayer(selectPlayback);
+  const controls = usePlayer(selectControls);
 
   const [core] = useState(() => new TitleCore());
 
@@ -42,7 +41,16 @@ export const Title = forwardRef(function Title(
     return null;
   }
 
-  core.setMedia({ ...metadata, ...controls, ...playback });
+  if (!playback) {
+    if (__DEV__) logMissingFeature('Title', 'playback');
+    return null;
+  }
+
+  core.setMedia({
+    contentTitle: metadata.contentTitle,
+    paused: playback.paused,
+    controlsVisible: controls?.controlsVisible,
+  });
   const state = core.getState();
 
   return renderElement(
