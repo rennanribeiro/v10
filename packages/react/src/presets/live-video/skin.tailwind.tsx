@@ -13,6 +13,7 @@ import {
   overlay,
   popup,
   poster,
+  posterPlaceholder,
   primaryControls,
   root,
   slider,
@@ -20,7 +21,7 @@ import {
 } from '@videojs/skins/default/tailwind/video.tailwind';
 import { isString } from '@videojs/utils/predicate';
 import { cn } from '@videojs/utils/style';
-import { type ComponentProps, type CSSProperties, forwardRef, type ReactNode } from 'react';
+import { type ComponentProps, forwardRef, type ReactNode } from 'react';
 import { useTranslator } from '@/i18n/context';
 import {
   AirPlayEnterIcon,
@@ -61,6 +62,7 @@ import { PiPButton } from '@/ui/pip-button';
 import { PlayButton } from '@/ui/play-button';
 import { Popover } from '@/ui/popover';
 import { Poster } from '@/ui/poster';
+import { PosterPlaceholder } from '@/ui/poster-placeholder';
 import { StatusAnnouncer } from '@/ui/status-announcer';
 import { StatusIndicator } from '@/ui/status-indicator';
 import { Tooltip } from '@/ui/tooltip';
@@ -202,15 +204,13 @@ function CaptionsTrigger(): ReactNode {
 }
 
 export function LiveVideoSkinTailwind(props: LiveVideoSkinProps): ReactNode {
-  const { children, className, poster: posterProp, placeholder, style, ...rest } = props;
-
-  const containerStyle = placeholder
-    ? ({ '--media-poster-placeholder': `url(${placeholder})`, ...style } as CSSProperties)
-    : style;
+  const { children, className, poster: posterProp, style, ...rest } = props;
 
   return (
-    <Container className={cn(root(false), className)} style={containerStyle} {...rest}>
+    <Container className={cn(root(false), className)} style={style} {...rest}>
       {children}
+
+      <PosterPlaceholder className={posterPlaceholder} />
 
       {posterProp && (
         <Poster

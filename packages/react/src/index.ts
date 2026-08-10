@@ -120,6 +120,7 @@ export {
 export { PlaybackRateButton, type PlaybackRateButtonProps } from './ui/playback-rate-button/playback-rate-button';
 export { Popover, type PopoverContextValue, usePopoverContext } from './ui/popover';
 export { Poster, type PosterProps } from './ui/poster/poster';
+export { PosterPlaceholder, type PosterPlaceholderProps } from './ui/poster-placeholder/poster-placeholder';
 export {
   type QualityOption,
   type QualityOptionsProps,

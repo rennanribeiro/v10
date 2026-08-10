@@ -14,6 +14,8 @@ function getTemplateHTML() {
       <slot name="media"></slot>
       <slot></slot>
 
+      <media-poster-placeholder></media-poster-placeholder>
+
       <media-poster>
         <slot name="poster"></slot>
       </media-poster>

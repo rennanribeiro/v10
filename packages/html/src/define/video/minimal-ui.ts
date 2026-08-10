@@ -19,6 +19,7 @@ import { PlaybackRateButtonElement } from '../../ui/playback-rate-button/playbac
 import { PlaybackRateRadioGroupElement } from '../../ui/playback-rate-radio-group/playback-rate-radio-group-element';
 import { PopoverElement } from '../../ui/popover/popover-element';
 import { PosterElement } from '../../ui/poster/poster-element';
+import { PosterPlaceholderElement } from '../../ui/poster-placeholder/poster-placeholder-element';
 import { QualityRadioGroupElement } from '../../ui/quality-radio-group/quality-radio-group-element';
 import { SeekButtonElement } from '../../ui/seek-button/seek-button-element';
 import { safeDefine } from '../safe-define';
@@ -69,5 +70,6 @@ safeDefine(PlaybackRateRadioGroupElement);
 safeDefine(CaptionsRadioGroupElement);
 safeDefine(PopoverElement);
 safeDefine(PosterElement);
+safeDefine(PosterPlaceholderElement);
 safeDefine(QualityRadioGroupElement);
 safeDefine(SeekButtonElement);

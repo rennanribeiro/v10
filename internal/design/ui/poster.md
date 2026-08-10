@@ -45,5 +45,5 @@ Our approach makes the flexible path the default.
 ## Future
 
 1. **`data-ended`** — Show poster when media ends.
-2. **`data-loaded`** — Set when child image loads, enabling CSS-only placeholder-to-main transitions.
+2. **`data-loaded`** — Set when child image loads, enabling CSS-only poster-placeholder-to-main transitions.
 3. **Transition/animation support** — CSS transition recommendations for fade in/out.

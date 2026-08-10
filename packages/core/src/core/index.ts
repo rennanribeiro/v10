@@ -52,6 +52,8 @@ export * from './ui/popover/popover-data-attrs';
 export * from './ui/popover/popup-host-attr';
 export * from './ui/poster/poster-core';
 export * from './ui/poster/poster-data-attrs';
+export * from './ui/poster-placeholder/poster-placeholder-core';
+export * from './ui/poster-placeholder/poster-placeholder-data-attrs';
 export * from './ui/quality-radio-group/quality-radio-group-core';
 export * from './ui/quality-radio-group/quality-radio-group-data-attrs';
 export * from './ui/seek-button/seek-button-core';

@@ -36,7 +36,7 @@ export const Poster = forwardRef(function Poster(
   const [core] = useState(() => new PosterCore());
 
   // Track when the current src has finished loading so the CSS blur-up
-  // sequence can show the placeholder first, then crossfade to the full image.
+  // sequence can show the poster placeholder first, then crossfade to the full image.
   const src = (elementProps as { src?: string }).src;
   const [loadedSrc, setLoadedSrc] = useState<string | undefined>(undefined);
   const loaded = loadedSrc === src;

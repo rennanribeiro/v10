@@ -14,7 +14,7 @@ import {
   onSkinChange,
   onSourceChange,
 } from '@app/shared/sandbox-listener';
-import { getPlaceholderSrc, getPosterSrc, isLiveSource, SOURCES } from '@app/shared/sources';
+import { getPosterPlaceholderSrc, getPosterSrc, isLiveSource, SOURCES } from '@app/shared/sources';
 
 const html = String.raw;
 
@@ -29,7 +29,7 @@ async function render() {
   if (!tag) return;
 
   const poster = getPosterSrc(state.source);
-  const placeholder = getPlaceholderSrc(state.source);
+  const posterPlaceholder = getPosterPlaceholderSrc(state.source);
   const mediaAttrs = renderMediaAttrs(state);
   const playerTag = live ? 'live-video-player' : 'video-player';
 
@@ -39,8 +39,8 @@ async function render() {
   const srcAttr = source ? '' : ` src="${url}"`;
 
   document.getElementById('root')!.innerHTML = wrapSandboxHtmlI18n(html`
-    <${playerTag}>
-      <${tag} class="aspect-video max-w-4xl mx-auto"${placeholder ? ` placeholdersrc="${placeholder}"` : ''}>
+    <${playerTag}${posterPlaceholder ? ` poster-placeholder="${posterPlaceholder}"` : ''}>
+      <${tag} class="aspect-video max-w-4xl mx-auto">
         <!-- The storyboard track is derived automatically from the Mux src. -->
         <mux-video${srcAttr} ${mediaAttrs} playsinline crossorigin="anonymous"></mux-video>
         <!-- Mux Data and Cast are opt-in media components; no env key is needed for Mux-hosted sources. -->

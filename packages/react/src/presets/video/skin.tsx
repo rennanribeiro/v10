@@ -8,7 +8,7 @@ import {
 } from '@videojs/core/i18n/text/menu';
 import { isString } from '@videojs/utils/predicate';
 import { cn } from '@videojs/utils/style';
-import { type ComponentProps, type CSSProperties, forwardRef, type ReactNode } from 'react';
+import { type ComponentProps, forwardRef, type ReactNode } from 'react';
 import { useTranslator } from '@/i18n/context';
 import {
   AirPlayEnterIcon,
@@ -55,6 +55,7 @@ import { PlayButton } from '@/ui/play-button';
 import { usePlaybackRateOptions } from '@/ui/playback-rate';
 import { Popover } from '@/ui/popover';
 import { Poster } from '@/ui/poster';
+import { PosterPlaceholder } from '@/ui/poster-placeholder';
 import { useQualityOptions } from '@/ui/quality';
 import { SeekIndicator } from '@/ui/seek-indicator';
 import { Slider } from '@/ui/slider';
@@ -433,19 +434,13 @@ function FullscreenControl() {
 }
 
 export function VideoSkin(props: VideoSkinProps): ReactNode {
-  const { children, className, poster, placeholder, style, ...rest } = props;
-
-  const containerStyle = placeholder
-    ? ({ '--media-poster-placeholder': `url(${placeholder})`, ...style } as CSSProperties)
-    : style;
+  const { children, className, poster, style, ...rest } = props;
 
   return (
-    <Container
-      className={cn('media-default-skin media-default-skin--video', className)}
-      style={containerStyle}
-      {...rest}
-    >
+    <Container className={cn('media-default-skin media-default-skin--video', className)} style={style} {...rest}>
       {children}
+
+      <PosterPlaceholder className="media-poster-placeholder" />
 
       {poster && (
         <Poster src={isString(poster) ? poster : undefined} render={isRenderProp(poster) ? poster : undefined} />

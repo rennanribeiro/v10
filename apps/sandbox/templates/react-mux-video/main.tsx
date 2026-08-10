@@ -5,8 +5,8 @@ import { VideoSkinComponent } from '@app/shared/react/skins';
 import { useAutoplay } from '@app/shared/react/use-autoplay';
 import { useLoop } from '@app/shared/react/use-loop';
 import { useMuted } from '@app/shared/react/use-muted';
-import { usePlaceholder } from '@app/shared/react/use-placeholder';
 import { usePoster } from '@app/shared/react/use-poster';
+import { usePosterPlaceholder } from '@app/shared/react/use-poster-placeholder';
 import { usePreload } from '@app/shared/react/use-preload';
 import { useSkin } from '@app/shared/react/use-skin';
 import { useSource } from '@app/shared/react/use-source';
@@ -27,7 +27,7 @@ function App() {
   const source = useSource();
   const styling = useMemo(readStyling, []);
   const poster = usePoster();
-  const placeholder = usePlaceholder();
+  const posterPlaceholder = usePosterPlaceholder();
   const live = isLiveSource(source);
   const autoplay = useAutoplay();
   const muted = useMuted();
@@ -41,10 +41,9 @@ function App() {
 
   return (
     <SandboxI18nProvider>
-      <Provider>
+      <Provider posterPlaceholder={posterPlaceholder}>
         <VideoSkinComponent
           poster={poster}
-          placeholder={placeholder}
           skin={skin}
           styling={styling}
           live={live}

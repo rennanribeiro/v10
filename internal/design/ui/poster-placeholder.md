@@ -1,27 +1,71 @@
 ---
-status: implemented
-date: 2026-05-28
+status: decided
+date: 2026-08-08
 ---
 
 # Poster placeholder
 
-Poster placeholders provide a low-resolution or first-frame visual while the final poster loads. Current props, attributes, and CSS names belong to source and API reference.
+Supersedes [Poster placeholder layer](poster-placeholder-layer.md).
 
-## Decisions
+## Decision
 
-- Keep placeholder behavior on the poster component instead of introducing another public component with overlapping lifecycle and accessibility.
-- Render placeholder and final poster as separate visual layers so the final image can crossfade without replacing the whole component.
-- Let a consumer supply the placeholder directly; extraction of a first frame or image transformation is outside the UI component.
-- Expose presentation through CSS custom properties so skins can align sizing, position, filtering, and transition behavior across both layers.
-- Keep the placeholder decorative. The poster component owns any meaningful accessible name, preventing duplicate image announcements.
+The blur-up placeholder is its own component: `<media-poster-placeholder>` in HTML, `<PosterPlaceholder>` in React. It renders one empty element, sets `background-image` from the player's resolved `posterPlaceholder`, and leaves sizing, position, and blur to CSS.
+
+The URL is player configuration, not skin markup. `posterPlaceholder` and `defaultPosterPlaceholder` join the metadata feature and resolve on the same four tiers the poster uses: user, media, user default, then `''`.
+
+`BaseVideoSkinProps.placeholder` and `<video-skin placeholdersrc>` are gone.
+
+## Naming
+
+Every public name carries the `poster` prefix: the components above, the store keys, the `poster-placeholder` player attribute, `MediaContentData.posterPlaceholder`, and the skins' `.media-poster-placeholder` class.
+
+"Placeholder" alone is a generic word in UI work — it is the `placeholder` attribute on an input, and a stand-in for content that has not arrived. This one is specifically the stand-in for the poster: it resolves next to `poster`, it is painted behind `poster`, and it means nothing without one. Naming it after what it stands in for makes that relationship readable in an import list, an attribute, and a CSS selector alike.
+
+## Context
+
+The placeholder used to live on the poster component, painted into `media-poster::before` and fed by a CSS custom property that the skin threaded down from a prop.
+
+That worked in HTML, where `<media-poster>` is a wrapper element. It could not work in React, where `<Poster>` renders an `<img>` directly. An `<img>` is a replaced element: it generates no `::before` box and cannot have children, so there was nowhere on the React poster to paint a second layer. The React skins painted the placeholder on the skin container instead — a different element, a different selector, and a rule that had to reach across the tree with `:has()` to find out whether the poster had loaded.
+
+One concept, two implementations, and the divergence was structural rather than incidental. Neither side could adopt the other's.
+
+Configuration had the same split. The placeholder was a skin prop, so it was only reachable from a packaged skin. Anyone composing components by hand, or ejecting a skin, had no way to set one.
+
+## Rationale
+
+**A separate element is the only shape both platforms can render.** React cannot put a layer inside an `<img>`, and HTML cannot make a custom element *be* an `<img>` — customized built-ins never shipped in WebKit. What both platforms can do is render a plain box next to the poster. So that is what the poster placeholder is.
+
+**Painting over beats handing off.** The placeholder sits behind the poster and stays put. The poster covers it as it loads, and where the poster does not reach — the bars left by `object-fit: contain` — the placeholder keeps showing through. Nothing has to observe the poster's load state, so there is no cross-element selector and no coordination to get wrong. This is also what the HTML path already did for author-supplied images.
+
+**Visibility mirrors the poster.** Both components carry `data-visible` and both drop it once playback starts, so one mental model and one pair of skin rules cover them. `visible` does not depend on having a URL: with nothing configured the element paints nothing, so the two states are indistinguishable on screen, and tying them together would only make the contract harder to state.
+
+**The component sets the URL and nothing else.** A blur radius the component hardcoded would be unoverridable, and the signature look is the blur, so the component depends on CSS regardless. Setting only `background-image` keeps the split honest, and it means the same rules style both platforms — there is no shadow boundary to reach past and no `isShadowDOM` branch in the Tailwind variant.
+
+**Configuring on the player, not the skin, is what makes the feature reachable.** A skin prop is available to packaged skins only. A store value is available to a packaged skin, an ejected one, and a hand-authored layout alike, and it opens the media tier: a `MediaContentData` donor can supply a placeholder the way it already supplies a poster.
+
+## Alternatives considered
+
+**Keep it on the poster (the superseded decision).** Its stated reason was to avoid a second public component with overlapping lifecycle and accessibility. Neither overlap turned out to be real. The lifecycle is one boolean both components already derive from `started`, and there is no accessibility question at all: the placeholder is a decorative background image, so it has no accessible name to duplicate and screen readers skip it. What the single-component shape did cost was React parity, which is the thing the decision was meant to protect.
+
+**Give React's `<Poster>` a wrapper so it can host `::before`.** This closes the parity gap, and it was implemented and discarded. It breaks the rule that a component adds no elements to the page you style, it changes the React poster's public shape from an `<img>` to a `<div>`, and it makes `srcset`, `loading`, and `<picture>` reach one element deeper. [Poster](poster.md) treats author control of the image as the point of the component, and this trades it away to solve a problem that is not about the poster.
+
+**Give `<media-poster-placeholder>` a shadow root with default painting styles.** Sensible defaults for `background-size` and `background-repeat` would make the bare element behave without any CSS, and `media-thumbnail` sets that precedent. But React has no shadow root, so the defaults would exist on one platform only — reintroducing exactly the asymmetry this record removes.
+
+**Name it `placeholder`.** Shorter, and it was the working name through implementation. Dropped for the reasons under [Naming](#naming): the bare word does not say what the image stands in for, and it collides with the generic sense the platform already uses.
 
 ## Consequences
 
-The same concept works in React and HTML and remains skinnable without a JavaScript animation API. Consumers are responsible for choosing a safe placeholder URL and for any media-frame generation policy.
+`--media-poster-placeholder` is gone; the URL is no longer a custom property at all. `--media-poster-placeholder-blur` keeps its name and moves to the new element.
+
+The poster keeps `data-loaded`. Holding the image back until it loads is what makes the blur-up read as a fade rather than a pop, and the skins still use it.
+
+Nothing donates a poster placeholder from the media tier today. Mux builds posters from a signed URL whose token is bound to its params, so it cannot synthesize a smaller variant. `MediaContentData` has an index signature and is a public extension point, so a third-party media can.
 
 ## Current sources of truth
 
-- React implementation: `packages/react/src/ui/poster/poster.tsx`
-- HTML implementation: `packages/html/src/ui/poster/poster-element.ts`
+- Core: `packages/core/src/core/ui/poster-placeholder/poster-placeholder-core.ts`
+- Store: `packages/core/src/dom/store/features/metadata.ts`
+- HTML: `packages/html/src/ui/poster-placeholder/poster-placeholder-element.ts`
+- React: `packages/react/src/ui/poster-placeholder/poster-placeholder.tsx`
+- Skins: `packages/skins/src/*/css/components/poster-placeholder.css` and the Tailwind variant beside it
 - Poster design context: [Poster](poster.md)
-- Public API reference and package exports

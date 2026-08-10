@@ -126,6 +126,7 @@ export { PlaybackRateButtonElement } from './ui/playback-rate-button/playback-ra
 export { PlaybackRateRadioGroupElement } from './ui/playback-rate-radio-group/playback-rate-radio-group-element';
 export { PopoverElement } from './ui/popover/popover-element';
 export { PosterElement } from './ui/poster/poster-element';
+export { PosterPlaceholderElement } from './ui/poster-placeholder/poster-placeholder-element';
 export { QualityRadioGroupElement } from './ui/quality-radio-group/quality-radio-group-element';
 export { SeekButtonElement } from './ui/seek-button/seek-button-element';
 export { SeekIndicatorElement } from './ui/seek-indicator/seek-indicator-element';

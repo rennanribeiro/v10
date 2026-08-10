@@ -1,7 +1,7 @@
 import { captionsText } from '@videojs/core/i18n/text/menu';
 import { isString } from '@videojs/utils/predicate';
 import { cn } from '@videojs/utils/style';
-import { type ComponentProps, type CSSProperties, forwardRef, type ReactNode } from 'react';
+import { type ComponentProps, forwardRef, type ReactNode } from 'react';
 import { useTranslator } from '@/i18n/context';
 import {
   AirPlayEnterIcon,
@@ -42,6 +42,7 @@ import { PiPButton } from '@/ui/pip-button';
 import { PlayButton } from '@/ui/play-button';
 import { Popover } from '@/ui/popover';
 import { Poster } from '@/ui/poster';
+import { PosterPlaceholder } from '@/ui/poster-placeholder';
 import { StatusAnnouncer } from '@/ui/status-announcer';
 import { StatusIndicator } from '@/ui/status-indicator';
 import { Tooltip } from '@/ui/tooltip';
@@ -169,19 +170,13 @@ function CaptionsTrigger(): ReactNode {
 }
 
 export function MinimalLiveVideoSkin(props: MinimalLiveVideoSkinProps): ReactNode {
-  const { children, className, poster, placeholder, style, ...rest } = props;
-
-  const containerStyle = placeholder
-    ? ({ '--media-poster-placeholder': `url(${placeholder})`, ...style } as CSSProperties)
-    : style;
+  const { children, className, poster, style, ...rest } = props;
 
   return (
-    <Container
-      className={cn('media-minimal-skin media-minimal-skin--video', className)}
-      style={containerStyle}
-      {...rest}
-    >
+    <Container className={cn('media-minimal-skin media-minimal-skin--video', className)} style={style} {...rest}>
       {children}
+
+      <PosterPlaceholder className="media-poster-placeholder" />
 
       {poster && (
         <Poster src={isString(poster) ? poster : undefined} render={isRenderProp(poster) ? poster : undefined} />
