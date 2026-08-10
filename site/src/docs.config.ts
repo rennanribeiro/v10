@@ -95,6 +95,7 @@ export const sidebar: Sidebar = [
       { slug: 'reference/playback-rate-radio-group' },
       { slug: 'reference/popover' },
       { slug: 'reference/poster' },
+      { slug: 'reference/poster-placeholder' },
       { slug: 'reference/quality-radio-group' },
       { slug: 'reference/seek-button' },
       { slug: 'reference/slider' },
