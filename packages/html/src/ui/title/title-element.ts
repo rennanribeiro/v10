@@ -39,24 +39,21 @@ export class TitleElement extends MediaElement {
     if (__DEV__ && !this.#metadataState.value) {
       logMissingFeature(this.localName, this.#metadataState.displayName!);
     }
-
-    if (__DEV__ && !this.#playbackState.value) {
-      logMissingFeature(this.localName, this.#playbackState.displayName!);
-    }
   }
 
   protected override update(changed: PropertyValues): void {
     super.update(changed);
 
     const metadata = this.#metadataState.value;
-    const playback = this.#playbackState.value;
 
-    if (!metadata || !playback) return;
+    if (!metadata) return;
 
+    // A player without playback or controls has nothing that hides the title,
+    // so both fall back to the value that keeps it on screen.
     this.#core.setMedia({
       contentTitle: metadata.contentTitle,
-      paused: playback.paused,
-      controlsVisible: this.#controlsState.value?.controlsVisible,
+      paused: this.#playbackState.value?.paused ?? true,
+      controlsVisible: this.#controlsState.value?.controlsVisible ?? true,
     });
     const state = this.#core.getState();
 

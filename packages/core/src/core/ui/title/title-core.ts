@@ -4,14 +4,13 @@ import type { MediaControlsState, MediaMetadataState, MediaPlaybackState } from 
  * Media state the title reads, composed by the HTML and React `Title` adapters
  * from the `metadata`, `playback`, and `controls` store slices.
  *
- * `controlsVisible` is optional because the audio presets leave out
- * `controlsFeature`: audio chrome never auto-hides, so there is no visibility
- * to follow.
+ * Every field is required. A player can leave out `playbackFeature` or
+ * `controlsFeature` — the audio presets leave out the latter — so the adapters
+ * substitute the neutral value that means "nothing here hides the title".
  */
 export type TitleMediaState = Pick<MediaMetadataState, 'contentTitle'> &
-  Pick<MediaPlaybackState, 'paused'> & {
-    controlsVisible?: MediaControlsState['controlsVisible'] | undefined;
-  };
+  Pick<MediaPlaybackState, 'paused'> &
+  Pick<MediaControlsState, 'controlsVisible'>;
 
 export interface TitleState {
   /** The resolved content title. Empty when no source supplied one. */
@@ -33,12 +32,11 @@ export class TitleCore {
     const media = this.#media!;
     const title = media.contentTitle;
     const hasTitle = title.length > 0;
-    const controlsVisible = media.controlsVisible ?? true;
 
     return {
       title,
       hasTitle,
-      visible: hasTitle && controlsVisible && media.paused,
+      visible: hasTitle && media.controlsVisible && media.paused,
     };
   }
 }

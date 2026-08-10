@@ -58,14 +58,16 @@ A title can come from three places. The player uses the first one that has a val
 2. The title the media reports about itself.
 3. `defaultContentTitle`, the fallback you set for media that does not name itself.
 
-If none of them has a value, the title is empty and the component renders nothing. To
-change the title while the player is running, call `setContentTitle`.
+If none of them has a value, the title is empty. The element stays in the page with no
+text, and `data-has-title` comes off so your CSS can hide it. To change the title while
+the player is running, call `setContentTitle`.
 
 The title shows when three things are true: a title exists, the controls are on screen,
 and playback is paused. Press play and it hides, so it stays out of the way of the video.
 
-Audio players are the exception. Their controls never hide on their own, so the title
-follows playback alone.
+A player that leaves out a feature simply has less to hide behind. Audio players have no
+auto-hiding controls, so their title follows playback alone; a player with no playback at
+all shows its title for as long as one resolves.
 
 ## Styling
 
