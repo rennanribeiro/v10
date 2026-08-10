@@ -1,12 +1,13 @@
 import { globSync, readdirSync, writeFileSync } from 'node:fs';
 import { basename, dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import type { UserConfig } from 'tsdown';
-import { defineConfig } from 'tsdown';
+import type { UserConfig } from 'vite-plus/pack';
+import { defineConfig } from 'vite-plus/pack';
 import { cdnI18nExternalPlugin } from '../../build/plugins/cdn-i18n-external-plugin.ts';
 import { inlineCssPlugin } from '../../build/plugins/inline-css-plugin.ts';
 import { inlineTemplatePlugin } from '../../build/plugins/inline-template-plugin.ts';
-import { baseConfig } from '../../build/tsdown.ts';
+import { baseConfig } from '../../build/pack.ts';
+import pkg from './package.json' with { type: 'json' };
 
 type BuildMode = 'dev' | 'prod';
 
@@ -133,6 +134,7 @@ for (const mode of buildModes) {
 
   configs.push({
     ...baseConfig,
+    name: 'cdn',
     entry: entryMap,
     platform: 'browser',
     format: 'es',
@@ -141,8 +143,10 @@ for (const mode of buildModes) {
     clean: mode === 'dev',
     dts: false,
     minify: isProd,
-    noExternal: [/.*/],
-    inlineOnly: false,
+    deps: {
+      alwaysBundle: [/.*/],
+      onlyBundle: false,
+    },
     treeshake: {
       moduleSideEffects: [
         { test: /\/define\//, sideEffects: true },

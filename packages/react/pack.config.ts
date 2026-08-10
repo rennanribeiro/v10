@@ -1,9 +1,9 @@
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import type { UserConfig } from 'tsdown';
-import { defineConfig } from 'tsdown';
+import type { UserConfig } from 'vite-plus/pack';
+import { defineConfig } from 'vite-plus/pack';
 import { copyCssPlugin } from '../../build/plugins/copy-css-plugin.ts';
-import { type PackageBuildMode, packageBuildConfig, packageBuildModes } from '../../build/tsdown.ts';
+import { type PackageBuildMode, packageBuildConfig, packageBuildModes } from '../../build/pack.ts';
 import { LOCALES, localeAliases } from '../core/src/core/i18n/locales.ts';
 
 const skinsDir = resolve(dirname(fileURLToPath(import.meta.url)), '../skins/src');
@@ -25,7 +25,9 @@ const createConfig = (mode: PackageBuildMode): UserConfig => ({
   // they need their own entries to stay separate chunks: importing one flavor
   // must never pull the other engine in with it.
   entry: ['src/**/index.{ts,tsx}', 'src/media/*/{hls-js,spf}.tsx', i18nLocaleEntries],
-  noExternal: [/^@videojs\/skins/],
+  deps: {
+    alwaysBundle: [/^@videojs\/skins/],
+  },
   alias: {
     '@': new URL('./src', import.meta.url).pathname,
   },

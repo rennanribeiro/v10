@@ -1,6 +1,6 @@
-import type { UserConfig } from 'tsdown';
-import { defineConfig } from 'tsdown';
-import { type PackageBuildMode, packageBuildConfig, packageBuildModes } from '../../build/tsdown.ts';
+import type { UserConfig } from 'vite-plus/pack';
+import { defineConfig } from 'vite-plus/pack';
+import { type PackageBuildMode, packageBuildConfig, packageBuildModes } from '../../build/pack.ts';
 import packageJson from './package.json' with { type: 'json' };
 
 const createConfig = (mode: PackageBuildMode): UserConfig => ({

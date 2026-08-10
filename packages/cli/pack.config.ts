@@ -1,8 +1,8 @@
 import { readFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { defineConfig } from 'tsdown';
-import { baseConfig } from '../../build/tsdown.ts';
+import { defineConfig } from 'vite-plus/pack';
+import { baseConfig } from '../../build/pack.ts';
 
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const pkg = JSON.parse(readFileSync(resolve(__dirname, 'package.json'), 'utf-8'));

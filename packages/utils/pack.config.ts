@@ -1,5 +1,5 @@
-import { defineConfig } from 'tsdown';
-import { neutralLibraryConfig } from '../../build/tsdown.ts';
+import { defineConfig } from 'vite-plus/pack';
+import { neutralLibraryConfig } from '../../build/pack.ts';
 
 export default defineConfig({
   ...neutralLibraryConfig,

@@ -1,12 +1,12 @@
 import { globSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import type { UserConfig } from 'tsdown';
-import { defineConfig } from 'tsdown';
+import type { UserConfig } from 'vite-plus/pack';
+import { defineConfig } from 'vite-plus/pack';
 import { copyCssPlugin } from '../../build/plugins/copy-css-plugin.ts';
 import { inlineCssPlugin } from '../../build/plugins/inline-css-plugin.ts';
 import { inlineTemplatePlugin } from '../../build/plugins/inline-template-plugin.ts';
-import { isDevBuildMode, type PackageBuildMode, packageBuildConfig, packageBuildModes } from '../../build/tsdown.ts';
+import { isDevBuildMode, type PackageBuildMode, packageBuildConfig, packageBuildModes } from '../../build/pack.ts';
 import { LOCALES, localeAliases } from '../core/src/core/i18n/locales.ts';
 
 const skinsDir = resolve(dirname(fileURLToPath(import.meta.url)), '../skins/src');
@@ -47,6 +47,7 @@ const i18nLocaleEntries = Object.fromEntries([
 
 const createConfig = (mode: PackageBuildMode): UserConfig => ({
   ...packageBuildConfig(mode, 'browser'),
+  name: 'package',
   entry: {
     index: 'src/index.ts',
     'i18n/index': 'src/i18n/index.ts',
@@ -65,7 +66,9 @@ const createConfig = (mode: PackageBuildMode): UserConfig => ({
       { test: /\/i18n\/locales\/.+\/register/, sideEffects: true },
     ],
   },
-  noExternal: [/^@videojs\/icons/, /^@videojs\/skins/],
+  deps: {
+    alwaysBundle: [/^@videojs\/icons/, /^@videojs\/skins/],
+  },
   alias: {
     '@': new URL('./src', import.meta.url).pathname,
   },

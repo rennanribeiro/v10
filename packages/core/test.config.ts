@@ -1,33 +1,32 @@
-import { defineConfig } from 'vitest/config';
+import { defineConfig } from 'vite-plus';
 
 export default defineConfig({
   define: {
     __DEV__: 'true',
   },
   test: {
-    onConsoleLog: (log) => !log.includes('Lit is in dev mode'),
     projects: [
       {
         extends: true,
         test: {
-          name: 'store',
+          name: 'core',
           include: ['src/core/**/*.test.ts'],
         },
       },
       {
         extends: true,
         test: {
-          name: 'store/html',
-          include: ['src/html/**/*.test.ts'],
+          name: 'core/dom',
+          include: ['src/dom/**/*.test.ts'],
           environment: 'jsdom',
+          setupFiles: ['src/dom/tests/setup.ts'],
         },
       },
       {
         extends: true,
         test: {
-          name: 'store/react',
-          include: ['src/react/**/*.test.{ts,tsx}'],
-          environment: 'jsdom',
+          name: 'core/scripts',
+          include: ['scripts/**/*.test.ts'],
         },
       },
     ],

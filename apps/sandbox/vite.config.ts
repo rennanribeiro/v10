@@ -4,7 +4,7 @@ import { dirname, resolve } from 'node:path';
 
 import tailwindcss from '@tailwindcss/vite';
 import react from '@vitejs/plugin-react';
-import { defineConfig, normalizePath, type Plugin } from 'vite';
+import { defineConfig, normalizePath, type Plugin } from 'vite-plus';
 
 import { mirrorTemplatesToSrc } from './scripts/shared';
 

@@ -1,9 +1,9 @@
 import { globSync } from 'node:fs';
 import { resolve } from 'node:path';
-import type { UserConfig } from 'tsdown';
-import { defineConfig } from 'tsdown';
+import type { UserConfig } from 'vite-plus/pack';
+import { defineConfig } from 'vite-plus/pack';
 import { copyCssPlugin } from '../../build/plugins/copy-css-plugin.ts';
-import { type PackageBuildMode, packageBuildConfig, packageBuildModes } from '../../build/tsdown.ts';
+import { type PackageBuildMode, packageBuildConfig, packageBuildModes } from '../../build/pack.ts';
 
 const skinsDir = resolve('src');
 

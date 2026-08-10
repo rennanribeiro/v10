@@ -127,9 +127,7 @@ class HlsJsOnlyMediaBase extends HTMLVideoElementHost implements MediaEngineHost
 }
 
 interface HlsJsMediaCapabilities
-  extends MediaStreamTypeCapability,
-    MediaLiveCapability,
-    Pick<MediaSourceCapability, 'preload'> {
+  extends MediaStreamTypeCapability, MediaLiveCapability, Pick<MediaSourceCapability, 'preload'> {
   readonly error: MediaError | null;
 }
 
