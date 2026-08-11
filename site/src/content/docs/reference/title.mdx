@@ -43,12 +43,20 @@ title on the player instead of passing children.
 <FrameworkCase frameworks={["react"]}>
   ```tsx
   <Player.Provider contentTitle="Big Buck Bunny">
+    <Player.Container>
+      <Video src="video.mp4" />
+      <Title />
+    </Player.Container>
+  </Player.Provider>
   ```
 </FrameworkCase>
 
 <FrameworkCase frameworks={["html"]}>
   ```html
   <video-player content-title="Big Buck Bunny">
+    <video src="video.mp4"></video>
+    <media-title></media-title>
+  </video-player>
   ```
 </FrameworkCase>
 
@@ -59,15 +67,30 @@ A title can come from three places. The player uses the first one that has a val
 3. `defaultContentTitle`, the fallback you set for media that does not name itself.
 
 If none of them has a value, the title is empty. The element stays in the page with no
-text, and `data-has-title` comes off so your CSS can hide it. To change the title while
-the player is running, call `setContentTitle`.
+text, and `data-has-title` comes off so your CSS can hide it.
+
+To change the title while the player is running, call `setContentTitle` on the store:
+
+<FrameworkCase frameworks={["react"]}>
+  ```tsx
+  function Rename() {
+    const store = Player.usePlayer();
+
+    return <button onClick={() => store.setContentTitle("Sintel")}>Rename</button>;
+  }
+  ```
+</FrameworkCase>
+
+<FrameworkCase frameworks={["html"]}>
+  ```ts
+  const player = document.querySelector("video-player");
+
+  player.store.setContentTitle("Sintel");
+  ```
+</FrameworkCase>
 
 The title shows when three things are true: a title exists, the controls are on screen,
 and playback is paused. Press play and it hides, so it stays out of the way of the video.
-
-A player that leaves out a feature simply has less to hide behind. Audio players have no
-auto-hiding controls, so their title follows playback alone; a player with no playback at
-all shows its title for as long as one resolves.
 
 ## Styling
 
