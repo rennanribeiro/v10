@@ -89,8 +89,10 @@ To change the title while the player is running, call `setContentTitle` on the s
   ```
 </FrameworkCase>
 
-The title shows when three things are true: a title exists, the controls are on screen,
-and playback is paused. Press play and it hides, so it stays out of the way of the video.
+The title is part of the player's chrome. It shows whenever a title exists and the
+controls are on screen, and it leaves when they do, so it never sits over the video on
+its own. An audio player has no controls that come and go, so its title stays on screen
+whenever there is one to show.
 
 ## Styling
 

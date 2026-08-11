@@ -4,7 +4,6 @@ import { TitleCore, type TitleMediaState } from '../title-core';
 function createMediaState(overrides: Partial<TitleMediaState> = {}): TitleMediaState {
   return {
     contentTitle: 'Big Buck Bunny',
-    paused: true,
     controlsVisible: true,
     ...overrides,
   };
@@ -44,34 +43,26 @@ describe('TitleCore', () => {
   });
 
   describe('visibility', () => {
-    it('is visible when a title exists, controls are visible, and playback is paused', () => {
+    it('is visible when a title exists and controls are visible', () => {
       const core = new TitleCore();
 
-      core.setMedia(createMediaState({ controlsVisible: true, paused: true }));
+      core.setMedia(createMediaState({ controlsVisible: true }));
 
       expect(core.getState().visible).toBe(true);
     });
 
-    it('is hidden while playing even when controls are visible', () => {
+    it('is hidden when controls are hidden', () => {
       const core = new TitleCore();
 
-      core.setMedia(createMediaState({ controlsVisible: true, paused: false }));
+      core.setMedia(createMediaState({ controlsVisible: false }));
 
       expect(core.getState().visible).toBe(false);
     });
 
-    it('is hidden when controls are hidden even while paused', () => {
+    it('stays hidden without a title regardless of controls', () => {
       const core = new TitleCore();
 
-      core.setMedia(createMediaState({ controlsVisible: false, paused: true }));
-
-      expect(core.getState().visible).toBe(false);
-    });
-
-    it('stays hidden without a title regardless of controls and playback', () => {
-      const core = new TitleCore();
-
-      core.setMedia(createMediaState({ contentTitle: '', controlsVisible: true, paused: true }));
+      core.setMedia(createMediaState({ contentTitle: '', controlsVisible: true }));
 
       expect(core.getState().visible).toBe(false);
     });

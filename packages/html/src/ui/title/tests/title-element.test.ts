@@ -145,7 +145,7 @@ describe('TitleElement', () => {
     await waitForAssertion(() => expect(title.hasAttribute('data-has-title')).toBe(false));
   });
 
-  it('hides the title once attached media starts playing', async () => {
+  it('follows the controls rather than playback once media is attached', async () => {
     const store: TitleStore = createTitleStore();
     const media = new FakeMedia();
     store.attach({ media: media as unknown as PlayerTarget['media'], container: null });
@@ -155,11 +155,17 @@ describe('TitleElement', () => {
     store.setContentTitle('Sintel');
     await waitForAssertion(() => expect(title.hasAttribute('data-visible')).toBe(true));
 
+    // Playing does not hide the title on its own; the controls it shares an
+    // edge with are still on screen. Wait for the store to see the play so the
+    // assertion cannot pass on a stale frame.
     media.play();
-    await waitForAssertion(() => expect(title.hasAttribute('data-visible')).toBe(false));
+    await waitForAssertion(() => {
+      expect(store.paused).toBe(false);
+      expect(title.hasAttribute('data-visible')).toBe(true);
+    });
 
-    media.pause();
-    await waitForAssertion(() => expect(title.hasAttribute('data-visible')).toBe(true));
+    store.toggleControls();
+    await waitForAssertion(() => expect(title.hasAttribute('data-visible')).toBe(false));
   });
 
   it('hides the title when controls are hidden', async () => {
