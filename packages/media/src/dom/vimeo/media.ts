@@ -8,6 +8,7 @@ import { MediaError } from '../../core/media-error';
 import type { ErrorLike, MediaPreloadType, TextTrackListLike, Video } from '../../core/types';
 import { MediaPlayedRangesMixin } from '../media-played-ranges';
 import { createTimeRange, serializeEmbedParams } from '../utils';
+import { VIMEO_MEDIA } from './predicate';
 
 export type { default as VimeoPlayerApi } from '@vimeo/player';
 
@@ -74,6 +75,7 @@ const VimeoMediaBase = MediaPlayedRangesMixin(EventTarget);
  * @fires sourcechange - Fired when `source` changes, either directly or by resolving a new `src`. Read `source` for the new value.
  */
 export class VimeoMedia extends VimeoMediaBase implements Partial<Video> {
+  readonly [VIMEO_MEDIA] = true;
   #target: HTMLIFrameElement | null = null;
   #player: VimeoPlayer | null = null;
   /**

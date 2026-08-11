@@ -1,5 +1,6 @@
 import { HlsJsMedia, type HlsSource } from '../hls-js';
 import { createMuxDrmSystems } from './drm';
+import { MUX_MEDIA } from './predicate';
 import {
   createMuxPosterURL,
   createMuxStoryboardURL,
@@ -37,6 +38,7 @@ export const muxMediaDefaultProps: MuxMediaProps = {
  * @fires sourcechange - Fired when `source` changes, either directly or by parsing a new `src`. Read `source` for the new value.
  */
 export class MuxMedia extends HlsJsMedia implements MuxMediaProps {
+  readonly [MUX_MEDIA] = true;
   #source: MuxSource | null = muxMediaDefaultProps.source;
 
   /**
