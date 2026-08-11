@@ -1,7 +1,7 @@
 'use client';
 
 import { TitleCore, TitleDataAttrs } from '@videojs/core';
-import { logMissingFeature, selectControls, selectMetadata, selectPlayback } from '@videojs/core/dom';
+import { logMissingFeature, selectControls, selectMetadata } from '@videojs/core/dom';
 import type { ForwardedRef } from 'react';
 import { forwardRef, useState } from 'react';
 
@@ -31,7 +31,6 @@ export const Title = forwardRef(function Title(
   const { render, className, style, ...elementProps } = componentProps;
 
   const metadata = usePlayer(selectMetadata);
-  const playback = usePlayer(selectPlayback);
   const controls = usePlayer(selectControls);
 
   const [core] = useState(() => new TitleCore());
@@ -41,11 +40,10 @@ export const Title = forwardRef(function Title(
     return null;
   }
 
-  // A player without playback or controls has nothing that hides the title,
-  // so both fall back to the value that keeps it on screen.
+  // A player without controls has nothing that hides the title, so this falls
+  // back to the value that keeps it on screen.
   core.setMedia({
     contentTitle: metadata.contentTitle,
-    paused: playback?.paused ?? true,
     controlsVisible: controls?.controlsVisible ?? true,
   });
   const state = core.getState();

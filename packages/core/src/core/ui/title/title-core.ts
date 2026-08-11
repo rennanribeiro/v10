@@ -1,16 +1,14 @@
-import type { MediaControlsState, MediaMetadataState, MediaPlaybackState } from '@videojs/media';
+import type { MediaControlsState, MediaMetadataState } from '@videojs/media';
 
 /**
  * Media state the title reads, composed by the HTML and React `Title` adapters
- * from the `metadata`, `playback`, and `controls` store slices.
+ * from the `metadata` and `controls` store slices.
  *
- * Every field is required. A player can leave out `playbackFeature` or
- * `controlsFeature` — the audio presets leave out the latter — so the adapters
- * substitute the neutral value that means "nothing here hides the title".
+ * Every field is required. A player can leave out `controlsFeature` — the audio
+ * presets do — so the adapters substitute the neutral value that means "nothing
+ * here hides the title".
  */
-export type TitleMediaState = Pick<MediaMetadataState, 'contentTitle'> &
-  Pick<MediaPlaybackState, 'paused'> &
-  Pick<MediaControlsState, 'controlsVisible'>;
+export type TitleMediaState = Pick<MediaMetadataState, 'contentTitle'> & Pick<MediaControlsState, 'controlsVisible'>;
 
 export interface TitleState {
   /** The resolved content title. Empty when no source supplied one. */
@@ -36,7 +34,9 @@ export class TitleCore {
     return {
       title,
       hasTitle,
-      visible: hasTitle && media.controlsVisible && media.paused,
+      // The title is part of the chrome: it comes and goes with the controls
+      // that share its edge of the player, and carries the scrim they sit on.
+      visible: hasTitle && media.controlsVisible,
     };
   }
 }

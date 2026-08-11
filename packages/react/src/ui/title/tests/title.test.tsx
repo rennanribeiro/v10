@@ -70,7 +70,7 @@ describe('Title', () => {
     expect(title.hasAttribute('data-visible')).toBe(false);
   });
 
-  it('is visible while paused', () => {
+  it('is visible when controls are visible', () => {
     const { Wrapper } = createPlayerWrapper({
       ...metadataState('Sintel'),
       ...controlsState(true),
@@ -81,7 +81,7 @@ describe('Title', () => {
     expect(getByTestId('title').hasAttribute('data-visible')).toBe(true);
   });
 
-  it('is hidden while playing', () => {
+  it('stays visible while playing', () => {
     const { Wrapper } = createPlayerWrapper({
       ...metadataState('Sintel'),
       ...controlsState(true),
@@ -89,8 +89,7 @@ describe('Title', () => {
     });
     const { getByTestId } = render(<Title data-testid="title" />, { wrapper: Wrapper });
 
-    expect(getByTestId('title').hasAttribute('data-has-title')).toBe(true);
-    expect(getByTestId('title').hasAttribute('data-visible')).toBe(false);
+    expect(getByTestId('title').hasAttribute('data-visible')).toBe(true);
   });
 
   it('is hidden when controls are hidden', () => {
