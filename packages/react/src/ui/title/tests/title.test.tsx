@@ -56,70 +56,40 @@ describe('Title', () => {
     expect(queryByTestId('title')).toBeNull();
   });
 
-  it('omits data-has-title when no source supplies a title', () => {
+  it('renders nothing when no source supplies a title', () => {
     const { Wrapper } = createPlayerWrapper({
       ...metadataState(''),
       ...controlsState(true),
       ...playbackState(true),
     });
-    const { getByTestId } = render(<Title data-testid="title" />, { wrapper: Wrapper });
+    const { queryByTestId } = render(<Title data-testid="title" />, { wrapper: Wrapper });
 
-    const title = getByTestId('title');
-    expect(title.textContent).toBe('');
-    expect(title.hasAttribute('data-has-title')).toBe(false);
-    expect(title.hasAttribute('data-visible')).toBe(false);
+    expect(queryByTestId('title')).toBeNull();
   });
 
-  it('is visible when controls are visible', () => {
+  it('ignores controls and playback state', () => {
     const { Wrapper } = createPlayerWrapper({
       ...metadataState('Sintel'),
-      ...controlsState(true),
-      ...playbackState(true),
-    });
-    const { getByTestId } = render(<Title data-testid="title" />, { wrapper: Wrapper });
-
-    expect(getByTestId('title').hasAttribute('data-visible')).toBe(true);
-  });
-
-  it('stays visible while playing', () => {
-    const { Wrapper } = createPlayerWrapper({
-      ...metadataState('Sintel'),
-      ...controlsState(true),
+      ...controlsState(false),
       ...playbackState(false),
     });
     const { getByTestId } = render(<Title data-testid="title" />, { wrapper: Wrapper });
 
-    expect(getByTestId('title').hasAttribute('data-visible')).toBe(true);
+    expect(getByTestId('title').textContent).toBe('Sintel');
   });
 
-  it('is hidden when controls are hidden', () => {
-    const { Wrapper } = createPlayerWrapper({
-      ...metadataState('Sintel'),
-      ...controlsState(false),
-      ...playbackState(true),
-    });
-    const { getByTestId } = render(<Title data-testid="title" />, { wrapper: Wrapper });
-
-    expect(getByTestId('title').hasAttribute('data-has-title')).toBe(true);
-    expect(getByTestId('title').hasAttribute('data-visible')).toBe(false);
-  });
-
-  it('keeps the title visible without the playback feature', () => {
+  it('renders the title without the playback feature', () => {
     const { Wrapper } = createPlayerWrapper({ ...metadataState('Sintel'), ...controlsState(true) });
     const { getByTestId } = render(<Title data-testid="title" />, { wrapper: Wrapper });
 
-    const title = getByTestId('title');
-    expect(title.textContent).toBe('Sintel');
-    expect(title.hasAttribute('data-visible')).toBe(true);
+    expect(getByTestId('title').textContent).toBe('Sintel');
   });
 
-  it('keeps the title visible without the controls feature', () => {
+  it('renders the title without the controls feature', () => {
     const { Wrapper } = createPlayerWrapper({ ...metadataState('Sintel'), ...playbackState(true) });
     const { getByTestId } = render(<Title data-testid="title" />, { wrapper: Wrapper });
 
-    const title = getByTestId('title');
-    expect(title.textContent).toBe('Sintel');
-    expect(title.hasAttribute('data-visible')).toBe(true);
+    expect(getByTestId('title').textContent).toBe('Sintel');
   });
 
   it('supports className as a function of state', () => {
@@ -129,10 +99,12 @@ describe('Title', () => {
       ...playbackState(true),
     });
     const { getByTestId } = render(
-      <Title className={(state) => (state.visible ? 'shown' : 'hidden')} data-testid="title" />,
-      { wrapper: Wrapper }
+      <Title className={(state) => `title--${state.title.length}`} data-testid="title" />,
+      {
+        wrapper: Wrapper,
+      }
     );
 
-    expect(getByTestId('title').className).toBe('shown');
+    expect(getByTestId('title').className).toBe('title--6');
   });
 });

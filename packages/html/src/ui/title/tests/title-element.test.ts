@@ -127,25 +127,32 @@ describe('TitleElement', () => {
     await waitForAssertion(() => expect(title.textContent).toBe('Sintel'));
   });
 
-  it('renders empty text when no source supplies a title', async () => {
+  it('renders empty text and hides when no source supplies a title', async () => {
     const { title } = await setup();
 
     expect(title.textContent).toBe('');
-    expect(title.hasAttribute('data-has-title')).toBe(false);
+    expect(title.hidden).toBe(true);
+    expect(title.hasAttribute('data-hidden')).toBe(true);
   });
 
-  it('sets data-has-title once a title resolves and removes it when cleared', async () => {
+  it('shows once a title resolves and hides again when cleared', async () => {
     const store = createTitleStore();
     const { title } = await setup(store);
 
     store.setContentTitle('Sintel');
-    await waitForAssertion(() => expect(title.hasAttribute('data-has-title')).toBe(true));
+    await waitForAssertion(() => {
+      expect(title.hidden).toBe(false);
+      expect(title.hasAttribute('data-hidden')).toBe(false);
+    });
 
     store.setContentTitle(null);
-    await waitForAssertion(() => expect(title.hasAttribute('data-has-title')).toBe(false));
+    await waitForAssertion(() => {
+      expect(title.hidden).toBe(true);
+      expect(title.hasAttribute('data-hidden')).toBe(true);
+    });
   });
 
-  it('follows the controls rather than playback once media is attached', async () => {
+  it('ignores controls and playback state', async () => {
     const store: TitleStore = createTitleStore();
     const media = new FakeMedia();
     store.attach({ media: media as unknown as PlayerTarget['media'], container: null });
@@ -153,36 +160,24 @@ describe('TitleElement', () => {
     const { title } = await setup(store);
 
     store.setContentTitle('Sintel');
-    await waitForAssertion(() => expect(title.hasAttribute('data-visible')).toBe(true));
+    await waitForAssertion(() => expect(title.hidden).toBe(false));
 
-    // Playing does not hide the title on its own; the controls it shares an
-    // edge with are still on screen. Wait for the store to see the play so the
-    // assertion cannot pass on a stale frame.
+    // Whether the title travels with the controls is a skin composition
+    // concern, so neither playing nor hiding the controls touches it here.
     media.play();
     await waitForAssertion(() => {
       expect(store.paused).toBe(false);
-      expect(title.hasAttribute('data-visible')).toBe(true);
+      expect(title.hidden).toBe(false);
     });
-
-    store.toggleControls();
-    await waitForAssertion(() => expect(title.hasAttribute('data-visible')).toBe(false));
-  });
-
-  it('hides the title when controls are hidden', async () => {
-    const store = createTitleStore();
-    const { title } = await setup(store);
-
-    store.setContentTitle('Sintel');
-    await waitForAssertion(() => expect(title.hasAttribute('data-visible')).toBe(true));
 
     store.toggleControls();
     await waitForAssertion(() => {
-      expect(title.hasAttribute('data-has-title')).toBe(true);
-      expect(title.hasAttribute('data-visible')).toBe(false);
+      expect(store.controlsVisible).toBe(false);
+      expect(title.hidden).toBe(false);
     });
   });
 
-  it('keeps the title visible without the controls feature', async () => {
+  it('renders the title without the controls feature', async () => {
     const store = createNoControlsStore();
     const { title } = await setup(store);
 
@@ -190,11 +185,11 @@ describe('TitleElement', () => {
 
     await waitForAssertion(() => {
       expect(title.textContent).toBe('Sintel');
-      expect(title.hasAttribute('data-visible')).toBe(true);
+      expect(title.hidden).toBe(false);
     });
   });
 
-  it('keeps the title visible without the playback feature', async () => {
+  it('renders the title without the playback feature', async () => {
     const store = createMetadataOnlyStore();
     const { title } = await setup(store);
 
@@ -202,7 +197,7 @@ describe('TitleElement', () => {
 
     await waitForAssertion(() => {
       expect(title.textContent).toBe('Sintel');
-      expect(title.hasAttribute('data-visible')).toBe(true);
+      expect(title.hidden).toBe(false);
     });
   });
 

@@ -1,5 +1,5 @@
 import { TitleCore, TitleDataAttrs } from '@videojs/core';
-import { applyStateDataAttrs, logMissingFeature, selectControls, selectMetadata } from '@videojs/core/dom';
+import { applyStateDataAttrs, logMissingFeature, selectMetadata } from '@videojs/core/dom';
 import type { PropertyValues } from '@videojs/element';
 
 import { playerContext } from '../../player/context';
@@ -18,7 +18,6 @@ export class TitleElement extends MediaElement {
 
   readonly #core = new TitleCore();
   readonly #metadataState = new PlayerController(this, playerContext, selectMetadata);
-  readonly #controlsState = new PlayerController(this, playerContext, selectControls);
 
   readonly #textNode = new Text();
 
@@ -41,15 +40,10 @@ export class TitleElement extends MediaElement {
 
     if (!metadata) return;
 
-    // A player without controls has nothing that hides the title, so this
-    // falls back to the value that keeps it on screen.
-    this.#core.setMedia({
-      contentTitle: metadata.contentTitle,
-      controlsVisible: this.#controlsState.value?.controlsVisible ?? true,
-    });
-    const state = this.#core.getState();
+    const state = this.#core.getState(metadata);
 
     this.#textNode.textContent = state.title;
+    this.hidden = state.hidden;
 
     applyStateDataAttrs(this, state, TitleDataAttrs);
   }

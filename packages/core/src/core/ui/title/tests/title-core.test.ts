@@ -1,10 +1,12 @@
-import { describe, expect, it } from 'vitest';
-import { TitleCore, type TitleMediaState } from '../title-core';
+import type { MediaMetadataState } from '@videojs/media';
+import { describe, expect, it, vi } from 'vitest';
+import { TitleCore } from '../title-core';
 
-function createMediaState(overrides: Partial<TitleMediaState> = {}): TitleMediaState {
+function createMediaState(overrides: Partial<MediaMetadataState> = {}): MediaMetadataState {
   return {
     contentTitle: 'Big Buck Bunny',
-    controlsVisible: true,
+    setContentTitle: vi.fn(),
+    setDefaultContentTitle: vi.fn(),
     ...overrides,
   };
 }
@@ -14,57 +16,29 @@ describe('TitleCore', () => {
     it('returns the resolved content title', () => {
       const core = new TitleCore();
 
-      core.setMedia(createMediaState({ contentTitle: 'Sintel' }));
+      const state = core.getState(createMediaState({ contentTitle: 'Sintel' }));
 
-      expect(core.getState().title).toBe('Sintel');
+      expect(state.title).toBe('Sintel');
+      expect(state.hidden).toBe(false);
     });
 
-    it('returns hasTitle: false for the empty resolved title', () => {
+    it('is hidden for the empty resolved title', () => {
       const core = new TitleCore();
 
-      core.setMedia(createMediaState({ contentTitle: '' }));
-      const state = core.getState();
+      const state = core.getState(createMediaState({ contentTitle: '' }));
 
-      expect(state.hasTitle).toBe(false);
-      expect(state.visible).toBe(false);
+      expect(state).toEqual({ title: '', hidden: true });
     });
 
     it('returns only primitive values (no methods)', () => {
       const core = new TitleCore();
 
-      core.setMedia(createMediaState());
-      const state = core.getState();
+      const state = core.getState(createMediaState());
 
-      expect(state).toEqual({ title: 'Big Buck Bunny', hasTitle: true, visible: true });
+      expect(state).toEqual({ title: 'Big Buck Bunny', hidden: false });
 
       const functionKeys = Object.entries(state).filter(([, value]) => typeof value === 'function');
       expect(functionKeys).toHaveLength(0);
-    });
-  });
-
-  describe('visibility', () => {
-    it('is visible when a title exists and controls are visible', () => {
-      const core = new TitleCore();
-
-      core.setMedia(createMediaState({ controlsVisible: true }));
-
-      expect(core.getState().visible).toBe(true);
-    });
-
-    it('is hidden when controls are hidden', () => {
-      const core = new TitleCore();
-
-      core.setMedia(createMediaState({ controlsVisible: false }));
-
-      expect(core.getState().visible).toBe(false);
-    });
-
-    it('stays hidden without a title regardless of controls', () => {
-      const core = new TitleCore();
-
-      core.setMedia(createMediaState({ contentTitle: '', controlsVisible: true }));
-
-      expect(core.getState().visible).toBe(false);
     });
   });
 });

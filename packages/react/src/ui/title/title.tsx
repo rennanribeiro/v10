@@ -1,7 +1,7 @@
 'use client';
 
 import { TitleCore, TitleDataAttrs } from '@videojs/core';
-import { logMissingFeature, selectControls, selectMetadata } from '@videojs/core/dom';
+import { logMissingFeature, selectMetadata } from '@videojs/core/dom';
 import type { ForwardedRef } from 'react';
 import { forwardRef, useState } from 'react';
 
@@ -17,11 +17,13 @@ export interface TitleProps extends Omit<UIComponentProps<'span', TitleCore.Stat
  * The component owns its text content. Set the title through the player's
  * `contentTitle` prop or `setContentTitle` rather than by passing children.
  *
+ * Renders nothing when no title resolves.
+ *
  * @example
  * ```tsx
  * <Title />
  *
- * <Title className={(state) => (state.visible ? 'title title--visible' : 'title')} />
+ * <Title className="title" />
  * ```
  */
 export const Title = forwardRef(function Title(
@@ -31,7 +33,6 @@ export const Title = forwardRef(function Title(
   const { render, className, style, ...elementProps } = componentProps;
 
   const metadata = usePlayer(selectMetadata);
-  const controls = usePlayer(selectControls);
 
   const [core] = useState(() => new TitleCore());
 
@@ -40,13 +41,9 @@ export const Title = forwardRef(function Title(
     return null;
   }
 
-  // A player without controls has nothing that hides the title, so this falls
-  // back to the value that keeps it on screen.
-  core.setMedia({
-    contentTitle: metadata.contentTitle,
-    controlsVisible: controls?.controlsVisible ?? true,
-  });
-  const state = core.getState();
+  const state = core.getState(metadata);
+
+  if (state.hidden) return null;
 
   return renderElement(
     'span',

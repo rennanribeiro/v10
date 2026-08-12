@@ -66,8 +66,7 @@ A title can come from three places. The player uses the first one that has a val
 2. The title the media reports about itself.
 3. `defaultContentTitle`, the fallback you set for media that does not name itself.
 
-If none of them has a value, the title is empty. The element stays in the page with no
-text, and `data-has-title` comes off so your CSS can hide it.
+If none of them has a value, there is nothing to show and the title hides itself.
 
 To change the title while the player is running, call `setContentTitle` on the store:
 
@@ -89,51 +88,47 @@ To change the title while the player is running, call `setContentTitle` on the s
   ```
 </FrameworkCase>
 
-The title is part of the player's chrome. It shows whenever a title exists and the
-controls are on screen, and it leaves when they do, so it never sits over the video on
-its own. An audio player has no controls that come and go, so its title stays on screen
-whenever there is one to show.
+The title shows whenever there is a title to show. It does not follow the controls or
+playback on its own — when you want it to come and go with the controls, style it against
+the controls in your own layout, the same way you would any other piece of chrome.
 
 ## Styling
 
-Two data attributes drive presentation:
-
-- `data-has-title` is present when a title exists. Use it to remove the element entirely
-  when there is nothing to show, so a background or gradient never sits over empty space.
-- `data-visible` is present when the component decides the title should be shown. Use it
-  for the transition.
-
 <FrameworkCase frameworks={["html"]}>
-```css
-media-title:not([data-has-title]) {
-  display: none;
-}
+When no title resolves, the element sets the native `hidden` attribute and `data-hidden`,
+so it takes up no space and a background or gradient never sits over empty space.
 
+To fade the title in and out with the controls, style it against a sibling `media-controls`
+rather than reaching for state on the title itself:
+
+```css
 media-title {
   opacity: 0;
   transition: opacity 150ms ease-out;
 }
 
-media-title[data-visible] {
+media-controls[data-visible] ~ media-title {
   opacity: 1;
 }
 ```
 </FrameworkCase>
 
 <FrameworkCase frameworks={["react"]}>
-React renders a `<span>`. Add a `className` to style it:
+React renders a `<span>`, or nothing at all when no title resolves. Add a `className` to
+style it:
 
 ```css
-.title:not([data-has-title]) {
-  display: none;
-}
-
 .title {
   opacity: 0;
   transition: opacity 150ms ease-out;
 }
+```
 
-.title[data-visible] {
+To fade the title in and out with the controls, style it against a sibling `Controls`
+rather than reaching for state on the title itself:
+
+```css
+.controls[data-visible] ~ .title {
   opacity: 1;
 }
 ```
@@ -142,15 +137,15 @@ React renders a `<span>`. Add a `className` to style it:
 branch in JavaScript than in CSS:
 
 ```tsx
-<Title className={(state) => (state.visible ? "title title--visible" : "title")} />
+<Title className={(state) => (state.title.length > 40 ? "title title--long" : "title")} />
 ```
 </FrameworkCase>
 
 ## Accessibility
 
 The title is ordinary text, so it reaches assistive technology as content with no ARIA
-of its own. Hiding it with `display: none` when there is no title also removes it from
-the accessibility tree.
+of its own. The native `hidden` attribute it sets when there is no title also removes it
+from the accessibility tree, so nothing is announced when there is nothing to announce.
 
 Fading the title out with `opacity` leaves it readable by a screen reader while it is not
 painted. That is deliberate — the name of what is playing stays relevant whether or not
