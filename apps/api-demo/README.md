@@ -38,6 +38,17 @@ pnpm dev:api-demo
 pnpm build:api-demo
 ```
 
+## Deployment
+
+Deploys via Netlify from `main`, configured by [`netlify.toml`](netlify.toml). The
+Netlify site uses **package directory** `apps/api-demo` — Netlify reads the
+config from there while resolving its paths against the repository root, the same
+arrangement as [`site/netlify.toml`](../../site/netlify.toml).
+
+The `ignore` command asks Turborepo whether this app's `build` task is affected,
+so pushes that don't touch the demo (or the packages it depends on) skip the
+deploy.
+
 ## Adding more API demos
 
 `src/components/PlayerDemo.tsx` is the place to grow this. The media instance
