@@ -11,7 +11,7 @@ export default defineConfig({
     optimizeDeps: {
       // The workspace media packages ship ESM; let Vite resolve them directly
       // instead of pre-bundling (mirrors the main site config).
-      exclude: ['@videojs/media', '@videojs/react'],
+      exclude: ['@videojs/media', '@videojs/react', '@videojs/utils'],
       // react-dom (CJS) must be pre-bundled so its named exports are exposed as
       // ESM bindings to the @astrojs/react client renderer.
       include: ['react-dom', 'react-dom/client'],

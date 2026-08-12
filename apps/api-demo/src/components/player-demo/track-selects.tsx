@@ -1,4 +1,5 @@
 import type { AudioTrackListLike, TextTrackListLike } from '@videojs/media';
+import { isCaptionOrSubtitleTrack } from '@videojs/utils/dom';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { useMediaLog } from './media-log';
 import { readParams, setParam } from './params';
@@ -12,10 +13,22 @@ function trackLabel(track: { label: string; language: string }, index: number): 
 function applyTextTrack(list: TextTrackListLike, selected: number): void {
   for (let i = 0; i < list.length; i++) {
     const track = list[i]!;
-    if (track.kind === 'subtitles' || track.kind === 'captions') {
+    if (isCaptionOrSubtitleTrack(track)) {
       track.mode = i === selected ? 'showing' : 'disabled';
     }
   }
+}
+
+/**
+ * Whether the list holds a selectable track yet. The demo's cue point metadata
+ * track is in the list from the first render, so list length alone can't tell
+ * whether the engine's caption tracks have arrived.
+ */
+function hasCaptionTracks(list: TextTrackListLike): boolean {
+  for (let i = 0; i < list.length; i++) {
+    if (isCaptionOrSubtitleTrack(list[i]!)) return true;
+  }
+  return false;
 }
 
 function applyAudioTrack(list: AudioTrackListLike, selected: number): void {
@@ -123,8 +136,10 @@ export function TextTrackSelect() {
   useEffect(() => {
     if (!list) return;
     const controller = new AbortController();
+    // Restore once, but only after caption tracks exist — otherwise the shared
+    // `texttrack` param would be spent on the cue point metadata track alone.
     const tryRestore = () => {
-      if (restored.current || list.length === 0) return;
+      if (restored.current || !hasCaptionTracks(list)) return;
       restored.current = true;
       const param = readParams().get('texttrack');
       if (param !== null) applyTextTrack(list, param === 'off' ? -1 : Number(param));
@@ -145,7 +160,7 @@ export function TextTrackSelect() {
   if (list) {
     for (let i = 0; i < list.length; i++) {
       const track = list[i]!;
-      if (track.kind === 'subtitles' || track.kind === 'captions') {
+      if (isCaptionOrSubtitleTrack(track)) {
         options.push({ value: String(i), label: trackLabel(track, i) });
         if (track.mode === 'showing') showing = String(i);
       }

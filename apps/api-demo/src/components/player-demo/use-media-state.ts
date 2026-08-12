@@ -1,4 +1,4 @@
-import type { MediaFull } from '@videojs/media';
+import { hasMetadata, type MediaFull } from '@videojs/media';
 import { useEffect, useState } from 'react';
 import { STATE_EVENTS } from './constants';
 import { readParams } from './params';
@@ -103,6 +103,9 @@ export function useRestoreFromParams(media: MediaFull | null) {
     };
 
     media.addEventListener('loadedmetadata', apply, { signal: controller.signal });
+    // `loadedmetadata` won't fire again if it already has, so catch up once here.
+    if (hasMetadata(media)) apply();
+
     return () => controller.abort();
   }, [media]);
 }
