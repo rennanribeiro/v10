@@ -26,7 +26,7 @@ export class TitleElement extends MediaElement {
     super.connectedCallback();
 
     if (!this.#textNode.parentNode) {
-      this.appendChild(this.#textNode);
+      this.append(this.#textNode);
     }
 
     if (__DEV__ && !this.#metadataState.value) {

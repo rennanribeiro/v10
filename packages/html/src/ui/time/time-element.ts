@@ -47,8 +47,7 @@ export class TimeElement extends MediaElement {
     if (!this.#signSpan.parentNode) {
       this.#signSpan.setAttribute('aria-hidden', 'true');
       this.#signSpan.hidden = true;
-      this.appendChild(this.#signSpan);
-      this.appendChild(this.#textNode);
+      this.append(this.#signSpan, this.#textNode);
     }
 
     if (__DEV__ && !this.#state.value) {
