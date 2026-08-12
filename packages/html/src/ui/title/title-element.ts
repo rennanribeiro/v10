@@ -20,7 +20,7 @@ export class TitleElement extends MediaElement {
   readonly #metadataState = new PlayerController(this, playerContext, selectMetadata);
   readonly #controlsState = new PlayerController(this, playerContext, selectControls);
 
-  readonly #textNode = document.createTextNode('');
+  readonly #textNode = new Text();
 
   override connectedCallback(): void {
     super.connectedCallback();

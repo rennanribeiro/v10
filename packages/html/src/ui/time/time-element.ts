@@ -32,7 +32,7 @@ export class TimeElement extends MediaElement {
   readonly #i18n = new I18nController(this, i18nContext);
 
   readonly #signSpan = document.createElement('span');
-  readonly #textNode = document.createTextNode('');
+  readonly #textNode = new Text();
 
   #disconnect: AbortController | null = null;
   #listening = false;
