@@ -44,68 +44,34 @@ export function applyStyles(element: HTMLElement, styles: Record<string, string 
 }
 
 export function resolveCSSLength(el: Element, value: string): number {
-  const trimmed = value.trim();
+  const length = value.trim();
 
-  if (!trimmed) return 0;
+  if (!length) return 0;
 
-  const parsed = Number.parseFloat(trimmed);
-
-  if (!Number.isNaN(parsed) && (/^-?\d*\.?\d+$/.test(trimmed) || trimmed.endsWith('px'))) return parsed;
+  if (/^-?(?:\d+(?:\.\d+)?|\.\d+)(?:px)?$/.test(length)) return Number.parseFloat(length);
 
   const doc = el.ownerDocument;
-  const root = doc?.documentElement;
+  const probe = doc.createElement('div');
 
-  if (!Number.isNaN(parsed) && trimmed.endsWith('rem')) {
-    const rootFontSize = root ? Number.parseFloat(getComputedStyle(root).fontSize) || 16 : 16;
-    return parsed * rootFontSize;
-  }
+  probe.style.cssText = 'position:absolute;visibility:hidden;pointer-events:none';
+  probe.style.inlineSize = length;
 
-  if (!Number.isNaN(parsed) && trimmed.endsWith('em')) {
-    const fontSize = el instanceof HTMLElement ? Number.parseFloat(getComputedStyle(el).fontSize) || 16 : 16;
-    return parsed * fontSize;
-  }
-
-  if (!doc) return Number.isNaN(parsed) ? 0 : parsed;
-
-  const measurementEl = doc.createElement('div');
-  measurementEl.style.position = 'absolute';
-  measurementEl.style.visibility = 'hidden';
-  measurementEl.style.pointerEvents = 'none';
-  measurementEl.style.inlineSize = trimmed;
-
-  if (!measurementEl.style.inlineSize) return 0;
-
-  measurementEl.style.blockSize = '0';
-  measurementEl.style.padding = '0';
-  measurementEl.style.border = '0';
-  measurementEl.style.inset = '0';
+  if (!probe.style.inlineSize) return 0;
 
   const computed = getComputedStyle(el);
-  measurementEl.style.fontSize = computed.fontSize;
+  probe.style.fontSize = computed.fontSize;
 
-  for (let i = 0; i < computed.length; i++) {
-    const name = computed.item(i);
-
-    if (name.startsWith('--')) {
-      measurementEl.style.setProperty(name, computed.getPropertyValue(name));
-    }
+  for (const match of length.matchAll(/var\(\s*(--[\w-]+)/g)) {
+    const name = match[1];
+    if (name) probe.style.setProperty(name, computed.getPropertyValue(name));
   }
 
-  const parent = doc.body ?? doc.documentElement;
+  (doc.body ?? doc.documentElement).append(probe);
 
-  if (!parent) return Number.isNaN(parsed) ? 0 : parsed;
-
-  parent.appendChild(measurementEl);
-
-  if (getComputedStyle(measurementEl).inlineSize === 'auto') {
-    measurementEl.remove();
-    return 0;
+  try {
+    const pixels = Number.parseFloat(getComputedStyle(probe).inlineSize);
+    return Number.isFinite(pixels) ? pixels : 0;
+  } finally {
+    probe.remove();
   }
-
-  const pixels = measurementEl.getBoundingClientRect().width;
-  measurementEl.remove();
-
-  if (Number.isFinite(pixels)) return pixels;
-
-  return Number.isNaN(parsed) ? 0 : parsed;
 }

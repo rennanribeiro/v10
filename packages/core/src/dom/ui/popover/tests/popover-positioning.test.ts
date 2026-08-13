@@ -294,18 +294,23 @@ describe('getAnchorPositionStyle', () => {
 describe('resolveOffsets', () => {
   it('resolves non-pixel CSS lengths to pixels', () => {
     const el = document.createElement('div');
-    const getComputedStyleSpy = vi.spyOn(globalThis, 'getComputedStyle').mockImplementation(
-      (target: Element) =>
-        ({
-          fontSize: target === document.documentElement ? '16px' : '14px',
-          getPropertyValue(name: string) {
-            if (name === PopoverCSSVars.sideOffset) return '0.5rem';
-            if (name === PopoverCSSVars.alignOffset) return '1em';
-            if (name === PopoverCSSVars.boundaryOffset) return '2px';
-            return '';
-          },
-        }) as CSSStyleDeclaration
-    );
+    const getComputedStyleSpy = vi.spyOn(globalThis, 'getComputedStyle').mockImplementation((target: Element) => {
+      if (target !== el) {
+        return {
+          inlineSize: (target as HTMLElement).style.inlineSize === '0.5rem' ? '8px' : '14px',
+        } as CSSStyleDeclaration;
+      }
+
+      return {
+        fontSize: '14px',
+        getPropertyValue(name: string) {
+          if (name === PopoverCSSVars.sideOffset) return '0.5rem';
+          if (name === PopoverCSSVars.alignOffset) return '1em';
+          if (name === PopoverCSSVars.boundaryOffset) return '2px';
+          return '';
+        },
+      } as CSSStyleDeclaration;
+    });
 
     expect(resolveOffsets(el)).toEqual({ sideOffset: 8, alignOffset: 14, boundaryOffset: 2 });
 
