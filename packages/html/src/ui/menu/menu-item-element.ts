@@ -59,6 +59,7 @@ export class MenuItemElement extends MediaElement {
 
   #disconnect: AbortController | null = null;
   #registered = false;
+  #hasSettingState = false;
   #settingUnavailable = false;
   #cleanupRegistration: (() => void) | null = null;
 
@@ -143,14 +144,14 @@ export class MenuItemElement extends MediaElement {
 
   #syncMenuItemSetting(): void {
     if (!this.type || !this.commandfor) {
-      this.#setSettingUnavailable(false);
+      this.#clearMenuItemSetting();
       this.#settingProvider.setValue(undefined);
       return;
     }
 
     const value = this.#getSettingValue(this.type);
     if (!value) {
-      this.#setSettingUnavailable(false);
+      this.#clearMenuItemSetting();
       this.#settingProvider.setValue(undefined);
       return;
     }
@@ -166,8 +167,16 @@ export class MenuItemElement extends MediaElement {
       value
     );
 
-    applyElementProps(this, { 'data-availability': setting.availability });
-    this.#setSettingUnavailable(setting.availability !== 'available');
+    const unavailable = setting.availability !== 'available';
+
+    applyElementProps(this, {
+      'data-availability': setting.availability,
+      'data-disabled': unavailable ? '' : undefined,
+      'data-hidden': unavailable ? '' : undefined,
+      hidden: unavailable ? '' : undefined,
+    });
+    this.#hasSettingState = true;
+    this.#setSettingUnavailable(unavailable);
     this.#settingProvider.setValue({
       type: this.type,
       ...setting,
@@ -181,6 +190,19 @@ export class MenuItemElement extends MediaElement {
 
   #setSettingUnavailable(unavailable: boolean): void {
     this.#settingUnavailable = unavailable;
+  }
+
+  #clearMenuItemSetting(): void {
+    if (!this.#hasSettingState) return;
+
+    applyElementProps(this, {
+      'data-availability': undefined,
+      'data-disabled': undefined,
+      'data-hidden': undefined,
+      hidden: undefined,
+    });
+    this.#hasSettingState = false;
+    this.#setSettingUnavailable(false);
   }
 
   #getSettingValue(

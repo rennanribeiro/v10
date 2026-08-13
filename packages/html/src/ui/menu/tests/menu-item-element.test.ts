@@ -99,7 +99,22 @@ describe('MenuItemElement', () => {
     await menuItem.updateComplete;
     await waitForAssertion(() => {
       expect(menuItem.getAttribute('data-availability')).toBe('unavailable');
+      expect(menuItem.hasAttribute('data-disabled')).toBe(true);
+      expect(menuItem.hasAttribute('data-hidden')).toBe(true);
+      expect(menuItem.hidden).toBe(true);
       expect(menuItem.getAttribute('aria-disabled')).toBe('true');
     });
+  });
+
+  it('preserves author-owned hidden state on regular items', async () => {
+    const menu = document.createElement(MenuElement.tagName) as MenuElement;
+    const menuItem = document.createElement(MenuItemElement.tagName) as MenuItemElement;
+    menuItem.hidden = true;
+    menu.append(menuItem);
+    document.body.append(menu);
+
+    await menuItem.updateComplete;
+
+    expect(menuItem.hidden).toBe(true);
   });
 });

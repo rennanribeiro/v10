@@ -165,11 +165,6 @@
       opacity: 1;
     }
 
-    &[data-availability="unavailable"],
-    &[data-availability="unsupported"] {
-      display: none;
-    }
-
     &:hover,
     &[data-highlighted] {
       @supports (top: anchor(top)) {

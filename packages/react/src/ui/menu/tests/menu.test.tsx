@@ -986,4 +986,20 @@ describe('MenuContent', () => {
 
     expect(screen.getByTestId('value').textContent).toBe('1.5×');
   });
+
+  it('does not render unavailable setting triggers', () => {
+    const { Wrapper } = createPlayerWrapper({ playbackRates: [] });
+
+    render(
+      <MenuRoot>
+        <MenuTrigger type="playback-rate" data-testid="trigger">
+          Speed
+        </MenuTrigger>
+        <MenuContent>Speed</MenuContent>
+      </MenuRoot>,
+      { wrapper: Wrapper }
+    );
+
+    expect(screen.queryByTestId('trigger')).toBeNull();
+  });
 });

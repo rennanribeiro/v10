@@ -92,7 +92,6 @@ export const menu = {
   item: cn(
     itemBase,
     'group/menu-item justify-between tabular-nums text-inherit',
-    'data-[availability=unavailable]:hidden data-[availability=unsupported]:hidden',
     'aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50'
   ),
   separator: 'my-1 border-b border-[oklch(1_0_0/0.1)]',

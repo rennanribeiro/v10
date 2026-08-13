@@ -23,6 +23,7 @@ function PlaybackRateMenuItemSettingProvider({ children }: { children: ReactNode
   if (!playbackRate) return children;
 
   const { state, options, value } = playbackRate;
+  if (state.availability !== 'available') return null;
   const label = options.find((option) => option.value === value)?.label ?? '';
 
   return (
@@ -38,6 +39,7 @@ function CaptionsMenuItemSettingProvider({ children }: { children: ReactNode }):
   if (!captions) return children;
 
   const { state, options, value } = captions;
+  if (state.availability !== 'available') return null;
   const label =
     value === CAPTIONS_OFF_VALUE
       ? translateText(offText, t)
@@ -56,6 +58,7 @@ function QualityMenuItemSettingProvider({ children }: { children: ReactNode }): 
   if (!quality) return children;
 
   const { state, options, value } = quality;
+  if (state.availability !== 'available') return null;
   const label = options.find((option) => option.value === value)?.label ?? translateText(autoText, t);
 
   return (
@@ -70,6 +73,7 @@ function AudioTrackMenuItemSettingProvider({ children }: { children: ReactNode }
   if (!audioTrack) return children;
 
   const { state, options, value } = audioTrack;
+  if (state.availability !== 'available') return null;
   const label = options.find((option) => option.value === value)?.label ?? '';
 
   return (
