@@ -53,13 +53,13 @@ describe('resolveCSSLength', () => {
     vi.restoreAllMocks();
   });
 
-  function mockComputedLength(el: Element, inlineSize: string, variables: Record<string, string> = {}) {
+  function mockComputedLength(el: Element, insetInlineStart: string, variables: Record<string, string> = {}) {
     const getPropertyValue = vi.fn((name: string) => variables[name] ?? '');
 
     vi.spyOn(globalThis, 'getComputedStyle').mockImplementation((target: Element) =>
       target === el
         ? ({ fontSize: '14px', getPropertyValue } as unknown as CSSStyleDeclaration)
-        : ({ inlineSize } as CSSStyleDeclaration)
+        : ({ insetInlineStart } as CSSStyleDeclaration)
     );
 
     return getPropertyValue;
@@ -75,29 +75,36 @@ describe('resolveCSSLength', () => {
 
   it.each([
     ['0.5rem', '8px', 8],
+    ['-0.5rem', '-8px', -8],
     ['1em', '14px', 14],
+    ['-1em', '-14px', -14],
     ['10vw', '24px', 24],
     ['calc(0.5 * 16px)', '8px', 8],
+    ['calc(0px - 0.5rem)', '-8px', -8],
     ['calc(1px - 1px)', '0px', 0],
-  ])('resolves %s from its computed inline size', (value, inlineSize, expected) => {
+  ])('resolves %s from its computed inset', (value, inset, expected) => {
     const el = document.createElement('div');
     const appendSpy = vi.spyOn(document.body, 'append');
 
-    mockComputedLength(el, inlineSize);
+    mockComputedLength(el, inset);
 
     expect(resolveCSSLength(el, value)).toBe(expected);
     expect(appendSpy).toHaveBeenCalledOnce();
     expect((appendSpy.mock.calls[0]![0] as Element).isConnected).toBe(false);
   });
 
-  it('copies referenced custom properties from the source element', () => {
+  it('copies computed custom properties referenced by the length', () => {
     const el = document.createElement('div');
     const appendSpy = vi.spyOn(document.body, 'append');
-    const getPropertyValue = mockComputedLength(el, '8px', { '--size': '16px' });
+    const getPropertyValue = mockComputedLength(el, '-8px', {
+      '--offset': 'calc(calc(16px / 4) * -2)',
+    });
 
-    expect(resolveCSSLength(el, 'calc(0.5 * var(--size))')).toBe(8);
-    expect(getPropertyValue).toHaveBeenCalledExactlyOnceWith('--size');
-    expect((appendSpy.mock.calls[0]![0] as HTMLElement).style.getPropertyValue('--size')).toBe('16px');
+    expect(resolveCSSLength(el, 'var(--offset)')).toBe(-8);
+    expect(getPropertyValue).toHaveBeenCalledExactlyOnceWith('--offset');
+    expect((appendSpy.mock.calls[0]![0] as HTMLElement).style.getPropertyValue('--offset')).toBe(
+      'calc(calc(16px / 4) * -2)'
+    );
   });
 
   it('returns zero for empty, invalid, and unresolved values', () => {

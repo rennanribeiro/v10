@@ -54,9 +54,9 @@ export function resolveCSSLength(el: Element, value: string): number {
   const probe = doc.createElement('div');
 
   probe.style.cssText = 'position:absolute;visibility:hidden;pointer-events:none';
-  probe.style.inlineSize = length;
+  probe.style.insetInlineStart = length;
 
-  if (!probe.style.inlineSize) return 0;
+  if (!probe.style.insetInlineStart) return 0;
 
   const computed = getComputedStyle(el);
   probe.style.fontSize = computed.fontSize;
@@ -69,7 +69,7 @@ export function resolveCSSLength(el: Element, value: string): number {
   (doc.body ?? doc.documentElement).append(probe);
 
   try {
-    const pixels = Number.parseFloat(getComputedStyle(probe).inlineSize);
+    const pixels = Number.parseFloat(getComputedStyle(probe).insetInlineStart);
     return Number.isFinite(pixels) ? pixels : 0;
   } finally {
     probe.remove();

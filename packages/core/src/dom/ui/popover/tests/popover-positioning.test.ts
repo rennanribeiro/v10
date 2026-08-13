@@ -297,7 +297,7 @@ describe('resolveOffsets', () => {
     const getComputedStyleSpy = vi.spyOn(globalThis, 'getComputedStyle').mockImplementation((target: Element) => {
       if (target !== el) {
         return {
-          inlineSize: (target as HTMLElement).style.inlineSize === '0.5rem' ? '8px' : '14px',
+          insetInlineStart: (target as HTMLElement).style.insetInlineStart === '0.5rem' ? '8px' : '14px',
         } as CSSStyleDeclaration;
       }
 
