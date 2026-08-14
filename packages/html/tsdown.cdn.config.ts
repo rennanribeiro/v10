@@ -41,6 +41,7 @@ const media = [
   'mux-video',
   'native-hls-video',
   'dash-video',
+  'shaka-video',
 ];
 
 /**
