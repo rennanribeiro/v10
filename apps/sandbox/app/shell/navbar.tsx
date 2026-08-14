@@ -28,6 +28,7 @@ type NavbarProps = {
   onLocaleChange: (value: SandboxLocaleTag) => void;
   availableSources: readonly SourceId[];
   isBackgroundVideo: boolean;
+  isSpfBackgroundVideo: boolean;
   isSpfHls: boolean;
   isMuxVideo: boolean;
   isMuxAudio: boolean;
@@ -46,9 +47,9 @@ type NavbarProps = {
  * protection. Derived from the pair rather than stored on the source, since every
  * source here plays fine under some other media.
  *
- * Keyed on the *preset*, not a single is-SPF-HLS flag, because the two
- * variants answer differently and a note promising the wrong outcome is worse
- * than none — a reviewer would file the difference as a bug:
+ * Keyed on the *preset*, not a single is-SPF-HLS flag, because the variants answer
+ * differently and a note promising the wrong outcome is worse than none — a
+ * reviewer would file the difference as a bug:
  *
  * - **DRM.** Mux encrypts video renditions and leaves audio clear. The audio-only
  *   engine resolves only the audio rendition, so it never fetches an encrypted
@@ -61,6 +62,16 @@ type NavbarProps = {
  *   only appears for one of them.
  */
 function expectedOutcomeNote(source: SandboxSource, preset: Preset): string | undefined {
+  // The background presets are the same engine again, minus every error surface:
+  // they compose no `collectErrors`, put no capability constraints on their
+  // one-shot selection, and have no adapter mapping. Nothing reaches the media
+  // element either — MPEG-TS and encryption both leave `error === null`, measured
+  // on Chromium and WebKit — so the note promises a stall rather than a verdict.
+  if (preset === 'hls-background-video' || preset === 'mux-background-video') {
+    if (source.drm || (source.subType && source.subType !== 'mp4')) return 'expects silent stall, no error';
+    return undefined;
+  }
+
   if (preset !== 'hls-video' && preset !== 'hls-audio') return undefined;
   const audioOnlyPreset = preset === 'hls-audio';
 
@@ -123,6 +134,7 @@ export function Navbar({
   onLocaleChange,
   availableSources,
   isBackgroundVideo,
+  isSpfBackgroundVideo,
   isSpfHls,
   isMuxVideo,
   isMuxAudio,
@@ -186,7 +198,7 @@ export function Navbar({
               if (sources[id].type === 'none') return true;
               // Any HLS source, including formats the SPF engine can't play — reaching
               // those failures on purpose is how the error paths get smoke-tested.
-              if (isSpfHls) return sources[id].type === 'hls';
+              if (isSpfHls || isSpfBackgroundVideo) return sources[id].type === 'hls';
               if (isMuxVideo || isMuxAudio) return sources[id].type !== 'dash';
               return true;
             })
@@ -194,7 +206,10 @@ export function Navbar({
               const note = expectedOutcomeNote(sources[id], preset);
               return { value: id, label: note ? `${sources[id].label} — ${note}` : sources[id].label };
             })}
-          disabled={isBackgroundVideo || isVimeoVideo || isYouTubeVideo}
+          // `<background-video>` is the one background preset with a fixed source:
+          // it hands a progressive MP4 to the browser, where the SPF-backed pair
+          // stream whatever manifest they're pointed at.
+          disabled={(isBackgroundVideo && !isSpfBackgroundVideo) || isVimeoVideo || isYouTubeVideo}
         />
       </div>
 
