@@ -131,6 +131,7 @@ async function loadCdnPreset(preset: Preset, skin: Skin, live: boolean) {
     case 'native-hls-video':
     case 'hls-video':
     case 'dash-video':
+    case 'shaka-video':
       if (live) {
         if (skin === 'minimal') await import('@videojs/html/cdn/live-video-minimal');
         else await import('@videojs/html/cdn/live-video');
@@ -198,6 +199,9 @@ async function loadCdnMedia(preset: Preset) {
     case 'dash-video':
       await import('@videojs/html/cdn/media/dash-video');
       break;
+    case 'shaka-video':
+      await import('@videojs/html/cdn/media/shaka-video');
+      break;
   }
 }
 
@@ -237,6 +241,7 @@ function getMediaTag(preset: Preset): string {
     'hls-video': 'hls-video',
     'hls-audio': 'hls-audio',
     'dash-video': 'dash-video',
+    'shaka-video': 'shaka-video',
     audio: 'audio',
     'background-video': 'background-video',
     'hls-background-video': 'hls-background-video',
@@ -260,7 +265,8 @@ function isVideoPreset(preset: Preset): boolean {
     preset === 'mux-video-spf' ||
     preset === 'native-hls-video' ||
     preset === 'hls-video' ||
-    preset === 'dash-video'
+    preset === 'dash-video' ||
+    preset === 'shaka-video'
   );
 }
 
