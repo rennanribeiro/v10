@@ -259,9 +259,11 @@ describe('generateReactCreateCode', () => {
   it('generates a React player component for default video', () => {
     const result = generateReactCreateCode(baseReact);
     const code = result['MyPlayer.tsx'];
-    expect(code).toContain("'use client'");
-    expect(code).toContain('createPlayer');
-    expect(code).toContain('videoFeatures');
+    expect(code).not.toContain("'use client'");
+    expect(code).not.toContain('createPlayer');
+    expect(code).not.toContain('videoFeatures');
+    expect(code).toContain("import { VideoPlayer, VideoSkin, Video } from '@videojs/react/video'");
+    expect(code).toContain('<VideoPlayer>');
     expect(code).toContain('<VideoSkin>');
     expect(code).toContain('<Video src={src} playsInline />');
     expect(code).toContain("from '@videojs/react/video'");
@@ -271,7 +273,7 @@ describe('generateReactCreateCode', () => {
   it('uses separate media import for HLS', () => {
     const result = generateReactCreateCode({ ...baseReact, renderer: 'hls' });
     const code = result['MyPlayer.tsx'];
-    expect(code).toContain("import { VideoSkin } from '@videojs/react/video'");
+    expect(code).toContain("import { VideoPlayer, VideoSkin } from '@videojs/react/video'");
     expect(code).toContain("import { HlsJsVideo } from '@videojs/react/media/hlsjs-video'");
     expect(code).toContain('<HlsJsVideo src={src} playsInline />');
   });
@@ -307,7 +309,9 @@ describe('generateReactCreateCode', () => {
     };
     const result = generateReactCreateCode(opts);
     const code = result['MyPlayer.tsx'];
-    expect(code).toContain('audioFeatures');
+    expect(code).not.toContain('audioFeatures');
+    expect(code).toContain("import { AudioPlayer, AudioSkin, Audio } from '@videojs/react/audio'");
+    expect(code).toContain('<AudioPlayer>');
     expect(code).toContain('<AudioSkin>');
     expect(code).toContain('<Audio src={src} />');
     expect(code).not.toContain('playsInline');
@@ -329,12 +333,12 @@ describe('generateReactCreateCode', () => {
     expect(code).toContain("from '@videojs/react/video'");
   });
 
-  it('uses live video features, skin, and CSS import', () => {
+  it('uses the live video player, skin, and CSS import', () => {
     const result = generateReactCreateCode({ ...baseReact, useCase: 'live-video', renderer: 'hls' });
     const code = result['MyPlayer.tsx'];
-    expect(code).toContain('liveVideoFeatures');
+    expect(code).toContain('<LiveVideoPlayer>');
     expect(code).toContain('<LiveVideoSkin>');
-    expect(code).toContain("import { LiveVideoSkin } from '@videojs/react/live-video'");
+    expect(code).toContain("import { LiveVideoPlayer, LiveVideoSkin } from '@videojs/react/live-video'");
     expect(code).toContain("import { HlsJsVideo } from '@videojs/react/media/hlsjs-video'");
     expect(code).toContain("import '@videojs/react/live-video/skin.css'");
     expect(code).toContain('<HlsJsVideo src={src} playsInline />');
@@ -355,12 +359,13 @@ describe('generateReactCreateCode', () => {
   it('omits the skin for a headless live video player', () => {
     const result = generateReactCreateCode({ ...baseReact, useCase: 'live-video', skin: 'none', renderer: 'hls' });
     const code = result['MyPlayer.tsx'];
-    expect(code).toContain('liveVideoFeatures');
+    expect(code).toContain("import { LiveVideoPlayer } from '@videojs/react/live-video'");
+    expect(code).toContain('<LiveVideoPlayer>');
     expect(code).not.toContain('LiveVideoSkin');
     expect(code).not.toContain('skin.css');
   });
 
-  it('uses live audio features and skin without playsInline', () => {
+  it('uses the live audio player and skin without playsInline', () => {
     const result = generateReactCreateCode({
       ...baseReact,
       useCase: 'live-audio',
@@ -368,9 +373,9 @@ describe('generateReactCreateCode', () => {
       renderer: 'mux-audio',
     });
     const code = result['MyPlayer.tsx'];
-    expect(code).toContain('liveAudioFeatures');
+    expect(code).toContain('<LiveAudioPlayer>');
     expect(code).toContain('<LiveAudioSkin>');
-    expect(code).toContain("import { LiveAudioSkin } from '@videojs/react/live-audio'");
+    expect(code).toContain("import { LiveAudioPlayer, LiveAudioSkin } from '@videojs/react/live-audio'");
     expect(code).toContain("import { MuxAudio } from '@videojs/react/media/mux-audio'");
     expect(code).toContain("import '@videojs/react/live-audio/skin.css'");
     expect(code).not.toContain('playsInline');
@@ -394,7 +399,11 @@ describe('generateReactCreateCode', () => {
     };
     const result = generateReactCreateCode(opts);
     const code = result['MyPlayer.tsx'];
-    expect(code).toContain('backgroundFeatures');
+    expect(code).not.toContain('backgroundFeatures');
+    expect(code).toContain(
+      "import { BackgroundVideoPlayer, BackgroundVideoSkin, BackgroundVideo } from '@videojs/react/background'"
+    );
+    expect(code).toContain('<BackgroundVideoPlayer>');
     expect(code).toContain('<BackgroundVideoSkin>');
     expect(code).toContain('<BackgroundVideo');
     expect(code).toContain("import '@videojs/react/background/skin.css'");

@@ -402,18 +402,18 @@ describe('handleDocs', () => {
         expect(output()).toContain('hls');
       });
 
-      it('generates the live-video preset with live features and skin', async () => {
+      it('generates the live-video preset with its player and skin', async () => {
         await handleDocs(reactFlags({ preset: 'live-video', media: 'hls' }), ['how-to/installation']);
         const out = output();
-        expect(out).toContain('liveVideoFeatures');
+        expect(out).toContain('<LiveVideoPlayer>');
         expect(out).toContain('<LiveVideoSkin>');
         expect(out).toContain("import '@videojs/react/live-video/skin.css'");
       });
 
-      it('generates the live-audio preset with live features and skin', async () => {
+      it('generates the live-audio preset with its player and skin', async () => {
         await handleDocs(reactFlags({ preset: 'live-audio', media: 'mux-audio' }), ['how-to/installation']);
         const out = output();
-        expect(out).toContain('liveAudioFeatures');
+        expect(out).toContain('<LiveAudioPlayer>');
         expect(out).toContain('<LiveAudioSkin>');
       });
     });

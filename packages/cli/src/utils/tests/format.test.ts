@@ -72,7 +72,7 @@ describe('formatInstallationCode', () => {
       skin: 'audio',
       renderer: 'mux-audio',
     });
-    expect(result).toContain('liveAudioFeatures');
+    expect(result).toContain('<LiveAudioPlayer>');
     expect(result).toContain('<LiveAudioSkin>');
   });
 

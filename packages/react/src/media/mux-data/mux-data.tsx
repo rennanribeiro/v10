@@ -13,7 +13,7 @@ export type MuxDataProps = Partial<MuxDataComponentProps>;
  * Adds [Mux Data](https://www.mux.com/data) monitoring to the surrounding
  * player's media.
  *
- * Renders nothing — place it inside the player provider as a sibling of the
+ * Renders nothing — place it inside the Player as a sibling of the
  * media component (e.g. `<MuxVideo />`) and it registers a `MuxData` media
  * component with the active media.
  *
@@ -21,12 +21,16 @@ export type MuxDataProps = Partial<MuxDataComponentProps>;
  * as its `video_id`, which Mux attributes to the owning environment. Set
  * `envKey` to monitor sources Mux doesn't host.
  *
+ * Any media component works. When the media plays through an hls.js or dash.js
+ * engine, that engine is handed to the Mux Data SDK so the view also carries
+ * stream-level detail such as rendition switches and request timing.
+ *
  * @example
  * ```tsx
- * <Player.Provider>
+ * <Player>
  *   <MuxVideo source={{ playbackId: 'abc123' }} />
  *   <MuxData playerSoftwareName="mux-video" />
- * </Player.Provider>
+ * </Player>
  * ```
  */
 export function MuxData(props: MuxDataProps): ReactNode {
