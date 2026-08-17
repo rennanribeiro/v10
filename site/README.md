@@ -77,6 +77,8 @@ The site deploys via Netlify from two branches:
 
 On each release, the CD workflow force-pushes `main` to `site/v10`, keeping production docs in sync with published packages.
 
+**Changelog prose:** write it onto the release PR before merging — run the **Changelog Prose** workflow with `target: release-pr` — so the polished changelog ships in that same force-push instead of landing on `main` after production has already moved. The run only ever adds a commit, so if it fails you can still cut the release and the raw release-please changelog goes out. A release cut without prose falls back to the post-release path, which opens a PR against `main`; that one needs a cherry-pick to `site/v10` to reach production before the next release.
+
 **Fixing a typo without cutting a release:** Land the fix on `main` first, then cherry-pick to `site/v10`. The next release's force-push already includes the fix (since it came from `main`), so nothing gets lost. The `site/v10` branch is protected — direct pushes are restricted to the CD bot.
 
 ## Environment Variables

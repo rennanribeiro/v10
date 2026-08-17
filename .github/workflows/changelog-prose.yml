@@ -1,25 +1,43 @@
 name: Changelog Prose
 
+# Prose normally goes onto the open release PR, before the release is cut, so
+# that merging the release PR ships the polished changelog with the tag, the
+# npm publish, and the site/v10 force-push in one step. Nothing here gates the
+# release: this workflow only ever adds a commit, so a failed or skipped run
+# leaves the raw release-please changelog in place and the release PR mergeable.
+# The post-release path below stays as a backstop for a release that was cut
+# without prose.
 on:
   release:
     types: [published]
   # claude-code-action does not support the `release` event, so the dispatch
-  # job relays core releases into a workflow_dispatch run. Manual dispatch
-  # also lets us backfill prose for a release that was missed.
+  # job relays core releases into a workflow_dispatch run.
   workflow_dispatch:
     inputs:
-      tag_name:
-        description: 'Release tag (e.g. @videojs/core@10.0.0-beta.24)'
+      target:
+        description: 'Where the prose lands'
         required: true
+        default: release-pr
+        type: choice
+        options:
+          # Commit onto release-please--branches--main, before the cut.
+          - release-pr
+          # Open a PR against main, after the cut. Needs tag_name.
+          - main
+      tag_name:
+        description: 'Release tag, for target=main (e.g. @videojs/core@10.0.0-beta.24)'
+        required: false
         type: string
       release_url:
         description: 'Release URL (defaults to the tag release page)'
         required: false
         type: string
 
+# On the release PR, share release-pr.yml's group so prose never races the
+# changelog extraction that writes the raw file this job reads.
 concurrency:
-  group: changelog-prose-${{ github.event.release.tag_name || inputs.tag_name }}
-  cancel-in-progress: true
+  group: ${{ inputs.target == 'release-pr' && 'release-pr' || format('changelog-prose-{0}', github.event.release.tag_name || inputs.tag_name) }}
+  cancel-in-progress: false
 
 jobs:
   dispatch:
@@ -39,11 +57,14 @@ jobs:
           # expands as a read-from-file reference and fails.
           gh workflow run changelog-prose.yml \
             --repo "$GITHUB_REPOSITORY" \
+            --raw-field target=main \
             --raw-field tag_name="$TAG_NAME" \
             --raw-field release_url="$RELEASE_URL"
 
   prose:
-    if: github.event_name == 'workflow_dispatch' && startsWith(inputs.tag_name, '@videojs/core@')
+    if: >-
+      github.event_name == 'workflow_dispatch' &&
+      (inputs.target == 'release-pr' || startsWith(inputs.tag_name, '@videojs/core@'))
     runs-on: ubuntu-latest
     permissions:
       actions: read
@@ -55,15 +76,26 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v5
         with:
-          fetch-depth: 1
+          # On the release PR, check out its branch and keep enough history to
+          # rebase onto it before pushing.
+          ref: ${{ inputs.target == 'release-pr' && 'release-please--branches--main' || '' }}
+          fetch-depth: ${{ inputs.target == 'release-pr' && '0' || '1' }}
 
       - name: Parse version
         id: version
         env:
+          TARGET: ${{ inputs.target }}
           TAG_NAME: ${{ inputs.tag_name }}
           RELEASE_URL: ${{ inputs.release_url }}
         run: |
-          VERSION="${TAG_NAME#@videojs/core@}"
+          # Before the cut there is no tag yet, so the version release-please
+          # is about to publish comes from the manifest on the release branch.
+          if [ "$TARGET" = 'release-pr' ]; then
+            VERSION=$(jq -r '."packages/core"' .github/release-please/.release-please-manifest.json)
+            TAG_NAME="@videojs/core@${VERSION}"
+          else
+            VERSION="${TAG_NAME#@videojs/core@}"
+          fi
           echo "version=$VERSION" >> "$GITHUB_OUTPUT"
           if [ -n "$RELEASE_URL" ]; then
             echo "release_url=$RELEASE_URL" >> "$GITHUB_OUTPUT"
@@ -72,12 +104,20 @@ jobs:
             echo "release_url=https://github.com/${GITHUB_REPOSITORY}/releases/tag/${ENCODED_TAG}" >> "$GITHUB_OUTPUT"
           fi
 
-      - name: Guard — check raw changelog exists
+      - name: Guard — check the raw changelog is present and unwritten
         id: guard
         run: |
           FILE="site/src/content/changelog/${{ steps.version.outputs.version }}.mdx"
           if [ ! -f "$FILE" ]; then
-            echo "::warning::Raw changelog file $FILE not found on main — skipping prose generation"
+            echo "::warning::Raw changelog file $FILE not found — skipping prose generation"
+            echo "skip=true" >> "$GITHUB_OUTPUT"
+          elif ! grep -q '^description: ""' "$FILE"; then
+            # release-pr.yml writes the raw file with an empty description and
+            # rewrites it on every push to the release branch. A filled-in one
+            # is prose that already ran, so the post-release backstop stays
+            # quiet after a successful pre-cut run instead of opening a
+            # duplicate PR — and a re-dispatch can't rewrite prose from prose.
+            echo "::notice::$FILE already has prose — skipping prose generation"
             echo "skip=true" >> "$GITHUB_OUTPUT"
           fi
 
@@ -101,7 +141,7 @@ jobs:
             Version: ${{ steps.version.outputs.version }}
             Release URL: ${{ steps.version.outputs.release_url }}
 
-            Your task is to rewrite a raw changelog file into polished narrative prose, then open a PR with the result.
+            Your task is to rewrite a raw changelog file into polished narrative prose, then publish the result.
 
             Steps:
 
@@ -151,9 +191,6 @@ jobs:
                - One concise sentence starting with a verb, summarizing the release for SEO/RSS (e.g., "Adds a hotkey system, gestures, and the mux-audio element."). Keep it under 140 characters.
                - Update the `description: ""` field in the file's YAML frontmatter. Change nothing else in the frontmatter.
 
-            5. **Create a PR:**
-               - Create branch: `docs/changelog-prose-${{ steps.version.outputs.version }}`
-               - Stage and commit the changed file: `docs(site): add changelog prose for ${{ steps.version.outputs.version }}` (commitlint's scope-enum has no `changelog` scope, so use `site`)
-               - Push the branch and open a PR targeting `main`.
-               - Include a link to the release in the PR body.
-               - Keep the PR description concise.
+            5. **Publish the result.** Stage the changelog file and nothing else, and commit it as `docs(site): add changelog prose for ${{ steps.version.outputs.version }}` (commitlint's scope-enum has no `changelog` scope, so use `site`). Where that commit goes depends on the target, which for this run is `${{ inputs.target }}`:
+               - `release-pr` — you are already on `release-please--branches--main`, the branch behind the open release PR, and the release has not been cut yet. Commit there directly: `git pull --rebase origin release-please--branches--main`, then `git push origin HEAD:release-please--branches--main`. Do not open a PR; the release PR is the review surface. If the push is rejected because release-please rewrote the branch underneath you, stop and report it rather than forcing — the release can go out without prose, and it can be regenerated afterwards.
+               - `main` — the release is already out. Create branch `docs/changelog-prose-${{ steps.version.outputs.version }}`, push it, and open a PR targeting `main` with a concise body that links the release.
