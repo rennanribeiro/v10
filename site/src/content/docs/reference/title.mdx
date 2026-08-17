@@ -42,12 +42,12 @@ title on the player instead of passing children.
 
 <FrameworkCase frameworks={["react"]}>
   ```tsx
-  <Player.Provider contentTitle="Big Buck Bunny">
-    <Player.Container>
+  <Player contentTitle="Big Buck Bunny">
+    <Container>
       <Video src="video.mp4" />
       <Title />
-    </Player.Container>
-  </Player.Provider>
+    </Container>
+  </Player>
   ```
 </FrameworkCase>
 
@@ -73,7 +73,7 @@ To change the title while the player is running, call `setContentTitle` on the s
 <FrameworkCase frameworks={["react"]}>
   ```tsx
   function Rename() {
-    const store = Player.usePlayer();
+    const store = usePlayer();
 
     return <button onClick={() => store.setContentTitle("Sintel")}>Rename</button>;
   }
