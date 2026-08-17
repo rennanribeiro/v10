@@ -51,6 +51,11 @@ export function isAudioUseCase(useCase: UseCase): boolean {
   return useCase === 'default-audio' || useCase === 'live-audio';
 }
 
+/** Whether the use case targets a live presentation rather than on-demand media. */
+export function isLiveUseCase(useCase: UseCase): boolean {
+  return useCase === 'live-video' || useCase === 'live-audio';
+}
+
 // Renderer → media subpath name, independent of whether a CDN build exists.
 // Preset renderers (html5-video/audio, background-video) are covered by their
 // preset bundle and have no separate media script, so they map to null.

@@ -2,6 +2,7 @@ import {
   getMediaSubpath,
   getPresetGroup,
   isAudioUseCase,
+  isLiveUseCase,
   type Renderer,
   type Skin,
   type UseCase,
@@ -112,7 +113,7 @@ export function getPresetLabel(useCase: UseCase, skin: Skin): string {
   if (useCase === 'background-video') return 'background video';
 
   const base = isAudioUseCase(useCase) ? 'audio' : 'video';
-  const live = useCase === 'live-video' || useCase === 'live-audio' ? 'live ' : '';
+  const live = isLiveUseCase(useCase) ? 'live ' : '';
   if (skin === 'none') return `headless ${live}${base}`;
   if (skin === 'minimal-video' || skin === 'minimal-audio') return `minimal ${live}${base}`;
   return `${live}${base}`;

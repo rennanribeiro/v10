@@ -5,6 +5,7 @@ import {
   getPresetGroup,
   type InstallMethod,
   isAudioUseCase,
+  isLiveUseCase,
   type Renderer,
   type Skin,
   type UseCase,
@@ -61,10 +62,6 @@ function getDefaultSourceUrl(renderer: Renderer, useCase: UseCase): string {
 
 function resolveSourceUrl(sourceUrl: string, renderer: Renderer, useCase: UseCase): string {
   return sourceUrl.trim() || getDefaultSourceUrl(renderer, useCase);
-}
-
-function isLiveUseCase(useCase: UseCase): boolean {
-  return useCase === 'live-video' || useCase === 'live-audio';
 }
 
 // Whether the rendered media element takes the `playsinline` attribute. Vimeo
