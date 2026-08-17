@@ -19,6 +19,7 @@ describe('createPlayer', () => {
     const result = createPlayer({ features: videoFeatures });
 
     assertType<CreatePlayerResult<VideoPlayerStore>>(result);
+    assertType<VideoPlayerStore>(result.createPlayerStore());
     // @ts-expect-error Container is imported from the package root, not created per player.
     result.Container;
   });
@@ -27,6 +28,7 @@ describe('createPlayer', () => {
     const result = createPlayer({ features: audioFeatures });
 
     assertType<CreatePlayerResult<AudioPlayerStore>>(result);
+    assertType<AudioPlayerStore>(result.createPlayerStore());
   });
 
   it('resolves spread video features to VideoPlayerStore', () => {
@@ -47,6 +49,7 @@ describe('createPlayer', () => {
     const result = createPlayer({ features: [customFeature] });
 
     assertType<CreatePlayerResult<PlayerStore<[Slice<PlayerTarget, CustomState>]>>>(result);
+    assertType<PlayerStore<[Slice<PlayerTarget, CustomState>]>>(result.createPlayerStore());
   });
 
   it('infers config props from selected features', () => {

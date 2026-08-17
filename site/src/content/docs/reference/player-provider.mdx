@@ -50,16 +50,18 @@ function App() {
 ## How it's created
 
 <FrameworkCase frameworks={["react"]}>
-Call `createPlayer()` with a `features` array. It returns `Player`, `usePlayer`, and `useMedia`. Import the shared `Container` separately when building a custom layout.
+Call `createPlayer()` with a `features` array. It returns `Player`, `createPlayerStore`, `usePlayer`, and `useMedia`. Import the shared `Container` separately when building a custom layout.
 
 ```tsx
 import { Container, createPlayer } from '@videojs/react';
 import { videoFeatures } from '@videojs/react/video';
 
-const { Player, usePlayer, useMedia } = createPlayer({
+const { Player, createPlayerStore, usePlayer, useMedia } = createPlayer({
   features: videoFeatures,
 });
 ```
+
+`Player` owns its store for normal React usage. `createPlayerStore()` is the typed escape hatch for integrations that need to own a standalone store.
 
 The <DocsLink slug="concepts/features">features</DocsLink> you pass determine what state is available in the store. `videoFeatures` is a <DocsLink slug="concepts/presets">preset</DocsLink> that includes playback, volume, fullscreen, and other standard video controls.
 

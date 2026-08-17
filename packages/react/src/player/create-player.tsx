@@ -38,6 +38,8 @@ export type PlayerProps<Config = object> = {
 
 export interface CreatePlayerResult<Store extends PlayerStore> {
   Player: FC<PlayerProps<InferPlayerConfig<Store>>>;
+  /** Creates a standalone store with the configured features. */
+  createPlayerStore: () => Store;
   usePlayer: UsePlayerHook<Store>;
   useMedia: () => Media | null;
 }
@@ -48,7 +50,7 @@ export type UsePlayerHook<Store extends PlayerStore> = {
 };
 
 /**
- * Create a player instance with a typed Player component and hooks.
+ * Create a player instance with a typed Player component, standalone store factory, and hooks.
  *
  * @label Video
  * @param config - Player configuration with features and optional display name.
@@ -78,8 +80,12 @@ export function createPlayer(config: CreatePlayerConfig<AnyPlayerFeature[]>): Cr
   const featureConfig = combinePlayerFeatureConfigs(config.features);
   const configKeys = Object.keys(featureConfig);
 
+  function createPlayerStore() {
+    return createStore<PlayerTarget>()(slice);
+  }
+
   function createConfiguredStore(values: Record<string, unknown>) {
-    const store = createStore<PlayerTarget>()(slice);
+    const store = createPlayerStore();
     applyConfigValues(store, featureConfig, values);
     return store;
   }
@@ -143,6 +149,7 @@ export function createPlayer(config: CreatePlayerConfig<AnyPlayerFeature[]>): Cr
 
   return {
     Player,
+    createPlayerStore,
     usePlayer,
     useMedia,
   };

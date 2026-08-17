@@ -23,6 +23,18 @@ describe('createPlayer', () => {
     }),
   });
 
+  it('creates a standalone store with the configured features', () => {
+    const { createPlayerStore } = createPlayer({ features: [mockSlice] });
+    const store = createPlayerStore();
+
+    expect(store.volume).toBe(1);
+    expect(store.muted).toBe(false);
+    expect(store.paused).toBe(true);
+    expect(typeof store.subscribe).toBe('function');
+
+    store.destroy();
+  });
+
   describe('Player', () => {
     it('creates store on mount', () => {
       const { Player, usePlayer } = createPlayer({ features: [mockSlice] });
