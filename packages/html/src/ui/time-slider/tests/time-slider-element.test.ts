@@ -192,28 +192,46 @@ describe('TimeSlider chapter elements', () => {
     await chapters.updateComplete;
 
     expect(chapters.getAttribute('aria-hidden')).toBe('true');
-    expect(chapters.querySelector('template')).toBeNull();
+    expect(chapters.querySelector('template')).toBe(template);
     expect(chapters.querySelectorAll('.chapter')).toHaveLength(1);
-    expect((chapters.firstElementChild as HTMLElement).style.getPropertyValue('--media-slider-chapter-start')).toBe(
-      '0%'
-    );
-    expect((chapters.firstElementChild as HTMLElement).style.getPropertyValue('--media-slider-chapter-end')).toBe(
-      '100%'
-    );
+    const chapter = chapters.querySelector<HTMLElement>('.chapter')!;
+    expect(chapter.style.getPropertyValue('--media-slider-chapter-start')).toBe('0%');
+    expect(chapter.style.getPropertyValue('--media-slider-chapter-end')).toBe('100%');
     expect(chapters.querySelector('svg')).toBeNull();
   });
 
-  it('keeps fallback content when the template is missing', async () => {
+  it('removes non-template content when the template is missing', async () => {
     const slider = createElement(TestSliderProviderElement);
     const chapters = createElement(TimeSliderChaptersElement);
-    const fallback = document.createElement('div');
-    fallback.className = 'fallback';
-    chapters.appendChild(fallback);
+    const content = document.createElement('div');
+    content.className = 'content';
+    chapters.appendChild(content);
     slider.appendChild(chapters);
     document.body.appendChild(slider);
     await chapters.updateComplete;
 
-    expect(chapters.querySelector('.fallback')).toBe(fallback);
+    expect(chapters.querySelector('.content')).toBeNull();
+  });
+
+  it('discovers a template on a later update', async () => {
+    const slider = createElement(TestSliderProviderElement);
+    const chapters = createElement(TimeSliderChaptersElement);
+    const content = document.createElement('div');
+    content.className = 'content';
+    chapters.appendChild(content);
+    slider.appendChild(chapters);
+    document.body.appendChild(slider);
+    await chapters.updateComplete;
+
+    const template = document.createElement('template');
+    template.innerHTML = '<div class="chapter"></div>';
+    chapters.appendChild(template);
+    chapters.requestUpdate();
+    await chapters.updateComplete;
+
+    expect(chapters.querySelector('template')).toBe(template);
+    expect(chapters.querySelector('.content')).toBeNull();
+    expect(chapters.querySelectorAll('.chapter')).toHaveLength(1);
   });
 
   for (const [name, content] of [
@@ -221,20 +239,20 @@ describe('TimeSlider chapter elements', () => {
     ['multiple-root', '<div></div><div></div>'],
     ['non-HTML', '<svg></svg>'],
   ] as const) {
-    it(`keeps fallback content when the template is ${name}`, async () => {
+    it(`removes non-template content when the template is ${name}`, async () => {
       const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
       const slider = createElement(TestSliderProviderElement);
       const chapters = createElement(TimeSliderChaptersElement);
-      const fallback = document.createElement('div');
-      fallback.className = 'fallback';
+      const unexpectedContent = document.createElement('div');
+      unexpectedContent.className = 'content';
       const template = document.createElement('template');
       template.innerHTML = content;
-      chapters.append(fallback, template);
+      chapters.append(unexpectedContent, template);
       slider.appendChild(chapters);
       document.body.appendChild(slider);
       await chapters.updateComplete;
 
-      expect(chapters.querySelector('.fallback')).toBe(fallback);
+      expect(chapters.querySelector('.content')).toBeNull();
       expect(warn).toHaveBeenCalledOnce();
       warn.mockRestore();
     });

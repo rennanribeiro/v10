@@ -1,8 +1,19 @@
-import { audioFeatures, backgroundFeatures, metadataFeature, videoFeatures } from '@videojs/core/dom';
+import { audioFeatures, backgroundFeatures, metadataFeature, type PopupGroup, videoFeatures } from '@videojs/core/dom';
+import { ContextConsumer } from '@videojs/element/context';
 import { afterEach, describe, expect, it } from 'vitest';
 
+import { ContainerMixin } from '../../index';
 import { MediaElement } from '../../ui/media-element';
 import { createPlayer } from '../create-player';
+import { popupGroupContext } from '../popup-group-context';
+
+let tagCounter = 0;
+
+function defineTestElement<Element extends CustomElementConstructor>(Base: Element): string {
+  const tagName = `test-player-context-${tagCounter++}`;
+  customElements.define(tagName, Base);
+  return tagName;
+}
 
 describe('createPlayer', () => {
   afterEach(() => {
@@ -16,7 +27,7 @@ describe('createPlayer', () => {
     expect(result.create).toBeInstanceOf(Function);
     expect(result.PlayerController).toBeDefined();
     expect(result.ProviderMixin).toBeInstanceOf(Function);
-    expect(result.ContainerMixin).toBeInstanceOf(Function);
+    expect(result).not.toHaveProperty('ContainerMixin');
   });
 
   it('create() returns a store instance', () => {
@@ -37,11 +48,50 @@ describe('createPlayer', () => {
   });
 
   it('ContainerMixin produces a valid custom element class', () => {
-    const { ContainerMixin } = createPlayer({ features: videoFeatures });
     const ContainerElement = ContainerMixin(MediaElement);
 
     expect(typeof ContainerElement).toBe('function');
     expect(ContainerElement.prototype).toBeDefined();
+  });
+
+  it('scopes popup coordination to container descendants', async () => {
+    const { ProviderMixin } = createPlayer({ features: videoFeatures });
+
+    class PopupGroupProbe extends MediaElement {
+      popupGroup: PopupGroup | undefined;
+
+      constructor() {
+        super();
+        new ContextConsumer(this, {
+          context: popupGroupContext,
+          callback: (value) => {
+            this.popupGroup = value;
+          },
+        });
+      }
+    }
+
+    const providerTag = defineTestElement(ProviderMixin(MediaElement));
+    const containerTag = defineTestElement(ContainerMixin(MediaElement));
+    const probeTag = defineTestElement(PopupGroupProbe);
+    const provider = document.createElement(providerTag);
+    const container = document.createElement(containerTag);
+    const outsideProbe = document.createElement(probeTag) as PopupGroupProbe;
+    const insideProbe = document.createElement(probeTag) as PopupGroupProbe;
+
+    container.append(insideProbe);
+    provider.append(outsideProbe, container);
+    document.body.append(provider);
+
+    await Promise.all([
+      (provider as MediaElement).updateComplete,
+      (container as MediaElement).updateComplete,
+      outsideProbe.updateComplete,
+      insideProbe.updateComplete,
+    ]);
+
+    expect(outsideProbe.popupGroup).toBeUndefined();
+    expect(insideProbe.popupGroup).toBeDefined();
   });
 
   it('creates audio player with expected exports', () => {
@@ -51,7 +101,7 @@ describe('createPlayer', () => {
     expect(result.create).toBeInstanceOf(Function);
     expect(result.PlayerController).toBeDefined();
     expect(result.ProviderMixin).toBeInstanceOf(Function);
-    expect(result.ContainerMixin).toBeInstanceOf(Function);
+    expect(result).not.toHaveProperty('ContainerMixin');
   });
 
   it('creates background player with expected exports', () => {
@@ -61,7 +111,7 @@ describe('createPlayer', () => {
     expect(result.create).toBeInstanceOf(Function);
     expect(result.PlayerController).toBeDefined();
     expect(result.ProviderMixin).toBeInstanceOf(Function);
-    expect(result.ContainerMixin).toBeInstanceOf(Function);
+    expect(result).not.toHaveProperty('ContainerMixin');
   });
 
   it('maps selected feature inputs to kebab-cased reactive properties and attributes', async () => {

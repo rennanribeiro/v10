@@ -38,20 +38,35 @@
       "development": "./dist/dev/media-tracks.js",
       "default": "./dist/default/media-tracks.js"
     },
-    "./background-video": {
-      "types": "./dist/dev/background-video.d.ts",
-      "development": "./dist/dev/background-video.js",
-      "default": "./dist/default/background-video.js"
+    "./hls-background-video": {
+      "types": "./dist/dev/hls-background-video.d.ts",
+      "development": "./dist/dev/hls-background-video.js",
+      "default": "./dist/default/hls-background-video.js"
     },
-    "./simple-hls": {
-      "types": "./dist/dev/simple-hls.d.ts",
-      "development": "./dist/dev/simple-hls.js",
-      "default": "./dist/default/simple-hls.js"
+    "./hls-audio": {
+      "types": "./dist/dev/hls-audio.d.ts",
+      "development": "./dist/dev/hls-audio.js",
+      "default": "./dist/default/hls-audio.js"
     },
-    "./simple-hls-audio-only": {
-      "types": "./dist/dev/simple-hls-audio-only.d.ts",
-      "development": "./dist/dev/simple-hls-audio-only.js",
-      "default": "./dist/default/simple-hls-audio-only.js"
+    "./hls-video": {
+      "types": "./dist/dev/hls-video.d.ts",
+      "development": "./dist/dev/hls-video.js",
+      "default": "./dist/default/hls-video.js"
+    },
+    "./mux-audio": {
+      "types": "./dist/dev/mux-audio.d.ts",
+      "development": "./dist/dev/mux-audio.js",
+      "default": "./dist/default/mux-audio.js"
+    },
+    "./mux-background-video": {
+      "types": "./dist/dev/mux-background-video.d.ts",
+      "development": "./dist/dev/mux-background-video.js",
+      "default": "./dist/default/mux-background-video.js"
+    },
+    "./mux-video": {
+      "types": "./dist/dev/mux-video.d.ts",
+      "development": "./dist/dev/mux-video.js",
+      "default": "./dist/default/mux-video.js"
     }
   },
   "main": "dist/default/index.js",

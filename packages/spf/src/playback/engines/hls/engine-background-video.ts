@@ -29,7 +29,7 @@ import { type SelectVideoTrackConfig, selectVideoTrack } from '../../behaviors/s
 /**
  * State shape for the background-video playback engine.
  *
- * Narrower than `SimpleHlsEngineState`: audio/text track slots are absent
+ * Narrower than `HlsVideoEngineState`: audio/text track slots are absent
  * because their selection/resolution behaviors are subtracted. `bandwidthState`
  * is present because `setupVideoBufferActors` declares it and `loadVideoSegments`
  * samples into it (wasted work in this variant — a Phase 3 alt-impl will skip
@@ -72,7 +72,7 @@ export type BackgroundVideoEngineSignals = {
  *
  * Each option is consumed by the appropriate behavior — the engine itself
  * has no config beyond what its behaviors read. Compared to
- * `SimpleHlsEngineConfig`, audio/text/ABR/bandwidth/quality knobs are
+ * `HlsVideoEngineConfig`, audio/text/ABR/bandwidth/quality knobs are
  * dropped: the variant subtracts the behaviors that read them.
  */
 export interface BackgroundVideoEngineConfig
@@ -83,7 +83,7 @@ export interface BackgroundVideoEngineConfig
    * presentation resolve and pins it for the session. Override for
    * mobile-aware or content-aware caps.
    *
-   * Adapters (e.g. `BackgroundVideoMediaElement`) install their own
+   * Adapters (e.g. `HlsBackgroundVideoMediaElement`) install their own
    * picker; this default applies when the engine is constructed directly.
    */
   picker?: TrackPicker<SelectVideoTrackConfig>;
@@ -113,7 +113,7 @@ const shareSignals = makeShareSignals<BackgroundVideoEngineState, BackgroundVide
  * surfaces that should start loading the moment a src is set.
  *
  * Native `loop` / `muted` / `autoplay` are adapter concerns and live on
- * `BackgroundVideoMediaElement` rather than the engine.
+ * `HlsBackgroundVideoMediaElement` rather than the engine.
  *
  * @example
  * ```ts

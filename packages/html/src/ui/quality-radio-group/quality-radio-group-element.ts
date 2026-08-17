@@ -1,6 +1,6 @@
 import { QualityRadioGroupCore, QualityRadioGroupDataAttrs, type QualityRadioGroupOption } from '@videojs/core';
 import { applyStateDataAttrs, logMissingFeature, selectQuality } from '@videojs/core/dom';
-import type { Text } from '@videojs/core/i18n';
+import { type Text, translateText } from '@videojs/core/i18n';
 import type { PropertyDeclarationMap, PropertyValues } from '@videojs/element';
 import { i18nContext } from '../../i18n/context';
 import { I18nController } from '../../i18n/controller';
@@ -27,8 +27,6 @@ export class QualityRadioGroupElement extends MenuRadioGroupElement {
   readonly #i18n = new I18nController(this, i18nContext);
   readonly #mediaState = new PlayerController(this, playerContext, selectQuality);
   readonly #options = new RadioOptionsController<QualityRadioGroupOption>(this, {
-    getTemplate: () => this.getTemplate(),
-    createItem: (template) => this.createRadioItem(template),
     renderItem: (item, label, option) => this.#setContent(item, label, option.tier, option.badge),
     setItemAttributes: (item, option) => item.setAttribute('data-rendition', option.value),
     getOptionCacheKey: (option) => `${option.tier ?? ''}:${option.badge ?? ''}`,
@@ -56,8 +54,9 @@ export class QualityRadioGroupElement extends MenuRadioGroupElement {
       this.#core.setMedia(media);
       state = this.#core.getState();
 
-      this.applyAriaLabel(this.#i18n.value, this.#core.getLabel(state));
+      this.applyDefaultAriaLabel(translateText(this.#core.getLabel(state), this.#i18n.value));
       this.#options.sync(state, this.#i18n.value, this.#i18n.locale);
+      this.publishMenuMetadata(state.disabled, state.availability);
     }
 
     super.update(changed);

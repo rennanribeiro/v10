@@ -2,7 +2,7 @@
 
 import type { RadioOption, RadioOptionsState } from '@videojs/core';
 import { logMissingFeature } from '@videojs/core/dom';
-import { translateText } from '@videojs/core/i18n';
+import { type Text, type TextParams, translateText } from '@videojs/core/i18n';
 import type { UnknownState } from '@videojs/store';
 import { useCallback, useState } from 'react';
 
@@ -13,6 +13,8 @@ interface RadioOptionsCore<Props, Media, State extends RadioOptionsState> {
   setProps(props: Props): void;
   setMedia(media: Media): void;
   getState(): State;
+  getLabel(state: State): Text | string;
+  getLabelParams?(state: State): TextParams | undefined;
   selectValue(media: Media, value: string): void;
 }
 
@@ -32,9 +34,12 @@ export type TranslatedRadioOption<Option extends RadioOption> = Omit<Option, 'la
 
 export interface RadioOptionsHookResult<Option extends RadioOption, State extends RadioOptionsState> {
   state: State;
+  label: string;
   value: string;
+  selectedLabel: string;
   options: TranslatedRadioOption<Option>[];
   disabled: boolean;
+  hidden: boolean;
   setValue: (value: string) => void;
 }
 
@@ -77,9 +82,12 @@ export function createRadioOptionsHook<Props, Media, State extends RadioOptionsS
 
     return {
       state,
+      label: translateText(core.getLabel(state), t, core.getLabelParams?.(state)),
       value: state.value,
+      selectedLabel: options.find((option) => option.value === state.value)?.label ?? '',
       options,
       disabled: state.disabled,
+      hidden: state.hidden,
       setValue,
     };
   };

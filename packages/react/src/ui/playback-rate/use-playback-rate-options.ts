@@ -16,10 +16,13 @@ export type PlaybackRateOption = TranslatedRadioOption<PlaybackRateRadioGroupOpt
 
 export interface PlaybackRateOptionsResult {
   state: PlaybackRateRadioGroupCore.State;
+  label: string;
   rate: number;
   value: string;
+  selectedLabel: string;
   options: PlaybackRateOption[];
   disabled: boolean;
+  hidden: boolean;
   setRate: (rate: number) => void;
   setValue: (value: string) => void;
 }

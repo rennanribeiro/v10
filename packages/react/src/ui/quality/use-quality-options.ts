@@ -11,9 +11,12 @@ export type QualityOption = TranslatedRadioOption<QualityRadioGroupOption>;
 
 export interface QualityOptionsResult {
   state: QualityRadioGroupCore.State;
+  label: string;
   value: string;
+  selectedLabel: string;
   options: QualityOption[];
   disabled: boolean;
+  hidden: boolean;
   setValue: (value: string) => void;
 }
 

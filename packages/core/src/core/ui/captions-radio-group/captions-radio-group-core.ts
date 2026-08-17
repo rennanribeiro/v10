@@ -4,13 +4,12 @@ import { isCaptionOrSubtitleTrack } from '@videojs/utils/dom';
 import { defaults } from '@videojs/utils/object';
 import type { NonNullableObject } from '@videojs/utils/types';
 import { resolveText, type Text } from '../../i18n';
-import { disableText, enableText } from '../../i18n/text/captions';
 import { captionsText, offText, subtitlesText } from '../../i18n/text/menu';
 import type { RadioOption, RadioOptionsState } from '../types';
 import { resolveLabel } from '../utils/resolve-label';
 
 export interface CaptionsRadioGroupProps {
-  /** Custom label for the menu trigger. */
+  /** Custom label for the options group. */
   label?: Text | string | ((state: CaptionsRadioGroupState) => Text | string) | undefined;
   /** Custom formatter for visible track labels. */
   formatTrack?: ((track: MediaTextTrack) => Text | string) | undefined;
@@ -51,7 +50,8 @@ export class CaptionsRadioGroupCore {
     options: [{ value: CAPTIONS_OFF_VALUE, label: offText, disabled: false }],
     value: CAPTIONS_OFF_VALUE,
     subtitlesShowing: false,
-    disabled: false,
+    disabled: true,
+    hidden: true,
     availability: 'unavailable',
     label: '',
   });
@@ -71,7 +71,7 @@ export class CaptionsRadioGroupCore {
     const label = resolveLabel(this.#props.label, state);
     if (label) return label;
 
-    return state.subtitlesShowing ? disableText : enableText;
+    return captionsText;
   }
 
   getTrackLabel(track: MediaTextTrack): Text | string {
@@ -82,6 +82,7 @@ export class CaptionsRadioGroupCore {
     return {
       'aria-label': this.getLabel(state),
       'aria-disabled': state.disabled ? 'true' : undefined,
+      hidden: state.hidden ? '' : undefined,
     };
   }
 
@@ -110,6 +111,7 @@ export class CaptionsRadioGroupCore {
       value: showingIndex === -1 ? CAPTIONS_OFF_VALUE : captionTracks[showingIndex]!.id || String(showingIndex),
       subtitlesShowing: media.subtitlesShowing,
       disabled: this.#props.disabled || captionTracks.length === 0,
+      hidden: availability === 'unavailable',
       availability,
     });
     this.state.patch({ label: resolveText(this.getLabel(this.state.current)) });

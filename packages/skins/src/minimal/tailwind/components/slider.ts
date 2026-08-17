@@ -13,14 +13,15 @@ const previewContent = cn(
 
 export const slider = {
   root: cn(
-    'group/slider relative flex flex-1 items-center justify-center rounded-full outline-none cursor-pointer',
+    'group/slider relative flex flex-1 items-center justify-center rounded-(--track-border-radius) outline-none cursor-pointer',
+    '[--track-border-radius:calc(infinity*1px)]',
     // Horizontal
     'data-[orientation=horizontal]:min-w-20 data-[orientation=horizontal]:w-(--slider-width,100%) data-[orientation=horizontal]:h-(--slider-height,--spacing(8))',
     // Vertical
     'data-[orientation=vertical]:w-(--slider-width,--spacing(8)) data-[orientation=vertical]:h-(--slider-height,--spacing(20))'
   ),
   track: cn(
-    'relative isolate overflow-hidden bg-current/20 rounded-[inherit] select-none',
+    'relative isolate overflow-hidden bg-current/20 rounded-(--track-border-radius) select-none',
     // Horizontal
     'data-[orientation=horizontal]:w-full data-[orientation=horizontal]:h-0.75',
     // Vertical
@@ -36,14 +37,14 @@ export const slider = {
       'data-[orientation=vertical]:[clip-path:inset(calc(100%-var(--media-slider-chapter-end))_0_var(--media-slider-chapter-start)_0)]'
     ),
     track: cn(
-      'relative isolate overflow-hidden bg-current/20 rounded-full select-none',
+      'relative isolate overflow-hidden bg-current/20 rounded-(--track-border-radius) select-none',
       'motion-safe:transition-[height,width] motion-safe:duration-200 motion-safe:ease-out',
       'data-[orientation=horizontal]:w-full data-[orientation=horizontal]:h-0.75',
-      'group-data-highlighted/chapter:data-[orientation=horizontal]:h-[--spacing(1.375)]',
-      'data-[orientation=horizontal]:[clip-path:inset(0_calc(100%-var(--media-slider-chapter-end)+var(--chapter-gap)*var(--chapter-inset-end))_0_calc(var(--media-slider-chapter-start)+var(--chapter-gap)*var(--chapter-inset-start))_round_calc(infinity*1px))]',
+      'group-data-highlighted/chapter:data-[orientation=horizontal]:h-[--spacing(1.25)]',
+      'data-[orientation=horizontal]:[clip-path:inset(0_calc(100%-var(--media-slider-chapter-end)+var(--chapter-gap)*var(--chapter-inset-end))_0_calc(var(--media-slider-chapter-start)+var(--chapter-gap)*var(--chapter-inset-start))_round_var(--track-border-radius))]',
       'data-[orientation=vertical]:w-0.75 data-[orientation=vertical]:h-full',
-      'group-data-highlighted/chapter:data-[orientation=vertical]:w-[--spacing(1.375)]',
-      'data-[orientation=vertical]:[clip-path:inset(calc(100%-var(--media-slider-chapter-end)+var(--chapter-gap)*var(--chapter-inset-end))_0_calc(var(--media-slider-chapter-start)+var(--chapter-gap)*var(--chapter-inset-start))_0_round_calc(infinity*1px))]'
+      'group-data-highlighted/chapter:data-[orientation=vertical]:w-[--spacing(1.25)]',
+      'data-[orientation=vertical]:[clip-path:inset(calc(100%-var(--media-slider-chapter-end)+var(--chapter-gap)*var(--chapter-inset-end))_0_calc(var(--media-slider-chapter-start)+var(--chapter-gap)*var(--chapter-inset-start))_0_round_var(--track-border-radius))]'
     ),
   },
   fill: {
@@ -53,35 +54,35 @@ export const slider = {
       'data-dragging:duration-0 data-seeking:duration-0'
     ),
     fill: cn(
-      'bg-current',
+      'bg-(--accent-color)',
       // Horizontal
-      'data-[orientation=horizontal]:inset-y-0 data-[orientation=horizontal]:left-0',
-      'data-[orientation=horizontal]:transition-[width] data-[orientation=horizontal]:w-(--media-slider-fill,0)',
-      'group-data-dragging/slider:data-[orientation=horizontal]:w-(--media-slider-pointer)',
+      'data-[orientation=horizontal]:inset-y-0 data-[orientation=horizontal]:left-0 data-[orientation=horizontal]:w-full',
+      'data-[orientation=horizontal]:transition-[clip-path] data-[orientation=horizontal]:[clip-path:inset(0_calc(100%-var(--media-slider-fill))_0_0_round_var(--track-border-radius))]',
+      'group-data-dragging/slider:data-[orientation=horizontal]:[clip-path:inset(0_calc(100%-var(--media-slider-pointer))_0_0_round_var(--track-border-radius))]',
       // Vertical
-      'data-[orientation=vertical]:inset-x-0 data-[orientation=vertical]:bottom-0',
-      'data-[orientation=vertical]:transition-[height] data-[orientation=vertical]:h-(--media-slider-fill,0)',
-      'group-data-dragging/slider:data-[orientation=vertical]:h-(--media-slider-pointer)'
+      'data-[orientation=vertical]:inset-x-0 data-[orientation=vertical]:bottom-0 data-[orientation=vertical]:h-full',
+      'data-[orientation=vertical]:transition-[clip-path] data-[orientation=vertical]:[clip-path:inset(calc(100%-var(--media-slider-fill))_0_0_0_round_var(--track-border-radius))]',
+      'group-data-dragging/slider:data-[orientation=vertical]:[clip-path:inset(calc(100%-var(--media-slider-pointer))_0_0_0_round_var(--track-border-radius))]'
     ),
     buffer: cn(
       'bg-current/20 motion-safe:duration-250 motion-safe:ease-out',
       // Horizontal
-      'data-[orientation=horizontal]:inset-y-0 data-[orientation=horizontal]:left-0',
-      'data-[orientation=horizontal]:transition-[width] data-[orientation=horizontal]:w-(--media-slider-buffer,0)',
+      'data-[orientation=horizontal]:inset-y-0 data-[orientation=horizontal]:left-0 data-[orientation=horizontal]:w-full',
+      'data-[orientation=horizontal]:transition-[clip-path] data-[orientation=horizontal]:[clip-path:inset(0_calc(100%-var(--media-slider-buffer))_0_0_round_var(--track-border-radius))]',
       // Vertical
-      'data-[orientation=vertical]:inset-x-0 data-[orientation=vertical]:bottom-0',
-      'data-[orientation=vertical]:transition-[height] data-[orientation=vertical]:h-(--media-slider-buffer)'
+      'data-[orientation=vertical]:inset-x-0 data-[orientation=vertical]:bottom-0 data-[orientation=vertical]:h-full',
+      'data-[orientation=vertical]:transition-[clip-path] data-[orientation=vertical]:[clip-path:inset(calc(100%-var(--media-slider-buffer))_0_0_0_round_var(--track-border-radius))]'
     ),
   },
   thumb: {
     base: cn(
       'z-10 absolute size-3 -translate-x-1/2 -translate-y-1/2',
       'bg-current rounded-full',
-      'shadow-[0_0_0_1px_var(--media-current-shadow-color,oklch(0_0_0/0.15)),0_1px_3px_0_oklch(0_0_0/0.15),0_1px_2px_-1px_oklch(0_0_0/0.15)]',
+      'shadow-[0_0_0_1px_var(--shadow-current-color,oklch(0_0_0/0.15)),0_1px_3px_0_oklch(0_0_0/0.15),0_1px_2px_-1px_oklch(0_0_0/0.15)]',
       'transition-[opacity,scale,outline-offset] motion-safe:transition-[opacity,scale,outline-offset,left,top] duration-150 ease-out select-none',
       'data-dragging:duration-0 data-seeking:duration-0',
       'outline-2 outline-transparent -outline-offset-2',
-      'focus-visible:outline-current focus-visible:outline-offset-2',
+      'focus-visible:outline-(--focus-ring-color) focus-visible:outline-offset-2',
       // Horizontal
       'data-[orientation=horizontal]:top-1/2 data-[orientation=horizontal]:left-(--media-slider-fill,0)',
       'group-data-dragging/slider:data-[orientation=horizontal]:left-(--media-slider-pointer)',
@@ -91,7 +92,7 @@ export const slider = {
     ),
     interactive: cn(
       'opacity-0 scale-70 origin-center',
-      'group-hover/slider:opacity-100 group-hover/slider:scale-100',
+      'pointer-fine:group-hover/slider:opacity-100 pointer-fine:group-hover/slider:scale-100',
       'group-focus-within/slider:opacity-100 group-focus-within/slider:scale-100'
     ),
   },
@@ -110,7 +111,7 @@ export const slider = {
   value: cn(
     previewContent,
     '[bottom:calc(100%+--spacing(5))] flex flex-row-reverse justify-center gap-2 px-3 tabular-nums',
-    'text-shadow-2xs text-shadow-(color:--media-current-shadow-color)'
+    'text-shadow-2xs text-shadow-(color:--shadow-current-color)'
   ),
   chapterTitle: 'min-w-0 overflow-hidden text-ellipsis whitespace-nowrap empty:hidden',
 };

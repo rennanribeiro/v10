@@ -7,6 +7,7 @@ import {
 import { applyStateDataAttrs, selectBuffer, selectTextTrack, selectTime } from '@videojs/core/dom';
 import type { PropertyValues } from '@videojs/element';
 import { ContextConsumer } from '@videojs/element/context';
+import { cloneTemplateRoot, getTemplateElement, getTemplateRoot } from '@videojs/utils/dom';
 
 import { playerContext } from '../../../player/context';
 import { PlayerController } from '../../../player/player-controller';
@@ -16,8 +17,8 @@ import { sliderContext } from '../../slider/context';
 /**
  * Clones a light-DOM template once per normalized chapter range.
  *
- * The template must contain exactly one HTML root element. Non-template children remain visible when the template is
- * missing or invalid, allowing consumers to provide a regular slider track as a fallback.
+ * The required template must contain exactly one HTML root element. When no chapter cues are available, the template
+ * is cloned once for a full-duration range.
  */
 export class TimeSliderChaptersElement extends MediaElement {
   static readonly tagName = 'media-time-slider-chapters';
@@ -29,7 +30,7 @@ export class TimeSliderChaptersElement extends MediaElement {
   readonly #buffer = new PlayerController(this, playerContext, selectBuffer);
   readonly #time = new PlayerController(this, playerContext, selectTime);
   readonly #rendered = new Map<string, HTMLElement>();
-  #chapterTemplate: HTMLTemplateElement | null = null;
+  #templateRoot: HTMLElement | null = null;
   #templateChecked = false;
 
   override connectedCallback(): void {
@@ -42,11 +43,11 @@ export class TimeSliderChaptersElement extends MediaElement {
 
     const slider = this.#slider.value;
     const duration = this.#time.value?.duration ?? 0;
-    const template = this.#template;
+    const templateRoot = this.#getTemplateRoot();
     if (!slider) return;
 
     applyStateDataAttrs(this, slider.state, slider.stateAttrMap);
-    if (!template) return;
+    if (!templateRoot) return;
 
     const { chapters, ranges, max } = this.#core.getRanges(this.#textTrack.value?.chaptersCues ?? [], 0, duration);
 
@@ -68,12 +69,7 @@ export class TimeSliderChaptersElement extends MediaElement {
       );
       let root = this.#rendered.get(state.key);
 
-      if (!root) {
-        const fragment = template.content.cloneNode(true) as DocumentFragment;
-        const first = fragment.firstElementChild;
-        if (!(first instanceof HTMLElement) || first.nextElementSibling) continue;
-        root = first;
-      }
+      if (!root) root = cloneTemplateRoot(templateRoot, this.ownerDocument);
 
       this.#setStyle(root, 'pointer-events', state.cue ? undefined : 'none');
       this.#setStyle(root, TimeSliderChapterCSSVars.start, state.startPercent);
@@ -101,27 +97,29 @@ export class TimeSliderChaptersElement extends MediaElement {
     for (const [key, rendered] of next) this.#rendered.set(key, rendered);
   }
 
-  get #template(): HTMLTemplateElement | null {
-    if (this.#templateChecked) return this.#chapterTemplate;
+  #getTemplateRoot(): HTMLElement | null {
+    if (this.#templateChecked) return this.#templateRoot;
 
-    for (const child of this.children) {
-      if (child instanceof HTMLTemplateElement) {
-        this.#templateChecked = true;
-        const first = child.content.firstElementChild;
-        if (!(first instanceof HTMLElement) || first.nextElementSibling) {
-          if (__DEV__) {
-            console.warn(`[${this.localName}] template must contain exactly one HTML root element.`);
-          }
-          return null;
-        }
-
-        this.#chapterTemplate = child;
-        child.remove();
-        for (const fallback of [...this.childNodes]) fallback.remove();
-        return child;
-      }
+    const template = getTemplateElement(this);
+    if (!template) {
+      for (const node of [...this.childNodes]) node.remove();
+      return null;
     }
-    return null;
+
+    this.#templateChecked = true;
+    const root = getTemplateRoot(template);
+    for (const node of [...this.childNodes]) {
+      if (node !== template) node.remove();
+    }
+    if (root?.namespaceURI !== 'http://www.w3.org/1999/xhtml') {
+      if (__DEV__) {
+        console.warn(`[${this.localName}] template must contain exactly one HTML root element.`);
+      }
+      return null;
+    }
+
+    this.#templateRoot = root as HTMLElement;
+    return this.#templateRoot;
   }
 
   #setStyle(element: HTMLElement, name: string, value: string | undefined): void {
