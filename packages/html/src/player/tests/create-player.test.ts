@@ -34,7 +34,7 @@ describe('createPlayer', () => {
     expect(result).not.toHaveProperty('Player');
     expect(result.context).toBe(result.playerContext);
     expect(result).not.toHaveProperty('create');
-    expect(result.ProviderMixin(MediaElement)).toBe(result.PlayerElement);
+    expect(result.ProviderMixin(UIElement)).toBe(result.PlayerElement);
     expect(result).not.toHaveProperty('ContainerMixin');
   });
 

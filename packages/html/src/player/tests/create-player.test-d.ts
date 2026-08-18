@@ -24,7 +24,7 @@ describe('createPlayer', () => {
     assertType<CreatePlayerResult<VideoPlayerStore>>(result);
     // @ts-expect-error ContainerMixin is no longer part of the HTML API.
     result.ContainerMixin;
-    assertType<typeof result.PlayerElement>(result.ProviderMixin(MediaElement));
+    assertType<typeof result.PlayerElement>(result.ProviderMixin(UIElement));
     // @ts-expect-error Use PlayerElement.
     result.Player;
     assertType<typeof result.playerContext>(result.context);
