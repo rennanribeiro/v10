@@ -387,6 +387,17 @@ function DynamicMenuFixture({ showCaptions }: { showCaptions: boolean }) {
 }
 
 describe('MenuContent', () => {
+  it('includes the root trigger in sequential focus', () => {
+    render(
+      <MenuRoot>
+        <MenuTrigger>Settings</MenuTrigger>
+        <MenuContent>Playback speed</MenuContent>
+      </MenuRoot>
+    );
+
+    expect(screen.getByRole('button', { name: 'Settings' }).getAttribute('tabindex')).toBe('0');
+  });
+
   it('only links triggers to rendered menu content', async () => {
     render(<SubmenuFixture />);
 
@@ -422,6 +433,39 @@ describe('MenuContent', () => {
       const content = screen.getByTestId('content');
       expect(trigger.getAttribute('aria-controls')).toBe(content.id);
     });
+  });
+
+  it.each(['Enter', ' '])('opens a root menu with %j', async (key) => {
+    render(
+      <MenuRoot>
+        <MenuTrigger data-testid="trigger">Settings</MenuTrigger>
+        <MenuContent data-testid="content">Settings</MenuContent>
+      </MenuRoot>
+    );
+
+    const trigger = screen.getByTestId('trigger');
+    fireEvent.keyDown(trigger, { key });
+
+    await waitFor(() => {
+      expect(screen.queryByTestId('content')).not.toBeNull();
+    });
+  });
+
+  it('honors preventDefault from root trigger key handlers', () => {
+    const onKeyDown = vi.fn((event: ReactKeyboardEvent<HTMLElement>) => event.preventDefault());
+    render(
+      <MenuRoot>
+        <MenuTrigger data-testid="trigger" onKeyDown={onKeyDown}>
+          Settings
+        </MenuTrigger>
+        <MenuContent data-testid="content">Settings</MenuContent>
+      </MenuRoot>
+    );
+
+    fireEvent.keyDown(screen.getByTestId('trigger'), { key: 'Enter' });
+
+    expect(onKeyDown).toHaveBeenCalledOnce();
+    expect(screen.queryByTestId('content')).toBeNull();
   });
 
   it('waits for a controlled owner to commit requested open changes', async () => {

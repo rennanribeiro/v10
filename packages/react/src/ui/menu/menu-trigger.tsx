@@ -1,7 +1,6 @@
-'use client';
-
 import type { MenuCore, MenuState } from '@videojs/core';
 import { isMenuNavigationKey } from '@videojs/core/dom';
+import { isInteractiveActivation } from '@videojs/utils/dom';
 import { forwardRef, useCallback, useEffect, useMemo, useRef } from 'react';
 
 import type { UIComponentProps } from '../../utils/types';
@@ -90,20 +89,33 @@ export const MenuTrigger = forwardRef<HTMLButtonElement | HTMLDivElement, MenuTr
     [menu]
   );
 
-  const rootTriggerProps = useMemo(() => {
-    if (!disabled) return menu.triggerProps;
+  const handleRootKeyDown = useCallback(
+    (event: React.KeyboardEvent<MenuTriggerElement>) => {
+      const defaultPreventedByUser = callKeyDownHandler(onKeyDown, event);
 
-    return {
-      onClick: (event: React.MouseEvent<HTMLElement>) => {
+      if (disabled || defaultPreventedByUser) {
+        if (disabled && isMenuNavigationKey(event)) event.preventDefault();
+        return;
+      }
+
+      if (isInteractiveActivation(event.nativeEvent)) {
         event.preventDefault();
-      },
-      onKeyDown: (event: React.KeyboardEvent<HTMLElement>) => {
-        if (event.key === 'Enter' || event.key === ' ' || isMenuNavigationKey(event)) {
-          event.preventDefault();
-        }
-      },
-    };
-  }, [disabled, menu.triggerProps]);
+        menu.triggerProps.onClick(event.nativeEvent);
+        return;
+      }
+
+      menu.triggerProps.onKeyDown(event);
+    },
+    [disabled, menu.triggerProps, onKeyDown]
+  );
+
+  const rootTriggerProps = useMemo(
+    () => ({
+      onClick: disabled ? (event: React.MouseEvent<HTMLElement>) => event.preventDefault() : menu.triggerProps.onClick,
+      onKeyDown: handleRootKeyDown,
+    }),
+    [disabled, handleRootKeyDown, menu.triggerProps]
+  );
 
   // Submenu trigger mode — renders as a div with role="menuitem"
   if (isSubMenuTrigger) {
