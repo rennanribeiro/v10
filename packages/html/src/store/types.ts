@@ -17,13 +17,3 @@ export type PlayerElement<Store extends PlayerStore> = MediaElement &
 
 export type PlayerElementConstructor<Store extends PlayerStore> = typeof MediaElement &
   Constructor<PlayerElement<Store>>;
-
-// ----------------------------------------
-// PlayerConsumer
-// ----------------------------------------
-
-export interface PlayerConsumer<Store extends PlayerStore> extends MediaElement {
-  readonly store: Store | null;
-}
-
-export interface PlayerConsumerConstructor<Store extends PlayerStore> extends Constructor<PlayerConsumer<Store>> {}

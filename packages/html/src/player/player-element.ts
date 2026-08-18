@@ -22,6 +22,10 @@ export interface CreatePlayerElementOptions<Store extends PlayerStore> {
   config: PlayerFeatureConfig;
 }
 
+interface Registration<Value> {
+  value: Value;
+}
+
 /** Creates a configured player element class that owns the store and attach lifecycle. */
 export function createPlayerElement<Store extends PlayerStore>(
   options: CreatePlayerElementOptions<Store>
@@ -37,25 +41,38 @@ export function createPlayerElement<Store extends PlayerStore>(
     #store: Store | null = options.factory();
     #configuredStore: Store | null = null;
     #detach: (() => void) | null = null;
+    #connected = false;
     #media: Media | null = null;
+    #nativeMedia: HTMLMediaElement | null = null;
     #container: MediaContainer | null = null;
-    #fallbackQueued = false;
+    #mediaRegistrations: Registration<Media>[] = [];
+    #containerRegistrations: Registration<MediaContainer>[] = [];
+    #observer = new MutationObserver(() => this.#syncNativeMedia());
 
-    #setMedia = (media: Media | null): void => {
-      if (this.#media === media) return;
-      this.#media = media;
-      this.#mediaProvider.setValue({ media, setMedia: this.#setMedia });
-      this.#tryAttach();
+    #registerMedia = (media: Media): (() => void) => {
+      const registration = { value: media };
+      this.#mediaRegistrations.push(registration);
+      this.#syncMedia();
+
+      return () => {
+        const index = this.#mediaRegistrations.indexOf(registration);
+        if (index < 0) return;
+        this.#mediaRegistrations.splice(index, 1);
+        this.#syncMedia();
+      };
     };
 
-    #setContainer = (container: MediaContainer | null): void => {
-      if (this.#container === container) return;
-      this.#container = container;
-      this.#containerProvider.setValue({
-        container,
-        setContainer: this.#setContainer,
-      });
-      this.#tryAttach();
+    #registerContainer = (container: MediaContainer): (() => void) => {
+      const registration = { value: container };
+      this.#containerRegistrations.push(registration);
+      this.#syncContainer();
+
+      return () => {
+        const index = this.#containerRegistrations.indexOf(registration);
+        if (index < 0) return;
+        this.#containerRegistrations.splice(index, 1);
+        this.#syncContainer();
+      };
     };
 
     #playerProvider = new ContextProvider(this, {
@@ -65,14 +82,14 @@ export function createPlayerElement<Store extends PlayerStore>(
 
     #mediaProvider = new ContextProvider(this, {
       context: options.mediaContext,
-      initialValue: { media: this.#media, setMedia: this.#setMedia },
+      initialValue: { media: this.#media, registerMedia: this.#registerMedia },
     });
 
     #containerProvider = new ContextProvider(this, {
       context: options.containerContext,
       initialValue: {
         container: this.#container,
-        setContainer: this.#setContainer,
+        registerContainer: this.#registerContainer,
       },
     });
 
@@ -85,25 +102,29 @@ export function createPlayerElement<Store extends PlayerStore>(
     }
 
     override connectedCallback(): void {
+      this.#connected = true;
       this.style.display ||= 'contents';
       this.#syncInitialConfig();
       super.connectedCallback();
       this.#playerProvider.setValue(this.store);
-      this.#mediaProvider.setValue({ media: this.#media, setMedia: this.#setMedia });
-      this.#containerProvider.setValue({
-        container: this.#container,
-        setContainer: this.#setContainer,
+      this.#publishMedia();
+      this.#publishContainer();
+      this.#observer.observe(this, { childList: true, subtree: true });
+      queueMicrotask(() => {
+        if (this.#connected) this.#syncNativeMedia();
       });
       this.#tryAttach();
-      this.#queueFallbackDiscovery();
     }
 
     override disconnectedCallback(): void {
-      super.disconnectedCallback();
+      this.#connected = false;
+      this.#observer.disconnect();
       this.#detachStore();
+      super.disconnectedCallback();
     }
 
     override destroyCallback(): void {
+      this.#observer.disconnect();
       this.#detachStore();
       this.#store?.destroy();
       this.#store = null;
@@ -119,9 +140,44 @@ export function createPlayerElement<Store extends PlayerStore>(
       }
     }
 
+    #syncMedia(): void {
+      const registered = this.#mediaRegistrations.at(-1)?.value ?? null;
+      const media = registered ?? this.#nativeMedia;
+      if (this.#media === media) return;
+      this.#media = media;
+      this.#publishMedia();
+      this.#tryAttach();
+    }
+
+    #syncContainer(): void {
+      const container = this.#containerRegistrations.at(-1)?.value ?? null;
+      if (this.#container === container) return;
+      this.#container = container;
+      this.#publishContainer();
+      this.#tryAttach();
+    }
+
+    #syncNativeMedia(): void {
+      const media = this.querySelector<HTMLMediaElement>('video, audio');
+      if (this.#nativeMedia === media) return;
+      this.#nativeMedia = media;
+      this.#syncMedia();
+    }
+
+    #publishMedia(): void {
+      this.#mediaProvider.setValue({ media: this.#media, registerMedia: this.#registerMedia });
+    }
+
+    #publishContainer(): void {
+      this.#containerProvider.setValue({
+        container: this.#container,
+        registerContainer: this.#registerContainer,
+      });
+    }
+
     #tryAttach(): void {
       const store = this.#store;
-      if (!store) return;
+      if (!this.#connected || !store) return;
 
       if (!this.#media) {
         this.#detachStore();
@@ -155,19 +211,6 @@ export function createPlayerElement<Store extends PlayerStore>(
         setPlayerConfigValue(store, options.config[key]!, (this as unknown as Record<string, unknown>)[key]);
       }
       this.#configuredStore = store;
-    }
-
-    #queueFallbackDiscovery(): void {
-      if (this.#media || this.#fallbackQueued) return;
-      this.#fallbackQueued = true;
-
-      queueMicrotask(() => {
-        this.#fallbackQueued = false;
-        if (this.#media) return;
-
-        const media = this.querySelector<HTMLMediaElement>('video, audio');
-        if (media) this.#setMedia(media);
-      });
     }
   }
 

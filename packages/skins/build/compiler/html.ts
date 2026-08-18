@@ -15,7 +15,7 @@ interface HtmlComponentDescriptor {
 
 const htmlComponents: Readonly<Record<string, HtmlComponentDescriptor>> = {
   Container: {
-    modules: ['@videojs/html/media/container'],
+    modules: ['@videojs/html/ui/container'],
     elements: { ContainerPrimitive: 'media-container' },
   },
   Controls: {
@@ -171,7 +171,7 @@ export function createCompilerHtmlConfig(styleTarget: CreateCompilerHtmlConfigOp
 }
 
 const markupElementModules = {
-  'media-container': '@videojs/html/media/container',
+  'media-container': '@videojs/html/ui/container',
   'media-poster': '@videojs/html/ui/poster',
 } as const;
 

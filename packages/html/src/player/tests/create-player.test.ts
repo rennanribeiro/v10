@@ -1,8 +1,9 @@
 import { audioFeatures, backgroundFeatures, metadataFeature, type PopupGroup, videoFeatures } from '@videojs/core/dom';
 import { ContextConsumer } from '@videojs/element/context';
-import { afterEach, describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { ContainerMixin } from '../../store/container-mixin';
+import { MediaAttachMixin } from '../../store/media-attach-mixin';
+import { ContainerElement } from '../../ui/container/container-element';
 import { MediaElement } from '../../ui/media-element';
 import { createPlayer } from '../create-player';
 import { popupGroupContext } from '../popup-group-context';
@@ -64,7 +65,7 @@ describe('createPlayer', () => {
     }
 
     const playerTag = defineTestElement(PlayerElement);
-    const containerTag = defineTestElement(ContainerMixin(MediaElement));
+    const containerTag = defineTestElement(ContainerElement);
     const probeTag = defineTestElement(PopupGroupProbe);
     const player = document.createElement(playerTag);
     const container = document.createElement(containerTag);
@@ -84,6 +85,76 @@ describe('createPlayer', () => {
 
     expect(outsideProbe.popupGroup).toBeUndefined();
     expect(insideProbe.popupGroup).toBeDefined();
+  });
+
+  it('keeps container registration identity-safe', async () => {
+    const { PlayerElement } = createPlayer({ features: backgroundFeatures });
+    const player = document.createElement(defineTestElement(PlayerElement)) as InstanceType<typeof PlayerElement>;
+    const first = document.createElement(defineTestElement(ContainerElement));
+    const second = document.createElement(defineTestElement(ContainerElement));
+    const video = document.createElement('video');
+
+    first.append(video);
+    player.append(first, second);
+    document.body.append(player);
+
+    await vi.waitFor(() => expect(player.store.target?.container).toBe(second));
+
+    second.remove();
+    await vi.waitFor(() => expect(player.store.target?.container).toBe(first));
+
+    first.remove();
+    await vi.waitFor(() => expect(player.store.target?.container).toBeNull());
+  });
+
+  it('upgrades parser-created containers under a connected player', async () => {
+    const { PlayerElement } = createPlayer({ features: backgroundFeatures });
+    const player = document.createElement(defineTestElement(PlayerElement)) as InstanceType<typeof PlayerElement>;
+    const containerTag = `test-late-container-${tagCounter++}`;
+
+    player.innerHTML = `<${containerTag}><video></video></${containerTag}>`;
+    document.body.append(player);
+
+    expect(() => customElements.define(containerTag, class extends ContainerElement {})).not.toThrow();
+    await vi.waitFor(() => expect(player.store.target?.container).toBeInstanceOf(ContainerElement));
+  });
+
+  it('keeps custom media registration identity-safe', async () => {
+    const { PlayerElement } = createPlayer({ features: backgroundFeatures });
+    const player = document.createElement(defineTestElement(PlayerElement)) as InstanceType<typeof PlayerElement>;
+    const mediaTag = defineTestElement(MediaAttachMixin(HTMLElement));
+    const first = document.createElement(mediaTag);
+    const second = document.createElement(mediaTag);
+
+    player.append(first, second);
+    document.body.append(player);
+
+    await vi.waitFor(() => expect(player.store.target?.media).toBe(second));
+
+    first.remove();
+    expect(player.store.target?.media).toBe(second);
+
+    second.remove();
+    await vi.waitFor(() => expect(player.store.target).toBeNull());
+  });
+
+  it('tracks native media added, removed, and replaced after connection', async () => {
+    const { PlayerElement } = createPlayer({ features: backgroundFeatures });
+    const player = document.createElement(defineTestElement(PlayerElement)) as InstanceType<typeof PlayerElement>;
+    const first = document.createElement('video');
+    const second = document.createElement('audio');
+
+    document.body.append(player);
+    expect(player.store.target).toBeNull();
+
+    player.append(first);
+    await vi.waitFor(() => expect(player.store.target?.media).toBe(first));
+
+    first.replaceWith(second);
+    await vi.waitFor(() => expect(player.store.target?.media).toBe(second));
+
+    second.remove();
+    await vi.waitFor(() => expect(player.store.target).toBeNull());
   });
 
   it('maps selected feature inputs to kebab-cased reactive properties and attributes', async () => {

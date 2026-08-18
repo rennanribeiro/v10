@@ -1,5 +1,5 @@
 import '../../../icons/element';
-import '../../../define/media/container';
+import '../../../define/ui/container';
 import '../../../define/ui/controls';
 import '../../../define/ui/fullscreen-button';
 import '../../../define/ui/mute-button';

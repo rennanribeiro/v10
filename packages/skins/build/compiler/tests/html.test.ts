@@ -40,7 +40,7 @@ describe('createCompilerHtmlConfig', () => {
 
   it('maps Skin-owned container markup to exact element registration modules', () => {
     expect(resolveHtmlElementImports([], '<media-container><media-poster></media-poster></media-container>')).toEqual([
-      '@videojs/html/media/container',
+      '@videojs/html/ui/container',
       '@videojs/html/ui/poster',
     ]);
   });

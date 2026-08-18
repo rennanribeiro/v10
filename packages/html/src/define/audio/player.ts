@@ -1,6 +1,6 @@
 import { audioFeatures } from '@videojs/core/dom';
-import { MediaContainerElement } from '../../media/container-element';
 import { createPlayer } from '../../player/create-player';
+import { ContainerElement } from '../../ui/container/container-element';
 import { safeDefine } from '../safe-define';
 
 const { PlayerElement, PlayerController: ConfiguredPlayerController } = createPlayer({
@@ -16,7 +16,7 @@ export class AudioPlayerElement extends PlayerElement {
 
 // Provider must be defined before consumer for context handshake during upgrade.
 safeDefine(AudioPlayerElement);
-safeDefine(MediaContainerElement);
+safeDefine(ContainerElement);
 
 declare global {
   interface HTMLElementTagNameMap {

@@ -104,7 +104,7 @@ describe('createFrameworkSkin', () => {
     const html = content(output, 'html', 'skin.ts');
 
     expect(html).toContain("import '@videojs/html/icons/element'");
-    expect(html).toContain("import '@videojs/html/media/container'");
+    expect(html).toContain("import '@videojs/html/ui/container'");
     expect(html).toContain("import '@videojs/html/ui/poster'");
     expect(html).toContain('export const skin = /* html */ `<media-container');
     expect(html).toContain('class="media-container media-skin media-skin-video media-theme-default"');
