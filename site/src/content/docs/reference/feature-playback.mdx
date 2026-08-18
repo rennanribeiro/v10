@@ -35,13 +35,11 @@ function PlayButton() {
 
 <FrameworkCase frameworks={["html"]}>
 ```ts title="play-button.ts"
-import { createPlayer, MediaElement, selectPlayback } from '@videojs/html';
-import { videoFeatures } from '@videojs/html/video';
+import { UIElement, selectPlayback } from '@videojs/html';
+import { PlayerController } from '@videojs/html/video';
 
-const { PlayerController, context } = createPlayer({ features: videoFeatures });
-
-class PlayButton extends MediaElement {
-  readonly #playback = new PlayerController(this, context, selectPlayback);
+class PlayButton extends UIElement {
+  readonly #playback = new PlayerController(this, selectPlayback);
 }
 ```
 </FrameworkCase>

@@ -38,13 +38,11 @@ function BufferBar() {
 
 <FrameworkCase frameworks={["html"]}>
 ```ts title="buffer-bar.ts"
-import { createPlayer, MediaElement, selectBuffer } from '@videojs/html';
-import { videoFeatures } from '@videojs/html/video';
+import { UIElement, selectBuffer } from '@videojs/html';
+import { PlayerController } from '@videojs/html/video';
 
-const { PlayerController, context } = createPlayer({ features: videoFeatures });
-
-class BufferBar extends MediaElement {
-  readonly #buffer = new PlayerController(this, context, selectBuffer);
+class BufferBar extends UIElement {
+  readonly #buffer = new PlayerController(this, selectBuffer);
 }
 ```
 </FrameworkCase>

@@ -43,13 +43,11 @@ function CastButton() {
 
 <FrameworkCase frameworks={["html"]}>
 ```ts title="cast-button.ts"
-import { createPlayer, MediaElement, selectRemotePlayback } from '@videojs/html';
-import { videoFeatures } from '@videojs/html/video';
+import { UIElement, selectRemotePlayback } from '@videojs/html';
+import { PlayerController } from '@videojs/html/video';
 
-const { PlayerController, context } = createPlayer({ features: videoFeatures });
-
-class CastButton extends MediaElement {
-  readonly #remotePlayback = new PlayerController(this, context, selectRemotePlayback);
+class CastButton extends UIElement {
+  readonly #remotePlayback = new PlayerController(this, selectRemotePlayback);
 }
 ```
 </FrameworkCase>

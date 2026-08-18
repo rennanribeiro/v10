@@ -26,7 +26,7 @@ The cost is that media-only features receive a broader target than they strictly
 
 ### Factories preserve inference and platform conventions
 
-Both platform packages expose a typed player factory configured by features. React receives scoped provider, container, and hook infrastructure. HTML receives equivalent context, controller, and mixin infrastructure while retaining declarative element registration for the common path.
+Both platform packages expose a typed player factory configured by features. React receives a scoped player component and hook infrastructure. HTML receives a configured player element class and controller while retaining declarative element registration for the common path.
 
 A factory was chosen over global programmatic registration because the feature tuple can drive type inference, separate players can use different configurations, and unused capabilities remain removable. HTML side-effect registration remains a platform adapter rather than the core composition model.
 
@@ -36,9 +36,9 @@ Consumers subscribe through explicit selectors instead of feature-specific hooks
 
 Missing optional feature state is represented by an absent selector result rather than an unconditional exception. Reusable controls can therefore provide a fallback or a development warning, while applications that require a capability can enforce that contract themselves.
 
-### Provider, container, media, and skin remain separate concerns
+### Player, container, media, and skin remain separate concerns
 
-The provider owns store creation and attachment. The container supplies layout and fullscreen context. Media supplies playback, and skins compose presentation plus controls. Keeping these boundaries separate gives HTML and React the same skin meaning and allows transcripts, playlists, or other consumers to remain inside player context but outside the fullscreen target.
+The player owns store creation and attachment. The container supplies layout and fullscreen context. Media supplies playback, and skins compose presentation plus controls. Keeping these boundaries separate gives HTML and React the same skin meaning and allows transcripts, playlists, or other consumers to remain inside player context but outside the fullscreen target.
 
 The later tactical decisions are recorded in:
 
@@ -70,7 +70,7 @@ There was also concern that feature bundles could become another preset taxonomy
 - The feature list is the type and bundle boundary for a player.
 - React and HTML share state and composition concepts while exposing platform-appropriate adapters.
 - Controls depend on selectors instead of the full store when practical.
-- Provider/container separation adds visible composition in HTML, but preserves cross-platform parity and enables extended player layouts.
+- Player/container separation adds visible composition in HTML, but preserves cross-platform parity and enables extended player layouts.
 - Current examples, feature inventories, overloads, element registrations, and package paths are deliberately omitted from this record because they evolve with source.
 
 ## Current sources
@@ -78,5 +78,5 @@ There was also concern that feature bundles could become another preset taxonomy
 - Feature definition and selectors: `packages/core/src/dom/feature.ts`, `packages/core/src/dom/store/`
 - Store composition and selector behavior: `packages/store/src/core/` and colocated tests
 - React factory and context: `packages/react/src/player/`
-- HTML factory, provider, container, and controller: `packages/html/src/player/`, `packages/html/src/store/`
+- HTML factory, player, container, and controller: `packages/html/src/player/`, `packages/html/src/ui/container/`
 - Public contracts and examples: package exports, package READMEs, and generated site reference pages

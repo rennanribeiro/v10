@@ -9,7 +9,7 @@ date: 2026-03-17
 
 Media elements are discovered via context, not named slots. Skins use a default `<slot>` instead of `<slot name="media">`. Users no longer need `slot="media"` on their `<video>` or `<audio>` elements.
 
-The provider's `mediaAttachContext` is the primary discovery mechanism. Custom elements that consume context register themselves directly. Plain `<video>`/`<audio>` elements that can't consume context are found via the provider's fallback `querySelector('video, audio')`.
+The player's media context is the primary discovery mechanism. Custom elements that consume context register themselves directly. Plain `<video>`/`<audio>` elements that cannot consume context are tracked by the player's subtree observer.
 
 The `<slot name="media">` inside `CustomMediaElement` is a separate concern — it's for overriding the internal native element and stays unchanged.
 
@@ -20,7 +20,7 @@ Skins previously used `<slot name="media">` inside `<media-container>` for two p
 1. **DOM projection** — visually placing the media element inside the container's layout.
 2. **Media discovery** — the container's `slotchange` listener and `MutationObserver` watched the slot to detect when a media element appeared.
 
-With [provider-attach](provider-attach.md), the provider now owns media discovery and `store.attach()`. The container no longer watches for media elements. Discovery purpose (2) is gone. Only DOM projection (1) remains — and a default slot serves that purpose without requiring users to mark their elements with `slot="media"`.
+With [player attachment](provider-attach.md), the player now owns media discovery and `store.attach()`. The container no longer watches for media elements. Discovery purpose (2) is gone. Only DOM projection (1) remains — and a default slot serves that purpose without requiring users to mark their elements with `slot="media"`.
 
 The named slot created user-facing friction:
 
@@ -39,11 +39,11 @@ The named slot created user-facing friction:
 
 **One less thing to remember.** Users drop a `<video>` inside a skin and it works. No attribute ceremony.
 
-**Consistent with React.** React uses `<Video>` with a callback ref — no slot concept. HTML now matches: elements register via context, the provider discovers them.
+**Consistent with React.** React uses `<Video>` with a callback ref — no slot concept. HTML now matches: custom elements register via context and the player owns attachment.
 
 **Default slot is invisible.** A `<slot>` (default) projects all light DOM children. The media element, controls, and other children all project naturally. No named targeting needed.
 
-**Fallback covers plain elements.** The provider's `querySelector('video, audio')` microtask fallback handles native elements that can't consume context. This path is simple and predictable.
+**Observation covers plain elements.** A subtree observer handles native elements that cannot consume context, including additions, removals, and replacements after the player connects.
 
 ## Previous Behavior
 

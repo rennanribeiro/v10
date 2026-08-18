@@ -40,13 +40,11 @@ function TimeDisplay() {
 
 <FrameworkCase frameworks={["html"]}>
 ```ts title="time-display.ts"
-import { createPlayer, MediaElement, selectTime } from '@videojs/html';
-import { videoFeatures } from '@videojs/html/video';
+import { UIElement, selectTime } from '@videojs/html';
+import { PlayerController } from '@videojs/html/video';
 
-const { PlayerController, context } = createPlayer({ features: videoFeatures });
-
-class TimeDisplay extends MediaElement {
-  readonly #time = new PlayerController(this, context, selectTime);
+class TimeDisplay extends UIElement {
+  readonly #time = new PlayerController(this, selectTime);
 }
 ```
 </FrameworkCase>

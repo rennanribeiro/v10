@@ -27,10 +27,9 @@ export const { Player } = createPlayer({
 
 <FrameworkCase frameworks={["html"]}>
 ```ts title="player.ts"
-import { createPlayer, features } from '@videojs/html';
-import { videoFeatures } from '@videojs/html/video';
+import { createPlayer, features, videoFeatures } from '@videojs/html';
 
-export const { ProviderMixin } = createPlayer({
+export const { PlayerElement: LandscapePlayerElement } = createPlayer({
   features: [...videoFeatures, features.orientationLock],
 });
 ```
@@ -49,10 +48,9 @@ export const { Player } = createPlayer({
 
 <FrameworkCase frameworks={["html"]}>
 ```ts title="portrait-player.ts"
-import { createPlayer, features } from '@videojs/html';
-import { videoFeatures } from '@videojs/html/video';
+import { createPlayer, features, videoFeatures } from '@videojs/html';
 
-export const { ProviderMixin } = createPlayer({
+export const { PlayerElement: PortraitPlayerElement } = createPlayer({
   features: [...videoFeatures, features.orientationLock({ type: 'portrait' })],
 });
 ```

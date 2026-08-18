@@ -1,60 +1,38 @@
 ---
 title: createPlayer
-description: Factory function that creates a player instance with a typed store, provider mixin, and controller for HTML custom elements
+description: Create a typed HTML player class and controller from a feature set
 ---
 
 import UtilReference from "@/components/docs/api-reference/UtilReference.astro";
 import Demo from "@/components/docs/demos/Demo.astro";
-import DocsLink from "@/components/docs/DocsLink.astro";
 import StyleCase from "@/components/docs/StyleCase.astro";
 import BasicUsageDemoHtml from "@/components/docs/demos/html-create-player/html/css/BasicUsage.astro";
 import basicUsageHtml from "@/components/docs/demos/html-create-player/html/css/BasicUsage.html?raw";
 import basicUsageHtmlCss from "@/components/docs/demos/html-create-player/html/css/BasicUsage.css?raw";
 import basicUsageHtmlTs from "@/components/docs/demos/html-create-player/html/css/BasicUsage.ts?raw";
 
-`createPlayer` is the entry point for setting up a Video.js player with HTML custom elements. It accepts a configuration object with a `features` array and returns a typed <DocsLink slug="reference/player-controller">`PlayerController`</DocsLink>, `context`, `ProviderMixin`, and a `create` store factory. Import `ContainerMixin` separately from the main package when composing a container.
+`createPlayer` builds a custom-element class from the features your player needs. It returns `PlayerElement`, a `PlayerController` already bound to that player, and the typed `playerContext`.
 
 ```ts title="player.ts"
-import { ContainerMixin, createPlayer, MediaElement, selectPlayback } from '@videojs/html';
-import { videoFeatures } from '@videojs/html/video';
+import { createPlayer, UIElement, selectPlayback, videoFeatures } from '@videojs/html';
 
-const { ProviderMixin, PlayerController, context } = createPlayer({
+const { PlayerElement: VideoPlayerElement, PlayerController } = createPlayer({
   features: videoFeatures,
 });
 
-// Provider element: owns the store, provides context to descendants
-class VideoPlayer extends ProviderMixin(MediaElement) {}
-customElements.define('video-player', VideoPlayer);
+customElements.define('video-player', VideoPlayerElement);
 
-// Control element with selector
-class PlayButton extends MediaElement {
-  #playback = new PlayerController(this, context, selectPlayback);
+class PlayButton extends UIElement {
+  #playback = new PlayerController(this, selectPlayback);
 }
 ```
 
-`PlayerController` and `ProviderMixin` are scoped to the created player's feature set. The root `ContainerMixin` consumes the shared player context, so the same import works with any created player.
+The returned `PlayerElement` owns the store and makes it available to descendants. Use the shared `ContainerElement` or import `@videojs/html/ui/container` to register `<media-container>` when you build a custom layout. The container is the visual and fullscreen boundary; the player itself defaults to `display: contents`.
 
-Use split elements (recommended for reusable skins/layouts):
+For standard video, audio, live, and background players, prefer the preset entry points. They export a named player element and a typed `PlayerController`, and register the player and default skin with one import:
 
-```ts title="player.ts"
-import { ContainerMixin, createPlayer, MediaElement } from '@videojs/html';
-import { videoFeatures } from '@videojs/html/video';
-
-const { ProviderMixin } = createPlayer({ features: videoFeatures });
-
-class PlayerRoot extends ProviderMixin(MediaElement) {}
-class PlayerRegion extends ContainerMixin(MediaElement) {}
-```
-
-Use a single composed element when the same element should both own the store and attach media:
-
-```ts title="player.ts"
-import { ContainerMixin, createPlayer, MediaElement } from '@videojs/html';
-import { videoFeatures } from '@videojs/html/video';
-
-const { ProviderMixin } = createPlayer({ features: videoFeatures });
-
-class ComposedPlayer extends ProviderMixin(ContainerMixin(MediaElement)) {}
+```ts
+import { PlayerController, VideoPlayerElement } from '@videojs/html/video';
 ```
 
 ## Examples

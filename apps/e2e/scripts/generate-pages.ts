@@ -352,7 +352,7 @@ createRoot(document.getElementById('root')!).render(<App />);
 function sourceHtmlPage(resource: string): string {
   const generatedRoot = '../../../../../../packages/html/src/__generated__/skins/default-video';
 
-  return `import '@videojs/html/video/player';
+  return `import '@videojs/html/video/ui';
 import { skin } from '${generatedRoot}/skin';
 import styles from '${generatedRoot}/styles/styles.css?inline';
 import { MEDIA } from '../resources';

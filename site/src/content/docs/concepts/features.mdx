@@ -35,7 +35,7 @@ import { VideoPlayer, Video, VideoSkin } from '@videojs/react/video';
 For example, if you import `<video-player>` from the `/video` path, you will have playback, volume, time, fullscreen, and more already enabled.
 
 ```html
-<script type="module" src="@videojs/html/video/player"></script> <!-- [!code focus] -->
+<script type="module" src="@videojs/html/video"></script> <!-- [!code focus] -->
 <video-player> <!-- [!code focus] -->
   <video-skin>
     <video src="movie.mp4"></video>
@@ -65,15 +65,11 @@ const { Player } = createPlayer({
 ```ts
 import { createPlayer, playbackFeature, volumeFeature, timeFeature, controlsFeature } from '@videojs/html';
 
-const { ProviderMixin, PlayerController, context } = createPlayer({ // [!code focus]
+const { PlayerElement: MyPlayerElement, PlayerController } = createPlayer({ // [!code focus]
   features: [playbackFeature, volumeFeature, timeFeature, controlsFeature], // [!code focus]
 }); // [!code focus]
 
-class MyPlayer extends ProviderMixin(MediaElement) {
-  static readonly tagName = 'my-player';
-}
-
-customElements.define('my-player', MyPlayer);
+customElements.define('my-player', MyPlayerElement);
 ```
 </FrameworkCase>
 
@@ -93,19 +89,13 @@ const { Player } = createPlayer({
 </FrameworkCase>
 <FrameworkCase frameworks={["html"]}>
 ```ts
-import { createPlayer, playbackFeature } from '@videojs/html';
-import { backgroundFeatures } from '@videojs/html/background';
-import { MediaElement } from '@videojs/html';
+import { backgroundFeatures, createPlayer, playbackFeature } from '@videojs/html';
 
-const { ProviderMixin } = createPlayer({ // [!code focus]
+const { PlayerElement: MyPlayerElement } = createPlayer({ // [!code focus]
   features: [...backgroundFeatures, playbackFeature], // [!code focus]
 }); // [!code focus]
 
-class MyPlayer extends ProviderMixin(MediaElement) {
-  static readonly tagName = 'my-player';
-}
-
-customElements.define('my-player', MyPlayer);
+customElements.define('my-player', MyPlayerElement);
 ```
 </FrameworkCase>
 
@@ -131,9 +121,10 @@ store.setVolume(0.8);
 You can access feature state and actions through <DocsLink slug="reference/player-controller">`PlayerController`</DocsLink> and pre-built feature selectors (e.g. <DocsLink slug="reference/feature-playback">`selectPlayback`</DocsLink>, <DocsLink slug="reference/feature-volume">`selectVolume`</DocsLink>):
 ```ts
 import { selectPlayback } from '@videojs/html';
+import { PlayerController } from '@videojs/html/video';
 
 // Subscribe to feature state (triggers element updates on change)
-readonly #playback = new PlayerController(this, context, selectPlayback);
+readonly #playback = new PlayerController(this, selectPlayback);
 
 // Read state and call actions
 const media = this.#playback.value;

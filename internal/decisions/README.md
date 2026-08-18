@@ -41,7 +41,7 @@ Add alternatives, consequences, or source links only when they materially explai
 
 | Area | Decisions |
 | --- | --- |
-| `player/` | Provider, container, media discovery, and player composition |
+| `player/` | Player, container, media discovery, and composition |
 | `spf/` | Stream-processing ownership and coordination |
 | `store/` | State-management contracts |
 | `ui/` | Components, gestures, captions, and interaction |

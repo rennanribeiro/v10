@@ -343,10 +343,11 @@ Removing a control is removing a line. That's the trade you get for the extra se
 For UI state rather than media state, use <DocsLink slug="reference/player-controller">`PlayerController`</DocsLink> inside a custom element. Give it a selector for the feature you care about and it keeps your element in sync:
 
 ```js
-import { PlayerController, playerContext, ReactiveElement, selectTime } from '@videojs/html';
+import { UIElement, selectTime } from '@videojs/html';
+import { PlayerController } from '@videojs/html/video';
 
-class MyElapsed extends ReactiveElement {
-  #time = new PlayerController(this, playerContext, selectTime);
+class MyElapsed extends UIElement {
+  #time = new PlayerController(this, selectTime);
 }
 ```
 
@@ -441,7 +442,7 @@ You get `streamType`, `targetLiveWindow`, and `liveEdgeStart` in state, plus a l
 The live composition is narrower than the video one on purpose: it leaves out quality, audio-track, and playback-rate state, none of which apply cleanly to a stream with no fixed duration. So a live skin's settings menu holds captions and nothing else. If you need one of the others on a live player, build your own player from a feature list rather than taking the preset's.
 
 <FrameworkCase frameworks={["html"]}>
-That's what <DocsLink slug="reference/html-create-player">`createPlayer`</DocsLink> is for. Hand it a feature list and you get back the mixins to define your own player element.
+That's what <DocsLink slug="reference/html-create-player">`createPlayer`</DocsLink> is for. Hand it a feature list and you get back a configured `PlayerElement` class and typed `PlayerController`.
 </FrameworkCase>
 
 <FrameworkCase frameworks={["react"]}>

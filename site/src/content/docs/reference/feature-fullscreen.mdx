@@ -40,13 +40,11 @@ function FullscreenButton() {
 
 <FrameworkCase frameworks={["html"]}>
 ```ts title="fullscreen-button.ts"
-import { createPlayer, MediaElement, selectFullscreen } from '@videojs/html';
-import { videoFeatures } from '@videojs/html/video';
+import { UIElement, selectFullscreen } from '@videojs/html';
+import { PlayerController } from '@videojs/html/video';
 
-const { PlayerController, context } = createPlayer({ features: videoFeatures });
-
-class FullscreenButton extends MediaElement {
-  readonly #fullscreen = new PlayerController(this, context, selectFullscreen);
+class FullscreenButton extends UIElement {
+  readonly #fullscreen = new PlayerController(this, selectFullscreen);
 }
 ```
 </FrameworkCase>

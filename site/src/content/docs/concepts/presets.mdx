@@ -32,9 +32,7 @@ For example, the `@videojs/html/background` preset includes a media element with
     
 ```html title="index.html"
 <script type="module">
-  import '@videojs/html/background/player';
-  import '@videojs/html/background/video';
-  import '@videojs/html/background/skin';
+  import '@videojs/html/background';
 </script>
 
 <background-video-player>
@@ -53,15 +51,33 @@ The default presets are `/video` and `/audio`. These cover the baseline controls
 
 ## What's in a preset
 
-Each React preset exports a named, preconfigured player component and typed `usePlayer` hook, plus the building blocks needed to customize or eject from it:
+Each preset exports a named, preconfigured player, typed state access, and its default building blocks:
 
-- **Player** — A player component named for the preset, such as `VideoPlayer`, already configured with the preset's feature bundle.
-- **Typed hook** — A `usePlayer` hook whose state and actions match the preset.
+- **Player** — A player named for the preset, such as `VideoPlayer` or `VideoPlayerElement`, already configured with the preset's feature bundle.
+- **Typed state access** — React presets export `usePlayer`; HTML presets export `PlayerController`. Both match the preset's state and actions.
 - **Feature bundle** — An array of <DocsLink slug="concepts/features">features</DocsLink> that define the player's state and actions. For example, the video feature bundle includes playback, volume, time, fullscreen, and more.
 - **Skins** — Pre-built UIs designed for that feature bundle. For example, a video skin renders fullscreen and PiP controls because the video feature bundle includes those features. An audio skin doesn't.
 - **Media element** — A media component suited to the use case. For example, the background video element bakes in autoplay, mute, and loop.
 
-These parts aren't equally tied together. Skins depend tightly on their feature bundle — a skin expects specific features to exist. Media elements are more interchangeable — you can swap in an HLS or DASH provider without changing your skin or features.
+These parts aren't equally tied together. Skins depend tightly on their feature bundle — a skin expects specific features to exist. Media elements are more interchangeable — you can swap in an HLS or DASH element without changing your skin or features.
+
+<FrameworkCase frameworks={["html"]}>
+Import the named player element and its typed controller from the same preset:
+
+```ts
+import { PlayerController, VideoPlayerElement } from '@videojs/html/video';
+```
+
+The preset root is both the convenient named-export path and the full registration entry. Narrow side-effect paths remain available when you are assembling the UI yourself:
+
+```ts
+import '@videojs/html/video';        // Full video preset
+import '@videojs/html/video/player'; // Only <video-player>
+import '@videojs/html/video/skin';   // <video-skin> and its required UI
+```
+
+The same pattern applies to `/audio`, `/live-video`, `/live-audio`, and `/background`.
+</FrameworkCase>
 
 ## Customizing a preset
 
@@ -95,20 +111,16 @@ function Hero() {
 <FrameworkCase frameworks={["html"]}>
 ```html title="index.html"
 <script type="module">
-  import { createPlayer, playbackFeature, MediaElement } from '@videojs/html';
-  import { backgroundFeatures } from '@videojs/html/background';
-  import '@videojs/html/media/container';
+  import { backgroundFeatures, createPlayer, playbackFeature } from '@videojs/html';
+  import '@videojs/html/background/video';
+  import '@videojs/html/ui/container';
   import '@videojs/html/ui/play-button';
 
-  const { ProviderMixin } = createPlayer({ // [!code focus]
+  const { PlayerElement: MyPlayerElement } = createPlayer({ // [!code focus]
     features: [...backgroundFeatures, playbackFeature], // [!code focus]
   }); // [!code focus]
 
-  class MyPlayer extends ProviderMixin(MediaElement) {
-    static readonly tagName = 'my-player';
-  }
-
-  customElements.define('my-player', MyPlayer);
+  customElements.define('my-player', MyPlayerElement);
 </script>
 
 <my-player>
@@ -126,7 +138,7 @@ If a preset's skin is close but not quite right, you can <DocsLink slug="how-to/
 
 ### Swap the media element
 
-A preset's default media element is just the starting point. You can replace it with any compatible media provider. For example, using an HLS source with the video preset:
+A preset's default media element is just the starting point. You can replace it with any compatible media element. For example, using an HLS source with the video preset:
 
 <FrameworkCase frameworks={["react"]}>
 ```tsx

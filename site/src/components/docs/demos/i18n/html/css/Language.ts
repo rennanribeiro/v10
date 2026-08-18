@@ -1,5 +1,6 @@
 import { LOCALES } from '@videojs/html/i18n';
 import '@videojs/html/video/player';
+import '@videojs/html/ui/container';
 import '@videojs/html/video/skin';
 
 const root = document.querySelector<HTMLElement>('.html-i18n-language');
