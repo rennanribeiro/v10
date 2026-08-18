@@ -1,6 +1,4 @@
 /** Audio-only player preset with playback and volume controls. */
 export { audioFeatures } from '@videojs/core/dom';
-export { MinimalAudioSkinElement } from '../define/audio/minimal-skin';
-export { MinimalAudioSkinTailwindElement } from '../define/audio/minimal-skin.tailwind';
+export { AudioPlayerElement, PlayerController } from '../define/audio/player';
 export { AudioSkinElement } from '../define/audio/skin';
-export { AudioSkinTailwindElement } from '../define/audio/skin.tailwind';

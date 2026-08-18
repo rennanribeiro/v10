@@ -1,6 +1,5 @@
 import { backgroundFeatures } from '@videojs/core/dom';
 import { createPlayer } from '../../player/create-player';
-import { ContainerElement } from '../../ui/container/container-element';
 import { safeDefine } from '../safe-define';
 
 const { PlayerElement, PlayerController: ConfiguredPlayerController } = createPlayer({
@@ -16,7 +15,6 @@ export class BackgroundVideoPlayerElement extends PlayerElement {
 
 // Provider must be defined before consumer for context handshake during upgrade.
 safeDefine(BackgroundVideoPlayerElement);
-safeDefine(ContainerElement);
 
 declare global {
   interface HTMLElementTagNameMap {
