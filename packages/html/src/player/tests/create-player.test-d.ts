@@ -24,12 +24,10 @@ describe('createPlayer', () => {
     assertType<CreatePlayerResult<VideoPlayerStore>>(result);
     // @ts-expect-error ContainerMixin is no longer part of the HTML API.
     result.ContainerMixin;
-    // @ts-expect-error createPlayer returns a PlayerElement class directly, not a provider mixin.
-    result.ProviderMixin;
+    assertType<typeof result.PlayerElement>(result.ProviderMixin(UIElement));
     // @ts-expect-error Use PlayerElement.
     result.Player;
-    // @ts-expect-error Use playerContext.
-    result.context;
+    assertType<typeof result.playerContext>(result.context);
     // @ts-expect-error The player element owns its store.
     result.create;
   });
