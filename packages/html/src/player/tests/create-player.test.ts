@@ -31,9 +31,9 @@ describe('createPlayer', () => {
     expect(result.PlayerElement).toBeInstanceOf(Function);
     expect(result.PlayerController).toBeInstanceOf(Function);
     expect(result).not.toHaveProperty('Player');
-    expect(result).not.toHaveProperty('context');
+    expect(result.context).toBe(result.playerContext);
     expect(result).not.toHaveProperty('create');
-    expect(result).not.toHaveProperty('ProviderMixin');
+    expect(result.ProviderMixin(MediaElement)).toBe(result.PlayerElement);
     expect(result).not.toHaveProperty('ContainerMixin');
   });
 

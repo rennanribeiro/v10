@@ -24,12 +24,10 @@ describe('createPlayer', () => {
     assertType<CreatePlayerResult<VideoPlayerStore>>(result);
     // @ts-expect-error ContainerMixin is imported from the package root, not created per player.
     result.ContainerMixin;
-    // @ts-expect-error createPlayer returns a PlayerElement class directly, not a provider mixin.
-    result.ProviderMixin;
+    assertType<typeof result.PlayerElement>(result.ProviderMixin(MediaElement));
     // @ts-expect-error Use PlayerElement.
     result.Player;
-    // @ts-expect-error Use playerContext.
-    result.context;
+    assertType<typeof result.playerContext>(result.context);
     // @ts-expect-error The player element owns its store.
     result.create;
   });
