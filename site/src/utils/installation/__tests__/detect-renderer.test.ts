@@ -238,10 +238,10 @@ describe('isRendererValidForUseCase', () => {
     expect(isRendererValidForUseCase('mux-audio', 'default-video')).toBe(false);
   });
 
-  it('live-video accepts streaming renderers but not progressive files or Vimeo', () => {
+  it('live-video accepts live-aware renderers', () => {
     expect(isRendererValidForUseCase('hls', 'live-video')).toBe(true);
-    expect(isRendererValidForUseCase('dash', 'live-video')).toBe(true);
     expect(isRendererValidForUseCase('mux-video', 'live-video')).toBe(true);
+    expect(isRendererValidForUseCase('dash', 'live-video')).toBe(false);
     expect(isRendererValidForUseCase('html5-video', 'live-video')).toBe(false);
     expect(isRendererValidForUseCase('vimeo', 'live-video')).toBe(false);
   });

@@ -10,50 +10,85 @@ export type Renderer =
 
 export type Skin = 'video' | 'audio' | 'minimal-video' | 'minimal-audio' | 'none';
 
-export type UseCase = 'default-video' | 'default-audio' | 'live-video' | 'live-audio' | 'background-video';
-
 export type InstallMethod = 'cdn' | 'npm' | 'pnpm' | 'yarn' | 'bun';
 
-// Order is also guidance: index 0 is the fallback default when there's no URL
-// detection, and the list reads top-to-bottom as what we steer users toward —
-// common files first, then open streaming formats, then hosting services.
-//
-// The live use cases list only streaming sources: a progressive file (mp4/mp3)
-// can't carry a live presentation, and the live presets exist to surface
-// live-edge state, so offering one would generate a player that never reports
-// it.
-export const VALID_RENDERERS: Record<UseCase, Renderer[]> = {
-  'default-video': ['html5-video', 'hls', 'dash', 'mux-video', 'vimeo'],
-  'default-audio': ['html5-audio', 'mux-audio'],
-  'live-video': ['hls', 'dash', 'mux-video'],
-  'live-audio': ['mux-audio'],
-  'background-video': ['background-video'],
-};
-
-// Use case → package subpath group, shared by the `@videojs/html` and
-// `@videojs/react` import paths and by the custom-element tag names. The
-// generated tags follow `<group>-player` / `<group>-skin` /
-// `<group>-minimal-skin`, so this doubles as the tag prefix. `background` is the
-// exception: its subpath is `background` but its tags are `background-video-*`.
-export function getPresetGroup(useCase: UseCase): string {
-  const map: Record<UseCase, string> = {
-    'default-video': 'video',
-    'default-audio': 'audio',
-    'live-video': 'live-video',
-    'live-audio': 'live-audio',
-    'background-video': 'background',
-  };
-  return map[useCase];
+export interface InstallationPreset {
+  label: string;
+  flag: string;
+  group: string;
+  tagPrefix: string;
+  componentPrefix: string;
+  mediaType: 'video' | 'audio';
+  live: boolean;
+  renderers: readonly Renderer[];
 }
 
-/** Whether the use case renders an `<audio>`-family player rather than video. */
-export function isAudioUseCase(useCase: UseCase): boolean {
-  return useCase === 'default-audio' || useCase === 'live-audio';
-}
+/**
+ * Installation presets in the order shown by the site and CLI.
+ *
+ * Renderer order is also guidance: index 0 is the default when URL detection
+ * has no match. Live presets include only media that exposes Video.js live-edge
+ * state; DASH playback does not currently provide that capability.
+ */
+export const INSTALLATION_PRESETS = {
+  'default-video': {
+    label: 'Video',
+    flag: 'video',
+    group: 'video',
+    tagPrefix: 'video',
+    componentPrefix: 'Video',
+    mediaType: 'video',
+    live: false,
+    renderers: ['html5-video', 'hls', 'dash', 'mux-video', 'vimeo'],
+  },
+  'default-audio': {
+    label: 'Audio',
+    flag: 'audio',
+    group: 'audio',
+    tagPrefix: 'audio',
+    componentPrefix: 'Audio',
+    mediaType: 'audio',
+    live: false,
+    renderers: ['html5-audio', 'mux-audio'],
+  },
+  'live-video': {
+    label: 'Live Video',
+    flag: 'live-video',
+    group: 'live-video',
+    tagPrefix: 'live-video',
+    componentPrefix: 'LiveVideo',
+    mediaType: 'video',
+    live: true,
+    renderers: ['hls', 'mux-video'],
+  },
+  'live-audio': {
+    label: 'Live Audio',
+    flag: 'live-audio',
+    group: 'live-audio',
+    tagPrefix: 'live-audio',
+    componentPrefix: 'LiveAudio',
+    mediaType: 'audio',
+    live: true,
+    renderers: ['mux-audio'],
+  },
+  'background-video': {
+    label: 'Background Video',
+    flag: 'background-video',
+    group: 'background',
+    tagPrefix: 'background-video',
+    componentPrefix: 'BackgroundVideo',
+    mediaType: 'video',
+    live: false,
+    renderers: ['background-video'],
+  },
+} as const satisfies Record<string, InstallationPreset>;
 
-/** Whether the use case targets a live presentation rather than on-demand media. */
-export function isLiveUseCase(useCase: UseCase): boolean {
-  return useCase === 'live-video' || useCase === 'live-audio';
+export type UseCase = keyof typeof INSTALLATION_PRESETS;
+
+export const USE_CASES = Object.keys(INSTALLATION_PRESETS) as UseCase[];
+
+export function getInstallationPreset(useCase: UseCase): InstallationPreset {
+  return INSTALLATION_PRESETS[useCase];
 }
 
 // Renderer → media subpath name, independent of whether a CDN build exists.

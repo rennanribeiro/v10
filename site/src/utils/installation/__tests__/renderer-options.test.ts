@@ -19,12 +19,9 @@ describe('buildOptions', () => {
     ]);
   });
 
-  // The live presets exist to surface live-edge state, so they only offer
-  // streaming sources — a progressive file can't be live.
-  it('offers only streaming options for live-video', () => {
+  it('offers only live-aware media for live-video', () => {
     expect(buildOptions('live-video')).toEqual([
       { value: 'hls', label: 'HLS' },
-      { value: 'dash', label: 'DASH' },
       { value: 'mux-video', label: 'Mux' },
     ]);
   });

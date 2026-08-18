@@ -1,16 +1,15 @@
+import { readFileSync } from 'node:fs';
+import { dirname, resolve } from 'node:path';
+import { fileURLToPath, pathToFileURL } from 'node:url';
 import {
   DEMO_LIVE_POSTER_SRC,
   DEMO_LIVE_SRC,
   DEMO_POSTER_SRC,
   DEMO_VIDEO_SRC,
-  getSkinGroup,
-  getSkinMediaType,
   HTML_CDN_BASE,
   type HtmlSkinDef,
-  isLiveSkin,
-  LIVE_MEDIA_SUBPATH,
-  LIVE_MEDIA_TAG,
-  type MediaType,
+  LIVE_MEDIA,
+  type SkinDef,
 } from './config.ts';
 import { pkgDistUrl, validatePackageImports } from './package-resolver.ts';
 
@@ -76,36 +75,30 @@ export function createRenderMediaIcon(iconSet: 'default' | 'minimal') {
   };
 }
 
-export function replaceSlots(html: string, mediaType: MediaType, isLive: boolean): string {
-  const tag = isLive ? LIVE_MEDIA_TAG[mediaType] : mediaType === 'audio' ? 'audio' : 'video';
+export function replaceSlots(html: string, skin: Pick<SkinDef, 'mediaType' | 'live'>): string {
+  const { live, mediaType } = skin;
+  const tag = live ? LIVE_MEDIA[mediaType].tag : mediaType === 'audio' ? 'audio' : 'video';
   const playsInline = mediaType === 'video' ? ' playsinline' : '';
-  const mediaElement = `<${tag} src="${isLive ? DEMO_LIVE_SRC : DEMO_VIDEO_SRC}"${playsInline}></${tag}>`;
+  const mediaElement = `<${tag} src="${live ? DEMO_LIVE_SRC : DEMO_VIDEO_SRC}"${playsInline}></${tag}>`;
 
   html = html.replace(
     /^([ \t]*)<!--\s*@deprecated[^\n]*\n\s*<slot name="media"><\/slot>\n\s*<slot><\/slot>/m,
     `$1${mediaElement}`
   );
 
-  return html.replace(
-    /<slot name="poster"><\/slot>/,
-    `<img src="${isLive ? DEMO_LIVE_POSTER_SRC : DEMO_POSTER_SRC}" />`
-  );
+  return html.replace(/<slot name="poster"><\/slot>/, `<img src="${live ? DEMO_LIVE_POSTER_SRC : DEMO_POSTER_SRC}" />`);
 }
 
 export function prependHtmlSkinScripts(html: string, skin: HtmlSkinDef): string {
-  const isMinimal = skin.id.includes('minimal');
-  const prefix = getSkinGroup(skin);
-  const cdnFileName = isMinimal ? `${prefix}-minimal-ui` : `${prefix}-ui`;
+  const cdnFileName = skin.variant === 'minimal' ? `${skin.group}-minimal-ui` : `${skin.group}-ui`;
   const scriptTags = [`<script type="module" src="${HTML_CDN_BASE}/${cdnFileName}.js"></script>`];
-  // Live snippets use a media element rather than a bare `<video>`, so they need
-  // that media's CDN bundle alongside the UI bundle.
-  if (isLiveSkin(skin)) {
+  if (skin.live) {
     scriptTags.push(
-      `<script type="module" src="${HTML_CDN_BASE}/media/${LIVE_MEDIA_SUBPATH[getSkinMediaType(skin)]}.js"></script>`
+      `<script type="module" src="${HTML_CDN_BASE}/media/${LIVE_MEDIA[skin.mediaType].subpath}.js"></script>`
     );
   }
   const cssLink = '<link rel="stylesheet" href="./player.css">';
-  const playerTag = `${prefix}-player`;
+  const playerTag = `${skin.group}-player`;
   const indented = html
     .split('\n')
     .map((line) => (line.length > 0 ? `  ${line}` : line))
@@ -149,9 +142,5 @@ export async function processHtmlSkin(skin: HtmlSkinDef): Promise<string> {
   context.renderIcon = createRenderMediaIcon(skin.iconSet);
 
   const html = evaluateTemplate(templateBody, context);
-  return prependHtmlSkinScripts(replaceSlots(html, getSkinMediaType(skin), isLiveSkin(skin)), skin);
+  return prependHtmlSkinScripts(replaceSlots(html, skin), skin);
 }
-
-import { readFileSync } from 'node:fs';
-import { dirname, resolve } from 'node:path';
-import { fileURLToPath, pathToFileURL } from 'node:url';

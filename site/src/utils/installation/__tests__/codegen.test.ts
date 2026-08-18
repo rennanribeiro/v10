@@ -44,9 +44,11 @@ describe('validateInstallationOptions', () => {
     }
   });
 
-  it('accepts any renderer regardless of use case', () => {
-    expect(validateInstallationOptions({ ...baseHTML, useCase: 'default-audio', renderer: 'hls' })).toEqual({
-      valid: true,
+  it('rejects media that does not support the preset', () => {
+    const result = validateInstallationOptions({ ...baseHTML, useCase: 'live-audio', renderer: 'hls' });
+    expect(result).toEqual({
+      valid: false,
+      reason: 'Invalid media type "hls" for the "live-audio" preset. Valid options: mux-audio',
     });
   });
 });
@@ -247,11 +249,6 @@ describe('generateHTMLUsageCode', () => {
     // A distinct asset from the on-demand demo, so the live player actually
     // reports live-edge state.
     expect(live.html).not.toEqual(onDemand.html);
-  });
-
-  it('keeps the DASH sample for live DASH, which has no live equivalent', () => {
-    const result = generateHTMLUsageCode({ ...baseHTML, useCase: 'live-video', renderer: 'dash' });
-    expect(result.html).toContain('.mpd');
   });
 });
 

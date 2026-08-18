@@ -1,11 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import {
-  generateCdnCode,
-  getCdnUnsupportedReason,
-  getPresetLabel,
-  presetSupportsCdn,
-  rendererSupportsCdn,
-} from '../cdn-code';
+import { generateCdnCode, rendererSupportsCdn } from '../cdn-code';
 
 describe('generateCdnCode', () => {
   // Media subpaths that ship a CDN build. The media script is emitted only for
@@ -93,66 +87,6 @@ describe('generateCdnCode', () => {
       'cdn/live-audio-minimal.js'
     );
     expect(generateCdnCode('live-audio', 'none', 'mux-audio', manifest)).toContain('cdn/live-audio-headless.js');
-  });
-});
-
-describe('presetSupportsCdn', () => {
-  // Every preset the install page offers ships all three skin variants.
-  it.each([
-    ['default-video', 'video'],
-    ['default-video', 'minimal-video'],
-    ['default-video', 'none'],
-    ['default-audio', 'audio'],
-    ['default-audio', 'minimal-audio'],
-    ['default-audio', 'none'],
-    ['live-video', 'video'],
-    ['live-video', 'minimal-video'],
-    ['live-video', 'none'],
-    ['live-audio', 'audio'],
-    ['live-audio', 'minimal-audio'],
-    ['live-audio', 'none'],
-    ['background-video', 'video'],
-  ] as const)('returns true for %s + %s', (useCase, skin) => {
-    expect(presetSupportsCdn(useCase, skin)).toBe(true);
-  });
-
-  // The set is explicit rather than derived, so a preset added to the picker
-  // without a CDN entry degrades to a package manager instead of a broken tag.
-  it('returns false for a preset with no published bundle', () => {
-    expect(presetSupportsCdn('made-up-preset' as never, 'video')).toBe(false);
-  });
-});
-
-describe('getCdnUnsupportedReason', () => {
-  const manifest = ['hlsjs-video', 'dash-video', 'mux-video', 'mux-audio'];
-
-  it('returns null when preset and renderer both ship bundles', () => {
-    expect(getCdnUnsupportedReason('live-video', 'video', 'hls', manifest)).toBeNull();
-    expect(getCdnUnsupportedReason('live-audio', 'none', 'mux-audio', manifest)).toBeNull();
-  });
-
-  it('blames the renderer when only the media bundle is missing', () => {
-    expect(getCdnUnsupportedReason('default-video', 'video', 'vimeo', manifest)).toBe('renderer');
-  });
-
-  it('blames the preset when it ships no bundle', () => {
-    expect(getCdnUnsupportedReason('made-up-preset' as never, 'video', 'hls', manifest)).toBe('preset');
-  });
-});
-
-describe('getPresetLabel', () => {
-  it('labels the live presets', () => {
-    expect(getPresetLabel('live-video', 'video')).toBe('live video');
-    expect(getPresetLabel('live-video', 'minimal-video')).toBe('minimal live video');
-    expect(getPresetLabel('live-video', 'none')).toBe('headless live video');
-    expect(getPresetLabel('live-audio', 'audio')).toBe('live audio');
-    expect(getPresetLabel('live-audio', 'minimal-audio')).toBe('minimal live audio');
-  });
-
-  it('labels the non-live presets', () => {
-    expect(getPresetLabel('default-video', 'video')).toBe('video');
-    expect(getPresetLabel('default-audio', 'minimal-audio')).toBe('minimal audio');
-    expect(getPresetLabel('background-video', 'video')).toBe('background video');
   });
 });
 

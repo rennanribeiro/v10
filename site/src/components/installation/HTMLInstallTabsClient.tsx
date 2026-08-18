@@ -4,8 +4,8 @@ import { useEffect, useRef } from 'react';
 import ClientCode from '@/components/Code/ClientCode';
 import { Tab, TabsList, TabsPanel, TabsRoot } from '@/components/Tabs';
 import { shared } from '@/components/typography/styles';
-import { installMethod, renderer, skin, useCase } from '@/stores/installation';
-import { getCdnUnsupportedReason, getPresetLabel } from '@/utils/installation/cdn-code';
+import { installMethod, renderer } from '@/stores/installation';
+import { rendererSupportsCdn } from '@/utils/installation/cdn-code';
 import type { InstallMethod } from '@/utils/installation/types';
 import HTMLCdnCodeBlock from './HTMLCdnCodeBlock';
 
@@ -17,13 +17,8 @@ interface HTMLInstallTabsProps {
 export default function HTMLInstallTabs({ cdnMedia }: HTMLInstallTabsProps) {
   const ref = useRef<HTMLDivElement>(null);
   const $renderer = useStore(renderer);
-  const $skin = useStore(skin);
-  const $useCase = useStore(useCase);
 
-  // CDN needs both a preset bundle and (for media renderers) a media bundle.
-  // Track which one is missing so the fallback copy names the right cause.
-  const unsupportedReason = getCdnUnsupportedReason($useCase, $skin, $renderer, cdnMedia);
-  const supportsCdn = unsupportedReason === null;
+  const supportsCdn = rendererSupportsCdn($renderer, cdnMedia);
 
   // Mirror the active install-method tab into the store so the usage code block
   // can react (e.g. CDN omits the JS imports). Observing from the stable
@@ -91,12 +86,9 @@ export default function HTMLInstallTabs({ cdnMedia }: HTMLInstallTabsProps) {
           <ClientCode code="bun add @videojs/html" lang="bash" />
         </TabsPanel>
       </TabsRoot>
-      {unsupportedReason !== null && (
+      {!supportsCdn && (
         <p className={clsx(shared.p, shared.prose)}>
-          {unsupportedReason === 'preset'
-            ? `The ${getPresetLabel($useCase, $skin)} player isn't available via CDN`
-            : "This source type isn't available via CDN"}{' '}
-          — install it with a package manager (npm, pnpm, yarn, or bun).
+          This source type isn't available via CDN — install it with a package manager (npm, pnpm, yarn, or bun).
         </p>
       )}
     </div>

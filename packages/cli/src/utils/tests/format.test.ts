@@ -75,30 +75,4 @@ describe('formatInstallationCode', () => {
     expect(result).toContain('<LiveAudioPlayer>');
     expect(result).toContain('<LiveAudioSkin>');
   });
-
-  it('formats the live-audio CDN install', () => {
-    const result = formatInstallationCode({
-      ...baseHTML,
-      useCase: 'live-audio',
-      skin: 'audio',
-      renderer: 'mux-audio',
-      installMethod: 'cdn',
-    });
-    expect(result).toContain('cdn/live-audio.js');
-    expect(result).not.toContain('## JavaScript imports');
-  });
-
-  // `handleDocs` gates CDN before formatting, so reaching here with an
-  // unpublished preset means that gate was bypassed.
-  it('throws when asked to format CDN for a preset with no CDN bundle', () => {
-    expect(() =>
-      formatInstallationCode({
-        ...baseHTML,
-        useCase: 'made-up-preset' as never,
-        skin: 'video',
-        renderer: 'hls',
-        installMethod: 'cdn',
-      })
-    ).toThrow('no CDN build');
-  });
 });

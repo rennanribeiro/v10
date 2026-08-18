@@ -13,10 +13,5 @@ export default function HTMLCdnCodeBlock({ cdnMedia }: HTMLCdnCodeBlockProps) {
   const $skin = useStore(skin);
   const $renderer = useStore(renderer);
 
-  // Mounted only when the configuration has a CDN bundle (see
-  // HTMLInstallTabsClient), so a null here means the two gates disagree.
-  const code = generateCdnCode($useCase, $skin, $renderer, cdnMedia);
-  if (code === null) return null;
-
-  return <ClientCode code={code} lang="html" />;
+  return <ClientCode code={generateCdnCode($useCase, $skin, $renderer, cdnMedia)} lang="html" />;
 }

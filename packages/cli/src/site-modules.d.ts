@@ -19,9 +19,18 @@ declare module '@/utils/installation/types' {
   export type Skin = 'video' | 'audio' | 'minimal-video' | 'minimal-audio' | 'none';
   export type UseCase = 'default-video' | 'default-audio' | 'live-video' | 'live-audio' | 'background-video';
   export type InstallMethod = 'cdn' | 'npm' | 'pnpm' | 'yarn' | 'bun';
-  export const VALID_RENDERERS: Record<UseCase, Renderer[]>;
-  export function getPresetGroup(useCase: UseCase): string;
-  export function isAudioUseCase(useCase: UseCase): boolean;
+  export interface InstallationPreset {
+    label: string;
+    flag: string;
+    group: string;
+    tagPrefix: string;
+    componentPrefix: string;
+    mediaType: 'video' | 'audio';
+    live: boolean;
+    renderers: readonly Renderer[];
+  }
+  export const USE_CASES: UseCase[];
+  export function getInstallationPreset(useCase: UseCase): InstallationPreset;
 }
 
 declare module '@/utils/installation/codegen' {
@@ -43,7 +52,7 @@ declare module '@/utils/installation/codegen' {
   export function generateHTMLInstallCode(
     opts: Pick<InstallationOptions, 'useCase' | 'skin' | 'renderer'>,
     cdnMediaSubpaths: readonly string[]
-  ): { cdn: string | null } & Record<'npm' | 'pnpm' | 'yarn' | 'bun', string>;
+  ): Record<'cdn' | 'npm' | 'pnpm' | 'yarn' | 'bun', string>;
 
   export function generateReactInstallCode(): Record<'npm' | 'pnpm' | 'yarn' | 'bun', string>;
 
@@ -79,17 +88,8 @@ declare module '@/utils/installation/cdn-code' {
     skin: Skin,
     renderer: Renderer,
     cdnMediaSubpaths: readonly string[]
-  ): string | null;
+  ): string;
   export function rendererSupportsCdn(renderer: Renderer, cdnMediaSubpaths: readonly string[]): boolean;
-  export function presetSupportsCdn(useCase: UseCase, skin: Skin): boolean;
-  export type CdnUnsupportedReason = 'preset' | 'renderer';
-  export function getCdnUnsupportedReason(
-    useCase: UseCase,
-    skin: Skin,
-    renderer: Renderer,
-    cdnMediaSubpaths: readonly string[]
-  ): CdnUnsupportedReason | null;
-  export function getPresetLabel(useCase: UseCase, skin: Skin): string;
 }
 
 declare module '@/utils/installation/renderer-options' {

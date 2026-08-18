@@ -24,6 +24,11 @@ describe('ejected skin configuration', () => {
     expect(new Set(SKINS.map(({ platform }) => platform))).toEqual(new Set(['html', 'react']));
     expect(new Set(SKINS.map(({ style }) => style))).toEqual(new Set(['css', 'tailwind']));
   });
+
+  it('defines every preset, skin, platform, and styling combination', () => {
+    expect(SKINS).toHaveLength(32);
+    expect(SKINS.filter(({ live }) => live)).toHaveLength(16);
+  });
 });
 
 describe('ejected HTML skins', () => {
@@ -48,13 +53,13 @@ describe('ejected HTML skins', () => {
   ].join('\n');
 
   it('replaces media and poster slots', () => {
-    const result = replaceSlots(slotSource, 'video', false);
+    const result = replaceSlots(slotSource, { mediaType: 'video', live: false });
     expect(result).toContain(`<video src="${DEMO_VIDEO_SRC}" playsinline></video>`);
     expect(result).toContain(`<img src="${DEMO_POSTER_SRC}" />`);
   });
 
   it('gives live skins a media element and a live source', () => {
-    const result = replaceSlots(slotSource, 'video', true);
+    const result = replaceSlots(slotSource, { mediaType: 'video', live: true });
     expect(result).toContain(`<hlsjs-video src="${DEMO_LIVE_SRC}" playsinline></hlsjs-video>`);
     expect(result).toContain(`<img src="${DEMO_LIVE_POSTER_SRC}" />`);
   });
