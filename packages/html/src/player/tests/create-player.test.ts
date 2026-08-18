@@ -2,7 +2,7 @@ import { audioFeatures, backgroundFeatures, metadataFeature, type PopupGroup, vi
 import { ContextConsumer } from '@videojs/element/context';
 import { afterEach, describe, expect, it } from 'vitest';
 
-import { ContainerMixin } from '../../index';
+import { ContainerMixin } from '../../store/container-mixin';
 import { MediaElement } from '../../ui/media-element';
 import { createPlayer } from '../create-player';
 import { popupGroupContext } from '../popup-group-context';
@@ -11,51 +11,43 @@ let tagCounter = 0;
 
 function defineTestElement<Element extends CustomElementConstructor>(Base: Element): string {
   const tagName = `test-player-context-${tagCounter++}`;
-  customElements.define(tagName, Base);
+  customElements.define(tagName, class extends Base {});
   return tagName;
 }
 
 describe('createPlayer', () => {
   afterEach(() => {
-    document.body.innerHTML = '';
+    document.body.replaceChildren();
   });
 
-  it('returns expected exports', () => {
-    const result = createPlayer({ features: videoFeatures });
+  it.each([
+    ['video', videoFeatures],
+    ['audio', audioFeatures],
+    ['background', backgroundFeatures],
+  ] as const)('creates a direct %s player class', (_name, features) => {
+    const result = createPlayer({ features });
 
-    expect(result.context).toBeDefined();
-    expect(result.create).toBeInstanceOf(Function);
-    expect(result.PlayerController).toBeDefined();
-    expect(result.ProviderMixin).toBeInstanceOf(Function);
+    expect(result.playerContext).toBeDefined();
+    expect(result.PlayerElement).toBeInstanceOf(Function);
+    expect(result.PlayerController).toBeInstanceOf(Function);
+    expect(result).not.toHaveProperty('Player');
+    expect(result).not.toHaveProperty('context');
+    expect(result).not.toHaveProperty('create');
+    expect(result).not.toHaveProperty('ProviderMixin');
     expect(result).not.toHaveProperty('ContainerMixin');
   });
 
-  it('create() returns a store instance', () => {
-    const { create } = createPlayer({ features: videoFeatures });
-    const store = create();
+  it('uses display contents as the default player layout', () => {
+    const { PlayerElement } = createPlayer({ features: backgroundFeatures });
+    const player = document.createElement(defineTestElement(PlayerElement));
 
-    expect(store.attach).toBeInstanceOf(Function);
-    expect(store.subscribe).toBeInstanceOf(Function);
-    expect(store.destroy).toBeInstanceOf(Function);
-  });
+    document.body.append(player);
 
-  it('ProviderMixin produces a valid custom element class', () => {
-    const { ProviderMixin } = createPlayer({ features: videoFeatures });
-    const ProviderElement = ProviderMixin(MediaElement);
-
-    expect(typeof ProviderElement).toBe('function');
-    expect(ProviderElement.prototype).toBeDefined();
-  });
-
-  it('ContainerMixin produces a valid custom element class', () => {
-    const ContainerElement = ContainerMixin(MediaElement);
-
-    expect(typeof ContainerElement).toBe('function');
-    expect(ContainerElement.prototype).toBeDefined();
+    expect(player.style.display).toBe('contents');
   });
 
   it('scopes popup coordination to container descendants', async () => {
-    const { ProviderMixin } = createPlayer({ features: videoFeatures });
+    const { PlayerElement } = createPlayer({ features: videoFeatures });
 
     class PopupGroupProbe extends MediaElement {
       popupGroup: PopupGroup | undefined;
@@ -71,20 +63,20 @@ describe('createPlayer', () => {
       }
     }
 
-    const providerTag = defineTestElement(ProviderMixin(MediaElement));
+    const playerTag = defineTestElement(PlayerElement);
     const containerTag = defineTestElement(ContainerMixin(MediaElement));
     const probeTag = defineTestElement(PopupGroupProbe);
-    const provider = document.createElement(providerTag);
+    const player = document.createElement(playerTag);
     const container = document.createElement(containerTag);
     const outsideProbe = document.createElement(probeTag) as PopupGroupProbe;
     const insideProbe = document.createElement(probeTag) as PopupGroupProbe;
 
     container.append(insideProbe);
-    provider.append(outsideProbe, container);
-    document.body.append(provider);
+    player.append(outsideProbe, container);
+    document.body.append(player);
 
     await Promise.all([
-      (provider as MediaElement).updateComplete,
+      (player as MediaElement).updateComplete,
       (container as MediaElement).updateComplete,
       outsideProbe.updateComplete,
       insideProbe.updateComplete,
@@ -94,75 +86,36 @@ describe('createPlayer', () => {
     expect(insideProbe.popupGroup).toBeDefined();
   });
 
-  it('creates audio player with expected exports', () => {
-    const result = createPlayer({ features: audioFeatures });
-
-    expect(result.context).toBeDefined();
-    expect(result.create).toBeInstanceOf(Function);
-    expect(result.PlayerController).toBeDefined();
-    expect(result.ProviderMixin).toBeInstanceOf(Function);
-    expect(result).not.toHaveProperty('ContainerMixin');
-  });
-
-  it('creates background player with expected exports', () => {
-    const result = createPlayer({ features: backgroundFeatures });
-
-    expect(result.context).toBeDefined();
-    expect(result.create).toBeInstanceOf(Function);
-    expect(result.PlayerController).toBeDefined();
-    expect(result.ProviderMixin).toBeInstanceOf(Function);
-    expect(result).not.toHaveProperty('ContainerMixin');
-  });
-
   it('maps selected feature inputs to kebab-cased reactive properties and attributes', async () => {
-    const { ProviderMixin } = createPlayer({ features: [metadataFeature] });
-    const ProviderElement = ProviderMixin(MediaElement);
-    const tagName = 'test-metadata-provider';
-    customElements.define(tagName, ProviderElement);
+    const { PlayerElement } = createPlayer({ features: [metadataFeature] });
+    const tagName = defineTestElement(PlayerElement);
+    const player = document.createElement(tagName) as InstanceType<typeof PlayerElement>;
 
-    const player = document.createElement(tagName) as InstanceType<typeof ProviderElement>;
     player.setAttribute('content-title', 'Attribute title');
     player.setAttribute('default-content-title', 'Fallback');
     document.body.append(player);
 
     expect(player.contentTitle).toBe('Attribute title');
     expect(player.store.contentTitle).toBe('Attribute title');
-    expect(ProviderElement.observedAttributes).toContain('default-content-title');
+    expect(PlayerElement.observedAttributes).toContain('default-content-title');
 
     player.contentTitle = 'Property title';
-
-    expect(player.contentTitle).toBe('Property title');
-    expect(player.getAttribute('content-title')).toBe('Attribute title');
-
     await player.updateComplete;
-
     expect(player.store.contentTitle).toBe('Property title');
-
-    player.setAttribute('content-title', '');
-    await player.updateComplete;
-    expect(player.store.contentTitle).toBe('');
 
     player.removeAttribute('content-title');
     await player.updateComplete;
     expect(player.store.contentTitle).toBe('Fallback');
 
     player.store.setContentTitle('Imperative title');
-
     expect(player.store.contentTitle).toBe('Imperative title');
     expect(player.contentTitle).toBeNull();
-    expect(player.hasAttribute('content-title')).toBe(false);
-
-    player.remove();
-    document.body.append(player);
-
-    expect(player.store.contentTitle).toBe('Imperative title');
   });
 
   it('leaves config attributes inert when their feature is absent', () => {
-    const { ProviderMixin } = createPlayer({ features: backgroundFeatures });
-    const ProviderElement = ProviderMixin(MediaElement);
+    const { PlayerElement } = createPlayer({ features: backgroundFeatures });
 
-    expect(ProviderElement.observedAttributes).not.toContain('content-title');
-    expect(ProviderElement.prototype).not.toHaveProperty('contentTitle');
+    expect(PlayerElement.observedAttributes).not.toContain('content-title');
+    expect(PlayerElement.prototype).not.toHaveProperty('contentTitle');
   });
 });

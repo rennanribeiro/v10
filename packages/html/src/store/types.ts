@@ -3,19 +3,20 @@ import type { Constructor } from '@videojs/utils/types';
 import type { MediaElement } from '@/ui/media-element';
 
 // ----------------------------------------
-// PlayerProvider
+// PlayerElement
 // ----------------------------------------
 
-type ProviderProperties<Store extends PlayerStore> = {
+type PlayerProperties<Store extends PlayerStore> = {
   -readonly [Key in keyof InferPlayerConfig<Store>]?: InferPlayerConfig<Store>[Key] | undefined;
 };
 
-export type PlayerProvider<Store extends PlayerStore> = MediaElement &
-  ProviderProperties<Store> & {
+export type PlayerElement<Store extends PlayerStore> = MediaElement &
+  PlayerProperties<Store> & {
     readonly store: Store;
   };
 
-export interface PlayerProviderConstructor<Store extends PlayerStore> extends Constructor<PlayerProvider<Store>> {}
+export type PlayerElementConstructor<Store extends PlayerStore> = typeof MediaElement &
+  Constructor<PlayerElement<Store>>;
 
 // ----------------------------------------
 // PlayerConsumer

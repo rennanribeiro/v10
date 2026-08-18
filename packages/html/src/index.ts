@@ -72,7 +72,6 @@ export * from './player/create-player';
 export * from './player/player-controller';
 export * from './store/container-mixin';
 export * from './store/media-attach-mixin';
-export * from './store/provider-mixin';
 export * from './store/types';
 export { AirPlayButtonElement } from './ui/airplay-button/airplay-button-element';
 export { AlertDialogCloseElement } from './ui/alert-dialog/alert-dialog-close-element';

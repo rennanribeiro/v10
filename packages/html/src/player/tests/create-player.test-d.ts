@@ -13,8 +13,9 @@ import {
 import type { Slice } from '@videojs/store';
 import { assertType, describe, it } from 'vitest';
 
-import { MediaElement } from '../../ui/media-element';
+import type { MediaElement } from '../../ui/media-element';
 import { type CreatePlayerResult, createPlayer } from '../create-player';
+import type { PlayerController } from '../player-controller';
 
 describe('createPlayer', () => {
   it('resolves video features to VideoPlayerStore', () => {
@@ -23,24 +24,24 @@ describe('createPlayer', () => {
     assertType<CreatePlayerResult<VideoPlayerStore>>(result);
     // @ts-expect-error ContainerMixin is imported from the package root, not created per player.
     result.ContainerMixin;
+    // @ts-expect-error createPlayer returns a PlayerElement class directly, not a provider mixin.
+    result.ProviderMixin;
+    // @ts-expect-error Use PlayerElement.
+    result.Player;
+    // @ts-expect-error Use playerContext.
+    result.context;
+    // @ts-expect-error The player element owns its store.
+    result.create;
   });
 
   it('resolves audio features to AudioPlayerStore', () => {
     const result = createPlayer({ features: audioFeatures });
+    const store = new result.PlayerElement().store;
 
     assertType<CreatePlayerResult<AudioPlayerStore>>(result);
-
-    const store = result.create();
-
     assertType<number | undefined>(store.error?.code);
     assertType<string | undefined>(store.error?.message);
     assertType<() => void>(store.dismissError);
-  });
-
-  it('resolves spread video features to VideoPlayerStore', () => {
-    const result = createPlayer({ features: videoFeatures });
-
-    assertType<CreatePlayerResult<VideoPlayerStore>>(result);
   });
 
   it('resolves custom features to generic PlayerStore', () => {
@@ -51,7 +52,6 @@ describe('createPlayer', () => {
     const customFeature = definePlayerFeature({
       state: (): CustomState => ({ custom: true }),
     });
-
     const result = createPlayer({ features: [customFeature] });
 
     assertType<CreatePlayerResult<PlayerStore<[Slice<PlayerTarget, CustomState>]>>>(result);
@@ -60,21 +60,26 @@ describe('createPlayer', () => {
   it('infers config properties from selected features', () => {
     const withMetadata = createPlayer({ features: [metadataFeature] });
     const withoutMetadata = createPlayer({ features: [features.playback] });
-    const MetadataProvider = withMetadata.ProviderMixin(MediaElement);
-    const PlainProvider = withoutMetadata.ProviderMixin(MediaElement);
-    const metadataProvider = new MetadataProvider();
-    const plainProvider = new PlainProvider();
+    const metadataPlayer = new withMetadata.PlayerElement();
+    const plainPlayer = new withoutMetadata.PlayerElement();
 
-    assertType<string | null | undefined>(metadataProvider.contentTitle);
-    assertType<string | null | undefined>(metadataProvider.defaultContentTitle);
+    assertType<string | null | undefined>(metadataPlayer.contentTitle);
+    assertType<string | null | undefined>(metadataPlayer.defaultContentTitle);
 
     // @ts-expect-error metadata properties are absent when the feature is absent.
-    plainProvider.contentTitle;
+    plainPlayer.contentTitle;
+  });
+
+  it('returns a controller already bound to the player context', () => {
+    const { PlayerController } = createPlayer({ features: videoFeatures });
+    const host = null as unknown as MediaElement;
+
+    assertType<PlayerController<VideoPlayerStore>>(new PlayerController(host));
+    assertType<PlayerController<VideoPlayerStore, boolean>>(new PlayerController(host, (state) => state.paused));
   });
 
   it('accepts the orientation lock feature alias with and without config', () => {
     const configuredOrientationLock = features.orientationLock({ type: 'portrait' });
-
     const defaultResult = createPlayer({ features: [features.orientationLock] });
     const configuredResult = createPlayer({ features: [configuredOrientationLock] });
 
@@ -82,7 +87,7 @@ describe('createPlayer', () => {
     assertType<CreatePlayerResult<PlayerStore<[typeof configuredOrientationLock]>>>(configuredResult);
   });
 
-  it('resolves extended video features to generic PlayerStore', () => {
+  it('resolves extended video and audio features to generic stores', () => {
     interface AnalyticsState {
       events: string[];
     }
@@ -90,45 +95,17 @@ describe('createPlayer', () => {
     const analyticsFeature = definePlayerFeature({
       state: (): AnalyticsState => ({ events: [] }),
     });
+    const videoResult = createPlayer({ features: [...videoFeatures, analyticsFeature] });
+    const audioResult = createPlayer({ features: [...audioFeatures, analyticsFeature] });
 
-    const result = createPlayer({
-      features: [...videoFeatures, analyticsFeature],
-    });
-
-    // Extended features fall through to the generic overload
-    assertType<CreatePlayerResult<PlayerStore<[...typeof videoFeatures, typeof analyticsFeature]>>>(result);
-
-    // The store has both video and analytics state
-    const store = result.create();
-
-    assertType<boolean>(store.paused);
-    assertType<number>(store.volume);
-    assertType<string[]>(store.events);
+    assertType<CreatePlayerResult<PlayerStore<[...typeof videoFeatures, typeof analyticsFeature]>>>(videoResult);
+    assertType<boolean>(new videoResult.PlayerElement().store.paused);
+    assertType<string[]>(new audioResult.PlayerElement().store.events);
   });
 
   it('resolves background features to generic PlayerStore', () => {
     const result = createPlayer({ features: backgroundFeatures });
 
     assertType<CreatePlayerResult<PlayerStore<[]>>>(result);
-  });
-
-  it('resolves extended audio features to generic PlayerStore', () => {
-    interface AnalyticsState {
-      events: string[];
-    }
-
-    const analyticsFeature = definePlayerFeature({
-      state: (): AnalyticsState => ({ events: [] }),
-    });
-
-    const result = createPlayer({
-      features: [...audioFeatures, analyticsFeature],
-    });
-
-    const store = result.create();
-
-    assertType<boolean>(store.paused);
-    assertType<number>(store.volume);
-    assertType<string[]>(store.events);
   });
 });

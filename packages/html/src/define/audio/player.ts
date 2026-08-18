@@ -1,14 +1,16 @@
 import { audioFeatures } from '@videojs/core/dom';
 import { MediaContainerElement } from '../../media/container-element';
 import { createPlayer } from '../../player/create-player';
-import { MediaElement } from '../../ui/media-element';
 import { safeDefine } from '../safe-define';
 
-const { ProviderMixin } = createPlayer({
+const { PlayerElement, PlayerController: ConfiguredPlayerController } = createPlayer({
   features: audioFeatures,
 });
 
-export class AudioPlayerElement extends ProviderMixin(MediaElement) {
+/** Player controller bound to the standard audio player store. */
+export const PlayerController = ConfiguredPlayerController;
+
+export class AudioPlayerElement extends PlayerElement {
   static readonly tagName = 'audio-player';
 }
 
