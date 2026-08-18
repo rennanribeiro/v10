@@ -35,7 +35,7 @@ export interface CreatePlayerResult<Store extends PlayerStore> {
  *
  * @example
  * ```ts
- * import { createPlayer, MediaElement, selectPlayback } from '@videojs/html';
+ * import { createPlayer, UIElement, selectPlayback } from '@videojs/html';
  * import { videoFeatures } from '@videojs/html/video';
  *
  * const { PlayerElement: VideoPlayerElement, PlayerController } = createPlayer({
@@ -45,7 +45,7 @@ export interface CreatePlayerResult<Store extends PlayerStore> {
  * customElements.define('video-player', VideoPlayerElement);
  *
  * // Control element with selector
- * class PlayButton extends MediaElement {
+ * class PlayButton extends UIElement {
  *   #playback = new PlayerController(this, selectPlayback);
  * }
  * ```

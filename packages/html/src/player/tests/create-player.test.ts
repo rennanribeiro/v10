@@ -4,7 +4,7 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 
 import { MediaAttachMixin } from '../../store/media-attach-mixin';
 import { ContainerElement } from '../../ui/container/container-element';
-import { MediaElement } from '../../ui/media-element';
+import { UIElement } from '../../ui/ui-element';
 import { createPlayer } from '../create-player';
 import { popupGroupContext } from '../popup-group-context';
 
@@ -50,7 +50,7 @@ describe('createPlayer', () => {
   it('scopes popup coordination to container descendants', async () => {
     const { PlayerElement } = createPlayer({ features: videoFeatures });
 
-    class PopupGroupProbe extends MediaElement {
+    class PopupGroupProbe extends UIElement {
       popupGroup: PopupGroup | undefined;
 
       constructor() {
@@ -77,8 +77,8 @@ describe('createPlayer', () => {
     document.body.append(player);
 
     await Promise.all([
-      (player as MediaElement).updateComplete,
-      (container as MediaElement).updateComplete,
+      (player as UIElement).updateComplete,
+      (container as UIElement).updateComplete,
       outsideProbe.updateComplete,
       insideProbe.updateComplete,
     ]);

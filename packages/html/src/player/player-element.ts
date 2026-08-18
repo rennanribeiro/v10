@@ -11,7 +11,7 @@ import type { Media } from '@videojs/media/dom';
 import { isNull } from '@videojs/utils/predicate';
 import { kebabCase } from '@videojs/utils/string';
 import type { PlayerElementConstructor } from '../store/types';
-import { MediaElement } from '../ui/media-element';
+import { UIElement } from '../ui/ui-element';
 import type { ContainerContext, MediaContext, PlayerContext } from './context';
 
 export interface CreatePlayerElementOptions<Store extends PlayerStore> {
@@ -32,9 +32,9 @@ export function createPlayerElement<Store extends PlayerStore>(
 ): PlayerElementConstructor<Store> {
   const configKeys = Object.keys(options.config);
 
-  class ConfiguredPlayerElement extends MediaElement {
+  class ConfiguredPlayerElement extends UIElement {
     static properties = {
-      ...MediaElement.properties,
+      ...UIElement.properties,
       ...Object.fromEntries(configKeys.map((key) => [key, { type: String, attribute: kebabCase(key) }])),
     } satisfies PropertyDeclarationMap;
 

@@ -13,7 +13,7 @@ import {
 import type { Slice } from '@videojs/store';
 import { assertType, describe, it } from 'vitest';
 
-import type { MediaElement } from '../../ui/media-element';
+import type { UIElement } from '../../ui/ui-element';
 import { type CreatePlayerResult, createPlayer } from '../create-player';
 import type { PlayerController } from '../player-controller';
 
@@ -72,7 +72,7 @@ describe('createPlayer', () => {
 
   it('returns a controller already bound to the player context', () => {
     const { PlayerController } = createPlayer({ features: videoFeatures });
-    const host = null as unknown as MediaElement;
+    const host = null as unknown as UIElement;
 
     assertType<PlayerController<VideoPlayerStore>>(new PlayerController(host));
     assertType<PlayerController<VideoPlayerStore, boolean>>(new PlayerController(host, (state) => state.paused));
