@@ -97,14 +97,14 @@ export function prependHtmlSkinScripts(html: string, skin: HtmlSkinDef): string 
       `<script type="module" src="${HTML_CDN_BASE}/media/${LIVE_MEDIA[skin.mediaType].subpath}.js"></script>`
     );
   }
-  const cssLink = '<link rel="stylesheet" href="./player.css">';
+  const cssLink = skin.style === 'css' ? '\n<link rel="stylesheet" href="./player.css">' : '';
   const playerTag = `${skin.group}-player`;
   const indented = html
     .split('\n')
     .map((line) => (line.length > 0 ? `  ${line}` : line))
     .join('\n');
 
-  return `${scriptTags.join('\n')}\n${cssLink}\n\n<${playerTag}>\n${indented}\n</${playerTag}>`;
+  return `${scriptTags.join('\n')}${cssLink}\n\n<${playerTag}>\n${indented}\n</${playerTag}>`;
 }
 
 async function loadImportedNames(

@@ -14,6 +14,7 @@ import {
   prependHtmlSkinScripts,
   replaceSlots,
 } from '../ejected-skins/html.ts';
+import { buildEjectedSkin } from '../ejected-skins/index.ts';
 
 describe('ejected skin configuration', () => {
   it('has a unique id for every configured skin', () => {
@@ -85,5 +86,31 @@ describe('ejected HTML skins', () => {
     expect(result).toContain('/live-video-minimal-ui.js"></script>');
     expect(result).toContain('/media/hlsjs-video.js"></script>');
     expect(result).toContain('<live-video-player>');
+  });
+
+  it('does not link a generated stylesheet for Tailwind skins', () => {
+    const skin = SKINS.find(({ id }) => id === 'minimal-live-video-tailwind');
+    if (skin?.platform !== 'html') throw new Error('Missing live Tailwind HTML skin fixture');
+
+    expect(prependHtmlSkinScripts('<media-controls></media-controls>', skin)).not.toContain('player.css');
+  });
+});
+
+describe('ejected React skins', () => {
+  it('produces CSS and Tailwind players with matching dependencies', async () => {
+    const cssSkin = SKINS.find(({ id }) => id === 'default-live-video-react');
+    const tailwindSkin = SKINS.find(({ id }) => id === 'default-live-video-react-tailwind');
+    if (cssSkin?.platform !== 'react' || tailwindSkin?.platform !== 'react') {
+      throw new Error('Missing live React skin fixtures');
+    }
+
+    const [cssEntry, tailwindEntry] = await Promise.all([buildEjectedSkin(cssSkin), buildEjectedSkin(tailwindSkin)]);
+    const cssSource = cssEntry.tsx?.['LiveVideoPlayer.tsx'];
+    const tailwindSource = tailwindEntry.tsx?.['LiveVideoPlayer.tsx'];
+
+    expect(cssSource).toContain("import './player.css';");
+    expect(tailwindSource).not.toContain("import './player.css';");
+    expect(tailwindSource).toContain('export function LiveVideoPlayer');
+    expect(tailwindSource).not.toContain('export function LiveVideoSkinTailwind');
   });
 });

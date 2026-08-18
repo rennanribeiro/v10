@@ -876,9 +876,9 @@ function destructureSkinProps(source: string): string {
  */
 function flattenSkinIntoPlayer(
   source: string,
-  skin: Pick<ReactSkinDef, 'group' | 'live' | 'mediaType'>
+  skin: Pick<ReactSkinDef, 'group' | 'live' | 'mediaType' | 'style'>
 ): { player: string; component: string } {
-  const { group, live, mediaType } = skin;
+  const { group, live, mediaType, style } = skin;
   const isVideo = mediaType === 'video';
   const mediaTag = live ? LIVE_MEDIA[mediaType].component : isVideo ? 'Video' : 'Audio';
   const features = live ? (isVideo ? 'liveVideoFeatures' : 'liveAudioFeatures') : `${mediaType}Features`;
@@ -897,12 +897,10 @@ function flattenSkinIntoPlayer(
   const mediaImport = live
     ? `import { ${mediaTag} } from '@videojs/react/media/${LIVE_MEDIA[mediaType].subpath}';`
     : `import { ${mediaTag} } from '@videojs/react/${group}';`;
-  const cssImport = "import './player.css';";
-  const playerImport = "import { Player } from './player';";
-  source = source.replace(
-    /(import \{[^}]*\} from '@videojs\/react';)/,
-    `$1\n${mediaImport}\n${cssImport}\n${playerImport}`
-  );
+  const playerImports = [mediaImport];
+  if (style === 'css') playerImports.push("import './player.css';");
+  playerImports.push("import { Player } from './player';");
+  source = source.replace(/(import \{[^}]*\} from '@videojs\/react';)/, `$1\n${playerImports.join('\n')}`);
 
   // 2. Rename SkinProps → PlayerProps, replace `children` with `src`
   source = source.replace(/export interface \w+SkinProps/, `export interface ${playerName}Props`);
@@ -911,7 +909,7 @@ function flattenSkinIntoPlayer(
   // 3. Replace the skin function: rename, swap children→src, wrap in Player
   //    Match the destructured form: function XSkin({ children, className, poster, ...rest }: XSkinProps): ReactNode {
   source = source.replace(
-    /export function \w+Skin\(\{ children, ([^}]+)\}: \w+SkinProps\): ReactNode \{\n([\s\S]*?)\n\}/,
+    /export function \w+Skin\w*\(\{ children, ([^}]+)\}: \w+SkinProps\): ReactNode \{\n([\s\S]*?)\n\}/,
     (_, destructuredRest: string, body: string) => {
       // Replace {children} with <Video/Audio> element inside the body
       let newBody = body.replace(/^\n+/, '').replace(/(\s*)\{children\}/, `$1<${mediaTag} src={src}${playsInline} />`);
