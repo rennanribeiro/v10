@@ -11,7 +11,6 @@ import {
 import { combine, createStore } from '@videojs/store';
 
 import type { PlayerElementConstructor } from '../store/types';
-import type { UIElementConstructor } from '../ui/ui-element';
 import { containerContext, mediaContext, type PlayerContext, playerContext } from './context';
 import { createPlayerController, type PlayerController } from './player-controller';
 import { createPlayerElement } from './player-element';
@@ -29,12 +28,6 @@ export interface CreatePlayerResult<Store extends PlayerStore> {
 
   /** Context that carries the player store to descendant elements. */
   playerContext: PlayerContext<Store>;
-
-  /** @deprecated Use `PlayerElement` directly. Removed with the docs migration at the end of the stack. */
-  ProviderMixin: <Base extends UIElementConstructor>(BaseClass: Base) => Base & PlayerElementConstructor<Store>;
-
-  /** @deprecated Use `playerContext`. Removed with the docs migration at the end of the stack. */
-  context: PlayerContext<Store>;
 }
 
 /**
@@ -96,9 +89,5 @@ export function createPlayer(config: CreatePlayerConfig<AnyPlayerFeature[]>): Cr
     PlayerElement: ConfiguredPlayerElement,
     PlayerController: createPlayerController(playerContext),
     playerContext,
-    // Keep the pre-existing docs executable while this breaking API change is
-    // reviewed independently. The final docs PR removes both aliases.
-    ProviderMixin: () => ConfiguredPlayerElement as never,
-    context: playerContext,
   };
 }
