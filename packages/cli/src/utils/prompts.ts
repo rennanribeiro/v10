@@ -35,13 +35,19 @@ export async function promptFramework(): Promise<Framework> {
   return value;
 }
 
-const PRESET_OPTIONS: Array<{ value: UseCase; label: string }> = [
-  { value: 'default-video', label: 'Video' },
-  { value: 'default-audio', label: 'Audio' },
-  { value: 'live-video', label: 'Live Video' },
-  { value: 'live-audio', label: 'Live Audio' },
-  { value: 'background-video', label: 'Background Video' },
-];
+// Keyed by `UseCase` so a new preset fails to compile until it has a prompt
+// label, matching the install page's picker.
+const PRESET_LABELS: Record<UseCase, string> = {
+  'default-video': 'Video',
+  'default-audio': 'Audio',
+  'live-video': 'Live Video',
+  'live-audio': 'Live Audio',
+  'background-video': 'Background Video',
+};
+
+const PRESET_OPTIONS: Array<{ value: UseCase; label: string }> = Object.entries(PRESET_LABELS).map(
+  ([value, label]) => ({ value: value as UseCase, label })
+);
 
 // Reuse the installation page's option builder so labels and ordering stay in
 // lockstep with the UI.

@@ -46,18 +46,23 @@ async function resolveFramework(flags: ParsedFlags): Promise<Framework> {
   return promptFramework();
 }
 
-const PRESET_FLAGS: Record<string, UseCase> = {
-  video: 'default-video',
-  audio: 'default-audio',
+// Use case → `--preset` flag name. Keyed by `UseCase` so a new preset fails to
+// compile until it has a flag name here, rather than silently missing from the
+// CLI while the install page offers it.
+const PRESET_FLAGS: Record<UseCase, string> = {
+  'default-video': 'video',
+  'default-audio': 'audio',
   'live-video': 'live-video',
   'live-audio': 'live-audio',
   'background-video': 'background-video',
 };
 
+const USE_CASE_BY_FLAG = new Map(Object.entries(PRESET_FLAGS).map(([useCase, flag]) => [flag, useCase as UseCase]));
+
 function mapPresetToUseCase(preset: string): UseCase {
-  const result = PRESET_FLAGS[preset];
+  const result = USE_CASE_BY_FLAG.get(preset);
   if (!result) {
-    const valid = Object.keys(PRESET_FLAGS)
+    const valid = Object.values(PRESET_FLAGS)
       .map((name) => `"${name}"`)
       .join(', ');
     console.error(`Invalid preset: "${preset}". Valid options: ${valid}`);
@@ -77,7 +82,7 @@ function validateMedia(media: string): Renderer {
 }
 
 function presetFlagFor(useCase: UseCase): string {
-  return Object.keys(PRESET_FLAGS).find((flag) => PRESET_FLAGS[flag] === useCase) ?? useCase;
+  return PRESET_FLAGS[useCase];
 }
 
 // The interactive prompt only offers renderers valid for the chosen preset, and
