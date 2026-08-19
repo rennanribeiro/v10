@@ -1,5 +1,5 @@
 import type { AnyPlayerStore, PlayerTarget } from '@videojs/core/dom';
-import { controlsFeature, metadataFeature, playbackFeature } from '@videojs/core/dom';
+import { controlsFeature, metadataFeature, playbackFeature, setPlayerConfigValue } from '@videojs/core/dom';
 import { ContextProvider } from '@videojs/element/context';
 import { combine, createStore } from '@videojs/store';
 import { afterEach, describe, expect, it } from 'vitest';
@@ -87,6 +87,13 @@ function createMetadataOnlyStore() {
 
 type TitleStore = ReturnType<typeof createTitleStore>;
 
+const titleConfig = metadataFeature.config!.title;
+
+/** Set the user title the way a provider does, through the feature's own config. */
+function setTitle(store: object, value: string | null): void {
+  setPlayerConfigValue(store, titleConfig, value);
+}
+
 class TestPlayerProviderElement extends MediaElement {
   store: AnyPlayerStore = createTitleStore() as unknown as AnyPlayerStore;
 
@@ -100,7 +107,7 @@ class TestPlayerProviderElement extends MediaElement {
 
 defineElement('test-title-player', TestPlayerProviderElement);
 
-async function setup(store?: { setContentTitle(value: string | null): void }) {
+async function setup(store?: object) {
   const provider = document.createElement('test-title-player') as TestPlayerProviderElement;
   if (store) provider.store = store as unknown as AnyPlayerStore;
 
@@ -122,7 +129,7 @@ describe('TitleElement', () => {
     const store = createTitleStore();
     const { title } = await setup(store);
 
-    store.setContentTitle('Sintel');
+    setTitle(store, 'Sintel');
 
     await waitForAssertion(() => expect(title.textContent).toBe('Sintel'));
   });
@@ -139,13 +146,13 @@ describe('TitleElement', () => {
     const store = createTitleStore();
     const { title } = await setup(store);
 
-    store.setContentTitle('Sintel');
+    setTitle(store, 'Sintel');
     await waitForAssertion(() => {
       expect(title.hidden).toBe(false);
       expect(title.hasAttribute('data-hidden')).toBe(false);
     });
 
-    store.setContentTitle(null);
+    setTitle(store, null);
     await waitForAssertion(() => {
       expect(title.hidden).toBe(true);
       expect(title.hasAttribute('data-hidden')).toBe(true);
@@ -159,7 +166,7 @@ describe('TitleElement', () => {
 
     const { title } = await setup(store);
 
-    store.setContentTitle('Sintel');
+    setTitle(store, 'Sintel');
     await waitForAssertion(() => expect(title.hidden).toBe(false));
 
     // Whether the title travels with the controls is a skin composition
@@ -181,7 +188,7 @@ describe('TitleElement', () => {
     const store = createNoControlsStore();
     const { title } = await setup(store);
 
-    store.setContentTitle('Sintel');
+    setTitle(store, 'Sintel');
 
     await waitForAssertion(() => {
       expect(title.textContent).toBe('Sintel');
@@ -193,7 +200,7 @@ describe('TitleElement', () => {
     const store = createMetadataOnlyStore();
     const { title } = await setup(store);
 
-    store.setContentTitle('Sintel');
+    setTitle(store, 'Sintel');
 
     await waitForAssertion(() => {
       expect(title.textContent).toBe('Sintel');
@@ -205,10 +212,10 @@ describe('TitleElement', () => {
     const store = createTitleStore();
     const { title } = await setup(store);
 
-    store.setContentTitle('Sintel');
+    setTitle(store, 'Sintel');
     await waitForAssertion(() => expect(title.textContent).toBe('Sintel'));
 
-    store.setContentTitle('Big Buck Bunny');
+    setTitle(store, 'Big Buck Bunny');
     await waitForAssertion(() => expect(title.textContent).toBe('Big Buck Bunny'));
   });
 });

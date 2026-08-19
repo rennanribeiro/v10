@@ -8,12 +8,8 @@ afterEach(() => {
   cleanup();
 });
 
-function metadataState(contentTitle: string): Record<string, unknown> {
-  return {
-    contentTitle,
-    setContentTitle: vi.fn(),
-    setDefaultContentTitle: vi.fn(),
-  };
+function metadataState(title: string): Record<string, unknown> {
+  return { title };
 }
 
 function controlsState(controlsVisible: boolean): Record<string, unknown> {

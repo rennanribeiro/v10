@@ -1,12 +1,10 @@
 import type { MediaMetadataState } from '@videojs/media';
-import { describe, expect, it, vi } from 'vitest';
+import { describe, expect, it } from 'vitest';
 import { TitleCore } from '../title-core';
 
 function createMediaState(overrides: Partial<MediaMetadataState> = {}): MediaMetadataState {
   return {
-    contentTitle: 'Big Buck Bunny',
-    setContentTitle: vi.fn(),
-    setDefaultContentTitle: vi.fn(),
+    title: 'Big Buck Bunny',
     ...overrides,
   };
 }
@@ -16,7 +14,7 @@ describe('TitleCore', () => {
     it('returns the resolved content title', () => {
       const core = new TitleCore();
 
-      const state = core.getState(createMediaState({ contentTitle: 'Sintel' }));
+      const state = core.getState(createMediaState({ title: 'Sintel' }));
 
       expect(state.title).toBe('Sintel');
       expect(state.hidden).toBe(false);
@@ -25,20 +23,17 @@ describe('TitleCore', () => {
     it('is hidden for the empty resolved title', () => {
       const core = new TitleCore();
 
-      const state = core.getState(createMediaState({ contentTitle: '' }));
+      const state = core.getState(createMediaState({ title: '' }));
 
       expect(state).toEqual({ title: '', hidden: true });
     });
 
-    it('returns only primitive values (no methods)', () => {
+    it('treats a whitespace-only title as a title', () => {
       const core = new TitleCore();
 
-      const state = core.getState(createMediaState());
+      const state = core.getState(createMediaState({ title: '   ' }));
 
-      expect(state).toEqual({ title: 'Big Buck Bunny', hidden: false });
-
-      const functionKeys = Object.entries(state).filter(([, value]) => typeof value === 'function');
-      expect(functionKeys).toHaveLength(0);
+      expect(state).toEqual({ title: '   ', hidden: false });
     });
   });
 });

@@ -2,14 +2,14 @@ import type { MediaMetadataState } from '@videojs/media';
 
 export interface TitleState {
   /** The resolved content title. Empty when no source supplied one. */
-  title: MediaMetadataState['contentTitle'];
+  title: MediaMetadataState['title'];
   /** Whether the component is hidden because no title is available. */
   hidden: boolean;
 }
 
 export class TitleCore {
   getState(media: MediaMetadataState): TitleState {
-    const title = media.contentTitle;
+    const { title } = media;
 
     return {
       title,
