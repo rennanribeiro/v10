@@ -34,6 +34,7 @@ export const container = (isShadowDOM: boolean) =>
     '[--default-accent-color:oklch(1_0_0)]',
     '[--border-color:light-dark(oklch(0_0_0/0.1),oklch(1_0_0/0.15))]',
     '[--focus-ring-color:light-dark(oklch(0_0_0),oklch(1_0_0))]',
+    '**:[--focus-ring-color:oklch(1_0_0)]',
     '[--container-border-radius:var(--media-border-radius,1.75rem)]',
     '[--media-video-border-radius:var(--container-border-radius)]',
     '[--controls-transition-duration:100ms]',
@@ -149,7 +150,7 @@ const splitControls = cn(
 
 export const primaryControls = cn(
   splitControls,
-  'bottom-2 inset-x-2 origin-bottom',
+  'z-20 bottom-2 inset-x-2 origin-bottom',
   '@max-lg/media-root:motion-safe:group-[:not([data-visible])]/controls:translate-y-1'
 );
 
@@ -170,7 +171,7 @@ export const spacer = 'grow';
 
 export const time = {
   ...baseTime,
-  group: cn(baseTime.group, 'px-3'),
+  group: cn(baseTime.group, 'px-2 @lg/media-root:px-3'),
 };
 
 /* Thumbnail (with video surface) */

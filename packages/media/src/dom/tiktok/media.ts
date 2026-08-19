@@ -1,11 +1,7 @@
-// Adapted from `tiktok-video-element` from `muxinc/media-elements`,
-// ported to TypeScript and reshaped as a media host to fit the v10
-// media-host architecture (mirrors `dom/youtube`).
-//
-// Source: https://github.com/muxinc/media-elements
-// License: MIT
+// Adapted from `tiktok-video-element` in https://github.com/muxinc/media-elements (MIT),
+// ported to TypeScript and reshaped as a media host (mirrors `dom/youtube`).
 
-import { createPublicPromise, type PublicPromise } from '@videojs/utils/function';
+import { createPublicPromise, type PublicPromise, tryCall } from '@videojs/utils/function';
 import { deepEqual } from '@videojs/utils/object';
 import { isNumber, isUndefined } from '@videojs/utils/predicate';
 import { EMPTY_TEXT_TRACKS, EMPTY_TIME_RANGES } from '../../core/constants';
@@ -32,7 +28,7 @@ import {
   type TikTokPlayerError,
 } from './player-api';
 import { tiktokMediaDefaultProps } from './props';
-import { buildTikTokIframeSrc, type TikTokSource } from './source';
+import { buildTikTokIframeSrc, shouldBootstrapTikTokEmbed, type TikTokSource } from './source';
 
 const TikTokMediaBase = MediaPlayedRangesMixin(EventTarget);
 
@@ -42,13 +38,9 @@ const TikTokMediaBase = MediaPlayedRangesMixin(EventTarget);
 export class TikTokMedia extends TikTokMediaBase implements Partial<Video> {
   #target: HTMLIFrameElement | null = null;
   #loadComplete = createPublicPromise<void>();
-  /**
-   * Cancels the `message` listener. It lives on `window` rather than on the
-   * iframe, so nothing removes it when the frame goes; the signal is what keeps
-   * it from outliving the attach that added it.
-   */
+  // Cancels the `message` listener; it lives on `window`, so nothing removes it when the frame goes.
   #messages: AbortController | null = null;
-  /** Guards messages and deferred embeds across attach/detach cycles. */
+  // Guards messages and deferred embeds across attach/detach cycles.
   #attachId = 0;
 
   #src = tiktokMediaDefaultProps.src;
@@ -65,10 +57,15 @@ export class TikTokMedia extends TikTokMediaBase implements Partial<Video> {
   #ended = false;
   #seeking = false;
   #loaded = false;
-  /** The current `src` names no TikTok video, so the embed still holds the last one. */
+  // The current `src` names no TikTok video, so the embed still holds the last one.
   #srcUnsupported = false;
-  /** A play asked for before the embed could take one, replayed once it can. */
+  // A play asked for before the embed could take one, replayed once it can.
   #playRequested = false;
+  // How far the bootstrap has got: `parking` until the autoplay nobody asked for is stopped, `parked` while the
+  // player waits for the caller's first command. Before `off`, what the embed reports is the bootstrap's own.
+  #bootstrap: 'off' | 'parking' | 'parked' = 'off';
+  // Where the park leaves the player: the start, or a position the caller seeked to before it got there.
+  #parkPosition = 0;
   #playFired = false;
   #currentTime = 0;
   #duration = Number.NaN;
@@ -79,12 +76,7 @@ export class TikTokMedia extends TikTokMediaBase implements Partial<Video> {
 
   static PLAYER_SOFTWARE_NAME = 'tiktok-video';
 
-  /**
-   * The embed's window. TikTok publishes no player object — commands are posted
-   * to the frame — so the window the protocol is spoken to is the closest thing
-   * to one, and it is what a caller needs to speak it directly. Null until the
-   * iframe is in a document, since a frame that is not rendered has no window.
-   */
+  /** The embed's window. TikTok publishes no player object; commands are posted to the frame. Null until rendered. */
   get engine() {
     return this.#target?.contentWindow ?? null;
   }
@@ -93,12 +85,7 @@ export class TikTokMedia extends TikTokMediaBase implements Partial<Video> {
     return this.#target;
   }
 
-  /**
-   * Bind the iframe hosting the embed. The embed follows as soon as an URL can
-   * be resolved, which is not always now: a framework that creates the element
-   * before setting `src` attaches an iframe with nothing to embed yet, and
-   * `load()` picks it up once a source arrives.
-   */
+  /** Bind the iframe hosting the embed. The embed follows once a `src` resolves, which may be after attach. */
   attach(target: HTMLIFrameElement | null): void {
     if (!target || this.#target === target) return;
     if (this.#target) this.detach();
@@ -114,8 +101,7 @@ export class TikTokMedia extends TikTokMediaBase implements Partial<Video> {
     this.#messages?.abort();
     this.#messages = null;
     this.#target = null;
-    // A play still waiting on an embed this host no longer has. Left set, the
-    // next frame to report ready would start playing on its own.
+    // Left set, the next frame to report ready would start playing on its own.
     this.#playRequested = false;
     // Unblock callers awaiting load; they re-check `#target` (now null) and no-op.
     this.#loadComplete.resolve();
@@ -135,14 +121,12 @@ export class TikTokMedia extends TikTokMediaBase implements Partial<Video> {
     const { engine } = this.#source ?? {};
     const next: TikTokSource = { ...(engine && { engine }), ...(value && { src: value }) };
 
-    // Everything happens in the `source` setter, so there is one path for storing
-    // it, deciding on a load, and dispatching `sourcechange`.
+    // The `source` setter is the one path for storing it, deciding on a load, and dispatching `sourcechange`.
     this.source = Object.keys(next).length > 0 ? next : null;
   }
 
   get currentSrc() {
-    // The `src` property resolves an empty attribute to the document URL, so only
-    // the attribute can report an embed that hasn't been built yet as empty.
+    // The `src` property resolves an empty attribute to the document URL, so only the attribute reports empty.
     return this.#target?.getAttribute('src') ?? '';
   }
 
@@ -150,19 +134,12 @@ export class TikTokMedia extends TikTokMediaBase implements Partial<Video> {
     return this.#readyState;
   }
 
-  /**
-   * Rebuild the embed for the current source. The protocol has play, pause,
-   * seek, and mute and nothing that swaps the video, and the parameters shaping
-   * the player are read once when the frame loads — so writing the iframe URL
-   * again is the only way to load anything.
-   */
+  /** Rebuild the embed for the current source; rewriting the iframe URL is the only load the protocol allows. */
   async load() {
     // Nothing to reload without a target, and no load to wait on either.
     if (!this.#target) return;
     const load = this.#beginLoad();
-    // Wait a microtask: a framework sets `src` and the props that shape the embed
-    // in whatever order it likes, and the embed URL is only built once, so it has
-    // to see all of them.
+    // Wait a microtask so a framework's `src` and prop writes all land before the URL is built, once.
     await Promise.resolve();
     // A later load took over while waiting; building the embed is its job now.
     if (load !== this.#loadComplete) return;
@@ -171,28 +148,23 @@ export class TikTokMedia extends TikTokMediaBase implements Partial<Video> {
     if (!target) return;
 
     const embedSrc = this.#src ? buildTikTokIframeSrc(this.#src, this.#snapshotProps()) : '';
-    // A frame already showing this embed has nothing to reload, and reloading it
-    // anyway would throw away the position it is playing from. Nothing is being
-    // discarded either, so the state stands and no lifecycle event is due.
+    // Reloading the same embed would only discard its position; nothing is cleared, so no lifecycle event is due.
     if (embedSrc && target.getAttribute('src') === embedSrc) {
-      // The frame is either ready already or still fetching that URL, and only in
-      // the first case is there no `onPlayerReady` left to settle this load.
+      // Still fetching means an `onPlayerReady` is coming to settle this load; already loaded means none is.
       if (this.#loaded) load.resolve();
       return;
     }
 
-    // Reset before bailing on an empty src: a cleared source has nothing to load,
-    // but what we report about the old video still has to go.
+    // Reset before bailing on an empty src: nothing to load, but the old video's state still has to go.
     this.#resetState();
+    // `emptied` announces that reset before the empty-src bail, the one case where the embed reports nothing further.
+    this.dispatchEvent(new Event('emptied'));
     if (!this.#src) {
-      // The embed has to go too. Left in place it keeps playing, and its progress
-      // reports write the state just cleared straight back. There is no unload
-      // command, so dropping the URL is what stops it.
+      // Drop the URL too; there is no unload command, and a frame left in place keeps playing and rewrites state.
       load.resolve();
       target.removeAttribute('src');
       return;
     }
-    this.dispatchEvent(new Event('emptied'));
     this.dispatchEvent(new Event('loadstart'));
     if (!embedSrc) {
       this.#srcUnsupported = true;
@@ -200,32 +172,23 @@ export class TikTokMedia extends TikTokMediaBase implements Partial<Video> {
       this.dispatchEvent(new Event('error'));
       // Unblock callers awaiting load so play()/fullscreen don't hang.
       load.resolve();
-      // There is no video to swap the frame to, so the embed keeps playing the
-      // last one under an error the host is already reporting; pausing is all
-      // the protocol offers to stop it.
+      // No video to swap to, so pause is all the protocol offers to stop the embed still playing the last one.
       this.#post('pause');
       return;
     }
+    this.#bootstrap = shouldBootstrapTikTokEmbed(this.#snapshotProps()) ? 'parking' : 'off';
     // The new frame reports `onPlayerReady`, which is what settles this load.
     target.src = embedSrc;
   }
 
-  /**
-   * Take over as the current load, returning its barrier. Settling the outgoing
-   * one is what keeps a superseded load from stranding callers that are already
-   * waiting; every exit from `load()` settles the barrier it was handed.
-   */
+  // Take over as the current load; settling the outgoing barrier releases its waiters.
   #beginLoad(): PublicPromise<void> {
     this.#loadComplete.resolve();
     this.#loadComplete = createPublicPromise<void>();
     return this.#loadComplete;
   }
 
-  /**
-   * Whether the embed is playing the source the host reports. It is not once the
-   * source is cleared or unrecognized: the embed holds the previous video either
-   * way, so what it reports and what `play()` would resume are no longer ours.
-   */
+  // Whether the embed plays the source the host reports; false once `src` is cleared or unrecognized.
   get #hasSource() {
     return !!this.#src && !this.#srcUnsupported;
   }
@@ -243,22 +206,21 @@ export class TikTokMedia extends TikTokMediaBase implements Partial<Video> {
   }
 
   async play() {
-    // The embed went with the source it was built for, or still holds one that is
-    // no longer being reported, so there is nothing left here to resume.
+    // The embed is gone or holds a video no longer reported, so there is nothing to resume.
     if (!this.#hasSource) return;
-    // Posted without waiting on the load barrier. The embed reports nothing at
-    // all before it is ready, so a barrier only its own report can settle is
-    // exactly what leaves a press of play doing nothing — and the command is
-    // cheap enough to send at a frame that may not be listening yet. Whichever
-    // happens first wins: the embed takes this one, or takes the replay below.
+    // Not deferred: only the embed's own report settles the load, so whichever lands first wins, this or the replay.
     this.#playRequested = true;
+    // A play posted mid-park races the pause and can land first; `#park` replays it.
+    if (this.#bootstrap === 'parking') return;
+    this.#takeOver();
     this.#post('play');
   }
 
   pause() {
-    // A pause between asking to play and the embed being ready is the later
-    // intent, so it cancels the replay rather than racing it.
+    // A pause after a pending play is the later intent, so it cancels the replay rather than racing it.
     this.#playRequested = false;
+    // Deliberately not a hand-over: only a play makes the embed's next report the caller's. Pausing a parked
+    // player asks for nothing it is not already doing, and taking it over would let the bootstrap's tail through.
     this.#post('pause');
   }
 
@@ -267,23 +229,29 @@ export class TikTokMedia extends TikTokMediaBase implements Partial<Video> {
   }
   set currentTime(value) {
     if (this.#currentTime === value) return;
+    // Scrubbing is not a hand-over either, for the same reason as `pause`.
+    // A seek while the bootstrap is still running is where it has to leave the player; parking to the start would
+    // rewind the caller, and the position they asked for would never be reported.
+    if (this.#bootstrap !== 'off') this.#parkPosition = value;
     this.#seeking = true;
-    // Report the requested position right away: the embed only reports one every
-    // so often, and until then the seek would look like it never happened.
+    // Report the requested position now; the embed only reports one periodically, so the seek would look lost.
     this.#currentTime = value;
     this.dispatchEvent(new Event('seeking'));
     this.dispatchEvent(new Event('timeupdate'));
-    this.#afterLoad(() => this.#post('seekTo', value));
+    this.#afterLoad(() => {
+      this.#post('seekTo', value);
+      // A player already parked is paused for good, so nothing is coming to confirm this one. A seek made while
+      // the bootstrap is still parking is settled by `#park` instead, once it lands on the position.
+      if (this.#bootstrap === 'parked') this.#settleSeek();
+    });
   }
 
   get duration() {
     return this.#duration;
   }
 
-  // No volume surface: the embed reports a level but takes no command to set
-  // one, so there is nothing to write. Reporting it read-only would have the
-  // player render a slider that cannot move; mute is a separate capability and
-  // stays, because `mute` and `unMute` are commands the embed does take.
+  // No volume surface: the embed reports a level but takes no command to set one, and a read-only level would
+  // render a slider that cannot move. Mute stays, since `mute` and `unMute` are commands the embed does take.
 
   get muted() {
     return this.#muted;
@@ -306,10 +274,7 @@ export class TikTokMedia extends TikTokMediaBase implements Partial<Video> {
   }
   set defaultMuted(value) {
     this.#defaultMuted = value;
-    // Until the embed reports its own mute there is nothing to report but what it
-    // is being built with, the way a media element seeds `muted` from the `muted`
-    // attribute. It is also what has `onPlayerReady` assert the mute over the
-    // protocol, which the URL parameter alone does not always achieve.
+    // Seed `muted` until the embed reports its own, and have `onPlayerReady` assert it over the protocol.
     if (!this.#loaded) this.#muted = value;
   }
 
@@ -317,8 +282,7 @@ export class TikTokMedia extends TikTokMediaBase implements Partial<Video> {
     return this.#loop;
   }
   set loop(value) {
-    // The embed reads `loop` from the URL it was built with, so a change after
-    // that is honored by replaying on ENDED instead.
+    // The embed reads `loop` from the URL it was built with, so a later change is honored by replaying on ENDED.
     this.#loop = value;
   }
 
@@ -326,9 +290,7 @@ export class TikTokMedia extends TikTokMediaBase implements Partial<Video> {
     return this.#controls;
   }
   set controls(value) {
-    // Like `loop`, this is read from the URL the embed was built with, and the
-    // protocol has no command for it. Rebuilding the frame to show or hide TikTok
-    // chrome would restart the video, so it lands on the next load instead.
+    // Also read from the embed URL, and rebuilding the frame to toggle chrome would restart the video.
     this.#controls = value;
   }
 
@@ -353,24 +315,18 @@ export class TikTokMedia extends TikTokMediaBase implements Partial<Video> {
     this.#poster = value;
   }
 
-  /**
-   * Structured source: the TikTok URL or id in `src`, plus player parameters
-   * under `engine.tiktok`. Replacing it re-derives `src`; assigning an equivalent
-   * source is a no-op.
-   */
+  /** TikTok URL or id in `src`, player params under `engine.tiktok`. Re-derives `src`; equal sources skip reload. */
   get source(): TikTokSource | null {
     return this.#source;
   }
   set source(value: TikTokSource | null) {
     const source = value ?? null;
-    // Changing anything takes a new object, so handing the same one back costs
-    // nothing.
+    // Changing anything takes a new object, so handing the same one back costs nothing.
     if (source === this.#source) return;
 
     const src = source?.src ?? '';
     const srcChanged = this.#src !== src;
-    // Player parameters are read when the embed is built, so a change to them
-    // needs a reload of its own even though the video is the same.
+    // Player parameters are read when the embed is built, so a change needs its own reload even for the same video.
     const engineChanged = !deepEqual(this.#source?.engine?.tiktok ?? null, source?.engine?.tiktok ?? null);
 
     this.#source = source;
@@ -383,8 +339,7 @@ export class TikTokMedia extends TikTokMediaBase implements Partial<Video> {
   }
 
   get buffered() {
-    // The embed reports no buffer state, only a position, so the only stretch
-    // known to be available is the one already played through.
+    // The embed reports no buffer state, only a position, so only what already played through is known available.
     return this.#currentTime > 0 ? createTimeRange(0, this.#currentTime) : EMPTY_TIME_RANGES;
   }
 
@@ -409,8 +364,7 @@ export class TikTokMedia extends TikTokMediaBase implements Partial<Video> {
 
   // The protocol has no fullscreen command, so fullscreen targets the iframe itself.
   async requestFullscreen() {
-    // Nothing entered fullscreen if there is no element to request it on, so the
-    // flag must not claim otherwise.
+    // No element to request on means nothing entered fullscreen, so the flag must not claim otherwise.
     if (!this.#target?.requestFullscreen) return;
     await this.#target.requestFullscreen();
     this.#isFullscreen = true;
@@ -424,44 +378,36 @@ export class TikTokMedia extends TikTokMediaBase implements Partial<Video> {
     this.#isFullscreen = false;
   }
 
-  /**
-   * Build the embed for the attached target. A target that arrived with a URL
-   * already holds one — a server-rendered iframe does — so it is left alone and
-   * its `onPlayerReady` settles the load. A target that cannot be resolved yet
-   * settles the load it was given; the next `load()` retries.
-   *
-   * @returns Whether the target holds an embed.
-   */
+  // Build the embed for the attached target. A server-rendered target already holds a URL, so it is left alone and
+  // its `onPlayerReady` settles the load; a target that cannot resolve yet settles its load, and `load()` retries.
   #createPlayer(): boolean {
     const target = this.#target;
     if (!target) return false;
 
-    // The `src` property resolves an empty attribute to the document URL, so it
-    // cannot tell an embed apart from a placeholder; the attribute can.
+    const props = this.#snapshotProps();
+    // The `src` property resolves an empty attribute to the document URL; only the attribute tells embed from empty.
     if (target.getAttribute('src')) {
-      // The frame is already fetching the embed and will report `onPlayerReady`
-      // for it like any other, so this load has begun just the same.
+      // A server-rendered URL was built from these props by the same rule, so it carries the same bootstrap.
+      this.#bootstrap = shouldBootstrapTikTokEmbed(props) ? 'parking' : 'off';
+      // The frame is already fetching the embed and will report `onPlayerReady` like any other.
       this.dispatchEvent(new Event('loadstart'));
       return true;
     }
 
-    const initialSrc = buildTikTokIframeSrc(this.#src, this.#snapshotProps());
+    const initialSrc = buildTikTokIframeSrc(this.#src, props);
     // No embed means no `onPlayerReady` is coming to settle this load.
     if (!initialSrc) {
       this.#loadComplete.resolve();
       return false;
     }
 
+    this.#bootstrap = shouldBootstrapTikTokEmbed(props) ? 'parking' : 'off';
     target.src = initialSrc;
     this.dispatchEvent(new Event('loadstart'));
     return true;
   }
 
-  /**
-   * Listen for what the embed reports. The messages arrive on `window` rather
-   * than on the frame that sent them, so every one has to be matched against the
-   * frame this host owns before it is allowed to touch state.
-   */
+  // Listen for what the embed reports; messages arrive on `window`, so each is matched against this host's frame.
   #listen(target: HTMLIFrameElement) {
     const win = globalThis.window;
     if (isUndefined(win)) return;
@@ -474,19 +420,14 @@ export class TikTokMedia extends TikTokMediaBase implements Partial<Video> {
 
   #onMessage(event: MessageEvent, target: HTMLIFrameElement, attachId: number) {
     if (this.#isStale(attachId)) return;
-    // A frame that is gone cannot have sent anything, so matching its absent
-    // window would let every foreign message through.
+    // A frame that is gone cannot have sent anything, so an absent window must not match.
     const frame = target.contentWindow;
     if (!frame || event.source !== frame) return;
     const message = event.data;
     if (!isTikTokPlayerMessage(message)) return;
-    // An unrecognized source left the frame holding the video it was already
-    // playing, and it keeps reporting it — taking that would put the state just
-    // cleared right back, under an error the host is reporting.
+    // An unrecognized source leaves the frame reporting the video it still holds; taking it would undo the reset.
     if (this.#srcUnsupported) return;
-    // The embed stays silent until it is ready, so anything it says is proof
-    // enough that it is — `onPlayerReady` is not reliably the first thing it
-    // sends, and waiting only for that leaves the load open forever.
+    // `onPlayerReady` is not reliably first, and the embed stays silent until ready, so anything it says is proof.
     if (this.#hasSource) this.#onLoaded();
 
     switch (message.type) {
@@ -501,10 +442,11 @@ export class TikTokMedia extends TikTokMediaBase implements Partial<Video> {
         }
         break;
       case 'onVolumeChange':
-        // Reported but not carried: with no volume to write there is nothing for
-        // a level to drive, and the mute the embed reports comes through `onMute`.
+        // Nothing for a level to drive without a volume to write, and the reported mute comes through `onMute`.
         break;
       case 'onMute':
+        // The mute a bootstrap autoplay forces on the embed is TikTok's own; `#park` undoes it.
+        if (this.#bootstrap !== 'off') break;
         // Muting leaves the volume alone, the way it does on a media element.
         this.#muted = !!message.value;
         this.dispatchEvent(new Event('volumechange'));
@@ -513,9 +455,7 @@ export class TikTokMedia extends TikTokMediaBase implements Partial<Video> {
         if (isTikTokPlayerError(message.value)) this.#onPlayerError(message.value);
         break;
       case 'onError':
-        // Deprecated by TikTok in favor of `onPlayerError`, and the code it
-        // carries is a `MediaError` one rather than one of TikTok's, so it is
-        // taken as it stands when it is one.
+        // Deprecated by TikTok; the code it carries is a `MediaError` one rather than TikTok's, so it stands as is.
         this.#onError(
           'TikTok player error; visit https://developers.tiktok.com/doc/embed-player for what the embed supports.',
           isMediaErrorCode(message.value) ? message.value : MediaError.MEDIA_ERR_SRC_NOT_SUPPORTED
@@ -527,42 +467,29 @@ export class TikTokMedia extends TikTokMediaBase implements Partial<Video> {
     }
   }
 
-  /**
-   * Whether a message belongs to a superseded attach. A `message` event already
-   * being dispatched still reaches a listener removed during the dispatch, so
-   * what a frame reports has to be matched against the attach that bound it.
-   */
+  // Whether a message belongs to a superseded attach; a dispatch in flight still reaches a listener removed mid-way.
   #isStale(attachId: number) {
     return attachId !== this.#attachId;
   }
 
-  /** Defer a command until `loadComplete` resolves, swallowing failures. */
+  // Defer a command until `loadComplete` resolves; posting to a frame being torn down throws and is swallowed.
   #afterLoad(fn: () => void) {
     this.#loadComplete.then(
       () => {
         if (!this.#target) return;
-        try {
-          fn();
-        } catch {
-          // Posting to a frame that is being torn down throws.
-        }
+        tryCall(fn);
       },
       () => {}
     );
   }
 
-  /** Send a command to the embed, if there is a frame to send it to. */
   #post(type: TikTokPlayerCommand, value?: number) {
     const frame = this.#target?.contentWindow;
     if (!frame) return;
     frame.postMessage(createTikTokPlayerCommand(type, value), PLAYER_TARGET_ORIGIN);
   }
 
-  /**
-   * The mute the next embed is built with. The frame reads it once from the URL,
-   * so a rebuild has to carry a mute set since the last one too; dropping it
-   * would bring the video back with sound.
-   */
+  // The mute the next embed is built with; the URL is read once, so a rebuild carries a mute set since the last one.
   get #nextMuted() {
     return this.#defaultMuted || this.#muted;
   }
@@ -573,6 +500,8 @@ export class TikTokMedia extends TikTokMediaBase implements Partial<Video> {
       defaultMuted: this.#nextMuted,
       loop: this.#loop,
       controls: this.#controls,
+      // Read only to decide on a bootstrap autoplay; TikTok has no preload parameter.
+      preload: this.#preload,
       source: this.#source,
     };
   }
@@ -580,8 +509,7 @@ export class TikTokMedia extends TikTokMediaBase implements Partial<Video> {
   #resetState() {
     this.#currentTime = 0;
     this.#duration = Number.NaN;
-    // Whatever the next embed is built with is the state the video it holds comes
-    // back in.
+    // The next embed comes back in whatever state it is built with.
     this.#muted = this.#nextMuted;
     this.#paused = !this.#autoplay;
     this.#ended = false;
@@ -590,6 +518,8 @@ export class TikTokMedia extends TikTokMediaBase implements Partial<Video> {
     this.#loaded = false;
     this.#srcUnsupported = false;
     this.#playFired = false;
+    this.#bootstrap = 'off';
+    this.#parkPosition = 0;
     this.#error = null;
     this.#isFullscreen = false;
   }
@@ -598,30 +528,60 @@ export class TikTokMedia extends TikTokMediaBase implements Partial<Video> {
     if (this.#loaded) return;
     this.#loaded = true;
     this.#readyState = READY_STATE_HAVE_METADATA;
-    // The URL the frame was built from does not always mute the embed, so the
-    // mute is asserted again over the protocol, which does, at the first moment
-    // the embed can take a command.
+    // The frame's URL does not always mute the embed, so assert it over the protocol at the first moment it can.
     if (this.#muted) this.#post('mute');
-    // A play asked for before the embed could take one. This is that moment.
-    if (this.#playRequested) {
+    if (this.#bootstrap === 'parking') {
+      // It came up playing on the bootstrap autoplay; put it where one that never autoplayed would have been.
+      this.#post('pause');
+      this.#post('seekTo', this.#parkPosition);
+    } else if (this.#playRequested) {
       this.#playRequested = false;
       this.#post('play');
     }
-    // Duration arrives with the first progress report, which dispatches a
-    // `durationchange` of its own once it does.
+    // Duration arrives with the first progress report, which dispatches its own `durationchange`.
     for (const type of ['loadedmetadata', 'loadcomplete']) {
       this.dispatchEvent(new Event(type));
     }
     this.#loadComplete.resolve();
   }
 
+  // Settle the bootstrap's playback. Stays `parked` rather than `off` because TikTok keeps reporting the tail of
+  // that autoplay, and a player nobody has asked to start should report none of it.
+  #park() {
+    if (this.#bootstrap === 'parked') return;
+    this.#bootstrap = 'parked';
+    this.#currentTime = this.#parkPosition;
+    this.#paused = true;
+    this.#playFired = false;
+    // TikTok mutes itself to get the unasked-for autoplay past the browser, so that mute is its own to undo.
+    if (!this.#muted) this.#post('unMute');
+    // The park put the player on the position a seek was waiting for.
+    this.#settleSeek();
+    // The play held back rather than raced against the park.
+    if (this.#playRequested) {
+      this.#playRequested = false;
+      this.#takeOver();
+      this.#post('play');
+    }
+  }
+
+  // Hand a parked player to the caller: what the embed reports next is theirs. Only a play does this, since only a
+  // play makes the next report of playback something they asked for.
+  #takeOver() {
+    if (this.#bootstrap === 'parked') this.#bootstrap = 'off';
+  }
+
+  // Settle a seek the embed will not confirm. It reports a position only while it plays, so a seek on a player the
+  // bootstrap is holding paused would otherwise leave `seeking` stuck true and a slider stuck with it.
+  #settleSeek() {
+    if (!this.#seeking) return;
+    this.#seeking = false;
+    this.dispatchEvent(new Event('seeked'));
+  }
+
   #onPlayerError({ errorCode, errorType }: TikTokPlayerError) {
-    // A blocked play leaves a video that is loaded and still playable, which is
-    // not something a media element reports as an error — the browser rejects the
-    // play request instead. Setting `error` would put a permanent failure over a
-    // working video, so it is only ever reported, never recorded: silence here
-    // reads as "the embed ignored us", which is the hardest thing to diagnose
-    // about a player driven entirely through a cross-origin frame.
+    // A blocked play leaves a loaded, playable video, so recording `error` would put a permanent failure over a
+    // working one; it is warned about instead, since silence from a cross-origin frame is the hardest thing to read.
     if (errorCode === ERROR_AUTOPLAY) {
       if (__DEV__) {
         console.warn(
@@ -646,6 +606,14 @@ export class TikTokMedia extends TikTokMediaBase implements Partial<Video> {
 
   #onStateChange(state: number) {
     const emit = (type: string) => this.dispatchEvent(new Event(type));
+
+    if (this.#bootstrap !== 'off') {
+      // The bootstrap's own playback. Its tail arrives well after the park is posted, and `loop` restarts it, so
+      // every start is put back down rather than only the first.
+      if (state === STATE_PLAYING || state === STATE_BUFFERING) this.#post('pause');
+      else if (state === STATE_PAUSED || state === STATE_ENDED) this.#park();
+      return;
+    }
 
     if (state === STATE_PLAYING || state === STATE_BUFFERING) {
       if (!this.#playFired) {
@@ -672,29 +640,29 @@ export class TikTokMedia extends TikTokMediaBase implements Partial<Video> {
       emit('pause');
       this.#ended = true;
       emit('ended');
-      // An embed built with `loop` restarts on its own; this is for a `loop` set
-      // after that, and playing an embed that already restarted costs nothing.
+      // An embed built with `loop` restarts itself; this covers a `loop` set after that, and replaying is free.
       if (this.#loop) void this.play();
     } else if (state === STATE_INIT) {
-      // The embed reports this for a video it holds but has not started, which is
-      // a resource still loaded and so nothing a media element announces.
+      // Reported for a video held but not started: a resource still loaded, so nothing to announce.
       this.#playFired = false;
       this.#paused = true;
     }
   }
 
   #onCurrentTime(currentTime: number, duration: number) {
-    if (currentTime !== this.#currentTime) {
-      this.#currentTime = currentTime;
-      this.dispatchEvent(new Event('timeupdate'));
-    }
+    // The positions a bootstrap runs through are not the caller's, and the park returns to 0 anyway. Duration below
+    // is worth keeping whenever the embed knows it.
+    if (this.#bootstrap === 'off') {
+      if (currentTime !== this.#currentTime) {
+        this.#currentTime = currentTime;
+        this.dispatchEvent(new Event('timeupdate'));
+      }
 
-    if (this.#seeking) {
-      // The embed announces no seeks, so the next position it reports is the only
-      // sign one landed — including when it lands on exactly the position asked
-      // for and there is no change to report.
-      this.#seeking = false;
-      this.dispatchEvent(new Event('seeked'));
+      if (this.#seeking) {
+        // The embed announces no seeks, so its next position report is the only sign one landed, change or not.
+        this.#seeking = false;
+        this.dispatchEvent(new Event('seeked'));
+      }
     }
 
     if (isNumber(duration) && duration > 0 && duration !== this.#duration) {
@@ -704,12 +672,7 @@ export class TikTokMedia extends TikTokMediaBase implements Partial<Video> {
   }
 }
 
-/**
- * Read a TikTok player error code as a `MediaError` one. TikTok groups its codes
- * by category rather than listing every one it may report, so the category is
- * what is read; anything outside the ones it documents describes a video that
- * cannot be played at all.
- */
+/** Read a TikTok player error code as a `MediaError` one; TikTok groups codes by category, so the category is read. */
 function toMediaErrorCode(errorCode: number) {
   if (errorCode >= ERROR_NETWORK_CATEGORY && errorCode < ERROR_PLAYER_CATEGORY) return MediaError.MEDIA_ERR_NETWORK;
   if (errorCode >= ERROR_PLAYER_CATEGORY && errorCode < ERROR_CATEGORY_END) return MediaError.MEDIA_ERR_DECODE;

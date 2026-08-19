@@ -1,3 +1,4 @@
+import { shallowEqual } from '@videojs/utils/object';
 import { HlsJsMedia, type HlsSource } from '../hls-js';
 import { createMuxDrmSystems } from './drm';
 import {
@@ -35,9 +36,11 @@ export const muxMediaDefaultProps: MuxMediaProps = {
 
 /**
  * @fires sourcechange - Fired when `source` changes, either directly or by parsing a new `src`. Read `source` for the new value.
+ * @fires contentdatachange - Fired when the derived `contentData` changes. Read `contentData` for the new value.
  */
 export class MuxMedia extends HlsJsMedia implements MuxMediaProps {
   #source: MuxSource | null = muxMediaDefaultProps.source;
+  #contentData: MuxContentData = {};
 
   /**
    * Media source URL. Setting a Mux stream URL
@@ -58,11 +61,15 @@ export class MuxMedia extends HlsJsMedia implements MuxMediaProps {
     // params a Mux URL does not carry, such as `poster`.
     if (super.src === value) return;
 
-    const { type, preferPlayback, engine } = this.#source ?? {};
+    const { type, preferPlayback, engine, maxAutoResolution, capRenditionToPlayerSize, minAutoResolution } =
+      this.#source ?? {};
     const source: MuxSource = {
       ...(type && { type }),
       ...(preferPlayback && { preferPlayback }),
       ...(engine && { engine }),
+      ...(maxAutoResolution && { maxAutoResolution }),
+      ...(capRenditionToPlayerSize !== undefined && { capRenditionToPlayerSize }),
+      ...(minAutoResolution && { minAutoResolution }),
       ...(parseMuxVideoURL(value) ?? (value ? { src: value } : null)),
     };
 
@@ -79,6 +86,12 @@ export class MuxMedia extends HlsJsMedia implements MuxMediaProps {
    * PlayReady license servers for this playback ID, so protected media plays
    * whichever path the browser takes. License servers named alongside the token
    * win, key by key, for content Mux does not license.
+   *
+   * `playback.maxResolution` and `playback.minResolution` are server-side: they
+   * decide which renditions Mux puts in the manifest at all. The inherited
+   * `maxAutoResolution` and `minAutoResolution` only look like their pair —
+   * those are client-side and bound which of the renditions that *do* arrive
+   * adaptive selection reaches for. The two halves are independent.
    */
   get source(): MuxSource | null {
     return this.#source;
@@ -92,6 +105,11 @@ export class MuxMedia extends HlsJsMedia implements MuxMediaProps {
 
     this.#source = source;
 
+    // Refresh the bag before the base announces `sourcechange`, because
+    // listeners read `contentData` from that event. Announcing its own change
+    // waits until after, so `src` is in step by the time either event fires.
+    const contentDataChanged = this.#refreshContentData();
+
     // Hand the same source down with `src` and the DRM license servers resolved
     // from the playback ID. The base keeps `src` in step, decides whether
     // playback has to reload, and dispatches `sourcechange`.
@@ -100,6 +118,8 @@ export class MuxMedia extends HlsJsMedia implements MuxMediaProps {
       src: createMuxVideoURL(source) ?? source.src ?? '',
       ...withMuxDrm(source),
     };
+
+    if (contentDataChanged) this.dispatchEvent(new Event('contentdatachange'));
   }
 
   /**
@@ -108,18 +128,29 @@ export class MuxMedia extends HlsJsMedia implements MuxMediaProps {
    * URL can't be built — no playback ID, or signed playback without a matching
    * image token.
    *
-   * Read-only and re-derived on read, so read it again after `sourcechange`.
-   * Nothing here is applied for you, apart from the thumbnail track
+   * Derived from `source` and nothing else. The same object is handed back
+   * until one of those URLs changes, and `contentdatachange` announces it when
+   * it does. Nothing here is applied for you, apart from the thumbnail track
    * `<mux-video>` adds from `storyboard` (and drops for live streams).
    */
   get contentData(): MuxContentData {
-    const poster = createMuxPosterURL(this.source);
-    const storyboard = createMuxStoryboardURL(this.source);
+    return this.#contentData;
+  }
 
-    return {
+  /** Rebuild the derived bag, reporting whether anything about it changed. */
+  #refreshContentData(): boolean {
+    const poster = createMuxPosterURL(this.#source);
+    const storyboard = createMuxStoryboardURL(this.#source);
+
+    const next: MuxContentData = {
       ...(poster && { poster }),
       ...(storyboard && { storyboard }),
     };
+
+    if (shallowEqual(this.#contentData, next)) return false;
+
+    this.#contentData = next;
+    return true;
   }
 }
 

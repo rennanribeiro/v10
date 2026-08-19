@@ -386,6 +386,83 @@ describe('VimeoMedia', () => {
     expect(media.contentData).toEqual({});
   });
 
+  it('dispatches `contentdatachange` when the title arrives and when it is cleared', async () => {
+    const media = new VimeoMedia();
+    // There is no embed to build without a source, so the player only exists once
+    // one is set; `attachAndLoad` is skipped here to watch the attach itself.
+    media.src = '76979871';
+    const handler = vi.fn();
+    media.addEventListener('contentdatachange', handler);
+
+    const iframe = createIframe();
+    media.attach(iframe);
+
+    // Attaching reports nothing, so there is nothing to announce yet.
+    expect(handler).not.toHaveBeenCalled();
+
+    const player = media.engine as unknown as MockPlayerLike;
+    player.emit('loaded');
+    await waitForVimeoLoaded(media);
+
+    expect(handler).toHaveBeenCalledTimes(1);
+    expect(media.contentData).toEqual({ title: 'Sample Video' });
+
+    media.src = '12345';
+
+    expect(handler).toHaveBeenCalledTimes(2);
+    expect(media.contentData).toEqual({});
+  });
+
+  it('dedupes `contentdatachange` when the embed reports the same title again', async () => {
+    const media = new VimeoMedia();
+    const { player } = await attachAndLoad(media);
+
+    const handler = vi.fn();
+    media.addEventListener('contentdatachange', handler);
+
+    // A second `loaded` for the same video re-reads the same title.
+    player.emit('loaded');
+    await new Promise((resolve) => setTimeout(resolve, 0));
+
+    expect(handler).not.toHaveBeenCalled();
+    expect(media.contentData).toEqual({ title: 'Sample Video' });
+  });
+
+  it('reports a blank title as an absent key rather than an empty string', async () => {
+    const media = new VimeoMedia();
+    media.src = '76979871';
+    const iframe = createIframe();
+    media.attach(iframe);
+
+    const player = media.engine as unknown as MockPlayerLike;
+    player.getVideoTitle.mockResolvedValueOnce('');
+    player.emit('loaded');
+    await waitForVimeoLoaded(media);
+
+    // An empty string would read as a deliberate blank and stop a consumer's
+    // fallback chain, and Vimeo cannot tell that apart from a failed read.
+    expect(media.contentData).toEqual({});
+    expect('title' in media.contentData).toBe(false);
+  });
+
+  it('has the rest of the reset in step when it announces a cleared title', async () => {
+    const media = new VimeoMedia();
+    media.src = '76979871';
+    const { player } = await attachAndLoad(media);
+    player.emit('resize', { videoWidth: 1280, videoHeight: 720 });
+
+    const seen: number[] = [];
+    media.addEventListener('contentdatachange', () => seen.push(media.videoWidth));
+
+    media.src = '12345';
+
+    // The dimensions are cleared after the title is, so announcing from the
+    // middle of the reset would hand a listener the old video's frame size
+    // alongside the cleared title.
+    expect(seen).toHaveLength(1);
+    expect(seen[0]).toBeNaN();
+  });
+
   it('clears state reported about the old video when the source is cleared', async () => {
     const media = new VimeoMedia();
     media.src = '76979871';
@@ -398,6 +475,20 @@ describe('VimeoMedia', () => {
     expect(media.duration).toBeNaN();
     // A running embed would write all of that back through its own events.
     expect(player.unload).toHaveBeenCalled();
+  });
+
+  it('announces the reset when the source is cleared', async () => {
+    const media = new VimeoMedia();
+    media.src = '76979871';
+    await attachAndLoad(media);
+
+    const emptied = vi.fn();
+    media.addEventListener('emptied', emptied);
+    media.source = null;
+
+    // The embed is unloaded and reports nothing further, so nothing else is
+    // coming to say the last video's duration and buffer are gone.
+    expect(emptied).toHaveBeenCalledTimes(1);
   });
 
   it('unblocks a pending play() when the source is replaced mid-load', async () => {

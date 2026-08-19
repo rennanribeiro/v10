@@ -1,5 +1,3 @@
-'use client';
-
 import type { MenuCore, MenuState, StateAttrMap } from '@videojs/core';
 import type { MediaContainer, MenuApi, PositioningBoundary } from '@videojs/core/dom';
 import { createContext, useContext } from 'react';
@@ -65,6 +63,14 @@ export function useMenuRadioGroupContext(): MenuRadioGroupContextValue {
   const ctx = useContext(MenuRadioGroupContext);
   if (!ctx) throw new Error('Menu.RadioItem must be used within a Menu.RadioGroup');
   return ctx;
+}
+
+const MenuRadioItemContext = createContext(false);
+
+export const MenuRadioItemContextProvider = MenuRadioItemContext.Provider;
+
+export function useOptionalMenuRadioItemContext(): boolean {
+  return useContext(MenuRadioItemContext);
 }
 
 // ---------------------------------------------------------------------------

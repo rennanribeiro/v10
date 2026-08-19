@@ -177,6 +177,72 @@ describe('MuxMedia', () => {
     expect(media.contentData).toEqual({});
   });
 
+  it('dispatches `contentdatachange` when the derived urls change', () => {
+    const media = new MuxMedia();
+    const handler = vi.fn();
+    media.addEventListener('contentdatachange', handler);
+
+    media.source = { playbackId: 'abc123' };
+
+    expect(handler).toHaveBeenCalledTimes(1);
+    expect(media.contentData.poster).toBe('https://image.mux.com/abc123/thumbnail.webp');
+
+    media.source = { playbackId: 'xyz789' };
+
+    expect(handler).toHaveBeenCalledTimes(2);
+    expect(media.contentData.poster).toBe('https://image.mux.com/xyz789/thumbnail.webp');
+  });
+
+  it('dedupes `contentdatachange` when a source change leaves the urls alone', () => {
+    const media = new MuxMedia();
+    media.source = { playbackId: 'abc123' };
+
+    const handler = vi.fn();
+    media.addEventListener('contentdatachange', handler);
+
+    // A new object, so `sourcechange` still fires, but nothing the images are
+    // built from moved.
+    media.source = { playbackId: 'abc123', playback: { maxResolution: '720p' } };
+
+    expect(handler).not.toHaveBeenCalled();
+  });
+
+  it('clears the content data and announces it when the source is dropped', () => {
+    const media = new MuxMedia();
+    media.source = { playbackId: 'abc123' };
+
+    const handler = vi.fn();
+    media.addEventListener('contentdatachange', handler);
+
+    media.source = null;
+
+    expect(handler).toHaveBeenCalledTimes(1);
+    expect(media.contentData).toEqual({});
+  });
+
+  it('has the content data in step when `sourcechange` fires', () => {
+    const media = new MuxMedia();
+    const seen: (string | null | undefined)[] = [];
+    media.addEventListener('sourcechange', () => seen.push(media.contentData.poster));
+
+    media.source = { playbackId: 'abc123' };
+
+    expect(seen).toEqual(['https://image.mux.com/abc123/thumbnail.webp']);
+  });
+
+  it('hands back the same content data object until it changes', () => {
+    const media = new MuxMedia();
+    media.source = { playbackId: 'abc123' };
+
+    const first = media.contentData;
+
+    expect(media.contentData).toBe(first);
+
+    media.source = { playbackId: 'xyz789' };
+
+    expect(media.contentData).not.toBe(first);
+  });
+
   it('does not reload when only image params change', async () => {
     const media = new MuxMedia();
     media.attach(document.createElement('video'));
@@ -191,6 +257,91 @@ describe('MuxMedia', () => {
     await flushLoad();
 
     expect(loadstart).not.toHaveBeenCalled();
+  });
+
+  it('inherits maxAutoResolution without restarting playback', async () => {
+    vi.spyOn(Hls, 'isSupported').mockReturnValue(true);
+
+    const media = new MuxMedia();
+    media.attach(document.createElement('video'));
+    media.source = { playbackId: 'abc123', maxAutoResolution: '1080p' };
+    await flushLoad();
+
+    const engine = media.engine;
+    const loadstart = vi.fn();
+    media.addEventListener('loadstart', loadstart);
+
+    media.source = { playbackId: 'abc123', maxAutoResolution: '720p' };
+    await flushLoad();
+
+    expect(media.source?.maxAutoResolution).toBe('720p');
+    expect(media.engine).toBe(engine);
+    expect(loadstart).not.toHaveBeenCalled();
+
+    media.destroy();
+  });
+
+  it('keeps the client-side cap separate from the server-side manifest filter', async () => {
+    const media = new MuxMedia();
+    media.attach(document.createElement('video'));
+    // `playback.maxResolution` asks Mux to leave higher renditions out of the
+    // manifest; `maxAutoResolution` caps what ABR picks from the ones that
+    // arrive. Only the former belongs in the URL.
+    media.source = {
+      playbackId: 'abc123',
+      preferPlayback: 'native',
+      playback: { maxResolution: '1080p' },
+      maxAutoResolution: '720p',
+    };
+    await flushLoad();
+
+    expect(media.src).toBe('https://stream.mux.com/abc123.m3u8?max_resolution=1080p');
+    expect(media.source?.maxAutoResolution).toBe('720p');
+
+    media.destroy();
+  });
+
+  it('inherits the player-size caps without restarting playback', async () => {
+    vi.spyOn(Hls, 'isSupported').mockReturnValue(true);
+
+    const media = new MuxMedia();
+    media.attach(document.createElement('video'));
+    media.source = { playbackId: 'abc123', capRenditionToPlayerSize: false };
+    await flushLoad();
+
+    const engine = media.engine;
+    const loadstart = vi.fn();
+    media.addEventListener('loadstart', loadstart);
+
+    media.source = { playbackId: 'abc123', capRenditionToPlayerSize: true, minAutoResolution: '1080p' };
+    await flushLoad();
+
+    expect(media.source?.capRenditionToPlayerSize).toBe(true);
+    expect(media.source?.minAutoResolution).toBe('1080p');
+    expect(media.engine).toBe(engine);
+    expect(loadstart).not.toHaveBeenCalled();
+
+    media.destroy();
+  });
+
+  it('keeps the client-side floor separate from the server-side one it resembles', async () => {
+    const media = new MuxMedia();
+    media.attach(document.createElement('video'));
+    // `playback.minResolution` asks Mux which renditions to put in the manifest.
+    // `minAutoResolution` is unrelated: it bounds how far the element's own size
+    // may cap what arrives. Only the former belongs in the URL.
+    media.source = {
+      playbackId: 'abc123',
+      preferPlayback: 'native',
+      playback: { minResolution: '480p' },
+      minAutoResolution: '720p',
+    };
+    await flushLoad();
+
+    expect(media.src).toBe('https://stream.mux.com/abc123.m3u8?min_resolution=480p');
+    expect(media.source?.minAutoResolution).toBe('720p');
+
+    media.destroy();
   });
 
   it('reloads when the playback id changes', async () => {

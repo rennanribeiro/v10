@@ -1,5 +1,3 @@
-'use client';
-
 import { MenuCore, MenuDataAttrs } from '@videojs/core';
 import {
   createMenu,
@@ -49,7 +47,7 @@ export function MenuRoot({
   const isSubmenu = parentMenu !== null;
   const { side, align, closeOnEscape, closeOnOutsideClick } = coreProps;
 
-  const [core] = useState(() => new MenuCore({ ...coreProps, isSubmenu }));
+  const [core] = useState(() => new MenuCore(coreProps));
 
   const isControlled = controlledOpen !== undefined;
   const [uncontrolledOpen, setUncontrolledOpen] = useState(defaultOpen);
@@ -107,8 +105,8 @@ export function MenuRoot({
   }, [controlsState?.requestControlsLock, input.active, isSubmenu]);
 
   const preferredState = useMemo(() => {
-    core.setProps({ side, align, closeOnEscape, closeOnOutsideClick, isSubmenu });
-    core.setInput(input);
+    core.setProps({ side, align, closeOnEscape, closeOnOutsideClick });
+    core.setInput({ ...input, isSubmenu });
     return core.getState();
   }, [core, input, side, align, closeOnEscape, closeOnOutsideClick, isSubmenu]);
   const { state, preferredSide, setPositionedSide } = usePositionedState(preferredState);
