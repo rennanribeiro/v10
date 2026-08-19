@@ -7,7 +7,7 @@ const { Player } = createPlayer({ features: videoFeatures });
 
 export default function BasicUsage() {
   return (
-    <Player contentTitle="Big Buck Bunny">
+    <Player title="Big Buck Bunny">
       <Container className="react-title-basic">
         <Video loop muted playsInline src="{{VJS10_DEMO_VIDEO_MP4}}" />
         <Title className="react-title-basic__title" />

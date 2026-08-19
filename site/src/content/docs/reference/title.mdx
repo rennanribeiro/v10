@@ -42,7 +42,7 @@ title on the player instead of passing children.
 
 <FrameworkCase frameworks={["react"]}>
   ```tsx
-  <Player contentTitle="Big Buck Bunny">
+  <Player title="Big Buck Bunny">
     <Container>
       <Video src="video.mp4" />
       <Title />
@@ -60,33 +60,36 @@ title on the player instead of passing children.
   ```
 </FrameworkCase>
 
-A title can come from three places. The player uses the first one that has a value:
+A title can come from two places. The player uses the first one that has a value:
 
-1. `contentTitle`, the title you set.
+1. The title you set on the player.
 2. The title the media reports about itself.
-3. `defaultContentTitle`, the fallback you set for media that does not name itself.
 
-If none of them has a value, there is nothing to show and the title hides itself.
+If neither has a value, there is nothing to show and the title hides itself.
 
-To change the title while the player is running, call `setContentTitle` on the store:
+The title is player input, not player state, so change it the way you set it in the
+first place. The store exposes the resolved `title` to read, and nothing to write.
 
 <FrameworkCase frameworks={["react"]}>
   ```tsx
-  function Rename() {
-    const store = usePlayer();
+  const [title, setTitle] = useState("Big Buck Bunny");
 
-    return <button onClick={() => store.setContentTitle("Sintel")}>Rename</button>;
-  }
+  <Player title={title}>...</Player>;
   ```
 </FrameworkCase>
 
 <FrameworkCase frameworks={["html"]}>
+`title` already means the tooltip on an element, so the player takes the title as
+`content-title`, reflected by the `contentTitle` property:
+
   ```ts
   const player = document.querySelector("video-player");
 
-  player.store.setContentTitle("Sintel");
+  player.contentTitle = "Sintel";
   ```
 </FrameworkCase>
+
+Set it to `null` to hand the title back to the media.
 
 The title shows whenever there is a title to show. It does not follow the controls or
 playback on its own — when you want it to come and go with the controls, style it against
