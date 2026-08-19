@@ -5,6 +5,7 @@ import { TitleCore } from '../title-core';
 function createMediaState(overrides: Partial<MediaMetadataState> = {}): MediaMetadataState {
   return {
     title: 'Big Buck Bunny',
+    poster: '',
     ...overrides,
   };
 }

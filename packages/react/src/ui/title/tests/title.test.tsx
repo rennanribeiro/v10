@@ -9,7 +9,7 @@ afterEach(() => {
 });
 
 function metadataState(title: string): Record<string, unknown> {
-  return { title };
+  return { title, poster: '' };
 }
 
 function controlsState(controlsVisible: boolean): Record<string, unknown> {
