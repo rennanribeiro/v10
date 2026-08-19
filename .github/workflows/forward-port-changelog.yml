@@ -22,6 +22,17 @@ concurrency:
 
 jobs:
   forward-port:
+    # Sit out the release commit. Merging the release PR trips this workflow and
+    # the release job at the same time, and the release job force-pushes main onto
+    # site/v10 as its last step, so the raw changelog reaches production that way
+    # regardless. Running here as well would only publish it early: this job takes
+    # about a minute, while the release job takes roughly four and can sit queued
+    # behind its `production` concurrency group for far longer. Skipping keeps a
+    # version's changelog off videojs.org until its packages are really on npm.
+    #
+    # This matches release-please's squashed release commit, `chore: release main
+    # (#1234)`. If that title ever changes, update this condition with it.
+    if: "${{ !startsWith(github.event.head_commit.message, 'chore: release main') }}"
     runs-on: ubuntu-latest
     permissions:
       contents: write
