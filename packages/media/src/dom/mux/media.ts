@@ -58,11 +58,15 @@ export class MuxMedia extends HlsJsMedia implements MuxMediaProps {
     // params a Mux URL does not carry, such as `poster`.
     if (super.src === value) return;
 
-    const { type, preferPlayback, engine } = this.#source ?? {};
+    const { type, preferPlayback, engine, maxAutoResolution, capRenditionToPlayerSize, minAutoResolution } =
+      this.#source ?? {};
     const source: MuxSource = {
       ...(type && { type }),
       ...(preferPlayback && { preferPlayback }),
       ...(engine && { engine }),
+      ...(maxAutoResolution && { maxAutoResolution }),
+      ...(capRenditionToPlayerSize !== undefined && { capRenditionToPlayerSize }),
+      ...(minAutoResolution && { minAutoResolution }),
       ...(parseMuxVideoURL(value) ?? (value ? { src: value } : null)),
     };
 
@@ -79,6 +83,12 @@ export class MuxMedia extends HlsJsMedia implements MuxMediaProps {
    * PlayReady license servers for this playback ID, so protected media plays
    * whichever path the browser takes. License servers named alongside the token
    * win, key by key, for content Mux does not license.
+   *
+   * `playback.maxResolution` and `playback.minResolution` are server-side: they
+   * decide which renditions Mux puts in the manifest at all. The inherited
+   * `maxAutoResolution` and `minAutoResolution` only look like their pair —
+   * those are client-side and bound which of the renditions that *do* arrive
+   * adaptive selection reaches for. The two halves are independent.
    */
   get source(): MuxSource | null {
     return this.#source;

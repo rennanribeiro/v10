@@ -109,6 +109,10 @@
       --scale: 1.75;
     }
   }
+
+  * {
+    --focus-ring-color: oklch(1 0 0);
+  }
 }
 
 /* Error Dialog  */
@@ -176,6 +180,12 @@
   .media-controls--primary,
   .media-controls--secondary {
     position: absolute;
+  }
+  /* Primary must be higher for the preview/thumbnail */
+  .media-controls--primary {
+    z-index: 20;
+  }
+  .media-controls--secondary {
     z-index: 10;
   }
 
@@ -190,6 +200,11 @@
     right: var(--inset);
     container-type: normal;
     transform-origin: top;
+  }
+
+  .media-time-controls {
+    flex: 1;
+    padding-inline: calc(var(--spacing) * 2);
   }
 
   @container media-root (width < 32rem) {
@@ -242,6 +257,10 @@
         }
       }
     }
+
+    .media-button--captions {
+      display: none;
+    }
   }
 
   @container media-root (width >= 32rem) {
@@ -278,11 +297,10 @@
         translate: 0 4px;
       }
     }
-  }
 
-  .media-time-controls {
-    flex: 1;
-    padding-inline: calc(var(--spacing) * 3);
+    .media-time-controls {
+      padding-inline: calc(var(--spacing) * 3);
+    }
   }
 
   @media (pointer: fine) {

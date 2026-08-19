@@ -484,6 +484,276 @@ describe('HlsJsMedia', () => {
     });
   });
 
+  describe('rendition caps', () => {
+    const M3U8 = 'https://example.com/video.m3u8';
+    const built: HlsJsMedia[] = [];
+
+    afterEach(async () => {
+      // Let any queued load settle, then tear the engines down, so no manifest
+      // request outlives the test that started it.
+      await Promise.resolve();
+      while (built.length) built.pop()!.destroy();
+    });
+
+    function setupMse(source: HlsSource = {}) {
+      vi.spyOn(Hls, 'isSupported').mockReturnValue(true);
+
+      const video = document.createElement('video');
+      document.body.appendChild(video);
+
+      const media = new HlsJsMedia();
+      built.push(media);
+      media.attach(video);
+      media.source = { ...source, src: M3U8 };
+      media.load();
+
+      return { media, video };
+    }
+
+    /**
+     * Minimal stand-in for an `Hls` instance, enough to build the controller the
+     * element installed and ask it what the current policy resolves to.
+     */
+    function probeEngine(levels: Array<{ width: number; height: number; bitrate: number }>) {
+      const listeners = new Map<string, Array<{ fn: (...args: any[]) => void; ctx: unknown }>>();
+      return {
+        levels,
+        autoLevelCapping: -1,
+        autoLevelEnabled: true,
+        logger: { log: () => {} },
+        config: { capLevelToPlayerSize: false, ignoreDevicePixelRatio: true, maxDevicePixelRatio: Infinity },
+        on(event: string, fn: (...args: any[]) => void, ctx?: unknown) {
+          listeners.set(event, [...(listeners.get(event) ?? []), { fn, ctx }]);
+        },
+        off: () => {},
+        emit(event: string, data: unknown) {
+          for (const { fn, ctx } of listeners.get(event) ?? []) fn.call(ctx, event, data);
+        },
+      } as unknown as Hls;
+    }
+
+    const LADDER = [
+      { width: 640, height: 360, bitrate: 800_000 },
+      { width: 1280, height: 720, bitrate: 2_800_000 },
+      { width: 1920, height: 1080, bitrate: 5_000_000 },
+    ];
+
+    /**
+     * What the engine's installed cap controller resolves the policy to now.
+     *
+     * The probe defaults to a viewport larger than the whole ladder, so the
+     * player-size ceiling never binds and a requested resolution is what is
+     * being measured. Pass a smaller one to measure the size cap itself.
+     */
+    function cappedIndex(media: HlsJsMedia, playerSize = { width: 4096, height: 2160 }) {
+      const engine = probeEngine(LADDER);
+      const Controller = media.engine!.config.capLevelController;
+      const controller = new Controller(engine);
+
+      const probeVideo = document.createElement('video');
+      probeVideo.width = playerSize.width;
+      probeVideo.height = playerSize.height;
+      (engine as any).emit(Hls.Events.MEDIA_ATTACHING, { media: probeVideo });
+
+      const index = controller.getMaxLevel(LADDER.length - 1);
+      controller.destroy();
+      return index;
+    }
+
+    /** Small enough that every rung but the lowest is above what it needs. */
+    const SMALL_PLAYER = { width: 320, height: 180 };
+
+    it('installs its own cap-level controller over the hls.js default', () => {
+      const { media } = setupMse();
+
+      expect(media.engine!.config.capLevelController).not.toBe(Hls.DefaultConfig.capLevelController);
+    });
+
+    it('caps automatic selection at the requested resolution', () => {
+      const { media } = setupMse({ maxAutoResolution: '720p' });
+
+      expect(cappedIndex(media)).toBe(1);
+    });
+
+    it('does not recreate the engine when only the cap changes', () => {
+      const { media } = setupMse({ maxAutoResolution: '1080p' });
+      const engine = media.engine;
+
+      media.source = { src: M3U8, maxAutoResolution: '720p' };
+      media.load();
+
+      // Capping is a playback preference, not engine construction: rebuilding
+      // here would tear down the buffer and lose ABR's bandwidth estimate.
+      expect(media.engine).toBe(engine);
+      expect(cappedIndex(media)).toBe(1);
+    });
+
+    it('applies a cap added after playback started', () => {
+      const { media } = setupMse();
+      const engine = media.engine;
+
+      expect(cappedIndex(media)).toBe(2);
+
+      media.source = { src: M3U8, maxAutoResolution: '360p' };
+
+      expect(media.engine).toBe(engine);
+      expect(cappedIndex(media)).toBe(0);
+    });
+
+    it('returns to uncapped selection when the key is removed', () => {
+      const { media } = setupMse({ maxAutoResolution: '360p' });
+
+      media.source = { src: M3U8 };
+
+      expect(cappedIndex(media)).toBe(2);
+    });
+
+    it('keeps the cap when only src changes', () => {
+      const { media } = setupMse({ maxAutoResolution: '720p' });
+
+      media.src = 'https://example.com/other.m3u8';
+
+      expect(media.source).toEqual({ src: 'https://example.com/other.m3u8', maxAutoResolution: '720p' });
+      expect(cappedIndex(media)).toBe(1);
+    });
+
+    it('carries the cap onto an engine rebuilt for new hls.js options', () => {
+      const { media } = setupMse({ maxAutoResolution: '720p' });
+      const engine = media.engine;
+
+      media.source = { src: M3U8, maxAutoResolution: '720p', engine: { hlsJs: { maxBufferLength: 60 } } };
+      media.load();
+
+      expect(media.engine).not.toBe(engine);
+      expect(cappedIndex(media)).toBe(1);
+    });
+
+    it('warns and ignores the cap on native playback', () => {
+      const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+
+      const media = new HlsJsMedia();
+      built.push(media);
+      media.attach(document.createElement('video'));
+      media.source = { src: M3U8, type: ContentTypes.M3U8, preferPlayback: 'native', maxAutoResolution: '720p' };
+      media.load();
+
+      expect(media.engine).toBeNull();
+      expect(warn).toHaveBeenCalledWith(
+        expect.stringContaining('`maxAutoResolution` requires the hls.js (MSE) engine')
+      );
+    });
+
+    describe('capRenditionToPlayerSize', () => {
+      it('caps to the element size by default', () => {
+        const { media } = setupMse();
+
+        // 320 device px is covered by the 640×360 rung, but the default floor
+        // holds the ceiling at 720p rather than dropping that far.
+        expect(cappedIndex(media, SMALL_PLAYER)).toBe(1);
+      });
+
+      it('stops capping to the element size when switched off', () => {
+        const { media } = setupMse({ capRenditionToPlayerSize: false });
+
+        expect(cappedIndex(media, SMALL_PLAYER)).toBe(2);
+      });
+
+      it('does not recreate the engine when only the toggle changes', () => {
+        const { media } = setupMse();
+        const engine = media.engine;
+
+        media.source = { src: M3U8, capRenditionToPlayerSize: false };
+        media.load();
+
+        expect(media.engine).toBe(engine);
+        expect(cappedIndex(media, SMALL_PLAYER)).toBe(2);
+      });
+
+      it('keeps a false toggle when only src changes', () => {
+        // A falsy value still has to survive the carry-over, which a truthiness
+        // check on the way through would drop.
+        const { media } = setupMse({ capRenditionToPlayerSize: false });
+
+        media.src = 'https://example.com/other.m3u8';
+
+        expect(media.source?.capRenditionToPlayerSize).toBe(false);
+        expect(cappedIndex(media, SMALL_PLAYER)).toBe(2);
+      });
+
+      it('returns to capping when the key is removed', () => {
+        const { media } = setupMse({ capRenditionToPlayerSize: false });
+
+        media.source = { src: M3U8 };
+
+        expect(cappedIndex(media, SMALL_PLAYER)).toBe(1);
+      });
+    });
+
+    describe('minAutoResolution', () => {
+      it('floors the size cap at the resolution named', () => {
+        const { media } = setupMse({ minAutoResolution: '1080p' });
+
+        expect(cappedIndex(media, SMALL_PLAYER)).toBe(2);
+      });
+
+      it('does not raise an explicit maxAutoResolution', () => {
+        const { media } = setupMse({ maxAutoResolution: '360p', minAutoResolution: '1080p' });
+
+        // The ceiling the caller asked for is the stricter instruction. A floor
+        // bounds how far the element's size may cap, and nothing else.
+        expect(cappedIndex(media, SMALL_PLAYER)).toBe(0);
+      });
+
+      it('weakens to nothing at the bottom of the ladder', () => {
+        // There is no rung under 270p, so naming it lifts the floor for any
+        // real ladder — the way to ask for strict player-size capping.
+        const { media } = setupMse({ minAutoResolution: '270p' });
+
+        expect(cappedIndex(media, SMALL_PLAYER)).toBe(0);
+      });
+
+      it('does not recreate the engine when only the floor changes', () => {
+        const { media } = setupMse({ minAutoResolution: '720p' });
+        const engine = media.engine;
+
+        media.source = { src: M3U8, minAutoResolution: '1080p' };
+        media.load();
+
+        expect(media.engine).toBe(engine);
+        expect(cappedIndex(media, SMALL_PLAYER)).toBe(2);
+      });
+
+      it('keeps the floor when only src changes', () => {
+        const { media } = setupMse({ minAutoResolution: '1080p' });
+
+        media.src = 'https://example.com/other.m3u8';
+
+        expect(media.source?.minAutoResolution).toBe('1080p');
+        expect(cappedIndex(media, SMALL_PLAYER)).toBe(2);
+      });
+    });
+
+    it('warns about every cap native playback ignores', () => {
+      const warn = vi.spyOn(console, 'warn').mockImplementation(() => {});
+
+      const media = new HlsJsMedia();
+      built.push(media);
+      media.attach(document.createElement('video'));
+      media.source = {
+        src: M3U8,
+        type: ContentTypes.M3U8,
+        preferPlayback: 'native',
+        capRenditionToPlayerSize: false,
+        minAutoResolution: '720p',
+      };
+      media.load();
+
+      expect(warn).toHaveBeenCalledWith(
+        expect.stringContaining('`capRenditionToPlayerSize`, `minAutoResolution` require the hls.js (MSE) engine')
+      );
+    });
+  });
+
   describe('remote playback load', () => {
     function setupConnected(load: () => Promise<void>) {
       const video = document.createElement('video');
