@@ -1,3 +1,4 @@
+import { parseGIF } from 'gifuct-js';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { MediaError } from '../../../core/media-error';
 import { isMediaVolumeCapable } from '../../../core/predicate';
@@ -45,9 +46,15 @@ function stubFetch(impl?: () => Promise<unknown>) {
   return fetchMock;
 }
 
-/** Flush the microtasks a load's fetch/decode chain awaits. */
+/**
+ * Flush the microtasks a load's fetch/decode chain awaits, including the
+ * dynamic import that pulls in the gifuct-js polyfill backend.
+ */
 async function flush(): Promise<void> {
-  for (let i = 0; i < 10; i++) await Promise.resolve();
+  for (let round = 0; round < 3; round++) {
+    for (let i = 0; i < 10; i++) await Promise.resolve();
+    await vi.dynamicImportSettled();
+  }
 }
 
 async function createLoadedMedia(): Promise<GifMedia> {
@@ -351,5 +358,59 @@ describe('GifMedia', () => {
     expect(played.length).toBe(1);
     expect(played.start(0)).toBe(0);
     expect(played.end(0)).toBeGreaterThan(0);
+  });
+
+  describe('with WebCodecs ImageDecoder available', () => {
+    function makeVideoFrame(durationUs: number) {
+      return {
+        displayWidth: 2,
+        displayHeight: 2,
+        duration: durationUs,
+        close: vi.fn(),
+      };
+    }
+
+    beforeEach(() => {
+      class FakeImageDecoder {
+        static isTypeSupported = vi.fn(async (type: string) => type === 'image/gif');
+        tracks = { ready: Promise.resolve(), selectedTrack: { frameCount: FRAME_COUNT } };
+        completed = Promise.resolve();
+        decode = vi.fn(async () => ({ image: makeVideoFrame(FRAME_DELAY_MS * 1000) }));
+        close = vi.fn();
+      }
+      vi.stubGlobal('ImageDecoder', FakeImageDecoder);
+    });
+
+    it('prefers the native decoder over the gifuct-js polyfill', async () => {
+      const media = await createLoadedMedia();
+
+      expect(media.duration).toBeCloseTo((FRAME_COUNT * FRAME_DELAY_MS) / 1000);
+      expect(media.videoWidth).toBe(2);
+      expect(media.videoHeight).toBe(2);
+      expect(vi.mocked(parseGIF)).not.toHaveBeenCalled();
+    });
+
+    it('plays through frames and ends on the native path', async () => {
+      const media = await createLoadedMedia();
+      const seen = recordEvents(media, ['ended']);
+
+      await media.play();
+      vi.advanceTimersByTime(FRAME_COUNT * FRAME_DELAY_MS + 10);
+
+      expect(seen).toEqual(['ended']);
+      expect(media.ended).toBe(true);
+    });
+
+    it('paints decoded frames onto the attached canvas', async () => {
+      const media = await createLoadedMedia();
+      const ctx = { clearRect: vi.fn(), drawImage: vi.fn() };
+      const canvas = document.createElement('canvas');
+      canvas.getContext = (() => ctx) as unknown as typeof canvas.getContext;
+
+      media.attach(canvas);
+      await flush();
+
+      expect(ctx.drawImage).toHaveBeenCalledTimes(1);
+    });
   });
 });

@@ -1,11 +1,11 @@
 import { createPublicPromise, type PublicPromise } from '@videojs/utils/function';
-import type { ParsedFrame, ParsedGif } from 'gifuct-js';
-import { decompressFrames, parseGIF } from 'gifuct-js';
 import { EMPTY_TIME_RANGES } from '../../core/constants';
 import { MediaError } from '../../core/media-error';
 import type { CanPlayTypeResult, ErrorLike, MediaPreloadType, Video } from '../../core/types';
 import { MediaPlayedRangesMixin } from '../media-played-ranges';
 import { createTimeRange } from '../utils';
+import type { GifFrameSource } from './frame-source';
+import { createImageDecoderSource, isImageDecoderSupported } from './image-decoder-source';
 
 export interface GifMediaProps {
   src: string;
@@ -25,11 +25,6 @@ export const gifMediaDefaultProps: GifMediaProps = {
   playbackRate: 1,
 };
 
-// Browsers snap near-zero GIF frame delays (0 or 1 hundredths of a second) up
-// to 100ms rather than spinning; delays land here already converted to ms.
-const MIN_FRAME_DELAY_MS = 20;
-const SNAPPED_FRAME_DELAY_MS = 100;
-
 // Native media fires `timeupdate` every 250ms or so; GIF frames can be far
 // shorter, so advancing frames re-dispatches only after this much media time.
 const TIMEUPDATE_INTERVAL_MS = 250;
@@ -37,12 +32,27 @@ const TIMEUPDATE_INTERVAL_MS = 250;
 const READY_STATE_HAVE_NOTHING = 0;
 const READY_STATE_HAVE_ENOUGH_DATA = 4;
 
+/**
+ * Decode a fetched GIF into a frame source, preferring the browser's own
+ * WebCodecs `ImageDecoder`. The JS decoder is the polyfill, pulled in only
+ * where WebCodecs can't decode GIFs so the native path never ships it.
+ */
+async function createFrameSource(buffer: ArrayBuffer): Promise<GifFrameSource> {
+  if (await isImageDecoderSupported()) {
+    return createImageDecoderSource(buffer);
+  }
+  const { createGifuctSource } = await import('./gifuct-source');
+  return createGifuctSource(buffer);
+}
+
 const GifMediaBase = MediaPlayedRangesMixin(EventTarget);
 
 /**
- * Plays an animated GIF like a video: decodes its frames once and drives a
+ * Plays an animated GIF like a video: decodes its frames and drives a
  * `<canvas>` with its own clock, so playback can actually pause, seek, loop
  * on demand, and change rate — none of which an `<img>` rendering allows.
+ * Decoding uses WebCodecs `ImageDecoder` where available and falls back to a
+ * lazily-loaded JS decoder (gifuct-js) elsewhere.
  *
  * GIFs carry no audio, so the media exposes no volume or mute surface, and
  * fetching happens with `fetch()`, so the source must be same-origin or served
@@ -50,7 +60,6 @@ const GifMediaBase = MediaPlayedRangesMixin(EventTarget);
  */
 export class GifMedia extends GifMediaBase implements Partial<Video> {
   #canvas: HTMLCanvasElement | null = null;
-  #patchCanvas: HTMLCanvasElement | null = null;
 
   #src = gifMediaDefaultProps.src;
   #autoplay = gifMediaDefaultProps.autoplay;
@@ -60,10 +69,9 @@ export class GifMedia extends GifMediaBase implements Partial<Video> {
   #playbackRate = gifMediaDefaultProps.playbackRate;
   #defaultPlaybackRate = gifMediaDefaultProps.playbackRate;
 
-  #gif: ParsedGif | null = null;
-  #frames: ParsedFrame[] = [];
+  #source: GifFrameSource | null = null;
   /** Per-frame delay in ms, normalized the way browsers render it. */
-  #delays: number[] = [];
+  #delays: readonly number[] = [];
   /** Cumulative start time of each frame in ms; one extra entry holds the total. */
   #starts: number[] = [0];
 
@@ -74,7 +82,7 @@ export class GifMedia extends GifMediaBase implements Partial<Video> {
   #error: ErrorLike | null = null;
 
   #frameIndex = 0;
-  /** Index of the frame currently composited on the canvas, -1 when blank. */
+  /** Index of the last frame handed to the source to paint, -1 when none. */
   #renderedIndex = -1;
   /** Media time already spent inside the current frame, in ms. */
   #frameElapsed = 0;
@@ -101,17 +109,16 @@ export class GifMedia extends GifMediaBase implements Partial<Video> {
     if (!target || this.#canvas === target) return;
     if (this.#canvas) this.detach();
     this.#canvas = target;
-    if (this.#gif) {
+    if (this.#source) {
       this.#sizeCanvas();
       this.#renderedIndex = -1;
-      this.#renderUpTo(this.#frameIndex);
+      this.#render(this.#frameIndex);
     }
   }
 
   detach(): void {
     if (!this.#canvas) return;
     this.#canvas = null;
-    this.#patchCanvas = null;
     this.#renderedIndex = -1;
   }
 
@@ -120,6 +127,8 @@ export class GifMedia extends GifMediaBase implements Partial<Video> {
     this.#abort?.abort();
     this.#abort = null;
     this.#loadComplete?.resolve();
+    this.#source?.destroy();
+    this.#source = null;
     this.detach();
     super.destroy();
   }
@@ -135,7 +144,7 @@ export class GifMedia extends GifMediaBase implements Partial<Video> {
   }
 
   get currentSrc(): string {
-    return this.#gif ? this.#src : '';
+    return this.#source ? this.#src : '';
   }
 
   get readyState(): number {
@@ -166,7 +175,7 @@ export class GifMedia extends GifMediaBase implements Partial<Video> {
     this.#abort = null;
     this.#stopClock();
 
-    const hadData = this.#gif !== null;
+    const hadData = this.#source !== null;
     // A seek queued before any metadata is a start position for this load; one
     // left over from a previous source is not.
     const pendingSeek = hadData ? null : this.#pendingSeek;
@@ -202,23 +211,22 @@ export class GifMedia extends GifMediaBase implements Partial<Video> {
     }
     if (abort !== this.#abort) return;
 
-    let gif: ParsedGif;
-    let frames: ParsedFrame[];
+    let source: GifFrameSource;
     try {
-      gif = parseGIF(buffer);
-      frames = decompressFrames(gif, true);
-      if (frames.length === 0) throw new Error('No frames');
+      source = await createFrameSource(buffer);
     } catch {
+      if (abort !== this.#abort) return;
       this.#fail(new MediaError('Failed to decode GIF.', MediaError.MEDIA_ERR_DECODE));
       return;
     }
+    if (abort !== this.#abort) {
+      // A newer load superseded this one while the decoder was working.
+      source.destroy();
+      return;
+    }
 
-    this.#gif = gif;
-    this.#frames = frames;
-    this.#delays = frames.map((frame) => {
-      const delay = frame.delay ?? 0;
-      return delay < MIN_FRAME_DELAY_MS ? SNAPPED_FRAME_DELAY_MS : delay;
-    });
+    this.#source = source;
+    this.#delays = source.delays;
     this.#starts = [0];
     for (const delay of this.#delays) {
       this.#starts.push(this.#starts[this.#starts.length - 1]! + delay);
@@ -236,7 +244,7 @@ export class GifMedia extends GifMediaBase implements Partial<Video> {
     }
 
     this.#sizeCanvas();
-    this.#renderUpTo(this.#frameIndex);
+    this.#render(this.#frameIndex);
 
     this.dispatchEvent(new Event('loadeddata'));
     this.dispatchEvent(new Event('canplay'));
@@ -287,7 +295,7 @@ export class GifMedia extends GifMediaBase implements Partial<Video> {
     this.#ended = false;
     if (wasPaused) this.dispatchEvent(new Event('play'));
 
-    if (!this.#gif) {
+    if (!this.#source) {
       if (!this.#abort) void this.#fetchAndDecode();
       await (this.#loadComplete ??= createPublicPromise<void>());
       if (this.#error) {
@@ -311,7 +319,7 @@ export class GifMedia extends GifMediaBase implements Partial<Video> {
   }
 
   get currentTime(): number {
-    if (this.#frames.length === 0) return this.#pendingSeek ?? 0;
+    if (this.#frameCount === 0) return this.#pendingSeek ?? 0;
     let elapsed = this.#frameElapsed;
     if (!this.#paused && this.#timer !== null) {
       elapsed += (performance.now() - this.#frameClock) * this.#playbackRate;
@@ -320,7 +328,7 @@ export class GifMedia extends GifMediaBase implements Partial<Video> {
     return Math.min(start + elapsed, this.#totalMs) / 1000;
   }
   set currentTime(value: number) {
-    if (this.#frames.length === 0) {
+    if (this.#frameCount === 0) {
       // No frame table to land on yet; applied once metadata arrives.
       this.#pendingSeek = value;
       return;
@@ -335,8 +343,8 @@ export class GifMedia extends GifMediaBase implements Partial<Video> {
 
   #seekTo(seconds: number): void {
     const ms = Math.min(Math.max(seconds * 1000, 0), this.#totalMs);
-    let index = this.#frames.length - 1;
-    for (let i = 0; i < this.#frames.length; i++) {
+    let index = this.#frameCount - 1;
+    for (let i = 0; i < this.#frameCount; i++) {
       if (ms < this.#starts[i + 1]!) {
         index = i;
         break;
@@ -345,16 +353,20 @@ export class GifMedia extends GifMediaBase implements Partial<Video> {
     this.#frameIndex = index;
     this.#frameElapsed = ms - this.#starts[index]!;
     if (this.#ended && ms < this.#totalMs) this.#ended = false;
-    this.#renderUpTo(index);
+    this.#render(index);
     if (!this.#paused) this.#startClock();
   }
 
   get duration(): number {
-    return this.#frames.length > 0 ? this.#totalMs / 1000 : Number.NaN;
+    return this.#frameCount > 0 ? this.#totalMs / 1000 : Number.NaN;
+  }
+
+  get #frameCount(): number {
+    return this.#delays.length;
   }
 
   get #totalMs(): number {
-    return this.#starts[this.#frames.length] ?? 0;
+    return this.#starts[this.#frameCount] ?? 0;
   }
 
   get autoplay(): boolean {
@@ -362,7 +374,7 @@ export class GifMedia extends GifMediaBase implements Partial<Video> {
   }
   set autoplay(value: boolean) {
     this.#autoplay = value;
-    if (value && this.#paused && this.#gif) void this.play();
+    if (value && this.#paused && this.#source) void this.play();
   }
 
   get loop(): boolean {
@@ -380,7 +392,7 @@ export class GifMedia extends GifMediaBase implements Partial<Video> {
     // Bank time spent at the old rate before the new one changes the clock's scale.
     this.#syncElapsed();
     this.#playbackRate = value;
-    if (!this.#paused && this.#gif) this.#startClock();
+    if (!this.#paused && this.#source) this.#startClock();
     this.dispatchEvent(new Event('ratechange'));
   }
 
@@ -393,11 +405,11 @@ export class GifMedia extends GifMediaBase implements Partial<Video> {
 
   get buffered() {
     // The whole file decodes up front, so once loaded everything is buffered.
-    return this.#frames.length > 0 ? createTimeRange(0, this.duration) : EMPTY_TIME_RANGES;
+    return this.#frameCount > 0 ? createTimeRange(0, this.duration) : EMPTY_TIME_RANGES;
   }
 
   get seekable() {
-    return this.#frames.length > 0 ? createTimeRange(0, this.duration) : EMPTY_TIME_RANGES;
+    return this.#frameCount > 0 ? createTimeRange(0, this.duration) : EMPTY_TIME_RANGES;
   }
 
   get error(): ErrorLike | null {
@@ -405,16 +417,16 @@ export class GifMedia extends GifMediaBase implements Partial<Video> {
   }
 
   get videoWidth(): number {
-    return this.#gif?.lsd.width ?? 0;
+    return this.#source?.width ?? 0;
   }
 
   get videoHeight(): number {
-    return this.#gif?.lsd.height ?? 0;
+    return this.#source?.height ?? 0;
   }
 
   #resetState(): void {
-    this.#gif = null;
-    this.#frames = [];
+    this.#source?.destroy();
+    this.#source = null;
     this.#delays = [];
     this.#starts = [0];
     this.#frameIndex = 0;
@@ -445,7 +457,7 @@ export class GifMedia extends GifMediaBase implements Partial<Video> {
 
   #startClock(): void {
     this.#stopClock();
-    if (this.#frames.length === 0) return;
+    if (this.#frameCount === 0) return;
     const remaining = this.#delays[this.#frameIndex]! - this.#frameElapsed;
     this.#frameClock = performance.now();
     this.#timer = setTimeout(this.#advance, Math.max(remaining / this.#playbackRate, 0));
@@ -461,10 +473,10 @@ export class GifMedia extends GifMediaBase implements Partial<Video> {
     this.#timer = null;
     this.#frameElapsed = 0;
 
-    if (this.#frameIndex + 1 >= this.#frames.length) {
+    if (this.#frameIndex + 1 >= this.#frameCount) {
       if (this.#loop) {
         this.#frameIndex = 0;
-        this.#renderUpTo(0);
+        this.#render(0);
         this.#maybeTimeupdate();
         this.#startClock();
         return;
@@ -479,7 +491,7 @@ export class GifMedia extends GifMediaBase implements Partial<Video> {
     }
 
     this.#frameIndex += 1;
-    this.#renderUpTo(this.#frameIndex);
+    this.#render(this.#frameIndex);
     this.#maybeTimeupdate();
     this.#startClock();
   };
@@ -500,55 +512,24 @@ export class GifMedia extends GifMediaBase implements Partial<Video> {
   // ----------------------------------------
 
   #sizeCanvas(): void {
-    const gif = this.#gif;
+    const source = this.#source;
     const canvas = this.#canvas;
-    if (!gif || !canvas) return;
-    canvas.width = gif.lsd.width;
-    canvas.height = gif.lsd.height;
+    if (!source || !canvas) return;
+    canvas.width = source.width;
+    canvas.height = source.height;
   }
 
-  /**
-   * Composite the canvas forward to `index`. GIF frames are deltas over the
-   * previous state, so a backward jump clears and replays from frame 0; a
-   * forward jump draws only the frames in between.
-   */
-  #renderUpTo(index: number): void {
+  /** Ask the source to paint frame `index`; the clock never waits on a paint. */
+  #render(index: number): void {
     const canvas = this.#canvas;
-    if (!canvas || this.#frames.length === 0) return;
+    const source = this.#source;
+    if (!canvas || !source || index === this.#renderedIndex) return;
     // jsdom (and canvas-less environments) return null; playback state still advances.
     const ctx = canvas.getContext('2d');
     if (!ctx) return;
-
-    let from = this.#renderedIndex + 1;
-    if (index < this.#renderedIndex) {
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      from = 0;
-    }
-    for (let i = from; i <= index; i++) {
-      this.#drawFrame(ctx, i);
-    }
     this.#renderedIndex = index;
-  }
-
-  #drawFrame(ctx: CanvasRenderingContext2D, index: number): void {
-    const frame = this.#frames[index]!;
-    const previous = index > 0 ? this.#frames[index - 1]! : null;
-
-    // Disposal 2 restores the previous frame's region to background (treated
-    // as transparent, like browsers do); 3 (restore-previous) is rare and
-    // approximated the same way.
-    if (previous && previous.disposalType >= 2) {
-      const { left, top, width, height } = previous.dims;
-      ctx.clearRect(left, top, width, height);
-    }
-
-    const { left, top, width, height } = frame.dims;
-    const patchCanvas = (this.#patchCanvas ??= globalThis.document?.createElement('canvas'));
-    const patchCtx = patchCanvas?.getContext('2d');
-    if (!patchCanvas || !patchCtx) return;
-    patchCanvas.width = width;
-    patchCanvas.height = height;
-    patchCtx.putImageData(new ImageData(new Uint8ClampedArray(frame.patch), width, height), 0, 0);
-    ctx.drawImage(patchCanvas, left, top);
+    // An on-demand backend paints asynchronously and discards stale draws
+    // itself, so a late frame never overwrites a newer one.
+    void source.drawFrame(ctx, index);
   }
 }
