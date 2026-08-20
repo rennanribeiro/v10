@@ -81,19 +81,6 @@ export const container = (isShadowDOM: boolean) =>
           '[&_video::-webkit-media-text-track-container]:font-[inherit]',
         ]
       : [],
-    // Poster placeholder (blur-up) — React path only; HTML path uses media-poster::before
-    !isShadowDOM
-      ? [
-          'before:absolute before:inset-0 before:pointer-events-none',
-          'before:[background-image:var(--media-poster-placeholder,none)]',
-          'before:bg-no-repeat',
-          'before:[background-position:var(--media-object-position,center)]',
-          'before:[background-size:var(--media-object-fit,contain)]',
-          'before:opacity-0 before:[filter:blur(var(--media-poster-placeholder-blur,20px))]',
-          'before:transition-opacity before:duration-250',
-          'has-[img[data-visible]:not([data-loaded])]:before:opacity-100',
-        ]
-      : [],
     // Fullscreen
     '[&:fullscreen]:[--container-border-radius:0]',
     {
@@ -109,15 +96,14 @@ export const controls = cn(
   // Position & wrapping layout (small)
   'absolute bottom-1 inset-x-1',
   '[--base-side-offset:5] [--base-boundary-offset:1]',
+  '[--volume-mask:linear-gradient(to_right,transparent_10%,black_25%,black_100%)]',
   'gap-x-2 flex-wrap rounded-[--spacing(3)] group/controls',
   'text-white z-20',
   'peer-data-open/error:hidden',
   'ease-(--controls-transition-timing-function)',
   'duration-[calc(var(--controls-transition-duration)/2)]',
   'not-data-visible:duration-(--controls-transition-duration)',
-  'pointer-fine:will-change-[translate,filter,opacity]',
   'pointer-fine:transition-[translate,filter,opacity]',
-  'pointer-coarse:will-change-[translate,opacity]',
   'pointer-coarse:transition-[translate,opacity]',
   // Hidden state
   'not-data-visible:opacity-0 not-data-visible:pointer-events-none',
@@ -129,8 +115,23 @@ export const controls = cn(
 
 /* Button groups */
 
+const volumeMaskTarget = cn(
+  '[mask-image:var(--volume-mask-image,none)]',
+  '[mask-repeat:no-repeat]',
+  '[mask-position:var(--volume-mask-position,100%_0)]',
+  '[mask-size:var(--volume-mask-size,200%_100%)]',
+  '[transition:mask-position_50ms_ease-out]'
+);
+
 export const buttonGroupStart = cn(baseButtonGroup, 'flex-1 @2xl/media-root:flex-none');
-export const buttonGroupEnd = cn(baseButtonGroup, 'flex-1 justify-end @2xl/media-root:flex-none');
+export const buttonGroupEnd = cn(
+  baseButtonGroup,
+  volumeMaskTarget,
+  'flex-1 justify-end @2xl/media-root:flex-none',
+  'group-has-[[data-volume-level][aria-expanded=true]]/controls:@max-2xl/media-root:[--volume-mask-image:var(--volume-mask)]',
+  'group-has-[[data-volume-level][aria-expanded=true]]/controls:@max-2xl/media-root:[--volume-mask-position:0_0]',
+  'group-has-[[data-volume-level][aria-expanded=true]]/controls:@max-2xl/media-root:[--volume-mask-size:400%_100%]'
+);
 
 export const spacer = 'grow';
 
@@ -140,12 +141,11 @@ export const time = {
   ...baseTime,
   controls: cn(
     baseTime.controls,
+    volumeMaskTarget,
     '[--slider-height:--spacing(5)] grow-0 shrink-0 basis-full order-[-1] px-1.5',
     '@2xl/media-root:[--slider-height:--spacing(8)] @2xl/media-root:grow @2xl/media-root:shrink @2xl/media-root:basis-0 @2xl/media-root:order-[unset]',
-    '@2xl/media-root:[mask-position:100%_0] @2xl/media-root:[mask-size:200%_100%]',
-    '@2xl/media-root:[transition:mask-position_50ms_ease-out]',
-    'group-has-[[data-volume-level][aria-expanded=true]]/controls:@2xl/media-root:[mask-image:linear-gradient(to_right,transparent_10%,black_25%,black_100%)]',
-    'group-has-[[data-volume-level][aria-expanded=true]]/controls:@2xl/media-root:[mask-position:0_0]'
+    'group-has-[[data-volume-level][aria-expanded=true]]/controls:@2xl/media-root:[--volume-mask-image:var(--volume-mask)]',
+    'group-has-[[data-volume-level][aria-expanded=true]]/controls:@2xl/media-root:[--volume-mask-position:0_0]'
   ),
 };
 
@@ -171,7 +171,7 @@ export const slider = {
   preview: cn(
     baseSlider.preview,
     '[--preview-end-inset:calc(100cqi-100%)]',
-    '[--preview-left:clamp(calc(var(--max-width)/2),var(--media-slider-pointer),calc(100%-var(--max-width)/2+var(--preview-end-inset)))]',
+    '[--preview-left:clamp(calc(var(--max-size)/2),var(--media-slider-pointer),calc(100%-var(--max-size)/2+var(--preview-end-inset)))]',
     '@2xl/media-root:[--preview-left:var(--media-slider-pointer)]'
   ),
 };
@@ -180,7 +180,7 @@ export const slider = {
 
 export const popup = {
   ...basePopup,
-  volume: cn(basePopup.popover, 'p-0 bg-transparent'),
+  volume: cn(basePopup.popover, 'p-0 bg-transparent', '@max-2xl/media-root:[--media-popover-side-offset:--spacing(3)]'),
 };
 
 /* Menu */

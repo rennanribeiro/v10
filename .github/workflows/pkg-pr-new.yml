@@ -87,6 +87,14 @@ jobs:
       - name: Build packages
         run: pnpm build:packages
 
+      # `build:packages` runs the `build` task, which does not produce
+      # @videojs/html's `cdn/` tree; `build:cdn` is a separate task. `cdn` is in
+      # that package's `files`, and the sandbox resolves its CDN demos through
+      # the published export map, so skipping this leaves `./cdn/*` pointing at
+      # nothing in the preview tarball.
+      - name: Build CDN bundles
+        run: pnpm build:cdn
+
       # Keep this list in sync with the public packages built by `build:packages`.
       # @videojs/cli is excluded because it is built separately and depends on a
       # full site build, which is too slow for a per-commit preview.
@@ -100,6 +108,11 @@ jobs:
       # `pnpm pack` resolves that `workspace:*` to the current release, so without
       # it an install pulls a published @videojs/element alongside the preview one
       # and ends up with two copies of the custom-element base.
+      #
+      # --template uploads apps/sandbox as a StackBlitz project, so a reviewer can
+      # open a running player built from the pull request. Its `dev` script
+      # regenerates the gitignored src/ from templates/ on boot, so the sandbox
+      # still works even though src/ is never part of the upload.
       - name: Publish preview packages
         env:
           VIDEOJS_SKIP_PACKAGE_DOCS: '1'
@@ -113,3 +126,4 @@ jobs:
           './packages/spf'
           './packages/store'
           './packages/utils'
+          --template './apps/sandbox'

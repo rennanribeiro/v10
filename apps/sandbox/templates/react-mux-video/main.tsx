@@ -42,10 +42,22 @@ function App() {
 
   return (
     <SandboxI18nProvider>
-      <Player>
+      <Player poster={poster}>
         <VideoSkinComponent
-          poster={poster}
-          placeholder={placeholder}
+          renderPoster={
+            placeholder ? (
+              <img
+                alt=""
+                crossOrigin=""
+                style={{
+                  backgroundImage: `url("${placeholder}")`,
+                  backgroundPosition: 'var(--media-object-position, center)',
+                  backgroundRepeat: 'no-repeat',
+                  backgroundSize: 'contain',
+                }}
+              />
+            ) : undefined
+          }
           skin={skin}
           styling={styling}
           live={live}
@@ -59,7 +71,7 @@ function App() {
             loop={loop}
             preload={preload}
             playsInline
-            crossOrigin="anonymous"
+            crossOrigin=""
           >
             <Chapters tracks={getChapters(source)} />
           </MuxVideo>

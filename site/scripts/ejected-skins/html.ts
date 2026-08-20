@@ -86,7 +86,9 @@ export function replaceSlots(html: string, skin: Pick<SkinDef, 'mediaType' | 'li
     `$1${mediaElement}`
   );
 
-  return html.replace(/<slot name="poster"><\/slot>/, `<img src="${live ? DEMO_LIVE_POSTER_SRC : DEMO_POSTER_SRC}" />`);
+  // No shadow root once ejected, so the poster slot collapses to the image it carried.
+  // The src arrives from the player's `poster`, resolved through the store.
+  return html.replace(/^([ \t]*)<slot name="poster">[\s\S]*?<\/slot>/m, '$1<img alt="" decoding="async" />');
 }
 
 export function prependHtmlSkinScripts(html: string, skin: HtmlSkinDef): string {
@@ -99,12 +101,14 @@ export function prependHtmlSkinScripts(html: string, skin: HtmlSkinDef): string 
   }
   const cssLink = skin.style === 'css' ? '\n<link rel="stylesheet" href="./player.css">' : '';
   const playerTag = `${skin.group}-player`;
+  const posterAttr =
+    skin.mediaType === 'audio' ? '' : ` poster="${skin.live ? DEMO_LIVE_POSTER_SRC : DEMO_POSTER_SRC}"`;
   const indented = html
     .split('\n')
     .map((line) => (line.length > 0 ? `  ${line}` : line))
     .join('\n');
 
-  return `${scriptTags.join('\n')}${cssLink}\n\n<${playerTag}>\n${indented}\n</${playerTag}>`;
+  return `${scriptTags.join('\n')}${cssLink}\n\n<${playerTag}${posterAttr}>\n${indented}\n</${playerTag}>`;
 }
 
 async function loadImportedNames(

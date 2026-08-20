@@ -84,19 +84,6 @@ export const container = (isShadowDOM: boolean) =>
           '[&_video::-webkit-media-text-track-container]:font-[inherit]',
         ]
       : [],
-    // Poster placeholder (blur-up) — React path only; HTML path uses media-poster::before
-    !isShadowDOM
-      ? [
-          'before:absolute before:inset-0 before:pointer-events-none',
-          'before:[background-image:var(--media-poster-placeholder,none)]',
-          'before:bg-no-repeat',
-          'before:[background-position:var(--media-object-position,center)]',
-          'before:[background-size:var(--media-object-fit,contain)]',
-          'before:opacity-0 before:[filter:blur(var(--media-poster-placeholder-blur,20px))]',
-          'before:transition-opacity before:duration-250',
-          'has-[img[data-visible]:not([data-loaded])]:before:opacity-100',
-        ]
-      : [],
     // Fullscreen
     '[&:fullscreen]:[--container-border-radius:0]',
     {
@@ -114,9 +101,7 @@ const controlsBase = cn(
   'peer-data-open/error:hidden!',
   'ease-(--controls-transition-timing-function)',
   'duration-[calc(var(--controls-transition-duration)/2)]',
-  'pointer-fine:will-change-[filter,opacity,scale,translate]',
   'pointer-fine:transition-[filter,opacity,scale,translate]',
-  'pointer-coarse:will-change-[opacity,scale,translate]',
   'pointer-coarse:transition-[opacity,scale,translate]',
   '@2xl/media-root:[--base-boundary-offset:3]'
 );
@@ -150,7 +135,7 @@ const splitControls = cn(
 
 export const primaryControls = cn(
   splitControls,
-  'bottom-2 inset-x-2 origin-bottom',
+  'z-20 bottom-2 inset-x-2 origin-bottom',
   '@max-lg/media-root:motion-safe:group-[:not([data-visible])]/controls:translate-y-1'
 );
 
@@ -171,7 +156,7 @@ export const spacer = 'grow';
 
 export const time = {
   ...baseTime,
-  group: cn(baseTime.group, 'px-3'),
+  group: cn(baseTime.group, 'px-2 @lg/media-root:px-3'),
 };
 
 /* Thumbnail (with video surface) */

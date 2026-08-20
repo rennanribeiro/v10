@@ -40,9 +40,10 @@ function App() {
 
   return (
     <SandboxI18nProvider>
-      <Player>
+      <Player poster={poster}>
+        {/* The skin renders its own <img> from `poster`; supplying one is what lets it carry a CORS mode. */}
         <VideoSkinComponent
-          poster={poster}
+          renderPoster={<img alt="" crossOrigin="" />}
           skin={skin}
           styling={styling}
           live={live}
@@ -55,7 +56,7 @@ function App() {
             loop={loop}
             preload={preload}
             playsInline
-            crossOrigin="anonymous"
+            crossOrigin=""
           >
             <Chapters tracks={getChapters(source)} />
             <Storyboard src={storyboard} />

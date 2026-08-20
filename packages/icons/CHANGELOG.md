@@ -1,5 +1,33 @@
 # Changelog
 
+## [10.0.0-beta.29](https://github.com/videojs/v10/compare/@videojs/icons@10.0.0-beta.28...@videojs/icons@10.0.0-beta.29) (2026-08-19)
+
+
+### Features
+
+* **skin:** add canonical styling and registry output ([#2202](https://github.com/videojs/v10/issues/2202)) ([8982d8d](https://github.com/videojs/v10/commit/8982d8d88e09827ad14ed406864c1db14d66c9c8))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * devDependencies
+    * @videojs/utils bumped to 10.0.0-beta.29
+
+## [10.0.0-beta.28](https://github.com/videojs/v10/compare/@videojs/icons@10.0.0-beta.27...@videojs/icons@10.0.0-beta.28) (2026-08-19)
+
+
+### Miscellaneous Chores
+
+* **@videojs/icons:** Synchronize videojs versions
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * devDependencies
+    * @videojs/utils bumped to 10.0.0-beta.28
+
 ## [10.0.0-beta.27](https://github.com/videojs/v10/compare/@videojs/icons@10.0.0-beta.26...@videojs/icons@10.0.0-beta.27) (2026-08-17)
 
 

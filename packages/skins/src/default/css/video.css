@@ -180,6 +180,12 @@
   .media-controls--primary,
   .media-controls--secondary {
     position: absolute;
+  }
+  /* Primary must be higher for the preview/thumbnail */
+  .media-controls--primary {
+    z-index: 20;
+  }
+  .media-controls--secondary {
     z-index: 10;
   }
 
@@ -196,6 +202,11 @@
     transform-origin: top;
   }
 
+  .media-time-controls {
+    flex: 1;
+    padding-inline: calc(var(--spacing) * 2);
+  }
+
   @container media-root (width < 32rem) {
     .media-controls--primary,
     .media-controls--secondary {
@@ -204,12 +215,10 @@
 
       @media (pointer: fine) {
         transition-property: filter, opacity, scale, translate;
-        will-change: filter, opacity, scale, translate;
       }
 
       @media (pointer: coarse) {
         transition-property: opacity, scale, translate;
-        will-change: opacity, scale, translate;
       }
     }
 
@@ -245,6 +254,10 @@
           translate: 0 -4px;
         }
       }
+    }
+
+    .media-button--captions {
+      display: none;
     }
   }
 
@@ -282,21 +295,18 @@
         translate: 0 4px;
       }
     }
-  }
 
-  .media-time-controls {
-    flex: 1;
-    padding-inline: calc(var(--spacing) * 3);
+    .media-time-controls {
+      padding-inline: calc(var(--spacing) * 3);
+    }
   }
 
   @media (pointer: fine) {
     transition-property: filter, opacity, scale, translate;
-    will-change: filter, opacity, scale, translate;
   }
 
   @media (pointer: coarse) {
     transition-property: opacity, scale, translate;
-    will-change: opacity, scale, translate;
   }
 
   @container media-root (width > 42rem) {

@@ -9,8 +9,8 @@
  * failed-CDN constraint (`excludeFailedCdns`, failover cooldown) and the
  * capability constraint (`excludeUnplayableTracks`, codec support). Then a small
  * ordered chain of rules (`applyRules`) picks among the survivors. Each constraint/rule reads the signals it needs at apply
- * time, so the effect subscribes to exactly what was consulted. The chain is
- * three rules, most authoritative first:
+ * time, so the effect subscribes to exactly what was consulted. The chain runs
+ * most authoritative first:
  *
  *   1. **user intent** — a soft filter on `user*TrackSelection`: narrow to the
  *      partial-track match; an empty match falls through to the full set.
@@ -18,7 +18,12 @@
  *      narrow to the highest-priority CDN that still has tracks; an empty match
  *      falls through. Shared by video and audio, so every type stays on one CDN
  *      (`deriveCdnPriority` owns the list). No-op for non-redundant sources.
- *   3. **ranking** — the terminal sort: `rankByBandwidth`, shared by video and
+ *   3. **player resolution** — a soft filter on `playerResolution`
+ *      (`playerResolutionCap`, video only): narrow to the smallest rendition
+ *      tier covering the player element, plus everything below it. No-op
+ *      without a measurement. Ahead of the ranker but behind the CDN scope, so
+ *      the cap chooses *within* a host rather than between hosts.
+ *   4. **ranking** — the terminal sort: `rankByBandwidth`, shared by video and
  *      audio. Fitting tracks (within the throughput threshold) first, highest
  *      bitrate first; over-throughput tracks after, least-over first. Hysteresis
  *      via boosting the current track's sort weight by `upgradeMargin`.
@@ -38,8 +43,9 @@
  * `setupTrackSwitching` owns only the lifecycle and runs what it's given. Video
  * and audio run constraints `[excludeFailedCdns, excludeUnplayableTracks]` then
  * rules `[filterByUserSelection, preferActiveCdn, rankByBandwidth]` and take the
- * head; `switchVideoTrack` also accepts ABR tuning config, `switchAudioTrack`
- * takes none. `switchTextTrack` differs — selection is *optional* (captions are
+ * head; video inserts `playerResolutionCap` after the active-CDN scope, and
+ * `switchVideoTrack` also accepts ABR tuning config, `switchAudioTrack` takes
+ * none. `switchTextTrack` differs — selection is *optional* (captions are
  * opt-in / off-able), so it runs `[excludeFailedCdns]` + `[preferActiveCdn]` and
  * supplies a text terminal (`pickResolvedTextTrack`) that resolves standing user
  * intent (`userTextTrackSelection`, incl. `'off'`) and may yield no selection.
@@ -65,10 +71,13 @@ import { createMachineReactor } from '../../core/reactors/create-machine-reactor
 import { computed, peek, type ReadonlySignal, type Signal } from '../../core/signals/primitives';
 import { DEFAULT_QUALITY_CONFIG, type QualityConfig, resolutionArea } from '../../media/abr/quality-selection';
 import { SVTA_NO_SUPPORTED_AUDIO_TRACK, SVTA_NO_SUPPORTED_VIDEO_TRACK } from '../../media/errors';
+import type { Resolution } from '../../media/primitives/resolution';
 import {
   matchesPartialTrack,
   pickTextTrackFromTracks,
+  smallestCoveringPixelArea,
   type TextSelectionConfig,
+  tracksUnderPixelArea,
 } from '../../media/primitives/select-tracks';
 import {
   type AudioTrack,
@@ -85,6 +94,8 @@ import { getCdnId as defaultGetCdnId, type GetCdnId } from '../../media/utils/cd
 import { getTracksByType } from '../../media/utils/tracks';
 import type { BandwidthConfig, BandwidthState } from '../../network/bandwidth-estimator';
 import { DEFAULT_BANDWIDTH_CONFIG, getBandwidthEstimate } from '../../network/bandwidth-estimator';
+import type { SelectionRule, SelectionRuleDeps } from '../primitives/selection-rules';
+import { applyConstraints, applyRules, excludeUnplayableTracks, sameCandidateSet } from '../primitives/selection-rules';
 import { type ErrorEmitterState, emitError } from './collect-errors';
 
 // ============================================================================
@@ -138,83 +149,12 @@ export const DEFAULT_INITIAL_BANDWIDTH = 5_000_000;
 // Rule chain
 // ============================================================================
 
-/**
- * Deps handed to each rule and to `applyRules`, mirroring a behavior's setup
- * deps so a rule reads from the same surfaces a behavior does. `context` is
- * optional — it's threaded through but absent on direct setup calls (and
- * unread by today's rules), so the whole deps object can pass straight through.
- */
-export interface SelectionRuleDeps<State = unknown, Context = unknown, Config = unknown> {
-  state: State;
-  context?: Context;
-  config: Config;
-}
-
-/**
- * A selection rule narrows or reorders the candidate list. It reads the state,
- * context, and config it needs at apply time (tightly-coupled reads), so a
- * rule's `.get()`s subscribe the running effect to exactly what it consulted.
- * Returning an empty list means "no match" — the composer skips it, so a soft
- * filter never narrows the set to nothing. A ranker returns the list with its
- * pick at the head.
- */
-export type SelectionRule<T, State = unknown, Context = unknown, Config = unknown> = (
-  tracks: readonly T[],
-  deps: SelectionRuleDeps<State, Context, Config>
-) => readonly T[];
-
-/**
- * Apply rules to a candidate list in order; the pick is the first survivor.
- * Two responsibilities the rules don't carry: a rule that returns nothing is
- * skipped (fall-through — a preference never empties the set), and once one
- * survivor remains the chain stops (early-bail — later rules, including the
- * bandwidth ranker, never run, so the effect doesn't subscribe to their
- * signals while the choice is fixed).
- *
- * @param rules - Rules to apply, most authoritative first
- * @param tracks - Candidate tracks
- * @param deps - The behavior's `{ state, context, config }`, passed through to each rule
- * @returns The surviving candidates, pick first
- */
-export function applyRules<T, State, Context, Config>(
-  rules: readonly SelectionRule<T, State, Context, Config>[],
-  tracks: readonly T[],
-  deps: SelectionRuleDeps<State, Context, Config>
-): readonly T[] {
-  let current = tracks;
-  for (const rule of rules) {
-    const remaining = rule(current, deps);
-    if (remaining.length === 0) continue;
-    current = remaining;
-    if (current.length === 1) break;
-  }
-  return current;
-}
-
-/**
- * Apply hard constraints to a candidate list — the pre-pass that runs before the
- * rule chain. A constraint shares a rule's signature but its exclusion is
- * *hard*: it removes the unplayable (a codec the environment can't decode, a CDN
- * in failover cooldown) and a removed track is never attempted. Unlike
- * `applyRules`, this never skips an empty result and never early-bails — every
- * constraint always applies, and an empty survivor set is a real outcome
- * ("nothing playable here"), not a fall-through. Because each constraint only
- * removes, the order they run in can't change the result.
- *
- * @param constraints - Constraints to apply (pooled, order-independent)
- * @param tracks - Candidate tracks
- * @param deps - The behavior's `{ state, context, config }`, passed to each constraint
- * @returns The playable survivors (possibly empty)
- */
-export function applyConstraints<T, State, Context, Config>(
-  constraints: readonly SelectionRule<T, State, Context, Config>[],
-  tracks: readonly T[],
-  deps: SelectionRuleDeps<State, Context, Config>
-): readonly T[] {
-  let current = tracks;
-  for (const constraint of constraints) current = constraint(current, deps);
-  return current;
-}
+// Re-exported so a consumer typing against this module's rules doesn't need a
+// second import; the definitions live in `../primitives/selection-rules` so the
+// simple `selectVideoTrack` variant can share them without pulling the ABR path
+// in with them. See that module's note.
+export type { SelectionRule, SelectionRuleDeps } from '../primitives/selection-rules';
+export { applyConstraints, applyRules, excludeUnplayableTracks } from '../primitives/selection-rules';
 
 // ============================================================================
 // Specialization helper
@@ -391,6 +331,14 @@ type BandwidthRankerConfig<S extends SelectionKey, T extends SwitchableTrack> = 
   SwitchVideoTrackConfig;
 
 /**
+ * State the player-resolution cap reads: TrackSwitchingStateMap plus the
+ * *optional* player measurement, manifested by `trackPlayerResolution`.
+ */
+type PlayerResolutionCapStateMap<S extends SelectionKey> = TrackSwitchingStateMap<S> & {
+  playerResolution?: ReadonlySignal<Resolution | undefined>;
+};
+
+/**
  * State the active-CDN scope reads: the lifecycle map plus an *optional*
  * `cdnPriority` — the manifest-ordered CDN list (most-preferred first). The
  * signal exists only when the composition includes `deriveCdnPriority` (which
@@ -422,17 +370,6 @@ type CdnRuleConfig<S extends SelectionKey, T extends SwitchableTrack> = TrackSwi
   getCdnId?: GetCdnId;
 };
 
-/**
- * Config the capability constraint reads: the base config plus an *optional*
- * `canPlayTrack` codec probe. Optional → an unwired probe means "no codec
- * filtering" and the constraint passes everything through, so the base config
- * (without it) stays assignable. The engine defaults it to the DOM-bound
- * `canPlayTrack`.
- */
-type CapabilityConstraintConfig<S extends SelectionKey, T extends SwitchableTrack> = TrackSwitchingConfig<S, T> & {
-  canPlayTrack?: CanPlayTrack;
-};
-
 type VideoTrackCandidate = PartiallyResolvedVideoTrack | VideoTrack;
 type AudioTrackCandidate = PartiallyResolvedAudioTrack | AudioTrack;
 type TextTrackCandidate = PartiallyResolvedTextTrack | TextTrack;
@@ -460,6 +397,50 @@ function filterByUserSelection<S extends SelectionKey, U extends UserSelectionKe
 }
 
 /**
+ * Player-resolution cap — a soft filter, video only. Narrows to the renditions
+ * worth delivering at the player element's rendered size, so a small embed
+ * doesn't pull segments nobody can perceive. The tighter sibling of
+ * `screenResolutionCap`: the element's box, not the screen behind it.
+ *
+ * The cap is the *smallest tier that still covers the player*, and everything at
+ * or below it survives — not "everything at or below the player's area," which
+ * under-serves a player falling between two tiers. Take an 800×450 player
+ * against a 360p/720p/1080p ladder: only 360p is below it, so capping at the
+ * player's area would hold an 800-px-wide box to a 640-px-wide picture. The
+ * honest answer is the tier above, 720p, with 360p left in for the ranker.
+ * `smallestCoveringPixelArea` picks that cap; `tracksUnderPixelArea` — the same
+ * filter `screenResolutionCap` narrows with — applies it.
+ *
+ * Renditions declaring no width or height compare as area `0` and are never capped
+ * out — they can't be judged against the player, and dropping them could strand
+ * a source whose renditions all omit it.
+ *
+ * Runs *after* `preferActiveCdn`, so it narrows within the host already chosen.
+ * Ahead of it, a cap that pruned every rendition of the preferred CDN would leave
+ * the scope to fall to the next one with survivors — a size preference silently
+ * moving playback to another host. Redundant streams normally mirror the same
+ * ladder, which makes that a nonstandard-but-legal mismatch across CDNs rather
+ * than an everyday case; the ordering costs nothing either way.
+ *
+ * Reading `state.playerResolution` through its signal is what subscribes the
+ * chain to resizes; `undefined` — no signal composed, or nothing to measure —
+ * means "don't cap" rather than a cap of zero, so the chain proceeds unnarrowed.
+ */
+function playerResolutionCap<S extends SelectionKey, T extends SwitchableTrack>(
+  tracks: readonly T[],
+  { state }: SelectionRuleDeps<PlayerResolutionCapStateMap<S>, AnySlotMap, TrackSwitchingConfig<S, T>>
+): readonly T[] {
+  const playerResolution = state.playerResolution?.get();
+  if (!playerResolution) return tracks;
+
+  // A player larger than every rendition has no covering tier, so the cap is
+  // `undefined` and the filter's unbounded default narrows nothing.
+  const cap = smallestCoveringPixelArea(tracks, playerResolution.width * playerResolution.height);
+
+  return tracksUnderPixelArea(tracks, cap);
+}
+
+/**
  * Failed-CDN constraint — a *hard* filter (constraints pre-pass), shared by
  * video and audio. Removes tracks served from a CDN currently in failover
  * cooldown (`failedCdns`, written by the failover monitor). Removed tracks are never
@@ -480,31 +461,6 @@ function excludeFailedCdns<S extends SelectionKey, T extends SwitchableTrack>(
   const getCdnId = config.getCdnId ?? defaultGetCdnId;
   const failedSet = new Set(failed);
   return tracks.filter((track) => !failedSet.has(getCdnId(track.url)));
-}
-
-/**
- * Capability constraint — a *hard* filter (constraints pre-pass), shared by
- * video and audio. Removes renditions this environment can't decode, probed via
- * the injected `canPlayTrack` (codec → `MediaSource.isTypeSupported`). Moving
- * the check here — before selection — means an unplayable variant (e.g. HEVC on
- * a browser without HEVC) is pruned upstream and never picked, instead of
- * surviving into the pipeline to fail late at `createSourceBuffer`. That late
- * throw stays as a defensive structural guarantee; with this constraint it
- * should rarely fire.
- *
- * Passes everything through when there's no `canPlayTrack` probe (a composition
- * that didn't wire it, or DOM-free tests). When it prunes *every* track (no
- * decodable rendition), the empty result is preserved (per `applyConstraints`)
- * — "nothing playable," so the behavior clears the selection (no pick) and the
- * late `createSourceBuffer` check stays as the backstop.
- */
-function excludeUnplayableTracks<S extends SelectionKey, T extends SwitchableTrack>(
-  tracks: readonly T[],
-  { config }: SelectionRuleDeps<TrackSwitchingStateMap<S>, AnySlotMap, CapabilityConstraintConfig<S, T>>
-): readonly T[] {
-  const canPlay = config.canPlayTrack;
-  if (!canPlay) return tracks;
-  return tracks.filter((track) => canPlay(track));
 }
 
 /**
@@ -633,7 +589,7 @@ type TextTerminalConfig = TrackSwitchingConfig<'selectedTextTrackId', TextTrackC
  *     stale pick whose match is gone (e.g. the language dropped on a source
  *     change) falls through to the default policy.
  *   - auto (`undefined`) → the opt-in default policy (`preferredSubtitleLanguage`
- *     → `DEFAULT=YES + AUTOSELECT=YES` → none), shared with `pickTextTrack`.
+ *     → `DEFAULT=YES + AUTOSELECT=YES` → none), via `pickTextTrackFromTracks`.
  *
  * Returning `undefined` is a real outcome (captions are opt-in), which is why the
  * text variant relies on `setupTrackSwitching`'s no-selection seam.
@@ -696,7 +652,7 @@ export function setupTrackSwitching<
       if (!isResolvedPresentation(presentation)) return [];
       return applyConstraints(config.constraints ?? [], getTracks(presentation), deps);
     },
-    { equals: (a, b) => a.length === b.length && a.every((track) => b.some((other) => other.id === track.id)) }
+    { equals: sameCandidateSet }
   );
 
   return createMachineReactor({
@@ -812,7 +768,7 @@ export const switchVideoTrack = defineBehavior({
         userSelectionKey: 'userVideoTrackSelection',
         getTracks: (presentation) => getTracksByType(presentation, 'video') as readonly VideoTrackCandidate[],
         constraints: [excludeFailedCdns, excludeUnplayableTracks],
-        rules: [filterByUserSelection, preferActiveCdn, rankByBandwidth],
+        rules: [filterByUserSelection, preferActiveCdn, playerResolutionCap, rankByBandwidth],
         noSupportedTrackCode: SVTA_NO_SUPPORTED_VIDEO_TRACK,
       },
     }),

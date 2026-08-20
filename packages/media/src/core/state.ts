@@ -148,12 +148,13 @@ export interface MediaStreamTypeState {
 
 /** Resolved content metadata exposed by the player store. */
 export interface MediaMetadataState {
-  /** The resolved content title. */
-  contentTitle: string;
-  /** Set or clear the user title override. */
-  setContentTitle(value: string | null): void;
-  /** Set or clear the fallback used when neither the user nor media supplies a title. */
-  setDefaultContentTitle(value: string | null): void;
+  /** The resolved content title. Set it through the player, not through the store. */
+  title: string;
+  /**
+   * The resolved poster URL, independent of the media element's own `poster`.
+   * Set it through the player, not through the store.
+   */
+  poster: string;
 }
 
 export interface MediaLiveState {
@@ -328,6 +329,13 @@ export interface MediaTextTrackState {
   thumbnailCues: MediaTextCue[];
   /** The `<track>` element's `src` for resolving relative cue text URLs. */
   thumbnailTrackSrc: string | null;
+  /**
+   * The media element's CORS mode, mapped through the CORS-settings-attribute
+   * rules, or `null` when it is not in CORS mode. Thumbnail UI fetches the
+   * sprite sheets the cues point at with this mode, since a cross-origin
+   * `<track>` only loads at all when the media element is CORS-enabled.
+   */
+  thumbnailTrackCrossOrigin: 'anonymous' | 'use-credentials' | null;
   /** All text tracks available on the media element. */
   textTrackList: MediaTextTrack[];
   /** Whether captions/subtitles are currently enabled. */

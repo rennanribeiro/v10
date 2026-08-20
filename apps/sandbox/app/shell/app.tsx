@@ -5,6 +5,7 @@ import type { SourceId } from '@app/shared/sources';
 import {
   DASH_SOURCE_IDS,
   DEFAULT_AUDIO_SOURCE,
+  DEFAULT_BACKGROUND_SOURCE,
   DEFAULT_DASH_SOURCE,
   DEFAULT_SOURCE,
   HLS_SOURCE_IDS,
@@ -14,6 +15,7 @@ import {
   MUX_SOURCE_IDS,
   MUX_SPF_SOURCE_IDS,
   NON_DASH_SOURCE_IDS,
+  SHAKA_SOURCE_IDS,
   SOURCES,
   SPF_HLS_SOURCE_IDS,
 } from '@app/shared/sources';
@@ -27,15 +29,27 @@ function getPagePath(platform: Platform, preset: Preset): string {
   return `/${platform}-${preset}/`;
 }
 
+/**
+ * The SPF background presets default to their own source rather than the global
+ * one, which is MPEG-TS and so is a failure case for that engine rather than a
+ * demo of it. Only when nothing was asked for — an explicit `?source=` still wins,
+ * so a shared link reaches the source it names.
+ */
+function isSpfBackgroundPreset(preset: Preset): boolean {
+  return preset === 'hls-background-video' || preset === 'mux-background-video';
+}
+
 function readParams() {
   const params = new URLSearchParams(location.search);
   const preload = params.get('preload');
+  const preset = (params.get('preset') ?? 'video') as Preset;
   return {
     platform: (params.get('platform') ?? 'html') as Platform,
     styling: (params.get('styling') ?? 'css') as Styling,
-    preset: (params.get('preset') ?? 'video') as Preset,
+    preset,
     skin: (params.get('skin') ?? 'default') as 'default' | 'minimal',
-    source: (params.get('source') ?? 'hls-1') as SourceId,
+    source: (params.get('source') ??
+      (isSpfBackgroundPreset(preset) ? DEFAULT_BACKGROUND_SOURCE : DEFAULT_SOURCE)) as SourceId,
     autoplay: params.get('autoplay') === '1',
     muted: params.get('muted') === '1',
     loop: params.get('loop') === '1',
@@ -76,24 +90,29 @@ export function App() {
   const muxPreset = preset === 'mux-video' || preset === 'mux-audio';
   const muxSpfPreset = preset === 'mux-video-spf' || preset === 'mux-audio-spf';
   const spfHlsPreset = preset === 'hls-video' || preset === 'hls-audio';
-  // Every background preset renders a fixed source and has no Tailwind skin.
-  const backgroundPreset =
-    preset === 'background-video' || preset === 'hls-background-video' || preset === 'mux-background-video';
+  // The SPF-backed background presets take the same HLS sources the plain HLS
+  // presets do — `<background-video>` is the one that stays fixed, since it hands a
+  // progressive MP4 to the browser rather than streaming a manifest.
+  const spfBackgroundPreset = isSpfBackgroundPreset(preset);
+  // No background preset has a Tailwind skin or a skin choice.
+  const backgroundPreset = preset === 'background-video' || spfBackgroundPreset;
   const embedPreset = (EMBED_PRESETS as readonly Preset[]).includes(preset);
   const availableSources =
     preset === 'audio'
       ? MP4_SOURCE_IDS
       : preset === 'dash-video'
         ? DASH_SOURCE_IDS
-        : structuredSource && muxPreset
-          ? MUX_SOURCE_IDS
-          : structuredSource && hlsPreset
-            ? HLS_SOURCE_IDS
-            : structuredSource && muxSpfPreset
-              ? MUX_SPF_SOURCE_IDS
-              : spfHlsPreset || muxSpfPreset
-                ? SPF_HLS_SOURCE_IDS
-                : NON_DASH_SOURCE_IDS;
+        : preset === 'shaka-video'
+          ? SHAKA_SOURCE_IDS
+          : structuredSource && muxPreset
+            ? MUX_SOURCE_IDS
+            : structuredSource && hlsPreset
+              ? HLS_SOURCE_IDS
+              : structuredSource && muxSpfPreset
+                ? MUX_SPF_SOURCE_IDS
+                : spfHlsPreset || muxSpfPreset || spfBackgroundPreset
+                  ? SPF_HLS_SOURCE_IDS
+                  : NON_DASH_SOURCE_IDS;
 
   // Keep the URL in sync with all state.
   useEffect(() => {
@@ -159,12 +178,24 @@ export function App() {
     }
   }, [preset, source]);
 
-  // Constrain source away from DASH for non-DASH presets
+  // Constrain source away from DASH for presets that cannot play it. Shaka is
+  // not one of them — it plays DASH and HLS from the same element.
   useEffect(() => {
-    if (preset !== 'dash-video' && SOURCES[source].type === 'dash') {
+    if (preset !== 'dash-video' && preset !== 'shaka-video' && SOURCES[source].type === 'dash') {
       setSource(DEFAULT_SOURCE);
     }
   }, [preset, source]);
+
+  // Land the SPF background presets on their own default when *switched into*,
+  // rather than inheriting whatever the previous preset was showing —
+  // `readParams` covers the first-mount half. Keyed on entry, so a source picked
+  // afterwards sticks.
+  const previousPreset = useRef(preset);
+  useEffect(() => {
+    const entered = spfBackgroundPreset && previousPreset.current !== preset;
+    previousPreset.current = preset;
+    if (entered) setSource(DEFAULT_BACKGROUND_SOURCE);
+  }, [preset, spfBackgroundPreset]);
 
   // Constrain source away from DRM the preset cannot license, and away from a
   // playback ID a non-Mux preset has no URL for.
@@ -210,6 +241,7 @@ export function App() {
         onAccentColorChange={setAccentColor}
         availableSources={availableSources}
         isBackgroundVideo={backgroundPreset}
+        isSpfBackgroundVideo={spfBackgroundPreset}
         isSpfHls={spfHlsPreset}
         isMuxVideo={preset === 'mux-video'}
         isMuxAudio={preset === 'mux-audio'}

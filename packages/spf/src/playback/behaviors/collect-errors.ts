@@ -25,9 +25,10 @@
 
 import { defineBehavior } from '../../core/composition/create-composition';
 import { createMachineReactor } from '../../core/reactors/create-machine-reactor';
-import { computed, type ReadonlySignal, type Signal, update } from '../../core/signals/primitives';
+import { computed, peek, type ReadonlySignal, type Signal, update } from '../../core/signals/primitives';
 import type { SvtaError } from '../../media/errors';
 import { isResolvedPresentation, type MaybeResolvedPresentation } from '../../media/types';
+import type { SelectionRule } from '../primitives/selection-rules';
 
 export interface CollectErrorsState {
   presentation?: MaybeResolvedPresentation;
@@ -66,6 +67,43 @@ export function emitError(state: ErrorEmitterState, error: SvtaError): void {
   console.error('[spf] reported condition', error);
   if (!state.errors) return;
   update(state.errors, (errors) => [...(errors ?? []), error]);
+}
+
+/**
+ * A "constraint" that reports a type the source carries **no** renditions of, for
+ * a composition that can't play without it.
+ *
+ * Strange on purpose, and the strangeness is the point: it never constrains
+ * anything, always returning its input untouched. It is shaped as a rule so a
+ * composition opts in by adding it to `constraints` — nothing to thread through
+ * config, and no cost at all to a composition that leaves it out.
+ *
+ * **Belongs last in the chain.** A constraint sees the list as it stands at its
+ * own position, so only at the tail does an empty input mean "nothing playable
+ * here" — none of this type offered, or the constraints ahead pruned them all.
+ *
+ * These are the failures no per-rendition cause can report: causes come from
+ * `reportUnsupportedTrackConditions` as each media playlist resolves, and a
+ * rendition pruned before selection never resolves. Container and encryption
+ * aren't knowable until one does; CODECS is, so an undecodable ladder isn't.
+ *
+ * Idempotent because the constraint chain runs inside a `computed` that re-derives
+ * on every `presentation` write — segment appends and live reloads included — and
+ * the sequence deliberately keeps duplicates. `peek` is what keeps that computed
+ * from subscribing to the slot this writes.
+ *
+ * @example
+ * // engine-background-video.ts — video-only, so a source with none can't play
+ * constraints: [excludeUnplayableTracks, reportAbsentTrackType(SVTA_NO_SUPPORTED_VIDEO_TRACK)]
+ */
+export function reportAbsentTrackType<T>(code: number): SelectionRule<T, ErrorEmitterState> {
+  return (tracks, { state }) => {
+    const reported = state.errors && peek(state.errors);
+    if (!tracks.length && !reported?.some((error) => error.code === code)) {
+      emitError(state, { code });
+    }
+    return tracks;
+  };
 }
 
 /**

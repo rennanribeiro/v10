@@ -46,6 +46,8 @@ export {
   type Locale,
   onI18nRegistryChange,
   registerI18n,
+  Text,
+  type TextProps,
   type TranslationParams,
   type Translations,
   type Translator,
@@ -176,6 +178,7 @@ export type {
   TimeSliderChaptersProps,
   TimeSliderChaptersState,
 } from './ui/time-slider/time-slider-chapters/time-slider-chapters';
+export { Title, type TitleProps } from './ui/title/title';
 export { Tooltip, type TooltipContent, type TooltipContextValue, useTooltipContext } from './ui/tooltip';
 export { VolumeIndicator } from './ui/volume-indicator';
 export type { VolumeIndicatorFillProps } from './ui/volume-indicator/volume-indicator-fill';
