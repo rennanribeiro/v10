@@ -143,6 +143,14 @@ export const Gesture = {
   },
 } as const;
 
+export const GifVideo = {
+  tagName: 'gif-video',
+  import: {
+    from: '@videojs/html/media/gif-video',
+    sideEffect: true,
+  },
+} as const;
+
 export const HlsAudio = {
   tagName: 'hls-audio',
   import: {
@@ -551,6 +559,14 @@ export const TimeSliderChapterTitle = {
   },
 } as const;
 
+export const Title = {
+  tagName: 'media-title',
+  import: {
+    from: '@videojs/html/ui/title',
+    sideEffect: true,
+  },
+} as const;
+
 export const Tooltip = {
   tagName: 'media-tooltip',
   import: {
@@ -658,6 +674,7 @@ export const entries = {
   ErrorDialog,
   FullscreenButton,
   Gesture,
+  GifVideo,
   HlsAudio,
   HlsBackgroundVideo,
   HlsJsVideo,
@@ -709,6 +726,7 @@ export const entries = {
   TimeSlider,
   TimeSliderChapters,
   TimeSliderChapterTitle,
+  Title,
   Tooltip,
   TooltipGroup,
   TooltipLabel,
