@@ -8,6 +8,7 @@ import RendererPicker from '@/components/installation/RendererPicker';
 import SkinPickerSection from '@/components/installation/SkinPickerSection.astro';
 import UseCasePicker from '@/components/installation/UseCasePicker';
 import HTMLInstallTabs from '@/components/installation/HTMLInstallTabs.astro';
+import NoCdnMediaNote from '@/components/installation/NoCdnMediaNote.astro';
 import HTMLUsageCodeBlock from '@/components/installation/HTMLUsageCodeBlock';
 import ReactCreateCodeBlock from '@/components/installation/ReactCreateCodeBlock';
 import ReactUsageCodeBlock from '@/components/installation/ReactUsageCodeBlock';
@@ -54,7 +55,7 @@ Here's what the flags mean:
 - *Skin*: Pick what your player looks like
 - *Media*: Pick what kind of media you have. The `live-video` preset supports HLS and Mux video; `live-audio` supports Mux audio.
 - *Source URL*: Define where your media comes from (or omit for a sample URL)
-- *Install method*: How do you want to install your package? (CDN is HTML-only, and a few media types have no CDN build — Vimeo, for one.)
+- *Install method*: How do you want to install your package? (CDN is HTML-only<NoCdnMediaNote />.)
 
 If you're an agent, interview your user and offer to run the CLI for them, or offer them a precomposed CLI command. 
 </div>
