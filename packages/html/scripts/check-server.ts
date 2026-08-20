@@ -35,11 +35,14 @@ const importScript = `
   await Promise.all(${JSON.stringify(imports)}.map((specifier) => import(specifier)));
   const html = await import('${packageName}');
   const custom = html.createPlayer({ features: [] });
-  if (typeof custom.PlayerElement !== 'function' || typeof custom.PlayerController !== 'function') {
+  if (typeof custom.ProviderMixin !== 'function' || typeof custom.PlayerController !== 'function' || typeof custom.create !== 'function') {
     throw new Error('createPlayer server facade is not composable');
   }
+  class ServerHost {}
+  class ServerPlayer extends custom.ProviderMixin(ServerHost) {}
+  if (!(new ServerPlayer() instanceof ServerHost)) throw new Error('ProviderMixin server export is not composable');
   const video = await import('${packageName}/video');
-  for (const name of ['PlayerController', 'VideoPlayerElement', 'VideoSkinElement']) {
+  for (const name of ['MinimalVideoSkinElement', 'VideoSkinElement']) {
     if (typeof video[name] !== 'function') throw new Error(name + ' server export is not constructable');
   }
   if (!Array.isArray(video.videoFeatures)) throw new Error('videoFeatures server export is not usable');

@@ -74,7 +74,7 @@ function createServerStubs(exportedNames: string[]): string[] {
 
   if (take('createPlayer')) {
     output.push(
-      'function createPlayer() { class PlayerElement {}; class PlayerController {}; return { PlayerElement, PlayerController, playerContext: undefined }; }'
+      'function createPlayer() { class PlayerController {}; const ProviderMixin = (Base) => Base; const create = () => undefined; return { ProviderMixin, PlayerController, context: undefined, create }; }'
     );
   }
   if (take('createPlayerController')) {
