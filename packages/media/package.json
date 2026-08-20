@@ -46,11 +46,12 @@
   ],
   "scripts": {
     "build": "tsdown",
+    "build:shaka": "node scripts/build-shaka.mjs",
     "build:watch": "tsdown --watch ./src --no-clean",
+    "clean": "rimraf --glob dist types '*.tsbuildinfo'",
     "dev": "pnpm run build:watch",
     "test": "vitest run",
-    "test:watch": "vitest",
-    "clean": "rimraf --glob dist types '*.tsbuildinfo'"
+    "test:watch": "vitest"
   },
   "dependencies": {
     "@videojs/utils": "workspace:*",
