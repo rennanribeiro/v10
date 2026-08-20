@@ -5,6 +5,15 @@ import { resolve } from 'node:path';
 const packageDir = resolve(import.meta.dirname, '..');
 const packageName = '@videojs/html';
 const serverDir = resolve(packageDir, 'dist/server');
+const createPlayerSource = readFileSync(resolve(packageDir, 'src/player/create-player.ts'), 'utf8');
+const createPlayerResult = createPlayerSource.match(/export interface CreatePlayerResult[\s\S]*?\n}/)?.[0];
+
+if (!createPlayerResult) throw new Error('Could not find CreatePlayerResult');
+
+const createPlayerReturnsElement = /\bPlayerElement\s*:/.test(createPlayerResult);
+const videoPresetExportsPlayer = /\bVideoPlayerElement\b/.test(
+  readFileSync(resolve(packageDir, 'src/presets/video.ts'), 'utf8')
+);
 
 function toPublicSpecifiers(file: string): string[] {
   const entry = file.replace(/\.js$/, '');
@@ -35,14 +44,26 @@ const importScript = `
   await Promise.all(${JSON.stringify(imports)}.map((specifier) => import(specifier)));
   const html = await import('${packageName}');
   const custom = html.createPlayer({ features: [] });
-  if (typeof custom.ProviderMixin !== 'function' || typeof custom.PlayerController !== 'function' || typeof custom.create !== 'function') {
-    throw new Error('createPlayer server facade is not composable');
+  if (${JSON.stringify(createPlayerReturnsElement)}) {
+    if (typeof custom.PlayerElement !== 'function' || typeof custom.PlayerController !== 'function' || !('playerContext' in custom)) {
+      throw new Error('createPlayer PlayerElement server facade is not composable');
+    }
+    class ServerPlayer extends custom.PlayerElement {}
+    new ServerPlayer();
+    new custom.PlayerController();
+  } else {
+    if (typeof custom.ProviderMixin !== 'function' || typeof custom.PlayerController !== 'function' || typeof custom.create !== 'function') {
+      throw new Error('createPlayer ProviderMixin server facade is not composable');
+    }
+    class ServerHost {}
+    class ServerPlayer extends custom.ProviderMixin(ServerHost) {}
+    if (!(new ServerPlayer() instanceof ServerHost)) throw new Error('ProviderMixin server export is not composable');
   }
-  class ServerHost {}
-  class ServerPlayer extends custom.ProviderMixin(ServerHost) {}
-  if (!(new ServerPlayer() instanceof ServerHost)) throw new Error('ProviderMixin server export is not composable');
   const video = await import('${packageName}/video');
-  for (const name of ['MinimalVideoSkinElement', 'VideoSkinElement']) {
+  const videoClasses = ${JSON.stringify(videoPresetExportsPlayer)}
+    ? ['PlayerController', 'VideoPlayerElement', 'VideoSkinElement']
+    : ['MinimalVideoSkinElement', 'VideoSkinElement'];
+  for (const name of videoClasses) {
     if (typeof video[name] !== 'function') throw new Error(name + ' server export is not constructable');
   }
   if (!Array.isArray(video.videoFeatures)) throw new Error('videoFeatures server export is not usable');

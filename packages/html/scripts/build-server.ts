@@ -5,6 +5,12 @@ import ts from 'typescript';
 const packageDir = resolve(import.meta.dirname, '..');
 const browserDir = resolve(packageDir, 'dist/default');
 const serverDir = resolve(packageDir, 'dist/server');
+const createPlayerSource = readFileSync(resolve(packageDir, 'src/player/create-player.ts'), 'utf8');
+const createPlayerResult = createPlayerSource.match(/export interface CreatePlayerResult[\s\S]*?\n}/)?.[0];
+
+if (!createPlayerResult) throw new Error('Could not find CreatePlayerResult');
+
+const createPlayerReturnsElement = /\bPlayerElement\s*:/.test(createPlayerResult);
 
 const entryFiles = [
   resolve(browserDir, 'index.js'),
@@ -74,7 +80,9 @@ function createServerStubs(exportedNames: string[]): string[] {
 
   if (take('createPlayer')) {
     output.push(
-      'function createPlayer() { class PlayerController {}; const ProviderMixin = (Base) => Base; const create = () => undefined; return { ProviderMixin, PlayerController, context: undefined, create }; }'
+      createPlayerReturnsElement
+        ? 'function createPlayer() { class PlayerElement {}; class PlayerController {}; return { PlayerElement, PlayerController, playerContext: undefined }; }'
+        : 'function createPlayer() { class PlayerController {}; const ProviderMixin = (Base) => Base; const create = () => undefined; return { ProviderMixin, PlayerController, context: undefined, create }; }'
     );
   }
   if (take('createPlayerController')) {
