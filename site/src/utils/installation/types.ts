@@ -1,12 +1,22 @@
-export type Renderer =
-  | 'background-video'
-  | 'dash'
-  | 'hls'
-  | 'html5-audio'
-  | 'html5-video'
-  | 'mux-audio'
-  | 'mux-video'
-  | 'vimeo';
+/**
+ * Every media renderer the installation flow can offer.
+ *
+ * Listed alphabetically; the order a picker shows comes from each preset's
+ * `renderers`, not from here. Exported so callers can walk the full set — see
+ * `renderersWithoutCdn` in `./cdn-code`.
+ */
+export const RENDERERS = [
+  'background-video',
+  'dash',
+  'hls',
+  'html5-audio',
+  'html5-video',
+  'mux-audio',
+  'mux-video',
+  'vimeo',
+] as const;
+
+export type Renderer = (typeof RENDERERS)[number];
 
 export type Skin = 'video' | 'audio' | 'minimal-video' | 'minimal-audio' | 'none';
 
