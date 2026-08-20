@@ -45,15 +45,15 @@ describe('generateCdnCode', () => {
     );
   });
 
-  it('generates headless video CDN tag when skin is none', () => {
+  it('generates the skinless video CDN tag when skin is none', () => {
     expect(generateCdnCode('default-video', 'none', 'html5-video', manifest)).toEqual(
-      `<script type="module" src="https://cdn.jsdelivr.net/npm/@videojs/html/cdn/video-headless.js"></script>`
+      `<script type="module" src="https://cdn.jsdelivr.net/npm/@videojs/html/cdn/video-player.js"></script>`
     );
   });
 
-  it('generates headless audio CDN tag when skin is none', () => {
+  it('generates the skinless audio CDN tag when skin is none', () => {
     expect(generateCdnCode('default-audio', 'none', 'html5-audio', manifest)).toEqual(
-      `<script type="module" src="https://cdn.jsdelivr.net/npm/@videojs/html/cdn/audio-headless.js"></script>`
+      `<script type="module" src="https://cdn.jsdelivr.net/npm/@videojs/html/cdn/audio-player.js"></script>`
     );
   });
 
@@ -71,9 +71,9 @@ describe('generateCdnCode', () => {
     );
   });
 
-  it('generates the headless live video CDN tag when skin is none', () => {
+  it('generates the skinless live video CDN tag when skin is none', () => {
     expect(generateCdnCode('live-video', 'none', 'hls', manifest)).toEqual(
-      `<script type="module" src="https://cdn.jsdelivr.net/npm/@videojs/html/cdn/live-video-headless.js"></script>
+      `<script type="module" src="https://cdn.jsdelivr.net/npm/@videojs/html/cdn/live-video-player.js"></script>
 <script type="module" src="https://cdn.jsdelivr.net/npm/@videojs/html/cdn/media/hlsjs-video.js"></script>`
     );
   });
@@ -86,7 +86,7 @@ describe('generateCdnCode', () => {
     expect(generateCdnCode('live-audio', 'minimal-audio', 'mux-audio', manifest)).toContain(
       'cdn/live-audio-minimal.js'
     );
-    expect(generateCdnCode('live-audio', 'none', 'mux-audio', manifest)).toContain('cdn/live-audio-headless.js');
+    expect(generateCdnCode('live-audio', 'none', 'mux-audio', manifest)).toContain('cdn/live-audio-player.js');
   });
 });
 

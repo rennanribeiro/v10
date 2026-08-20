@@ -9,12 +9,13 @@ import {
 
 const CDN_BASE = 'https://cdn.jsdelivr.net/npm/@videojs/html/cdn';
 
-// Every installation preset ships default, minimal, and headless CDN bundles.
+// Every installation preset ships default, minimal, and skinless CDN bundles.
+// The skinless bundle is named for the element it defines (e.g. `video-player`).
 // Background video is the exception: all skin choices resolve to one bundle.
 function getCdnFileName(useCase: UseCase, skin: Skin): string {
   const { group } = getInstallationPreset(useCase);
   if (useCase === 'background-video') return group;
-  if (skin === 'none') return `${group}-headless`;
+  if (skin === 'none') return `${group}-player`;
   if (skin === 'minimal-video' || skin === 'minimal-audio') return `${group}-minimal`;
   return group;
 }
