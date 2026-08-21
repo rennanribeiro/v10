@@ -1,5 +1,6 @@
-.video-player {
+.video-player media-container {
   position: relative;
+  display: block;
 }
 
 .video-player video {
