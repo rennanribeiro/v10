@@ -3,6 +3,8 @@ title: Customize skins
 description: Learn how to customize Video.js v10 skins by copying and modifying them
 ---
 
+import Aside from '@/components/Aside.astro';
+import DocsLink from '@/components/docs/DocsLink.astro';
 import FrameworkCase from '@/components/docs/FrameworkCase.astro';
 import StyleCase from '@/components/docs/StyleCase.astro';
 import EjectedSkin from '@/components/docs/EjectedSkin.astro';
@@ -11,14 +13,26 @@ Video.js v10 comes with two pre-built skins; Default and Minimal. Basic customiz
 
 ## Basic customization
 
+Both packaged skins read these CSS custom properties from your stylesheet. Set them on the skin, the player, or any ancestor, and the skin picks them up.
+
 | Property Name | Description | Type | Example |
 | ------------- | ----------- | ---- | ------- |
 | `--media-accent-color` | The color of slider fills and accented controls | [`<color>`](https://developer.mozilla.org/en-US/docs/Web/CSS/color_value) | `#f5c518` |
 | `--media-accent-text-color` | The color of text and icons shown on the accent color | [`<color>`](https://developer.mozilla.org/en-US/docs/Web/CSS/color_value) | `black` |
 | `--media-border-radius` | The border radius of the media player | A valid [border-radius value](https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/Properties/border-radius#values) | `1rem` |
 | `--media-scale-unit` | The base sizing unit for Vanilla CSS skins | [`<length>`](https://developer.mozilla.org/en-US/docs/Web/CSS/length) | `1rem` |
+| `--media-object-fit` | How the video and the poster fill the player box. Defaults to `contain` | [`object-fit`](https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/Properties/object-fit#values) | `cover` |
+| `--media-object-position` | Where the video and the poster sit inside the player box. Defaults to `center` | [`object-position`](https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/Properties/object-position#values) | `top center` |
 
 If you omit `--media-accent-text-color`, the skins choose a contrasting text color from `--media-accent-color` using [`contrast-color()`](https://developer.mozilla.org/en-US/docs/Web/CSS/Reference/Values/color_value/contrast-color). You only need to set it when you want to override that result.
+
+`--media-object-fit` and `--media-object-position` apply to the media element and the poster together, so the two stay aligned. Fullscreen ignores both and falls back to `contain`, which keeps a cropped player from cropping the whole screen. For worked examples, see <DocsLink slug="how-to/add-a-poster-placeholder">Add a poster placeholder</DocsLink> and <DocsLink slug="reference/background-video">Background video</DocsLink>.
+
+<Aside type="caution">
+Setting a custom property that a skin already sets on itself does nothing, and you get no warning. The skins declare those properties on their own root element, so the value you set on the player or an ancestor is replaced there and the skin's default stands. The table above is what the skins read from you.
+</Aside>
+
+To change anything else — background, control, menu, tooltip, text, and icon colors, spacing, or which controls appear — [eject the skin](#ejecting). That's the normal route once a design outgrows the properties above, and it hands you the same components and CSS the packaged skins are built from.
 
 ### Set the audio color scheme
 

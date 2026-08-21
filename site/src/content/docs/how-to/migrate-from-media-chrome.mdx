@@ -206,6 +206,8 @@ media-play-button[data-paused] .play-icon { display: inline; }
 
 Continuous values use CSS custom properties: sliders expose `--media-slider-fill` and `--media-slider-pointer`.
 
+Your Media Chrome theming properties mostly do not carry over, and they fail quietly. Exactly two names mean the same thing in both projects: `--media-object-fit` and `--media-object-position`. Every other name you may have set, from `--media-primary-color` to `--media-control-background`, is read by nothing in Video.js, so it parses, applies to the element, and changes nothing on screen. Rebuild the theme from the properties in <DocsLink slug="how-to/customize-skins">Customize skins</DocsLink>, then eject the skin for everything those don't reach.
+
 ## Themes become skins
 
 Media Chrome's `<template>`-based themes (`media-theme`) become Video.js <DocsLink slug="concepts/skins">skins</DocsLink> and <DocsLink slug="concepts/presets">presets</DocsLink>. Start from a preset, then eject and customize with <DocsLink slug="how-to/customize-skins">Customize skins</DocsLink>, rather than authoring a template.
