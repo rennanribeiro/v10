@@ -518,16 +518,16 @@ v8 used accessor methods for everything: `player.currentTime()` to read, `player
 | `player.duration()` | `media.duration`, or `duration` in player state |
 | `player.volume()`, `player.muted()` | `media.volume`, `media.muted` |
 | `player.playbackRate()` | `media.playbackRate`, or the player's `setPlaybackRate` |
-| `player.src({ src, type })` | set `src` on the media |
+| `player.src({ src, type })` | set `src` on the media, or call the player's `loadSource` action |
 | `player.requestFullscreen()`, `exitFullscreen()` | the player's `enterFullscreen`, `exitFullscreen`, `toggleFullscreen` |
 | `player.textTracks()`, `addRemoteTextTrack()` | `<track>` elements, and `textTrackList` in player state |
 | `player.audioTracks()` | `audioTracks` in player state |
 | `player.error()` | `error` in player state |
 | `player.dispose()` | remove the element, or unmount the component |
-| `player.tech()` | `.host.engine` on engine-backed media, where one exists |
+| `player.tech()` | `.engine` on an engine-backed media object; see <DocsLink slug="how-to/recover-from-playback-failures">Recover from playback failures</DocsLink> |
 | `videojs.getPlayer(id)` | hold a reference to the element |
 
-Swapping sources is the change most likely to surprise you. There's no `player.src()`; you set `src` on the media element, or replace the media element entirely, and the UI follows. Changing formats is changing tags.
+Swapping sources is the change most likely to surprise you. Set `src` on the media element, call the player's `loadSource` action, or replace the media element entirely, and the UI follows. Changing formats is changing tags.
 
 ## Languages
 

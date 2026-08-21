@@ -11,6 +11,8 @@ Tracks the current media source and readiness.
 
 <FeatureReference feature="source" />
 
+`loadSource` can load a new URL or deliberately reload the URL already in `source`. See <DocsLink slug="how-to/recover-from-playback-failures">Recover from playback failures</DocsLink> for the supported recovery sequence.
+
 ### Selector
 
 <FrameworkCase frameworks={["react"]}>
@@ -29,7 +31,7 @@ function SourceInfo() {
   const source = usePlayer(selectSource);
   if (!source) return null;
 
-  return <span>{source.src}</span>;
+  return <span>{source.source}</span>;
 }
 ```
 </FrameworkCase>

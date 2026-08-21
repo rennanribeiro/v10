@@ -1,0 +1,162 @@
+---
+title: 'Recover from playback failures'
+description: 'Observe terminal playback errors, present recovery UI, and restart a failed source'
+---
+
+import DocsLink from '@/components/docs/DocsLink.astro';
+import FrameworkCase from '@/components/docs/FrameworkCase.astro';
+
+Video.js lets each playback engine retry recoverable failures. Your application takes over when the media reports a terminal error. Observe that error, explain it to the viewer, and reload the source when retrying makes sense.
+
+## Tell a retry from a terminal failure
+
+A stall or `waiting` state is not a terminal error. The media may resume after buffering, and engines such as hls.js retry transient network and media failures within their configured retry budgets.
+
+The <DocsLink slug="reference/feature-error">error feature</DocsLink> updates when the media dispatches an `error` event. For hls.js-backed media, Video.js ignores non-fatal hls.js errors and publishes an error only after hls.js marks the failure as fatal. At that point, hls.js has stopped loading. Restoring connectivity or calling `play()` does not restart its loader.
+
+Terminal describes the current load, not whether the source can ever play again. A fatal network error can become recoverable at the application level once connectivity returns and you reload the source.
+
+Use the error code to choose the next action:
+
+| Code | Failure | Usual response |
+| --- | --- | --- |
+| `1` | Playback was aborted | No retry is normally needed |
+| `2` | Network or server failure | Reload the current source, or fetch a fresh signed URL and load it |
+| `3` | Decode failure | Try another rendition or source; use engine-specific recovery only when you need it |
+| `4` | Unsupported or unavailable source | Load a source the browser and engine can play |
+| `5` | Encrypted playback failure | Refresh authorization or correct the DRM configuration before loading again |
+| `100` | Provider-specific failure | Follow the provider's error context |
+
+The exact retry count and delay belong to the playback engine and its source configuration. Live playlist requests can exhaust their retry budget sooner than segment requests, so a network interruption that on-demand playback rides through may become terminal for a live stream.
+
+## Present the error
+
+Packaged skins include an accessible error dialog. It opens when `error` becomes non-null, presents the translated error message, and offers a Dismiss action. Dismissing clears player error state; it does not resume playback.
+
+For a custom or <DocsLink slug="how-to/customize-skins">ejected skin</DocsLink>, subscribe with `selectError` and render your own recovery actions. The React example replaces the skin's dismiss-only dialog with Retry and Dismiss actions:
+
+<FrameworkCase frameworks={["react"]}>
+
+```tsx title="PlaybackFailure.tsx"
+import { ErrorDialog, selectError, selectSource } from '@videojs/react';
+import { usePlayer } from '@videojs/react/live-video';
+
+export function PlaybackFailure() {
+  const failure = usePlayer(selectError);
+  const source = usePlayer(selectSource);
+
+  function retry() {
+    if (!source?.source) return;
+
+    source.loadSource(source.source);
+    failure?.dismissError();
+  }
+
+  return (
+    <ErrorDialog.Root>
+      <ErrorDialog.Popup>
+        <ErrorDialog.Title />
+        <ErrorDialog.Description />
+        <button type="button" onClick={retry} disabled={!source?.source}>
+          Retry
+        </button>
+        <ErrorDialog.Close>Dismiss</ErrorDialog.Close>
+      </ErrorDialog.Popup>
+    </ErrorDialog.Root>
+  );
+}
+```
+
+</FrameworkCase>
+
+<FrameworkCase frameworks={["html"]}>
+
+The packaged `<media-error-dialog>` handles presentation. Connect an application Retry button to the player store, or use the same handler for a Retry action in an ejected skin:
+
+```ts title="playback-failure.ts"
+import '@videojs/html/live-video';
+
+const player = document.querySelector('live-video-player');
+const retryButton = document.querySelector<HTMLButtonElement>('[data-retry-playback]');
+
+if (!player || !retryButton) throw new Error('Playback recovery UI is missing');
+
+function syncError() {
+  const error = player.store.error;
+  retryButton.hidden = !error;
+  retryButton.disabled = !player.store.source;
+}
+
+retryButton.addEventListener('click', () => {
+  const source = player.store.source;
+  if (!source) return;
+
+  player.store.loadSource(source);
+  player.store.dismissError();
+});
+
+syncError();
+player.store.subscribe(syncError);
+```
+
+</FrameworkCase>
+
+## Reload the source before playing
+
+The supported recovery sequence is:
+
+1. Resolve the URL you want to retry. For expiring or signed live URLs, obtain a fresh URL first.
+2. Call `loadSource(url)` from the <DocsLink slug="reference/feature-source">source feature</DocsLink>. Passing the URL already in `source` deliberately reloads it.
+3. Call `dismissError()` after starting the reload. Loading a new resource may also clear the error through an `emptied` event, but explicitly dismissing it keeps recovery UI consistent across media engines.
+4. Call `play()` only if playback was paused and the retry came from a user gesture. A source that was already playing normally starts loading immediately; browser autoplay policy still applies.
+
+`loadSource` sets the media's `src`, calls its `load()` method, and clears pending player operations. On the hls.js path, loading the manifest re-arms the loader after a fatal error. Calling `play()` before reloading cannot do that work.
+
+## Recover live playback without a remount
+
+Reloading a live manifest asks the engine for the current playlist and resumes from the stream's current live position. You do not need to remount the player, media component, or skin for a terminal hls.js network error.
+
+Remount only when your application is replacing the media implementation, switching to another engine, or intentionally resetting other component-owned state. A routine network retry should preserve the player and reload its source.
+
+## Use the engine escape hatch
+
+Prefer `loadSource` for recovery because it works through public player state and coordinates the media lifecycle. When you need an hls.js-specific operation, use the public `engine` property on the HLS media object. The property is `null` when `HlsJsVideo` falls back to the browser's native HLS implementation.
+
+<FrameworkCase frameworks={["react"]}>
+
+`useMedia()` returns the media object, not the rendered `<video>` element. Narrow it to the public `HlsJsMedia` class before accessing hls.js. Add `@videojs/media` as a direct application dependency when you import its public subpath.
+
+```tsx title="RestartHlsJs.tsx"
+import { HlsJsMedia } from '@videojs/media/dom/hls-js';
+import { useMedia } from '@videojs/react';
+
+export function RestartHlsJs() {
+  const media = useMedia();
+
+  return (
+    <button
+      type="button"
+      onClick={() => {
+        if (media instanceof HlsJsMedia) media.engine?.startLoad(-1);
+      }}
+    >
+      Restart HLS
+    </button>
+  );
+}
+```
+
+</FrameworkCase>
+
+<FrameworkCase frameworks={["html"]}>
+
+The custom media element exposes the engine directly:
+
+```ts
+const media = document.querySelector('hlsjs-video');
+media?.engine?.startLoad(-1);
+```
+
+</FrameworkCase>
+
+Direct engine calls bypass the source feature and do not clear player error state. After an engine-specific recovery, dismiss the error through the player store or error feature.

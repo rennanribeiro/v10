@@ -532,19 +532,19 @@ The SPF flavor doesn't license DRM ([#1776](https://github.com/videojs/v10/issue
 | Mux Player | Video.js v10 |
 |---|---|
 | `media.nativeEl` | `.target` on the element |
-| the hls.js instance | `.host.engine` on the hls.js-backed flavor |
+| the hls.js instance | `.engine` on the hls.js-backed media element |
 | `prefer-playback` | `source.preferPlayback`, or pick <DocsLink slug="reference/native-hls-video">native HLS</DocsLink> outright |
 </FrameworkCase>
 
 <FrameworkCase frameworks={["react"]}>
 | Mux Player | Video.js v10 |
 |---|---|
-| `media.nativeEl` | a `ref` on the media component, then `.target` |
-| the hls.js instance | `.host.engine` through that same `ref`, on the hls.js-backed flavor |
+| `media.nativeEl` | a `ref` on the media component; the ref is the native media element |
+| the hls.js instance | `useMedia()`, narrowed to `HlsJsMedia`, then `.engine` |
 | `prefer-playback` | `source.preferPlayback`, or pick <DocsLink slug="reference/native-hls-video">native HLS</DocsLink> outright |
 </FrameworkCase>
 
-`source.preferPlayback` is the closest mapping: set it to `'native'` and the Mux media hands playback to the browser's own HLS support instead of building an MSE pipeline, which is what `prefer-playback="native"` did.
+`source.preferPlayback` is the closest mapping: set it to `'native'` and the Mux media hands playback to the browser's own HLS support instead of building an MSE pipeline, which is what `prefer-playback="native"` did. See <DocsLink slug="how-to/recover-from-playback-failures">Recover from playback failures</DocsLink> for complete engine-access examples.
 
 Program Date Time has no convenience surface: no `getStartDate()`, no `currentPdt`. The player exposes `liveEdgeStart` and `targetLiveWindow`; for PDT itself, reach into the engine.
 

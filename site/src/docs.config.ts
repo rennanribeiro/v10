@@ -65,6 +65,7 @@ export const sidebar: Sidebar = [
     llmsDescription:
       'Task-oriented guides with step-by-step instructions to achieve a specific outcome by applying one or more concepts. Each guide may assume you already understand the relevant concepts.',
     contents: [
+      { slug: 'how-to/recover-from-playback-failures' },
       { slug: 'how-to/customize-skins' },
       { slug: 'how-to/add-a-poster-placeholder' },
       { slug: 'how-to/build-your-own-component' },
