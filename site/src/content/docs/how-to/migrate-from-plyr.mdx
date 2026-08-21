@@ -62,14 +62,12 @@ The easiest path is the CDN:
 ```html
 <script type="module" src="https://cdn.jsdelivr.net/npm/@videojs/html/cdn/video-minimal.js"></script>
 
-<video-player>
+<video-player poster="/path/to/poster.jpg">
   <video-minimal-skin>
     <video src="/path/to/video.mp4" playsinline>
       <track kind="captions" label="English" src="/path/to/captions/en.vtt" srclang="en" default />
       <track kind="metadata" label="thumbnails" src="/path/to/storyboard.vtt" default />
     </video>
-
-    <img slot="poster" src="/path/to/poster.jpg" alt="Video poster" />
   </video-minimal-skin>
 </video-player>
 ```
@@ -85,7 +83,8 @@ import '@videojs/html/video/minimal-skin.css';
 ### Notes
 
 - CSS styles are injected automatically into the Shadow DOM we create for the player.
-- The poster is a slotted `img` rather than a `poster` attribute, which gives the skin control over how it appears. That's much like Plyr's `data-poster`.
+- The poster is an attribute on the player rather than on the media, which gives the skin control over how it appears. That's much like Plyr's `data-poster`. Slot your own `<img slot="poster">` into the skin when you want to describe the image or supply candidates; see <DocsLink slug="reference/poster">Poster</DocsLink>.
+- `<video-player>` is `display: contents`, so it draws no box. Size the skin, not the player. See <DocsLink slug="concepts/sizing">Sizing</DocsLink>.
 - There's also a default skin with a modern, frosted appearance that some may prefer. Try it by removing the `-minimal` suffix from the script `src` if you're using the CDN, or the `minimal-` prefix from the imports.
 
 </FrameworkCase>
@@ -112,10 +111,10 @@ interface AppVideoPlayerProps {
 
 export function AppVideoPlayer({ origin }: AppVideoPlayerProps) {
   return (
-    <VideoPlayer>
-      <MinimalVideoSkin poster={`${origin}/poster.jpg`}>
+    <VideoPlayer poster={`${origin}/poster.jpg`}>
+      <MinimalVideoSkin>
         <Video src={`${origin}/video.mp4`} playsInline>
-          <track kind="captions" label="English" src={`${origin}/captions/en.vtt`} srclang="en" default />
+          <track kind="captions" label="English" src={`${origin}/captions/en.vtt`} srcLang="en" default />
           <track kind="metadata" label="thumbnails" src={`${origin}/storyboard.vtt`} default />
         </Video>
       </MinimalVideoSkin>
@@ -127,7 +126,7 @@ export function AppVideoPlayer({ origin }: AppVideoPlayerProps) {
 ### Notes
 
 - `@videojs/react/video` is a <DocsLink slug="concepts/presets">preset</DocsLink>: a player, a skin, and a media element that already fit together. `VideoPlayer` is the piece that owns the state, built from the standard set of <DocsLink slug="concepts/features">features</DocsLink> for video.
-- The poster is a prop on the skin rather than a `poster` attribute on the media, which gives the skin control over how it appears. That's much like Plyr's `data-poster`.
+- The poster is a prop on the player rather than a `poster` attribute on the media, which gives the skin control over how it appears. That's much like Plyr's `data-poster`. `VideoPlayer` takes no `className` and no `style`; those go on the skin, which is the element on the page. See <DocsLink slug="concepts/overview">Overview</DocsLink>.
 - This example assumes all your files for a given asset live in the same path, using consistent filenames. This will almost certainly need adjusting for your implementation.
 - If `origin` points somewhere other than your page's origin, add `crossOrigin="anonymous"` to `<Video>` and serve those files with CORS headers. A cross-origin thumbnail track only loads when the media element is CORS-enabled. See <DocsLink slug="reference/thumbnail">Thumbnail</DocsLink>.
 - There's also a default skin with a modern, frosted appearance that some may prefer. Try it by switching the CSS import filename to `skin.css` and the `MinimalVideoSkin` import and usage to `VideoSkin`.
@@ -358,7 +357,7 @@ Here's a matrix for configuration options in Plyr and how each maps to Video.js 
 | `controls` | The <DocsLink slug="concepts/skins">skins</DocsLink> include all the common controls, laid out in a familiar way that users would expect. If you want to customize the skin beyond basic colors, you can [eject the skin](#ejecting) and change layout, styles, or icons. |
 | `settings` | Included automatically in the skins when quality, speed, audio tracks, or captions are available. |
 | `autoplay`, `muted`, `loop`, `playsinline`, `preload` | These are attributes on your media (e.g. `<video>`) component. |
-| `poster` / `data-poster` | The skin owns the poster, as shown in [Basic migration](#basic-migration) above. |
+| `poster` / `data-poster` | `poster` on the player, which the skin draws, as shown in [Basic migration](#basic-migration) above. |
 | `ratio` | Set `aspect-ratio` in CSS on the skin component. The player around it generates no box, so an `aspect-ratio` there is ignored — see <DocsLink slug="concepts/sizing">Sizing</DocsLink>. |
 | `hideControls` | Preset skins auto-hide controls based on activity. The delay is currently not configurable. |
 | `clickToPlay` | Preset video skins include click and tap gestures. [Eject the skin](#ejecting) to remove or change them. |

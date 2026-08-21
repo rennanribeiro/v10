@@ -6,6 +6,7 @@ description: Poster image component that displays a thumbnail until video playba
 ---
 
 import ComponentReference from "@/components/docs/api-reference/ComponentReference.astro";
+import DocsLink from "@/components/docs/DocsLink.astro";
 import FrameworkCase from "@/components/docs/FrameworkCase.astro";
 import StyleCase from "@/components/docs/StyleCase.astro";
 import Demo from "@/components/docs/demos/Demo.astro";
@@ -41,19 +42,29 @@ import basicUsageHtmlTs from "@/components/docs/demos/poster/html/css/BasicUsage
 
 The poster shows before playback starts. Once the user plays or seeks, it hides; pausing does not bring it back. Loading a new source shows it again.
 
-You can set the poster URL on the player. This is useful when you want to change the poster from inside a skin, or keep all your media metadata in one place:
+The poster URL is a player input, not a skin one. Set it there and every poster inside the player, including the one a skin draws, picks it up:
 
 <FrameworkCase frameworks={["react"]}>
 ```tsx
-<VideoPlayer poster="poster.jpg" />
+<VideoPlayer poster="poster.jpg">
+  <VideoSkin>
+    <Video src="video.mp4" />
+  </VideoSkin>
+</VideoPlayer>
 ```
 </FrameworkCase>
 
 <FrameworkCase frameworks={["html"]}>
 ```html
-<video-player poster="poster.jpg"></video-player>
+<video-player poster="poster.jpg">
+  <video-skin>
+    <video src="video.mp4" playsinline></video>
+  </video-skin>
+</video-player>
 ```
 </FrameworkCase>
+
+A media that reports a poster of its own, such as <DocsLink slug="reference/mux-video">`MuxVideo`</DocsLink>, fills it in when you set nothing. See <DocsLink slug="reference/feature-metadata">Metadata</DocsLink> for how the two resolve.
 
 ## Supply your own image
 

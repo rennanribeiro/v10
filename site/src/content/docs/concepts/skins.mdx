@@ -40,6 +40,8 @@ In prior versions of Video.js, skins were CSS-only themes applied to the same se
 ```
 </FrameworkCase>
 
+A skin draws the UI; it doesn't hold state. So `poster` and the content title go on the player, and the skin takes the class, inline style, and geometry that decide how it looks. See <DocsLink slug="concepts/overview">Overview</DocsLink> for the full rule and <DocsLink slug="concepts/sizing">Sizing</DocsLink> for geometry.
+
 ## Packaged vs. ejected
 
 When you choose a skin you have two options for how you use it: **packaged** or **ejected**. It's usually easiest to start with a packaged skin and later eject its internal components into your project when you need more customization.

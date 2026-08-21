@@ -143,6 +143,43 @@ DASH, YouTube, Vimeo, Mux, and more media elements are currently under developme
 ```
 </FrameworkCase>
 
+## Which part takes which prop
+
+Three parts means three places a prop can go. Two rules cover nearly all of them.
+
+**What is playing goes on the player.** The poster and the content title describe the content, and the player is what holds content state, so every UI component inside it reads them from one place. See <DocsLink slug="reference/feature-metadata">Metadata</DocsLink>.
+
+**How it looks goes on the skin.** The skin is the element on the page, so its class, its inline style, and its geometry belong to it. See <DocsLink slug="concepts/sizing">Sizing</DocsLink>.
+
+Anything the browser already understands — `src`, `autoplay`, `muted`, `loop`, `preload`, `playsinline`, `crossorigin` — stays on the media, where it always was.
+
+<FrameworkCase frameworks={["react"]}>
+```tsx
+<VideoPlayer poster="poster.jpg" title="Big Buck Bunny">
+  <VideoSkin className="player">
+    <Video src="video.mp4" />
+  </VideoSkin>
+</VideoPlayer>
+```
+
+`VideoPlayer` renders no DOM, so it takes no `className` and no `style`. Passing either is a type error.
+
+A skin forwards props it doesn't recognize to the `div` it renders, so a misplaced prop can reach the DOM rather than fail. `<VideoSkin poster="poster.jpg">` is a type error in TypeScript; in plain JavaScript it puts a `poster` attribute on a `div` and draws no poster.
+</FrameworkCase>
+<FrameworkCase frameworks={["html"]}>
+`title` already means the tooltip on an HTML element, so the title input goes by `content-title` in markup.
+
+```html
+<video-player content-title="Big Buck Bunny" poster="poster.jpg">
+  <video-skin class="player">
+    <video src="video.mp4" playsinline></video>
+  </video-skin>
+</video-player>
+```
+
+Both elements take a `class` and a `style`, so neither one errors when you pick the wrong one. `<video-player>` is `display: contents` and draws no box: custom properties set on it inherit down to the UI, while `width`, `height`, and `aspect-ratio` do nothing at all. Put geometry on the skin.
+</FrameworkCase>
+
 ## Presets
 
 **Presets** preconfigure these parts for a specific use case.

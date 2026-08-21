@@ -258,7 +258,7 @@ Your metadata keys don't change. They're the same `snake_case` names Mux Data ha
 
 `content-title` reaches player state, so your own UI can read it. No packaged skin draws it, so setting it alone won't put a title on screen ([#1123](https://github.com/videojs/v10/issues/1123)).
 
-The poster is a skin concern. Build an `image.mux.com` URL and hand it over:
+The poster is a player input too, and the skin draws whatever the player resolves. `MuxVideo` reports the URL it derives from `source`, so a `poster` on the player is for the case where you have a URL of your own to use instead:
 
 <FrameworkCase frameworks={["html"]}>
 ```html
@@ -296,7 +296,7 @@ The player supplies the real poster. The slotted image supplies Mux Player's `pl
 `renderPoster` customizes the poster image, so its background can show Mux Player's `placeholder` while the real poster loads.
 </FrameworkCase>
 
-Mux serves the poster from its `thumbnail` endpoint, so every Mux Player poster attribute becomes a query parameter you append: `thumbnail-time` is `?time=`, and the size, crop, rotation, and format options work the same way. See <DocsLink slug="how-to/add-a-poster-placeholder">Add a poster placeholder</DocsLink> for more examples or the <DocsLink slug="reference/poster">Poster</DocsLink> reference for the component itself.
+Mux serves the poster from its `thumbnail` endpoint, and `source.poster` is how you reach that endpoint's options: `thumbnail-time` is `source.poster.time`, and size, crop, rotation, and format are `width`, `height`, `fitMode`, `rotate`, and `ext` beside it. Video.js converts those camel-case keys to the `snake_case` query parameters Mux expects. See <DocsLink slug="how-to/add-a-poster-placeholder">Add a poster placeholder</DocsLink> for more examples or the <DocsLink slug="reference/poster">Poster</DocsLink> reference for the component itself.
 
 ## Customize your player
 

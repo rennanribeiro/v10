@@ -82,14 +82,12 @@ v10 ships web components, so the migration keeps its declarative feel. One scrip
 ```html
 <script type="module" src="https://cdn.jsdelivr.net/npm/@videojs/html/cdn/video.js"></script>
 
-<video-player>
+<video-player poster="/poster.jpg">
   <video-skin class="aspect-video">
     <video src="/video.mp4" preload="auto" playsinline>
       <track kind="captions" src="/captions/en.vtt" srclang="en" label="English" default />
       <track kind="metadata" src="/storyboard.vtt" label="thumbnails" default />
     </video>
-
-    <img slot="poster" src="/poster.jpg" alt="" />
   </video-skin>
 </video-player>
 ```
@@ -106,7 +104,7 @@ Four differences worth understanding, because each one is a pattern you'll see a
 
 - **No `class="video-js"`, no `data-setup`, no `videojs()` call.** The custom elements register themselves and wire up when the browser upgrades them. Nothing scans the page looking for players.
 - **No `controls` attribute.** The skin *is* the controls. Including a skin is how you ask for them, which is also how you opt out: leave it out and you get a player with no UI.
-- **The poster is a slotted image, not an attribute.** That's what lets the skin control how it appears, rather than the browser.
+- **The poster moves from the media to the player.** That's what lets the skin control how it appears, rather than the browser. Sizing goes on the skin, because `<video-player>` is `display: contents` and draws no box.
 - **Your `<track>` elements don't change.** Captions, subtitles, chapters, and thumbnails are all still tracks, and the skin shows the matching controls when it finds them.
 
 There's also a minimal skin, closer to v8's control bar if the default's frosted look is too much of a change. Swap `cdn/video.js` for `cdn/video-minimal.js`.
@@ -160,10 +158,10 @@ import { Video, VideoPlayer, VideoSkin } from '@videojs/react/video';
 
 export function MyPlayer() {
   return (
-    <VideoPlayer>
-      <VideoSkin className="aspect-video" poster="/poster.jpg">
+    <VideoPlayer poster="/poster.jpg">
+      <VideoSkin className="aspect-video">
         <Video src="/video.mp4" preload="auto" playsInline>
-          <track kind="captions" src="/captions/en.vtt" srclang="en" label="English" default />
+          <track kind="captions" src="/captions/en.vtt" srcLang="en" label="English" default />
           <track kind="metadata" src="/storyboard.vtt" label="thumbnails" default />
         </Video>
       </VideoSkin>
@@ -178,7 +176,7 @@ Three differences worth understanding, because each one is a pattern you'll see 
 
 - **No `videojs()` call and no effect.** `VideoPlayer` owns the lifecycle.
 - **No `controls` prop.** The skin *is* the controls. Rendering a skin is how you ask for them, which is also how you opt out.
-- **The poster is a skin prop, not a media attribute.** That's what lets the skin control how it appears, rather than the browser.
+- **The poster is a player prop, not a media attribute.** That's what lets the skin control how it appears, rather than the browser. `className` and `style` go the other way: `VideoPlayer` renders no DOM, so they belong on the skin.
 
 The `'use client'` directive is there because the player owns browser state. There's also a minimal skin, closer to v8's control bar, if the default's frosted look is too much of a change.
 
@@ -189,8 +187,8 @@ The `'use client'` directive is there because the player owns browser state. The
 The v8 options object is gone, and its contents scattered in four directions. This is the biggest conceptual step, so it's worth understanding the four buckets before you go looking for a specific option.
 
 1. **Media attributes.** Anything the browser itself understands stays exactly where it was, on your media element.
-2. **Skin attributes.** The poster belongs to the skin, because the skin is what paints it.
-3. **Your CSS.** Sizing, aspect ratio, and responsive behavior are layout, and layout is yours.
+2. **Player inputs.** The poster and the content title describe what is playing, so they belong to the player. Every UI component inside it reads them from there.
+3. **Your CSS.** Sizing, aspect ratio, and responsive behavior are layout, and layout is yours. It goes on the skin.
 4. **Composition.** Which controls exist, which shortcuts fire, which language you're in. You express these by choosing components rather than by setting flags.
 
 ### Media attributes
@@ -203,34 +201,53 @@ Port these across untouched. They're native attributes and always were.
 | `sources: [{ src, type }]` | `src`, or `<source>` children for progressive fallback |
 | `disablePictureInPicture` | `disablepictureinpicture` |
 
-### Skin attributes
+### Player inputs
 
 | Video.js 8 | Video.js v10 |
 |---|---|
-| `poster` | the skin's poster |
+| `poster` | `poster` on the player |
 | `posterImage: false` | leave the poster unset |
-| the title in `TitleBar` | `content-title` on the player, with no built-in UI yet |
+| the title in `TitleBar` | the player's title input |
 
-The poster belongs to the skin rather than the media, which is what lets the skin control how it appears:
+The poster belongs to the player rather than the media, which is what lets the skin control how it appears:
 
 <FrameworkCase frameworks={["html"]}>
 ```html
-<video-skin>
-  <video src="/video.mp4"></video>
-  <img slot="poster" src="/poster.jpg" alt="" />
-</video-skin>
+<video-player poster="/poster.jpg">
+  <video-skin>
+    <video src="/video.mp4"></video>
+  </video-skin>
+</video-player>
 ```
 </FrameworkCase>
 
 <FrameworkCase frameworks={["react"]}>
 ```jsx
-<VideoSkin poster="/poster.jpg">
-  <Video src="/video.mp4" />
-</VideoSkin>
+<VideoPlayer poster="/poster.jpg">
+  <VideoSkin>
+    <Video src="/video.mp4" />
+  </VideoSkin>
+</VideoPlayer>
 ```
 </FrameworkCase>
 
-`content-title` is the closest thing to v8's `TitleBar`, and it does reach player state, so your own UI can read it. No packaged skin draws it, so v8's `TitleBar` has no visual equivalent ([#1123](https://github.com/videojs/v10/issues/1123)). See the <DocsLink slug="reference/poster">Poster</DocsLink> reference for the poster component itself.
+<FrameworkCase frameworks={["html"]}>
+The title input is the closest thing to v8's `TitleBar`. `title` already means the tooltip on an HTML element, so it goes by `content-title` in markup. It reaches player state, so your own UI can read it, but no packaged skin draws it, which leaves v8's `TitleBar` with no visual equivalent ([#1123](https://github.com/videojs/v10/issues/1123)).
+
+```html
+<video-player content-title="Big Buck Bunny" poster="/poster.jpg"></video-player>
+```
+</FrameworkCase>
+
+<FrameworkCase frameworks={["react"]}>
+The title input is the closest thing to v8's `TitleBar`. It reaches player state, so your own UI can read it, but no packaged skin draws it, which leaves v8's `TitleBar` with no visual equivalent ([#1123](https://github.com/videojs/v10/issues/1123)).
+
+```jsx
+<VideoPlayer title="Big Buck Bunny" poster="/poster.jpg">…</VideoPlayer>
+```
+</FrameworkCase>
+
+See the <DocsLink slug="reference/poster">Poster</DocsLink> reference for the poster component itself and <DocsLink slug="reference/title">Title</DocsLink> for drawing a title of your own.
 
 ### Your CSS
 
