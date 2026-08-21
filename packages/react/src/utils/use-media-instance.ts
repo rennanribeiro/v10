@@ -1,7 +1,8 @@
 import type { Media } from '@videojs/media';
-import { useLayoutEffect, useState } from 'react';
+import { useLayoutEffect, useRef, useState } from 'react';
 
 import { useMediaAttach } from '../player/context';
+import { destroyMediaInstance } from './media-instance-lifecycle';
 import { useLatestRef } from './use-latest-ref';
 
 interface MediaAcquisition<Instance> {
@@ -26,6 +27,7 @@ export function useMediaInstance<Instance extends Media & { destroy(): void }>(
   setup?: (media: Instance) => void
 ): Instance | null {
   const [acquisition, setAcquisition] = useState<MediaAcquisition<Instance> | null>(null);
+  const activeAcquisitionRef = useRef<MediaAcquisition<Instance> | null>(null);
   const setMedia = useMediaAttach();
   const setupRef = useLatestRef(setup);
 
@@ -39,14 +41,19 @@ export function useMediaInstance<Instance extends Media & { destroy(): void }>(
       throw error;
     }
 
-    setAcquisition({ MediaClass, instance });
+    const nextAcquisition = { MediaClass, instance };
+    activeAcquisitionRef.current = nextAcquisition;
+    setAcquisition(nextAcquisition);
     setMedia?.(instance);
 
     return () => {
+      if (activeAcquisitionRef.current === nextAcquisition) activeAcquisitionRef.current = null;
       setMedia?.((prev) => (prev === instance ? null : prev));
-      instance.destroy();
+      destroyMediaInstance(instance);
     };
   }, [MediaClass, setMedia]);
 
-  return acquisition?.MediaClass === MediaClass ? acquisition.instance : null;
+  return acquisition?.MediaClass === MediaClass && activeAcquisitionRef.current === acquisition
+    ? acquisition.instance
+    : null;
 }

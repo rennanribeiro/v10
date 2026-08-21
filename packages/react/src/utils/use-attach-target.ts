@@ -2,9 +2,12 @@ import type { MediaEngineHost } from '@videojs/media';
 import type { RefCallback } from 'react';
 import { useCallback, useLayoutEffect, useRef } from 'react';
 
+import { onMediaInstanceTermination } from './media-instance-lifecycle';
+
 interface TargetAttachment<Target> {
   media: MediaEngineHost;
   target: Target;
+  releaseTermination: () => void;
 }
 
 export function useAttachTarget<Target>(media: MediaEngineHost | null): RefCallback<Target> {
@@ -12,8 +15,12 @@ export function useAttachTarget<Target>(media: MediaEngineHost | null): RefCallb
   const attachmentRef = useRef<TargetAttachment<Target> | null>(null);
 
   const detach = useCallback(() => {
-    attachmentRef.current?.media.detach?.();
+    const attachment = attachmentRef.current;
+    if (!attachment) return;
+
     attachmentRef.current = null;
+    attachment.releaseTermination();
+    attachment.media.detach?.();
   }, []);
 
   useLayoutEffect(() => {
@@ -24,7 +31,15 @@ export function useAttachTarget<Target>(media: MediaEngineHost | null): RefCallb
 
     if (media && target && !attachmentRef.current) {
       media.attach?.(target);
-      attachmentRef.current = { media, target };
+      const nextAttachment: TargetAttachment<Target> = {
+        media,
+        target,
+        releaseTermination: () => {},
+      };
+      attachmentRef.current = nextAttachment;
+      nextAttachment.releaseTermination = onMediaInstanceTermination(media, () => {
+        if (attachmentRef.current === nextAttachment) attachmentRef.current = null;
+      });
     }
   });
 
