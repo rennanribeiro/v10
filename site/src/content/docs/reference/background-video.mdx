@@ -7,6 +7,7 @@ description: Decorative background video element with automatic muting and loopi
 
 import FrameworkCase from "@/components/docs/FrameworkCase.astro";
 import StyleCase from "@/components/docs/StyleCase.astro";
+import DocsLink from "@/components/docs/DocsLink.astro";
 import Demo from "@/components/docs/demos/Demo.astro";
 import MarkdownCode from "@/components/typography/MarkdownCode.astro";
 import Table from "@/components/typography/Table.astro";
@@ -27,7 +28,11 @@ import basicUsageHtml from "@/components/docs/demos/background-video/html/css/Ba
 import basicUsageHtmlCss from "@/components/docs/demos/background-video/html/css/BasicUsage.css?raw";
 import basicUsageHtmlTs from "@/components/docs/demos/background-video/html/css/BasicUsage.ts?raw";
 
-Decorative background video. By default it's muted, looped, and autoplaying — use the opt-out attributes below to change that. Renders a `<video>` inside a shadow DOM, positioned to fill its container.
+Decorative background video. By default it's muted, looped, and autoplaying — use the opt-out attributes below to change that. Renders a `<video>` inside a shadow DOM, absolutely positioned to fill the element.
+
+<FrameworkCase frameworks={["html"]}>
+The element ships no `display` of its own, so it needs one before it has a box for that `<video>` to fill. Give it a `display` and a size, or put it in a parent that lays it out — as the example below does with a grid. See <DocsLink slug="concepts/sizing">Sizing</DocsLink>.
+</FrameworkCase>
 
 ## Examples
 

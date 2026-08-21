@@ -50,6 +50,7 @@ export const sidebar: Sidebar = [
     contents: [
       { slug: 'concepts/features' },
       { slug: 'concepts/skins' },
+      { slug: 'concepts/sizing' },
       { slug: 'concepts/presets' },
       { slug: 'concepts/ui-components' },
       { slug: 'concepts/accessibility' },

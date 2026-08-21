@@ -359,7 +359,7 @@ Here's a matrix for configuration options in Plyr and how each maps to Video.js 
 | `settings` | Included automatically in the skins when quality, speed, audio tracks, or captions are available. |
 | `autoplay`, `muted`, `loop`, `playsinline`, `preload` | These are attributes on your media (e.g. `<video>`) component. |
 | `poster` / `data-poster` | The skin owns the poster, as shown in [Basic migration](#basic-migration) above. |
-| `ratio` | Set `aspect-ratio` in CSS on the skin component. |
+| `ratio` | Set `aspect-ratio` in CSS on the skin component. The player around it generates no box, so an `aspect-ratio` there is ignored — see <DocsLink slug="concepts/sizing">Sizing</DocsLink>. |
 | `hideControls` | Preset skins auto-hide controls based on activity. The delay is currently not configurable. |
 | `clickToPlay` | Preset video skins include click and tap gestures. [Eject the skin](#ejecting) to remove or change them. |
 | `keyboard` | Preset video skins include common hotkeys. [Eject the skin](#ejecting) to remove or change them. |

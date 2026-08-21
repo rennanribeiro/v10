@@ -33,6 +33,8 @@ npm install @videojs/react
 
 Media Chrome wraps a slotted `<video slot="media">` in a single `<media-controller>`. Video.js splits that into two elements. The player owns state and draws nothing. The `<media-container>` is the box everything lives in, with the media as a plain child.
 
+Everything you styled on `<media-controller>` therefore splits too. Colors and custom properties still work on the player, because they inherit. Size, aspect ratio, and position have to move to the container, which generates a box where the player does not — see <DocsLink slug="concepts/sizing">Sizing</DocsLink>.
+
 ```html
 <!-- Media Chrome -->
 <media-controller>

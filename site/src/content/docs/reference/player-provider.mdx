@@ -125,10 +125,10 @@ Everything that needs player state goes inside `Player`: skins, containers, UI c
 ## No visual presence
 
 <FrameworkCase frameworks={["react"]}>
-`Player` renders no visible element of its own — it's purely a state wrapper. Sizing, borders, and background go on the <DocsLink slug="reference/player-container">`Container`</DocsLink>, not `Player`.
+`Player` renders no DOM of its own — it's purely a state wrapper. Sizing, borders, and background go on the skin, or on the <DocsLink slug="reference/player-container">`Container`</DocsLink> when you build your own UI. See <DocsLink slug="concepts/sizing">Sizing</DocsLink>.
 </FrameworkCase>
 <FrameworkCase frameworks={["html"]}>
-The `<video-player>` element uses `display: contents`, meaning it has no visual box of its own. Sizing, borders, and background go on the <DocsLink slug="reference/player-container">`<media-container>`</DocsLink>, not the provider.
+The `<video-player>` element is `display: contents`, so it generates no box. Sizing, borders, and background go on the skin, or on the <DocsLink slug="reference/player-container">`<media-container>`</DocsLink> when you build your own UI. Set them on the provider and they're silently ignored — see <DocsLink slug="concepts/sizing">Sizing</DocsLink>.
 </FrameworkCase>
 
 ## Accessing state

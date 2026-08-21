@@ -85,7 +85,7 @@ customElements.define('my-container', MyContainer);
 
 ### Layout & fullscreen
 
-The container is the visual box around your media and controls. Sizing, aspect ratio, and visual boundaries all go here — on `Container`, not `Player`.
+The container is the visual box around your media and controls. Sizing, aspect ratio, and visual boundaries all go here — on `Container`, not `Player`. See <DocsLink slug="concepts/sizing">Sizing</DocsLink> for where geometry goes in every other composition.
 
 <FrameworkCase frameworks={["react"]}>
 ```tsx
@@ -98,8 +98,10 @@ The container is the visual box around your media and controls. Sizing, aspect r
 ```
 </FrameworkCase>
 <FrameworkCase frameworks={["html"]}>
+`<media-container>` ships no styles, so it lays out as `inline` until you give it a `display`. Set one alongside the size, or the `width` and `aspect-ratio` do nothing:
+
 ```html
-<media-container style="width: 640px; aspect-ratio: 16/9;">
+<media-container style="display: block; width: 640px; aspect-ratio: 16/9;">
   <video src="video.mp4"></video>
   <media-controls>...</media-controls>
 </media-container>

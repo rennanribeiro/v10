@@ -1,0 +1,160 @@
+---
+title: Sizing
+description: Which element in a player owns its box, and why geometry on any of the others does nothing.
+---
+
+import FrameworkCase from '@/components/docs/FrameworkCase.astro';
+import DocsLink from '@/components/docs/DocsLink.astro';
+import DocsLinkCard from '@/components/docs/DocsLinkCard.astro';
+import Aside from '@/components/Aside.astro';
+
+A player is several elements with separate jobs, and only one of them is the box you size. Put `width`, `height`, `aspect-ratio`, `position`, and `transform` there.
+
+## Where geometry goes
+
+| What you rendered | The box |
+|---|---|
+| A packaged <DocsLink slug="concepts/skins">skin</DocsLink> | The skin |
+| Your own UI | The <DocsLink slug="reference/player-container">container</DocsLink> |
+| A media element on its own, with no player around it | The media element |
+
+<FrameworkCase frameworks={["react"]}>
+```tsx title="App.tsx"
+import '@videojs/react/video/skin.css';
+import { Video, VideoPlayer, VideoSkin } from '@videojs/react/video';
+import './App.css';
+
+export default function App() {
+  return (
+    <VideoPlayer>
+      <VideoSkin className="player">
+        <Video src="https://stream.mux.com/BV3YZtogl89mg9VcNBhhnHm02Y34zI1nlMuMQfAbl3dM/highest.mp4" />
+      </VideoSkin>
+    </VideoPlayer>
+  );
+}
+```
+
+```css title="App.css"
+.player {
+  width: 100%;
+  max-width: 40rem;
+  aspect-ratio: 16 / 9;
+}
+```
+</FrameworkCase>
+<FrameworkCase frameworks={["html"]}>
+```ts title="main.ts"
+import '@videojs/html/video/player';
+import '@videojs/html/video/skin';
+import '@videojs/html/video/skin.css';
+import './index.css';
+```
+
+```html title="index.html"
+<video-player>
+  <video-skin class="player">
+    <video src="https://stream.mux.com/BV3YZtogl89mg9VcNBhhnHm02Y34zI1nlMuMQfAbl3dM/highest.mp4"></video>
+  </video-skin>
+</video-player>
+```
+
+```css title="index.css"
+.player {
+  width: 100%;
+  max-width: 40rem;
+  aspect-ratio: 16 / 9;
+}
+```
+</FrameworkCase>
+
+<FrameworkCase frameworks={["react"]}>
+## The player renders no DOM
+
+`VideoPlayer` is a context provider and renders nothing, so there's no element to size and nowhere for your geometry to be quietly dropped. `VideoSkin` and `Container` each render a `div` and forward `className` and `style` to it. `Video`, `MuxVideo`, and the other media components render a real `<video>`. Every element you can reach has a box.
+
+The HTML package differs here: several of its elements are `display: contents` and ignore geometry outright. That's worth knowing if you read the HTML examples, share CSS between the two, or port markup across.
+</FrameworkCase>
+<FrameworkCase frameworks={["html"]}>
+## The provider and the media elements have no box
+
+`<video-player>`, `<live-video-player>`, `<background-video-player>`, and `<media-i18n>` are `display: contents`. So are the media elements that wrap a native `<video>`: `<mux-video>`, `<hls-video>`, `<hlsjs-video>`, `<dash-video>`, `<shaka-video>`, and `<native-hls-video>`.
+
+An element with `display: contents` generates no box. Its children lay out as if the element were not in the tree at all, which is what makes the provider composable — it's a state boundary, not a wrapper, so it can sit inside your grid or flex layout without adding a box you have to style around.
+
+The cost is that geometry on those elements is inert, and CSS reports nothing when you set it. The declaration is still in the computed style, `getBoundingClientRect()` on the element returns `0×0`, and the children size themselves against your layout instead. A 124-pixel-wide decorative video becomes as wide as the page.
+
+```css
+/* ❌ Silently ignored — the provider generates no box */
+video-player {
+  width: 640px;
+  aspect-ratio: 16 / 9;
+}
+
+/* ✅ The skin is the box */
+video-skin {
+  width: 640px;
+  aspect-ratio: 16 / 9;
+}
+```
+
+Custom properties are the exception. They inherit through `display: contents`, so `video-player { --media-accent-color: rebeccapurple }` reaches the UI. See <DocsLink slug="how-to/customize-skins">Customize skins</DocsLink>.
+
+### What each element does by default
+
+| Element | Default `display` | Size it? |
+|---|---|---|
+| `<video-player>`, `<live-video-player>`, `<media-i18n>` | `contents` | No |
+| `<background-video-player>` | `contents` | No |
+| `<audio-player>`, `<live-audio-player>` | `inline`, because they ship no styles | No, see below |
+| `<video-skin>` and the other skins | `grid`, `width: 100%` | Yes |
+| `<background-video-skin>` | `block`, `width: 100%`, `height: 100%` | Yes |
+| `<media-container>` | `inline`, because it ships no styles | Yes, with a `display` |
+| `<background-video>`, `<mux-background-video>`, `<hls-background-video>` | `inline`, `position: relative` | Yes, with a `display` |
+| `<mux-video>`, `<hls-video>`, `<hlsjs-video>`, `<dash-video>`, `<shaka-video>`, `<native-hls-video>` | `contents` | Yes, with a `display` |
+| `<youtube-video>`, `<vimeo-video>`, `<twitch-video>`, `<tiktok-video>`, `<cloudflare-video>`, `<hls-audio>`, `<mux-audio>`, `<spotify-audio>` | `inline-flex` | Yes |
+
+`<media-container>` is the box for a custom UI, but it ships no styles at all, so `width` on it does nothing until you give it a `display`:
+
+```css
+media-container {
+  position: relative;
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+}
+```
+
+The audio providers are `inline` rather than `contents`, which both ignores `width` and disrupts a grid or flex parent. Set `display: contents` on them yourself:
+
+```css
+audio-player,
+live-audio-player {
+  display: contents;
+}
+```
+
+### Give one a box on purpose
+
+A chrome-less video — a decorative background, a thumbnail grid, a hero loop — is a media element with no skin and no container, so the media element has to become the box. Set its `display` along with its size:
+
+```css
+.hero-video {
+  display: block;
+  width: 124px;
+  aspect-ratio: 1 / 1;
+}
+```
+
+Use a class selector rather than a tag selector, as the example above does. On a media element either one works, because any rule in your stylesheet outranks the element's own shadow `:host` rule. On a provider a tag selector is a coin toss: the packaged `video-player { display: contents }` rule lives in a stylesheet we append to `<head>` when the player is defined, so it ties your `video-player { display: block }` on specificity and wins on document order. A class selector is more specific and wins either way.
+
+<Aside type="caution">
+Inline styles beat stylesheets, so code that assigns `element.style.display` after you takes over — a layout library rewriting the property every frame, for example. Have that code write the `display` you want, or mark your declaration `!important`.
+</Aside>
+</FrameworkCase>
+
+## Sizing lives in your CSS
+
+No player element takes a `width`, `height`, or `ratio` attribute, and there are no sizing modes to choose between. Sizing is layout, layout is yours, and CSS already describes it. `width: 100%` and `aspect-ratio` on the box cover what Video.js 8 spelled `fluid`, `fill`, and `aspectRatio`.
+
+<DocsLinkCard slug="reference/player-container">Container reference</DocsLinkCard>
