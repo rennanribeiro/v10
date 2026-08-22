@@ -4,6 +4,7 @@
   --menu-padding: calc(var(--spacing) * 1);
   --menu-border-radius: calc(var(--spacing) * 2.5);
   --menu-item-border-radius: calc(var(--menu-border-radius) - var(--menu-padding));
+
   box-sizing: border-box;
   min-width: max-content;
   max-width: var(--media-popover-available-width, none);
@@ -65,7 +66,6 @@
       &::before {
         position: absolute;
         position-anchor: --menu-item-highlight-anchor;
-        inset: anchor(inside);
         /* Firefox treats the moving highlight as a content shift and re-scrolls
            the menu while hovering. Exclude it from scroll anchoring. */
         overflow-anchor: none;
@@ -74,6 +74,10 @@
         background-color: var(--accent-background-color);
         border-radius: var(--menu-item-border-radius);
         transition: inset 100ms ease-in-out;
+        inset-block-start: anchor(start);
+        inset-inline-start: anchor(start);
+        inline-size: anchor-size(self-inline);
+        block-size: anchor-size(self-block);
       }
 
       &:has([data-highlighted=""])::before {

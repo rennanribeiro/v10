@@ -42,7 +42,6 @@ const group = cn(
   '[anchor-scope:--menu-item-highlight-anchor]',
   'supports-[top:anchor(top)]:before:absolute',
   'supports-[top:anchor(top)]:before:[position-anchor:--menu-item-highlight-anchor]',
-  'supports-[top:anchor(top)]:before:[inset:anchor(inside)]',
   // Firefox treats the moving highlight as a content shift and re-scrolls the
   // menu while hovering. Exclude it from scroll anchoring.
   'supports-[top:anchor(top)]:before:[overflow-anchor:none]',
@@ -52,6 +51,10 @@ const group = cn(
   'supports-[top:anchor(top)]:before:transition-[inset]',
   'supports-[top:anchor(top)]:before:duration-100',
   'supports-[top:anchor(top)]:before:ease-in-out',
+  'supports-[top:anchor(top)]:before:[inset-block-start:anchor(start)]',
+  'supports-[top:anchor(top)]:before:[inset-inline-start:anchor(start)]',
+  'supports-[top:anchor(top)]:before:[inline-size:anchor-size(self-inline)]',
+  'supports-[top:anchor(top)]:before:[block-size:anchor-size(self-block)]',
   'supports-[top:anchor(top)]:has-data-[highlighted=]:before:duration-0'
 );
 
