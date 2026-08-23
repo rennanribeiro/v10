@@ -7,13 +7,14 @@ import { normalizePath } from 'vite';
 import { defineConfig } from 'vite-plus';
 import type { UserConfig as ViteUserConfig } from 'vite-plus';
 import type { UserConfig as PackUserConfig } from 'vite-plus/pack';
-import { shadcnPlugin, vjscPlugin as vjscPackPlugin } from 'vjsc/plugins';
-import type { ShadcnItem } from 'vjsc/shadcn';
-import { vjscPlugin } from 'vjsc/vite';
 
 import { baseConfig, type PackageBuildMode, packageBuildConfig, packageBuildModes } from '../../build/pack.ts';
 import { copyCssPlugin } from '../../build/plugins/copy-css-plugin.ts';
-import { iconElementSourcePlugin } from '../icons/vjsc/vite';
+import { iconElementSourcePlugin } from '../icons/vjsc/vite.ts';
+// Vite+ loads workspace configs before it can schedule builds, so bootstrap the private compiler from source.
+import { shadcnPlugin, vjscPlugin as vjscPackPlugin } from '../vjsc/src/plugins/index.ts';
+import type { ShadcnItem } from '../vjsc/src/shadcn/index.ts';
+import { vjscPlugin } from '../vjsc/src/vite/index.ts';
 import { configureSkinModule } from './vjsc/config';
 import { type SkinModuleMeta, skinStyles } from './vjsc/meta';
 

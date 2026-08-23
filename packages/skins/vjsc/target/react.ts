@@ -1,7 +1,11 @@
 import type coreSchema from '@videojs/core/vjsc';
-import { type ComponentTarget, defineComponentTarget, type TemplateTargetDefinition } from 'vjsc/target';
-import { Host, jsx } from 'vjsc/target/jsx-runtime';
 
+import {
+  type ComponentTarget,
+  defineComponentTarget,
+  type TemplateTargetDefinition,
+} from '../../../vjsc/src/target/index.ts';
+import { Host, jsx } from '../../../vjsc/src/target/jsx-runtime.ts';
 import { reactComponentTransform } from './react-transform';
 
 type CoreSchema = typeof coreSchema;

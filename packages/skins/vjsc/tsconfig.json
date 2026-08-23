@@ -8,6 +8,9 @@
     "jsx": "react-jsx",
     "jsxImportSource": "vjsc/components",
     "lib": ["ES2022"],
+    "paths": {
+      "vjsc/*": ["../../vjsc/src/*"]
+    },
     "types": ["node"],
     "noEmit": true
   },

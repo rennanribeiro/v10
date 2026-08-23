@@ -1,11 +1,12 @@
 import type coreSchema from '@videojs/core/vjsc';
+
 import {
   type ComponentTarget,
   type ComponentTargetHelpers,
   defineComponentTarget,
   type TemplateTargetDefinition,
-} from 'vjsc/target';
-import { Host, jsx } from 'vjsc/target/jsx-runtime';
+} from '../../../vjsc/src/target/index.ts';
+import { Host, jsx } from '../../../vjsc/src/target/jsx-runtime.ts';
 
 type CoreSchema = typeof coreSchema;
 
