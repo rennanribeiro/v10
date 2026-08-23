@@ -9,6 +9,7 @@ import { copyCssPlugin } from '../../build/plugins/copy-css-plugin.ts';
 import { LOCALES, localeAliases } from '../core/src/core/i18n/locales.ts';
 
 const skinsDir = resolve(dirname(fileURLToPath(import.meta.url)), '../skins/src');
+const srcDir = new URL('./src', import.meta.url).pathname;
 const localeTags = [...LOCALES, ...localeAliases(LOCALES)];
 
 const i18nLocaleEntries = Object.fromEntries([
@@ -30,7 +31,7 @@ const createPackConfig = (mode: PackageBuildMode): PackUserConfig => ({
     alwaysBundle: [/^@videojs\/skins/],
   },
   alias: {
-    '@': new URL('./src', import.meta.url).pathname,
+    '@': srcDir,
   },
   plugins: [copyCssPlugin({ skinsDir, outDir: `dist/${mode}`, rebuild: false })],
 });
@@ -38,6 +39,11 @@ const createPackConfig = (mode: PackageBuildMode): PackUserConfig => ({
 export default defineConfig({
   define: {
     __DEV__: 'true',
+  },
+  resolve: {
+    alias: {
+      '@': srcDir,
+    },
   },
   test: {
     environment: 'jsdom',
