@@ -25,6 +25,40 @@ describe('syncMenuSize', () => {
     expect(content.style.getPropertyValue('--media-menu-height')).toBe('120px');
   });
 
+  it('keeps repeated measurements stable when a root child uses both block insets', () => {
+    const content = document.createElement('div');
+    const root = document.createElement('div');
+    const naturalHeight = 180;
+    content.style.paddingTop = '6px';
+    content.style.paddingBottom = '6px';
+    content.style.paddingBlockStart = '6px';
+    content.style.paddingBlockEnd = '6px';
+    root.style.position = 'absolute';
+    root.style.inset = '0px';
+    content.append(root);
+
+    const getMeasuredHeight = () => {
+      if (root.style.insetBlockEnd === 'auto') return naturalHeight;
+
+      const menuHeight = Number.parseFloat(content.style.getPropertyValue('--media-menu-height')) || 0;
+      return Math.max(naturalHeight, menuHeight);
+    };
+
+    Object.defineProperty(root, 'scrollWidth', { configurable: true, value: 180 });
+    Object.defineProperty(root, 'scrollHeight', { configurable: true, get: getMeasuredHeight });
+    vi.spyOn(root, 'getBoundingClientRect').mockImplementation(
+      () => ({ width: 180, height: getMeasuredHeight() }) as DOMRect
+    );
+
+    syncMenuSize(content);
+    expect(content.style.getPropertyValue('--media-menu-height')).toBe('192px');
+
+    syncMenuSize(content);
+    expect(content.style.getPropertyValue('--media-menu-height')).toBe('192px');
+    expect(root.style.inset).toBe('0px');
+    expect(root.style.insetBlockEnd).toBe('');
+  });
+
   it('covers ordinary root children and measures the active submenu', () => {
     const content = document.createElement('div');
     const root = document.createElement('div');

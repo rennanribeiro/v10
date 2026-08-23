@@ -64,6 +64,7 @@ function measureMenuElement(element: HTMLElement, width?: number): MenuSize {
     styles: {
       insetInlineStart: '0px',
       insetInlineEnd: 'auto',
+      insetBlockEnd: 'auto',
       width: width === undefined ? 'max-content' : `${width}px`,
       height: 'auto',
       minWidth: '0px',
