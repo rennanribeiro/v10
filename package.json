@@ -16,7 +16,7 @@
     "build:cli": "vp run --filter='@videojs/cli...' build",
     "build:sandbox": "vp run --filter='@videojs/sandbox^...' build && vp run @videojs/html#build:cdn && vp run @videojs/sandbox#build",
     "build:cdn": "vp run @videojs/html#build:cdn",
-    "build:site": "vp run site#build",
+    "build:site": "vp run --filter='site^...' build && vp run @videojs/html#build:cdn && vp run site#build",
     "build": "vp run -r build",
     "clean": "vp run -r --no-cache clean",
     "commitlint": "commitlint --config ./commitlint.config.js --edit",
