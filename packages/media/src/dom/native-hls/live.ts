@@ -1,4 +1,5 @@
 import type { Constructor } from '@videojs/utils/types';
+
 import type { NativeMediaHost } from './errors';
 import { getStreamInfoFromSrc, looksLikeM3u8 } from './m3u8-utils';
 

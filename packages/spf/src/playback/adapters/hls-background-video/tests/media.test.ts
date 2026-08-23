@@ -4,6 +4,7 @@
  * element, not because the adapter keeps a parallel copy of it.
  */
 import { describe, expect, it } from 'vite-plus/test';
+
 import { HlsBackgroundVideoMedia } from '../media';
 
 describe('HlsBackgroundVideoMedia', () => {

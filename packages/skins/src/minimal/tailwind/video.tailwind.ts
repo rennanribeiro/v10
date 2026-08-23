@@ -1,4 +1,5 @@
 import { cn } from '@videojs/utils/style';
+
 import { buttonGroup as baseButtonGroup } from './components/button-group';
 import { container as baseContainer } from './components/container';
 import { controls as baseControls } from './components/controls';

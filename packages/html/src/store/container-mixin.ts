@@ -1,6 +1,8 @@
 import { type AnyPlayerStore, createPopupGroup, type MediaContainer, type PlayerStore } from '@videojs/core/dom';
 import { ContextConsumer, ContextProvider } from '@videojs/element/context';
+
 import type { MediaElementConstructor } from '@/ui/media-element';
+
 import { type ContainerContext, containerContext, type PlayerContext, playerContext } from '../player/context';
 import { popupGroupContext } from '../player/popup-group-context';
 import type { PlayerConsumer, PlayerConsumerConstructor } from './types';

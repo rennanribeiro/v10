@@ -1,7 +1,7 @@
 import { resolve } from 'node:path';
 
 import { build, createServer, type ViteDevServer } from 'vite';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vite-plus/test';
 
 const packageDir = resolve(import.meta.dirname, '../..');
 const configFile = resolve(packageDir, 'vite.config.ts');

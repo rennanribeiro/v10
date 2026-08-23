@@ -1,4 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vite-plus/test';
+
 import { MediaElement } from '../media-element';
 
 let tagCounter = 0;

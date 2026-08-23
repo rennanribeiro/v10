@@ -6,6 +6,7 @@ import type { MuxMediaProps } from '@videojs/spf/mux-audio';
 import { MuxAudioMedia, muxMediaDefaultProps } from '@videojs/spf/mux-audio';
 import type { AudioHTMLAttributes, ReactNode } from 'react';
 import { forwardRef } from 'react';
+
 import { useAttachMedia } from '../../utils/use-attach-media';
 import { useComposedRefs } from '../../utils/use-composed-refs';
 import { useMediaInstance } from '../../utils/use-media-instance';

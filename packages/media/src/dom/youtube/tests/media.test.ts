@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vite-plus/test';
-import { MediaError } from '../../../core/media-error';
+
 import {
   buildYouTubeIframeSrc,
   parseYouTubeSource,
@@ -7,6 +7,7 @@ import {
   YouTubeMedia,
   youtubeMediaDefaultProps,
 } from '..';
+import { MediaError } from '../../../core/media-error';
 
 vi.mock(import('@videojs/utils/dom'), async (importOriginal) => {
   const mod = await importOriginal();

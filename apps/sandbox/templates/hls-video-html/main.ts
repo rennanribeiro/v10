@@ -8,7 +8,6 @@ import '@app/styles.css';
 // Icon visibility is driven by data-* attributes set by the button elements:
 //   media-play-button: [data-paused], [data-ended]
 //   media-mute-button: [data-muted]
-
 import '@videojs/html/video/player';
 import '@videojs/html/media/container';
 import '@videojs/html/media/hls-video';

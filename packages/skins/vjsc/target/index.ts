@@ -1,4 +1,5 @@
 import type { ComponentTarget } from 'vjsc/target';
+
 import { createHtmlIconTarget, createReactIconTarget } from '../../../icons/vjsc/target';
 import type { SkinConfig } from '../config';
 import { skinStyles } from '../meta';

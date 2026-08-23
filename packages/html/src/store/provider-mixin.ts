@@ -10,7 +10,9 @@ import { ContextProvider } from '@videojs/element/context';
 import type { Media } from '@videojs/media/dom';
 import { isNull } from '@videojs/utils/predicate';
 import { camelCase, kebabCase } from '@videojs/utils/string';
+
 import type { MediaElementConstructor } from '@/ui/media-element';
+
 import type { ContainerContext, MediaContext, PlayerContext } from '../player/context';
 import type { PlayerProviderConstructor } from './types';
 

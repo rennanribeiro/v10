@@ -2,7 +2,7 @@ import type { AnyPlayerStore, PlayerTarget } from '@videojs/core/dom';
 import { metadataFeature, playbackFeature, setPlayerConfigValue } from '@videojs/core/dom';
 import { ContextProvider } from '@videojs/element/context';
 import { combine, createStore } from '@videojs/store';
-import { afterEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, describe, expect, it, vi } from 'vite-plus/test';
 
 import { playerContext } from '../../../player/context';
 import { MediaElement } from '../../media-element';

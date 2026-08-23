@@ -13,6 +13,7 @@
 import { existsSync, globSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+
 import { findUnresolvableSpecifiers } from './cdn-graph.ts';
 
 const CDN_DIR = resolve(dirname(fileURLToPath(import.meta.url)), '../cdn');

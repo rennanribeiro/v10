@@ -21,6 +21,7 @@ import type { PropertyDeclarationMap, PropertyValues } from '@videojs/element';
 import { ContextConsumer, ContextProvider } from '@videojs/element/context';
 import { SnapshotController } from '@videojs/store/html';
 import { tryHidePopover, tryShowPopover } from '@videojs/utils/dom';
+
 import { containerContext, playerContext } from '../../player/context';
 import { PlayerController } from '../../player/player-controller';
 import { popupGroupContext } from '../../player/popup-group-context';

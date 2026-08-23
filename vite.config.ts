@@ -7,6 +7,9 @@ const ignoredPaths = [
   '**/.vercel/**',
   '**/.vite/**',
   '**/.next/**',
+  '**/.agents/**',
+  '**/.claude/**',
+  '**/.vite-hooks/**',
   '**/.opencode/**',
   '**/.github/**',
   '**/*.md',
@@ -21,6 +24,7 @@ const ignoredPaths = [
   '**/styles/vjs.css',
   '**/packages/*/types/**',
   'packages/core/src/core/ui/components.generated.ts',
+  'tools/oxlint/anti-slop/**',
 ];
 
 export default defineConfig({
@@ -31,9 +35,9 @@ export default defineConfig({
     printWidth: 120,
     semi: true,
     singleQuote: true,
-    sortImports: false,
-    sortPackageJson: false,
-    sortTailwindcss: false,
+    sortImports: true,
+    sortPackageJson: true,
+    sortTailwindcss: true,
     tabWidth: 2,
     trailingComma: 'es5',
     useTabs: false,
@@ -57,12 +61,29 @@ export default defineConfig({
   },
   lint: {
     ignorePatterns: ignoredPaths,
+    jsPlugins: [{ name: 'anti-slop', specifier: './tools/oxlint/anti-slop/index.ts' }],
     plugins: ['typescript', 'react'],
     options: {
       typeAware: false,
       typeCheck: false,
     },
     rules: {
+      // Baseline the vendored preset as warnings while the existing codebase is migrated incrementally.
+      'anti-slop/no-chained-type-assertions': 'warn',
+      'anti-slop/no-conditional-empty-object-spread': 'warn',
+      'anti-slop/no-known-value-widening': 'warn',
+      'anti-slop/no-module-mocking': 'warn',
+      'anti-slop/no-object-parameters': 'warn',
+      'anti-slop/no-reflect-apply': 'warn',
+      'anti-slop/no-reflect-get': 'warn',
+      'anti-slop/no-runtime-typeof': 'warn',
+      'anti-slop/no-shape-in-symbol-names': 'warn',
+      'anti-slop/no-unknown-parameters': 'warn',
+      'anti-slop/no-unknown-returns': 'warn',
+      'anti-slop/no-unknown-type-aliases': 'warn',
+      'anti-slop/no-unsafe-dictionary-type': 'warn',
+      'anti-slop/no-widen-then-assert': 'warn',
+      'anti-slop/require-safety-comment-for-type-assertion': 'warn',
       'array-callback-return': 'off',
       'no-cond-assign': 'off',
       'no-unused-vars': [

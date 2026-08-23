@@ -8,6 +8,7 @@
  * engines compete for one name.
  */
 import { describe, expect, it } from 'vite-plus/test';
+
 import { HlsBackgroundVideo } from '../../media/hls-background-video';
 import { HlsBackgroundVideoElement } from '../media/hls-background-video';
 import { MuxBackgroundVideoElement } from '../media/mux-background-video';

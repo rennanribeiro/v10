@@ -2,6 +2,7 @@
 
 import { existsSync, readFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
+
 import { describe, expect, it } from 'vite-plus/test';
 
 const menuDirectory = resolve(dirname(new URL(import.meta.url).pathname), '..');

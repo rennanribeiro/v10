@@ -4,6 +4,7 @@ import { GoogleCast as GoogleCastComponent } from '@videojs/media/dom/google-cas
 import { HlsJsMedia } from '@videojs/media/dom/hls-js';
 import { getMediaComponents } from '@videojs/media/dom/media-host';
 import { describe, expect, it } from 'vite-plus/test';
+
 import { createPlayerWrapper } from '../../testing/mocks';
 import { GoogleCast } from '../google-cast';
 

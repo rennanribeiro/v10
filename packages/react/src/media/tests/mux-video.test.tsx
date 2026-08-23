@@ -3,6 +3,7 @@ import { HlsJsMedia } from '@videojs/media/dom/hls-js';
 import { MuxMedia } from '@videojs/media/dom/mux';
 import type { ReactElement } from 'react';
 import { describe, expect, it, vi } from 'vite-plus/test';
+
 import { MuxVideo } from '../mux-video';
 
 /**

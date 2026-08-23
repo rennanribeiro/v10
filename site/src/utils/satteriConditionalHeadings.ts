@@ -1,10 +1,12 @@
 import * as fs from 'node:fs';
 import * as path from 'node:path';
 import { fileURLToPath } from 'node:url';
+
 import { kebabCase } from 'es-toolkit/string';
 import GithubSlugger from 'github-slugger';
 import type { MdastPluginInput, MdxJsxFlowElement } from 'satteri';
 import { defineMdastPlugin } from 'satteri';
+
 import { resolveReferenceSlug } from './api-reference-overrides';
 import { buildComponentReferenceTocHeadings, createComponentReferenceModel } from './componentReferenceModel';
 import { buildFeatureReferenceTocHeadings, createFeatureReferenceModel } from './featureReferenceModel';

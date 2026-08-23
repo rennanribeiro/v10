@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+
 import { currentFramework as frameworkStore, currentStyle as styleStore } from '@/stores/preferences';
 import { getDefaultStyle, type SupportedFramework } from '@/types/docs';
 import { getStylePreferenceClient } from '@/utils/docs/preferences';

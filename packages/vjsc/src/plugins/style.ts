@@ -285,7 +285,7 @@ function renderStyleRule(rule: StyleManifestRule, options: StylePluginOptions, l
 function isListItem(expression: Expression, parent: Node | null): boolean {
   return Boolean(
     (parent?.type === 'ArrayExpression' && parent.elements.includes(expression)) ||
-      (parent?.type === 'CallExpression' && parent.arguments.includes(expression))
+    (parent?.type === 'CallExpression' && parent.arguments.includes(expression))
   );
 }
 

@@ -9,7 +9,6 @@ import '@app/styles.css';
 //   loop=true            Loop playback
 //   preload=auto|metadata|none  Initial preload mode
 //   avcOnly=true         Filter out HEVC renditions (avoids changeType; see the toggle)
-
 import { SOURCE_IDS, SOURCES } from '@app/shared/sources';
 import { effect, snapshot } from '@videojs/spf';
 import type { HlsVideoEngineSignals, HlsVideoEngineState } from '@videojs/spf/hls';

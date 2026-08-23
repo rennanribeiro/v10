@@ -13,6 +13,7 @@ import type { PropertyDeclarationMap, PropertyValues } from '@videojs/element';
 import { ContextConsumer } from '@videojs/element/context';
 import { SnapshotController } from '@videojs/store/html';
 import { tryHidePopover, tryShowPopover } from '@videojs/utils/dom';
+
 import { containerContext } from '../../player/context';
 import { popupGroupContext } from '../../player/popup-group-context';
 import { MediaElement } from '../media-element';

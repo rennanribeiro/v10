@@ -7,6 +7,7 @@
  * not in adapter contract).
  */
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vite-plus/test';
+
 import {
   SVTA_NO_SUPPORTED_AUDIO_TRACK,
   SVTA_NO_SUPPORTED_VIDEO_TRACK,

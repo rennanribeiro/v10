@@ -1,6 +1,7 @@
 import { writeFileSync } from 'node:fs';
 import { dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+
 import en from '../src/core/i18n/locales/en.ts';
 import { flattenEntries } from './i18n-utils.ts';
 

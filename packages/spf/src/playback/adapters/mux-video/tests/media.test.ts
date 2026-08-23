@@ -7,6 +7,7 @@
  * identity and nothing else.
  */
 import { describe, expect, it, vi } from 'vite-plus/test';
+
 import { MuxVideoMedia } from '../media';
 
 describe('MuxVideoMedia', () => {

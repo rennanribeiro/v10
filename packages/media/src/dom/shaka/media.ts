@@ -1,7 +1,6 @@
 // Keep this import first: it lends shaka's UMD evaluation the `self` global a
 // server runtime lacks. See `server-shim.ts`.
 import './server-shim';
-
 import { deepEqual } from '@videojs/utils/object';
 import { isObject } from '@videojs/utils/predicate';
 // The es2021 bundle is the same everything-but-UI API as the package default,
@@ -9,6 +8,7 @@ import { isObject } from '@videojs/utils/predicate';
 // no `exports` map, so the deep path is public surface — and `dist/*.ui*` is
 // where the UI library lives; never import those.
 import shaka from 'shaka-player/dist/shaka-player.compiled-es2021';
+
 import type { DrmSystemsConfig } from '../../core/drm';
 import { MediaError } from '../../core/media-error';
 import { MediaTracksMixin } from '../../core/media-tracks';

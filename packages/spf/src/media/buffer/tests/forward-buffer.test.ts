@@ -1,4 +1,5 @@
 import { describe, expect, it } from 'vite-plus/test';
+
 import type { Segment } from '../../types';
 import {
   calculateForwardFlushPoint,

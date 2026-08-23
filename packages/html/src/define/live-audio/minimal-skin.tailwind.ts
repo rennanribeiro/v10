@@ -14,9 +14,9 @@ import {
 } from '@videojs/skins/minimal/tailwind/audio.tailwind';
 import { createTemplate } from '@videojs/utils/dom';
 import { cn } from '@videojs/utils/style';
+
 import { safeDefine } from '../safe-define';
 import { SkinElement } from '../skin-element';
-
 // Register the live audio player, container, and minimal UI custom elements.
 import './minimal-ui';
 

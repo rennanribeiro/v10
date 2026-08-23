@@ -4,6 +4,7 @@ import { defineSlice } from '@videojs/store';
 import { Component, type ErrorInfo, type ReactNode, StrictMode, useState } from 'react';
 import { renderToString } from 'react-dom/server';
 import { afterEach, describe, expect, it, vi } from 'vite-plus/test';
+
 import { I18nProvider, useLocale } from '../../i18n';
 import { Container } from '../../index';
 import { useContainer, usePlayerContext } from '../context';

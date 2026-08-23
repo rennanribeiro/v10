@@ -50,6 +50,7 @@ vi.mock('@clack/prompts', () => ({
 }));
 
 import * as p from '@clack/prompts';
+
 import { getConfigValue } from '../../utils/config.js';
 import { docExistsInAnyFramework, readBundledDoc, readLlmsTxt } from '../../utils/docs.js';
 import { handleDocs } from '../docs.js';

@@ -4,6 +4,7 @@
  * already cover this entry, and there is no second implementation to drift.
  */
 import { describe, expect, it } from 'vite-plus/test';
+
 import {
   HlsBackgroundVideoMedia,
   HlsBackgroundVideoMediaElement,

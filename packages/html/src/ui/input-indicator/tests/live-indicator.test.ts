@@ -5,6 +5,7 @@ import {
   VolumeIndicatorDataAttrs,
 } from '@videojs/core';
 import { afterEach, describe, expect, it } from 'vite-plus/test';
+
 import { LiveIndicator } from '../live-indicator';
 
 afterEach(() => {

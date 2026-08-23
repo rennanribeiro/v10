@@ -1,4 +1,5 @@
 import { isNull, isObject } from '@videojs/utils/predicate';
+
 import { AbortControllerRegistry } from './abort-controller-registry';
 import type { StoreCallbacks } from './config';
 import { throwDestroyedError, throwNoTargetError } from './errors';

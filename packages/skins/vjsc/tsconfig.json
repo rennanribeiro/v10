@@ -11,5 +11,5 @@
     "types": ["node"],
     "noEmit": true
   },
-  "include": ["**/*.ts", "**/*.tsx", "../tsdown.shadcn.config.ts"]
+  "include": ["**/*.ts", "**/*.tsx", "../vite.config.ts"]
 }

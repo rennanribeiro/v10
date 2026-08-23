@@ -2,6 +2,7 @@
 
 import { cn } from '@videojs/utils/style';
 import { type ComponentProps, forwardRef, type ReactNode } from 'react';
+
 import {
   PauseIcon,
   PlayIcon,
@@ -23,6 +24,7 @@ import { Popover } from '@/ui/popover';
 import { StatusAnnouncer } from '@/ui/status-announcer';
 import { Tooltip } from '@/ui/tooltip';
 import { VolumeSlider } from '@/ui/volume-slider';
+
 import type { BaseSkinProps } from '../types';
 
 export type MinimalLiveAudioSkinProps = BaseSkinProps;

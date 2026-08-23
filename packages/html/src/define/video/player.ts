@@ -1,4 +1,5 @@
 import { videoFeatures } from '@videojs/core/dom';
+
 import { MediaContainerElement } from '../../media/container-element';
 import { createPlayer } from '../../player/create-player';
 import { MediaElement } from '../../ui/media-element';

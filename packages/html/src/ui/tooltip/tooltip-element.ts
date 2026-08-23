@@ -24,6 +24,7 @@ import type { State } from '@videojs/store';
 import { SnapshotController } from '@videojs/store/html';
 import { listen, tryHidePopover, tryShowPopover } from '@videojs/utils/dom';
 import { isFunction } from '@videojs/utils/predicate';
+
 import { i18nContext } from '../../i18n/context';
 import { I18nController } from '../../i18n/controller';
 import { containerContext } from '../../player/context';

@@ -8,6 +8,7 @@
  * decides for itself.
  */
 import { describe, expect, it, vi } from 'vite-plus/test';
+
 import { MuxAudioMedia } from '../media';
 
 describe('MuxAudioMedia', () => {

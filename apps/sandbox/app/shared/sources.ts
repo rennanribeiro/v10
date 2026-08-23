@@ -1,4 +1,5 @@
 import type { MuxSource } from '@videojs/media/dom/mux';
+
 import { getMuxAssetId } from './mux';
 
 export interface ChapterTrack {

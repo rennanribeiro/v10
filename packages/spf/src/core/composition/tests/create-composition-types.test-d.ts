@@ -1,4 +1,5 @@
 import { describe, expectTypeOf, it } from 'vite-plus/test';
+
 import { type Signal, signal } from '../../signals/primitives';
 import {
   type Behavior,

@@ -4,6 +4,7 @@ import type { HlsVideoMediaProps } from '@videojs/spf/hls-video';
 import { HlsVideoMedia, hlsVideoMediaDefaultProps } from '@videojs/spf/hls-video';
 import type { ReactNode, VideoHTMLAttributes } from 'react';
 import { forwardRef } from 'react';
+
 import { useAttachMedia } from '../../utils/use-attach-media';
 import { useComposedRefs } from '../../utils/use-composed-refs';
 import { useMediaInstance } from '../../utils/use-media-instance';

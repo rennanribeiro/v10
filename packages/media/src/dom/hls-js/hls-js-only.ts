@@ -1,5 +1,6 @@
 import type { MixinReturn } from '@videojs/utils/types';
 import Hls, { type HlsConfig } from 'hls.js';
+
 import type { MediaError } from '../../core/media-error';
 import { MediaTracksMixin, type WithMediaTracks } from '../../core/media-tracks';
 import type {

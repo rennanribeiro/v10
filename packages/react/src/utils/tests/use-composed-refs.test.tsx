@@ -1,8 +1,6 @@
 import { render } from '@testing-library/react';
 import type { MutableRefObject, RefObject } from 'react';
-
 import { useRef } from 'react';
-
 import { describe, expect, it, vi } from 'vite-plus/test';
 
 import { composeRefs, useComposedRefs } from '../use-composed-refs';

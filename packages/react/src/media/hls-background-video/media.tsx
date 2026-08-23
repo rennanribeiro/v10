@@ -7,6 +7,7 @@ import {
 } from '@videojs/spf/hls-background-video';
 import type { VideoHTMLAttributes } from 'react';
 import { forwardRef, useEffect, useRef } from 'react';
+
 import { useAttachMedia } from '../../utils/use-attach-media';
 import { useComposedRefs } from '../../utils/use-composed-refs';
 import { useMediaInstance } from '../../utils/use-media-instance';

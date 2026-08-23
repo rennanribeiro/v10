@@ -1,8 +1,11 @@
-import { defineConfig } from 'tsdown';
-import { baseConfig } from '../../build/tsdown.ts';
+import { defineConfig } from 'vite-plus';
+import type { UserConfig as PackUserConfig } from 'vite-plus/pack';
 
-export default defineConfig({
-  ...baseConfig,
+import { neutralLibraryConfig } from '../../build/pack.ts';
+
+const pack: PackUserConfig = {
+  ...neutralLibraryConfig,
+  dts: true,
   entry: {
     index: './src/index.ts',
     'ast/index': './src/ast/index.ts',
@@ -17,16 +20,12 @@ export default defineConfig({
     'plugins/index': './src/plugins/index.ts',
     'vite/index': './src/vite/index.ts',
   },
-  platform: 'node',
-  // The package is ESM, so `.js`/`.d.ts` match its checked-in export map.
-  fixedExtension: false,
-  format: 'es',
-  sourcemap: true,
-  clean: true,
-  hash: false,
-  unbundle: true,
-  dts: true,
-  deps: {
-    neverBundle: [/^node:/],
+  deps: { neverBundle: [/^node:/] },
+};
+
+export default defineConfig({
+  test: {
+    include: ['src/**/*.test.{ts,tsx}'],
   },
+  pack,
 });

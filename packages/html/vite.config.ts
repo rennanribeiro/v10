@@ -1,12 +1,10 @@
-import { globSync, readdirSync, statSync, writeFileSync } from 'node:fs';
+import { globSync, readdirSync, writeFileSync } from 'node:fs';
 import { basename, dirname, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+
 import { defineConfig } from 'vite-plus';
 import type { UserConfig as PackUserConfig } from 'vite-plus/pack';
-import { cdnI18nExternalPlugin } from '../../build/plugins/cdn-i18n-external-plugin.ts';
-import { copyCssPlugin } from '../../build/plugins/copy-css-plugin.ts';
-import { inlineCssPlugin } from '../../build/plugins/inline-css-plugin.ts';
-import { inlineTemplatePlugin } from '../../build/plugins/inline-template-plugin.ts';
+
 import {
   baseConfig,
   isDevBuildMode,
@@ -14,6 +12,10 @@ import {
   packageBuildConfig,
   packageBuildModes,
 } from '../../build/pack.ts';
+import { cdnI18nExternalPlugin } from '../../build/plugins/cdn-i18n-external-plugin.ts';
+import { copyCssPlugin } from '../../build/plugins/copy-css-plugin.ts';
+import { inlineCssPlugin } from '../../build/plugins/inline-css-plugin.ts';
+import { inlineTemplatePlugin } from '../../build/plugins/inline-template-plugin.ts';
 import { LOCALES, localeAliases } from '../core/src/core/i18n/locales.ts';
 
 type CdnBuildMode = 'dev' | 'prod';
@@ -90,38 +92,35 @@ const createPackagePackConfig = (mode: PackageBuildMode): PackUserConfig => ({
 const cdnBuildModes: CdnBuildMode[] = ['dev', 'prod'];
 const cdnPresets = [
   'video',
-  'video-headless',
+  'video-player',
   'video-minimal',
   'video-ui',
   'video-minimal-ui',
   'live-video',
+  'live-video-player',
   'live-video-minimal',
+  'live-video-ui',
+  'live-video-minimal-ui',
   'audio',
-  'audio-headless',
+  'audio-player',
   'audio-minimal',
   'audio-ui',
   'audio-minimal-ui',
+  'live-audio',
+  'live-audio-player',
+  'live-audio-minimal',
+  'live-audio-ui',
+  'live-audio-minimal-ui',
   'background',
 ];
-const cdnMedia = [
-  'google-cast',
-  'hls-audio',
-  'hls-background-video',
-  'hls-video',
-  'hlsjs-video',
-  'mux-audio',
-  'mux-background-video',
-  'mux-data',
-  'mux-video',
-  'native-hls-video',
-  'dash-video',
-];
+const mediaDir = 'src/define/media';
 
 /**
- * Media entries, one bundle per name — or per flavor, for a name that is a
- * directory.
+ * Media entries, one bundle per module under `src/define/media` — or per flavor,
+ * for a module that is a directory.
  *
- * A directory ships its index as the flavor-neutral bundle and each flavor
+ * Discovered from the definitions so the npm and CDN delivery surfaces cannot
+ * drift. A directory ships its index as the flavor-neutral bundle and each flavor
  * beside it, so `media/mux-video/spf` reads the same as the npm subpath it
  * mirrors. The installation page derives CDN URLs from npm media subpaths, so
  * the two layouts matching is what keeps a flavor reachable there without a
@@ -131,18 +130,20 @@ const cdnMedia = [
  * where two flavors of one element can end up in a single realm — see the
  * tag-collision note in `define/media/mux-video/spf`.
  */
-const cdnMediaEntries = cdnMedia.flatMap((name) => {
-  const dir = `src/cdn/media/${name}`;
+const cdnMediaEntries = readdirSync(mediaDir, { withFileTypes: true })
+  .flatMap((entry) => {
+    if (entry.isDirectory()) {
+      return globSync(`${mediaDir}/${entry.name}/*.ts`).map((src) => {
+        const flavor = basename(src, '.ts');
+        return { src, name: flavor === 'index' ? `media/${entry.name}` : `media/${entry.name}/${flavor}` };
+      });
+    }
 
-  if (!statSync(dir, { throwIfNoEntry: false })?.isDirectory()) {
-    return [{ src: `${dir}.ts`, name: `media/${name}` }];
-  }
-
-  return globSync(`${dir}/*.ts`).map((src) => {
-    const flavor = basename(src, '.ts');
-    return { src, name: flavor === 'index' ? `media/${name}` : `media/${name}/${flavor}` };
-  });
-});
+    return entry.name.endsWith('.ts')
+      ? [{ src: `${mediaDir}/${entry.name}`, name: `media/${basename(entry.name, '.ts')}` }]
+      : [];
+  })
+  .sort((a, b) => a.name.localeCompare(b.name));
 
 const cdnLocaleEntries = globSync('src/cdn/locales/*.ts').map((file) => ({
   src: file,
@@ -226,6 +227,7 @@ for (const mode of cdnBuildModes) {
       ...(!isProd ? [dtsStubsPlugin(cdnOutDir)] : []),
     ],
     inputOptions: {
+      ...baseConfig.inputOptions,
       onwarn(warning, defaultHandler) {
         if (warning.code === 'COMMONJS_VARIABLE_IN_ESM') return;
         defaultHandler(warning);

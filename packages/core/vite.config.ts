@@ -1,8 +1,10 @@
 import { defineConfig } from 'vite-plus';
 import type { UserConfig as PackUserConfig } from 'vite-plus/pack';
+import { componentSchemaPlugin } from 'vjsc/plugins';
+
 import { type PackageBuildMode, packageBuildConfig, packageBuildModes } from '../../build/pack.ts';
-import en from './src/core/i18n/locales/en.ts';
 import { LOCALES, localeAliases } from './src/core/i18n/locales.ts';
+import en from './src/core/i18n/locales/en.ts';
 
 const localeTags = [...LOCALES, ...localeAliases(LOCALES)];
 const textNamespaces = [...new Set(Object.keys(en).map((key) => key.split('.')[0]))];
@@ -16,10 +18,25 @@ const localeEntries = Object.fromEntries([
 
 const createPackConfig = (mode: PackageBuildMode): PackUserConfig => ({
   ...packageBuildConfig(mode, 'neutral'),
-  deps: { neverBundle: ['@videojs/jsx'] },
+  dts:
+    mode === 'dev'
+      ? {
+          tsgo: true,
+          tsconfig: 'tsconfig.dts.json',
+          entry: ['src/**/*.ts'],
+        }
+      : false,
+  deps: { neverBundle: ['vjsc/components'] },
+  plugins: [
+    componentSchemaPlugin({
+      file: 'vjsc',
+      declaration: mode === 'dev',
+      source: '@videojs/core/vjsc',
+      include: ['./src/core/ui/*/*-component.ts'],
+    }),
+  ],
   entry: {
     index: './src/core/index.ts',
-    components: './src/core/ui/components.generated.ts',
     i18n: './src/core/i18n/index.ts',
     ...localeEntries,
     dom: './src/dom/index.ts',

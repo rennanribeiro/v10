@@ -1,4 +1,5 @@
 import type { MarkdownHeading } from 'astro';
+
 import { TableOfContentsDesktop } from './TableOfContents.desktop';
 import { TableOfContentsMobile } from './TableOfContents.mobile';
 import { filterHeadingsForToc, navigateToHeading, useActiveHeading } from './utils';
