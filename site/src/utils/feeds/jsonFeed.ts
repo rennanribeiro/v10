@@ -101,7 +101,13 @@ export function buildJsonFeed(
   };
 }
 
-/** JSON Feed's own media type, which readers use for autodiscovery. */
+/**
+ * JSON Feed's own media type, which readers use for autodiscovery.
+ *
+ * This covers `astro dev`. In a build these routes prerender to static files
+ * that the CDN serves by extension, so `netlify.toml` sets the same header for
+ * the built `/feed.json` paths — keep the two in step.
+ */
 export const JSON_FEED_CONTENT_TYPE = 'application/feed+json; charset=utf-8';
 
 export function jsonFeedResponse(feed: JsonFeed): Response {
