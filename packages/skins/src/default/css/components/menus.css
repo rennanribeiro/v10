@@ -141,13 +141,6 @@
     font-variant-numeric: tabular-nums;
     color: inherit;
 
-    &.media-menu__item--submenu > :not(.media-icon):not(.media-menu__hint) {
-      min-width: 0;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
-    }
-
     &[aria-disabled="true"] {
       pointer-events: none;
       cursor: not-allowed;
