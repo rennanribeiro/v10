@@ -3,6 +3,12 @@ import * as ts from 'typescript';
 import type { DataAttrsExtraction } from './types.js';
 import { unwrapObjectLiteral } from './utils.js';
 
+interface DataAttrEntry {
+  name: string;
+  description: string;
+  type?: string;
+}
+
 function extractSatisfiesExpression(node: ts.Expression): ts.TypeNode | undefined {
   if (ts.isSatisfiesExpression(node)) return node.type;
   if (ts.isParenthesizedExpression(node)) return extractSatisfiesExpression(node.expression);
@@ -65,7 +71,7 @@ export function extractDataAttrs(
     return null;
   }
 
-  const attrs: Array<{ name: string; description: string }> = [];
+  const attrs: DataAttrEntry[] = [];
 
   // Common naming patterns for data attributes exports
   const possibleNames = [`${componentName}DataAttrs`, `${componentName}DataAttributes`];
@@ -99,10 +105,10 @@ export function extractDataAttrs(
             // Get JSDoc comment and optional @type for this property
             const { description: jsDocComment, type: jsDocType } = parseJsDoc(prop, sourceFile);
 
-            const attrEntry = {
+            const attrEntry: DataAttrEntry = {
               name: dataAttrValue || `data-${propName}`,
               description: jsDocComment || '',
-            } satisfies { name: string; description: string; type?: string };
+            };
 
             // JSDoc @type takes priority, then inferred type from satisfies
             if (jsDocType) {

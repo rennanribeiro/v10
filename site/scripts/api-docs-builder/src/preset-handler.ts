@@ -327,9 +327,13 @@ function findReactMediaElement(filePath: string): string | undefined {
  * Feature names whose kebab-cased form doesn't match the docs page slug.
  * Example: `textTrack` → `feature-text-tracks.mdx`.
  */
-const FEATURE_SLUG_OVERRIDES = {
+interface FeatureSlugByName {
+  readonly [name: string]: string | undefined;
+}
+
+const FEATURE_SLUG_OVERRIDES: FeatureSlugByName = {
   textTrack: 'text-tracks',
-} satisfies Record<string, string>;
+};
 
 function featureDocsSlug(featureName: string): string {
   const override = FEATURE_SLUG_OVERRIDES[featureName];

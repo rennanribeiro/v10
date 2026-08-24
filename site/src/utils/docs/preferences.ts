@@ -1,5 +1,3 @@
-import type { AstroCookies } from 'astro';
-
 import type { AnySupportedStyle, SupportedFramework, SupportedStyle } from '@/types/docs';
 import { DEFAULT_FRAMEWORK, isValidFramework, isValidStyleForFramework } from '@/types/docs';
 
@@ -25,7 +23,12 @@ interface FrameworkPreference {
 }
 export type Preference = NoPreference | FrameworkPreference;
 
-export function getPreferencesServer(cookies: AstroCookies): Preference {
+interface CookieReader {
+  has(name: string): boolean;
+  get(name: string): { value: string } | null | undefined;
+}
+
+export function getPreferencesServer(cookies: CookieReader): Preference {
   const frameworkCookie = cookies.has(FRAMEWORK_COOKIE) ? cookies.get(FRAMEWORK_COOKIE) : null;
 
   const framework = frameworkCookie && isValidFramework(frameworkCookie.value) ? frameworkCookie.value : null;

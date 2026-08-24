@@ -60,9 +60,12 @@ function createMockContext(params: { code?: string; state?: string; storedState?
   if (params.code) url.searchParams.set('code', params.code);
   if (params.state) url.searchParams.set('state', params.state);
 
-  return /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ {
+  const context: Partial<APIContext> = {
     request: new Request(url.toString()),
-    cookies: /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ {
+    redirect: vi.fn((path: string) => new Response(null, { status: 302, headers: { Location: path } })),
+  };
+  Object.assign(context, {
+    cookies: {
       get: vi.fn((name: string) => {
         if (name === 'state' && params.storedState) {
           return { value: params.storedState };
@@ -71,9 +74,9 @@ function createMockContext(params: { code?: string; state?: string; storedState?
       }),
       set: vi.fn(),
       delete: vi.fn(),
-    } as any,
-    redirect: vi.fn((path: string) => new Response(null, { status: 302, headers: { Location: path } })),
-  } as APIContext;
+    },
+  });
+  return /* SAFETY: The partial context contains every member exercised by this fixture. */ context as APIContext;
 }
 
 describe('callback endpoint', () => {

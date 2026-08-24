@@ -1,6 +1,10 @@
 import { kebabCase } from 'es-toolkit/string';
 
-const UTIL_SLUG_OVERRIDES = {
+interface UtilSlugByName {
+  readonly [name: string]: string | undefined;
+}
+
+const UTIL_SLUG_OVERRIDES: UtilSlugByName = {
   registerI18n: 'register-i18n',
   getI18nTranslations: 'get-i18n-translations',
   hasRegisteredLocale: 'has-registered-locale',
@@ -8,7 +12,7 @@ const UTIL_SLUG_OVERRIDES = {
   createI18n: 'create-i18n',
   createTranslator: 'create-translator',
   I18nProvider: 'i18n-provider',
-} satisfies Record<string, string>;
+};
 
 export function utilReferenceSlug(name: string): string {
   return UTIL_SLUG_OVERRIDES[name] ?? kebabCase(name);

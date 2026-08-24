@@ -46,8 +46,12 @@ const mockUserPayload = {
 };
 
 function createMockContext(sessionCookie?: string): APIContext {
-  return /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ {
+  const context: Partial<APIContext> = {
     request: new Request('https://example.com/'),
+    locals: {},
+    redirect: vi.fn(),
+  };
+  Object.assign(context, {
     cookies: {
       get: vi.fn((name: string) => {
         if (name === 'session' && sessionCookie) {
@@ -58,9 +62,8 @@ function createMockContext(sessionCookie?: string): APIContext {
       set: vi.fn(),
       delete: vi.fn(),
     },
-    locals: {},
-    redirect: vi.fn(),
-  } as APIContext;
+  });
+  return /* SAFETY: The partial context contains every member exercised by this fixture. */ context as APIContext;
 }
 
 const next = vi.fn().mockResolvedValue(new Response('OK'));

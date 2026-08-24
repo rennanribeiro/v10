@@ -729,14 +729,29 @@ export function resolvePropsInterface(source: string): string {
 
 type SectionKey = 'top' | 'mainType' | 'main' | 'labels' | 'components' | 'errorDialog' | 'utilities' | 'icons';
 
-const SECTION_HEADERS = {
+interface SectionHeaderByKey {
+  readonly [section: string]: string | undefined;
+}
+
+interface ReactOutputSections {
+  top: string[];
+  mainType: string[];
+  main: string[];
+  labels: string[];
+  components: string[];
+  errorDialog: string[];
+  utilities: string[];
+  icons: string[];
+}
+
+const SECTION_HEADERS: SectionHeaderByKey = {
   mainType: 'Skin',
   labels: 'Labels',
   components: 'Components',
   errorDialog: 'Error Dialog',
   utilities: 'Utilities',
   icons: 'Icons',
-} satisfies Partial<Record<SectionKey, string>>;
+};
 
 function hasExportModifier(statement: ts.Statement): boolean {
   const modifiers = ts.canHaveModifiers(statement) ? ts.getModifiers(statement) : undefined;
@@ -768,7 +783,7 @@ function reorganizeReactOutput(source: string, extraUtilities: string[], extraIc
   const sourceFile = createSourceFile('output.tsx', source);
 
   const imports: string[] = [];
-  const sections = {
+  const sections: ReactOutputSections = {
     top: [],
     mainType: [],
     main: [],
@@ -777,7 +792,7 @@ function reorganizeReactOutput(source: string, extraUtilities: string[], extraIc
     errorDialog: [],
     utilities: [],
     icons: [],
-  } satisfies Record<SectionKey, string[]>;
+  };
 
   for (const statement of sourceFile.statements) {
     if (isDirectivePrologueStatement(statement)) continue;

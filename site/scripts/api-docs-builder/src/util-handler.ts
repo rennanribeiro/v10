@@ -35,7 +35,7 @@ import * as path from 'node:path';
  * All overloads are preserved. When a function or constructor has multiple
  * overload signatures, each becomes a separate entry in the overloads array.
  */
-import { isObject, isString } from '@videojs/utils/predicate';
+import { isBoolean, isNumber, isString } from '@videojs/utils/predicate';
 import * as ts from 'typescript';
 import * as tae from 'typescript-api-extractor';
 
@@ -56,6 +56,12 @@ export interface UtilEntry {
 interface EntryPoint {
   index: string;
   framework: 'react' | 'html' | null;
+}
+
+interface UtilField {
+  type: string;
+  detailedType?: string;
+  description?: string;
 }
 
 // ─── Entry Points ──────────────────────────────────────────────────
@@ -270,16 +276,16 @@ function getDisplayName(name: string): string {
   return name;
 }
 
-function normalizeDescription(description: import('./boundary-types').ApiDocInput): string | undefined {
+function normalizeDescription(description: import('./boundary-types').ApiDocInput | undefined): string | undefined {
   if (!description) return undefined;
   if (isString(description)) return description;
   if (Array.isArray(description)) {
     const text = description
       .map((part) => {
         if (isString(part)) return part;
-        if (part && isObject(part) && 'text' in part && isString(part.text)) {
-          return part.text;
-        }
+        if (!part || Array.isArray(part) || isString(part) || isNumber(part) || isBoolean(part)) return '';
+        const text = Object.entries(part).find(([key]) => key === 'text')?.[1];
+        if (isString(text)) return text;
         return '';
       })
       .join('')
@@ -373,11 +379,7 @@ function buildReturnValue(type: tae.AnyType, allExports?: tae.ExportNode[]): Ret
         ? formatDetailedType(prop.type, allExports, prop.optional)
         : formatType(prop.type, prop.optional);
       const propAbbrev = abbreviateType(prop.name, propType);
-      const field = { type: propAbbrev ?? propType } satisfies {
-        type: string;
-        detailedType?: string;
-        description?: string;
-      };
+      const field: UtilField = { type: propAbbrev ?? propType };
       if (propAbbrev && propType !== propAbbrev) field.detailedType = propType;
       if (prop.documentation?.description) field.description = prop.documentation.description;
       fields[prop.name] = field;
@@ -554,11 +556,7 @@ function extractPublicMembers(classDecl: ts.ClassDeclaration, sourceFile: ts.Sou
       const abbreviated = abbreviateType(name, typeStr);
       const description = getJSDocDescription(member);
 
-      const field = { type: abbreviated ?? typeStr } satisfies {
-        type: string;
-        detailedType?: string;
-        description?: string;
-      };
+      const field: UtilField = { type: abbreviated ?? typeStr };
       if (abbreviated && typeStr !== abbreviated) field.detailedType = typeStr;
       if (description) field.description = description;
 
@@ -578,11 +576,7 @@ function extractPublicMembers(classDecl: ts.ClassDeclaration, sourceFile: ts.Sou
       const abbreviated = abbreviateType(name, typeStr);
       const description = getJSDocDescription(member);
 
-      const field = { type: abbreviated ?? typeStr } satisfies {
-        type: string;
-        detailedType?: string;
-        description?: string;
-      };
+      const field: UtilField = { type: abbreviated ?? typeStr };
       if (abbreviated && typeStr !== abbreviated) field.detailedType = typeStr;
       if (description) field.description = description;
 
@@ -894,11 +888,7 @@ function extractReturnTypeFields(
     const abbreviated = abbreviateType(name, typeStr);
     const description = getJSDocDescription(member);
 
-    const field = { type: abbreviated ?? typeStr } satisfies {
-      type: string;
-      detailedType?: string;
-      description?: string;
-    };
+    const field: UtilField = { type: abbreviated ?? typeStr };
     if (abbreviated && typeStr !== abbreviated) field.detailedType = typeStr;
     if (description) field.description = description;
 

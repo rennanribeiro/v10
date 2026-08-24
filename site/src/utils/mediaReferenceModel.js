@@ -105,6 +105,12 @@ export function createMediaReferenceModel(mediaName, ref) {
 
   const engines = createEngines(ref);
 
+  /**
+   * @type {{
+   *   html: { sections: ReturnType<typeof createSections>; data: import('../types/media-reference').HtmlMediaReference };
+   *   react?: { sections: ReturnType<typeof createSections>; data: import('../types/media-reference').ReactMediaReference };
+   * }}
+   */
   const platforms = {
     html: {
       sections: createSections(HTML_SUBSECTIONS, ref.platforms.html, ref),

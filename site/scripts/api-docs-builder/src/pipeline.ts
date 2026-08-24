@@ -41,9 +41,13 @@ export { NAME_OVERRIDES };
 
 // Parts whose HTML element file doesn't follow the `{component}-{part}-element.ts` convention.
 // Key: `{component}/{part-kebab}`, Value: element file basename (without `.ts`).
-export const PART_ELEMENT_OVERRIDES = {
+interface PartElementByPath {
+  readonly [path: string]: string | undefined;
+}
+
+export const PART_ELEMENT_OVERRIDES: PartElementByPath = {
   'tooltip/provider': 'tooltip-group-element',
-} satisfies Record<string, string>;
+};
 
 // ─── Build Helpers ─────────────────────────────────────────────────
 

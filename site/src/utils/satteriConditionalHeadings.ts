@@ -15,6 +15,7 @@ import { buildComponentReferenceTocHeadings, createComponentReferenceModel } fro
 import { buildFeatureReferenceTocHeadings, createFeatureReferenceModel } from './featureReferenceModel';
 import { buildMediaReferenceTocHeadings, createMediaReferenceModel } from './mediaReferenceModel';
 import { getAstroFrontmatter, type MdastVisitorContext } from './satteriAstroData';
+import type { SiteDataObject } from './site-data-value';
 import { buildUtilReferenceTocHeadings, createUtilReferenceModel } from './utilReferenceModel';
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
@@ -23,7 +24,7 @@ const FEATURE_REF_DIR = path.resolve(__dirname, '../content/generated-feature-re
 const UTIL_REF_DIR = path.resolve(__dirname, '../content/generated-util-reference');
 const MEDIA_REF_DIR = path.resolve(__dirname, '../content/generated-media-reference');
 
-interface ConditionalHeading {
+interface ConditionalHeading extends SiteDataObject {
   depth: number;
   text: string;
   slug: string;

@@ -31,7 +31,10 @@ export function MixinAFooMixin<Base extends Constructor>(BaseClass: Base) {
 
     set foo(value: string) {
       this.#foo = value;
-      (this as EventTarget).dispatchEvent(new Event('foochange'));
+      const target: object = this;
+      /* SAFETY: The fixture models a mixin applied to an EventTarget host. */ (target as EventTarget).dispatchEvent(
+        new Event('foochange')
+      );
     }
   }
 

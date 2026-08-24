@@ -1,6 +1,8 @@
 import type { ComponentReference, PartReference } from '@/types/component-reference';
 import type { SupportedFramework } from '@/types/docs';
 
+import type { SiteDataObject } from './site-data-value';
+
 export interface ApiReferenceSection {
   key: string;
   title: string;
@@ -41,7 +43,7 @@ export interface SingleModel extends ComponentReferenceModelBase {
 
 export type ComponentReferenceModel = MultiPartModel | SingleModel;
 
-export interface TocHeading {
+export interface TocHeading extends SiteDataObject {
   depth: number;
   text: string;
   slug: string;

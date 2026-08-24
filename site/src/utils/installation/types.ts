@@ -113,7 +113,11 @@ export function getInstallationPreset(useCase: UseCase): InstallationPreset {
 // Preset renderers (html5-video/audio, background-video) are covered by their
 // preset bundle and have no separate media script, so they map to null.
 export function getMediaSubpath(renderer: Renderer): string | null {
-  const map = {
+  interface MediaSubpathByRenderer {
+    readonly [renderer: string]: string | undefined;
+  }
+
+  const map: MediaSubpathByRenderer = {
     hls: 'hlsjs-video',
     dash: 'dash-video',
     'mux-video': 'mux-video',
@@ -124,6 +128,6 @@ export function getMediaSubpath(renderer: Renderer): string | null {
     spotify: 'spotify-audio',
     tiktok: 'tiktok-video',
     twitch: 'twitch-video',
-  } satisfies Partial<Record<Renderer, string>>;
+  };
   return map[renderer] ?? null;
 }

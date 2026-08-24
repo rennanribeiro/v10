@@ -9,13 +9,17 @@ import { kebabCase } from 'es-toolkit/string';
  * Consumed by the api-docs-builder for component generation, and inverted
  * below so reference pages can resolve a file slug from the public name.
  */
-export const NAME_OVERRIDES = {
+interface ReferenceNameBySlug {
+  readonly [slug: string]: string | undefined;
+}
+
+export const NAME_OVERRIDES: ReferenceNameBySlug = {
   'pip-button': 'PiPButton',
   'airplay-button': 'AirPlayButton',
   'hlsjs-video': 'HlsJsVideo',
   'youtube-video': 'YouTubeVideo',
   'tiktok-video': 'TikTokVideo',
-} satisfies Record<string, string>;
+};
 
 const NAME_TO_SLUG: Record<string, string> = Object.fromEntries(
   Object.entries(NAME_OVERRIDES).map(([slug, name]) => [name, slug])

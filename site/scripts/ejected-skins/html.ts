@@ -13,6 +13,13 @@ import {
   type SkinDef,
 } from './config.ts';
 import { pkgDistUrl, validatePackageImports } from './package-resolver.ts';
+import type { SkinRuntimeValue } from './runtime-value.ts';
+
+interface HtmlSkinTemplateContext {
+  SEEK_TIME: number;
+  renderIcon?: SkinRuntimeValue;
+  [name: string]: SkinRuntimeValue;
+}
 
 const scriptDir = dirname(fileURLToPath(import.meta.url));
 const workspaceRoot = resolve(scriptDir, '../../..');
@@ -148,7 +155,7 @@ export async function processHtmlSkin(skin: HtmlSkinDef): Promise<string> {
   const source = readFileSync(sourcePath, 'utf-8');
   validatePackageImports(source, skin.template);
   const templateBody = extractTemplateLiteral(source);
-  const context = { SEEK_TIME: 10 } satisfies Record<string, import('./runtime-value').SkinRuntimeValue>;
+  const context: HtmlSkinTemplateContext = { SEEK_TIME: 10 };
 
   await loadImportedNames(source, templateBody, skin.template, context);
   context.renderIcon = createRenderMediaIcon(skin.iconSet);

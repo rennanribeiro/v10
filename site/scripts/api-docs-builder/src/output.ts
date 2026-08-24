@@ -14,7 +14,7 @@ interface Schema<T> {
   ): { success: true; data: T } | { success: false; error: { issues: readonly ValidationIssue[] } };
 }
 
-export interface GeneratedDoc<T = unknown> {
+export interface GeneratedDoc<T extends ApiDocInput = ApiDocInput> {
   /** Output filename including the `.json` extension. */
   fileName: string;
   /** Human-readable name used in diagnostics. */
@@ -24,7 +24,7 @@ export interface GeneratedDoc<T = unknown> {
   detail?: string;
 }
 
-export interface ReferenceGroup<T = unknown> {
+export interface ReferenceGroup<T extends ApiDocInput = ApiDocInput> {
   name: string;
   outputPath: string;
   schema: Schema<T>;
@@ -49,7 +49,7 @@ export type ReferenceGroupValidation =
   | { success: false; name: string; errors: ReferenceValidationError[] };
 
 /** Validate a complete output group before any generated files are changed. */
-export function validateReferenceGroup<T>(group: ReferenceGroup<T>): ReferenceGroupValidation {
+export function validateReferenceGroup<T extends ApiDocInput>(group: ReferenceGroup<T>): ReferenceGroupValidation {
   const docs: GeneratedDoc[] = [];
   const errors: ReferenceValidationError[] = [];
   const seenFileNames = new Set<string>();
