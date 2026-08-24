@@ -112,6 +112,22 @@ for (const { name, path } of UI_VIDEO_PAGES) {
       }
     });
 
+    test('uses the available menu space for size clamps', async () => {
+      const size = await panel.evaluate((element) => {
+        const menu = element.parentElement!;
+        menu.style.setProperty('--menu-max-height', '999px');
+        menu.style.setProperty('--media-menu-available-width', '123px');
+        menu.style.setProperty('--media-menu-available-height', '123px');
+        menu.style.setProperty('--media-popover-available-width', '321px');
+        menu.style.setProperty('--media-popover-available-height', '321px');
+        const style = getComputedStyle(menu);
+
+        return { maxWidth: style.maxWidth, maxHeight: style.maxHeight };
+      });
+
+      expect(size).toEqual({ maxWidth: '123px', maxHeight: '123px' });
+    });
+
     test('keyboard navigation still scrolls the highlighted option into view', async ({ page }) => {
       await getStableBox(panel);
       // Keys only reach the menu once the opened panel owns focus.

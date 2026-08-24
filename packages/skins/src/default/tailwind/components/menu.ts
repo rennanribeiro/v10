@@ -59,7 +59,7 @@ const menuHostShell = cn(
   popup.popover,
   surface,
   menuTokens,
-  'min-w-max max-w-(--media-popover-available-width,none) max-h-[min(var(--media-popover-available-height,var(--menu-max-height)),var(--menu-max-height))]',
+  'min-w-max max-w-(--media-menu-available-width,none) max-h-[min(var(--media-menu-available-height,var(--menu-max-height)),var(--menu-max-height))]',
   'box-border rounded-(--menu-border-radius) p-(--menu-padding) overscroll-none'
 );
 

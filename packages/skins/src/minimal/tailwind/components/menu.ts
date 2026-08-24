@@ -57,7 +57,7 @@ const group = cn(
 const menuHostShell = cn(
   popup.popover,
   menuTokens,
-  'min-w-max max-w-(--media-popover-available-width,none) max-h-[min(var(--media-popover-available-height,var(--menu-max-height)),var(--menu-max-height))]',
+  'min-w-max max-w-(--media-menu-available-width,none) max-h-[min(var(--media-menu-available-height,var(--menu-max-height)),var(--menu-max-height))]',
   'bg-(--popover-background-color) [backdrop-filter:var(--popover-backdrop-filter)]',
   'shadow-[0_0_0_1px_var(--popover-border-color),0_4px_6px_-1px_oklch(0_0_0/0.1),0_2px_4px_-2px_oklch(0_0_0/0.1)]',
   'box-border rounded-(--menu-border-radius) p-(--menu-padding) overscroll-none'
