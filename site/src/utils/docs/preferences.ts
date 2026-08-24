@@ -39,9 +39,10 @@ export function getPreferencesServer(cookies: AstroCookies): Preference {
  */
 
 export function getFrameworkPreferenceClient(): SupportedFramework | null {
-  if (!('document' in globalThis)) return null;
+  const currentDocument = globalThis.document;
+  if (!currentDocument) return null;
 
-  const cookies = document.cookie.split(';').reduce(
+  const cookies = currentDocument.cookie.split(';').reduce(
     (acc, cookie) => {
       const [key, value] = cookie.trim().split('=');
       if (key) acc[key] = value;
@@ -58,20 +59,22 @@ export function getFrameworkPreferenceClient(): SupportedFramework | null {
 }
 
 export function setFrameworkPreferenceClient(framework: SupportedFramework): void {
-  if (!('document' in globalThis)) return;
+  const currentDocument = globalThis.document;
+  if (!currentDocument) return;
   if (!isValidFramework(framework)) throw new Error(`Invalid framework: ${framework}`);
 
-  document.cookie = `${FRAMEWORK_COOKIE}=${framework}; ${COOKIE_OPTIONS}`;
+  currentDocument.cookie = `${FRAMEWORK_COOKIE}=${framework}; ${COOKIE_OPTIONS}`;
 }
 
 /**
  * Get style preference from localStorage for a specific framework
  */
 export function getStylePreferenceClient<F extends SupportedFramework>(framework: F): SupportedStyle<F> | null {
-  if (!('localStorage' in globalThis)) return null;
+  const currentStorage = globalThis.localStorage;
+  if (!currentStorage) return null;
 
   const storageKey = STYLE_STORAGE_KEY_PREFIX + framework;
-  const style = localStorage.getItem(storageKey);
+  const style = currentStorage.getItem(storageKey);
 
   if (style && isValidStyleForFramework(framework, style)) {
     return /* SAFETY: The surrounding typed API establishes the asserted contract at this boundary. */ style as SupportedStyle<F>;
@@ -83,19 +86,21 @@ export function getStylePreferenceClient<F extends SupportedFramework>(framework
  * Set style preference in localStorage for a specific framework
  */
 export function setStylePreferenceClient<F extends SupportedFramework>(framework: F, style: SupportedStyle<F>): void {
-  if (!('localStorage' in globalThis)) return;
+  const currentStorage = globalThis.localStorage;
+  if (!currentStorage) return;
   if (!isValidStyleForFramework(framework, style)) {
     throw new Error(`Invalid style "${style}" for framework "${framework}"`);
   }
 
   const storageKey = STYLE_STORAGE_KEY_PREFIX + framework;
-  localStorage.setItem(storageKey, style);
+  currentStorage.setItem(storageKey, style);
 }
 
 /**
  * Update the DOM data-style attribute to match the current style
  */
 export function updateStyleAttribute(style: AnySupportedStyle): void {
-  if (!('document' in globalThis)) return;
-  document.documentElement.dataset.style = style;
+  const currentDocument = globalThis.document;
+  if (!currentDocument) return;
+  currentDocument.documentElement.dataset.style = style;
 }
