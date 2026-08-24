@@ -450,6 +450,9 @@ describe('MenuElement', () => {
     await child.updateComplete;
     await item.updateComplete;
 
+    await waitForAssertion(() => {
+      expect(trigger.hasAttribute('data-highlighted')).toBe(true);
+    });
     trigger.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
 
     await root.updateComplete;
@@ -532,6 +535,7 @@ describe('MenuElement', () => {
     expect(rootItems.hasAttribute('inert')).toBe(true);
     expect(rootItems.getAttribute('aria-hidden')).toBe('true');
     expect(root.getAttribute('data-submenu-expanded')).toBe('true');
+    expect(trigger.hasAttribute('data-highlighted')).toBe(false);
     focus.mockClear();
 
     item.dispatchEvent(new MouseEvent('click', { bubbles: true, cancelable: true }));
@@ -551,6 +555,7 @@ describe('MenuElement', () => {
     expect(rootItems.hasAttribute('aria-hidden')).toBe(false);
     expect(focus).toHaveBeenCalledWith({ preventScroll: true });
     expect(document.activeElement).toBe(trigger);
+    expect(trigger.hasAttribute('data-highlighted')).toBe(true);
   });
 
   it('keeps the menu open when a checkbox item is toggled', async () => {

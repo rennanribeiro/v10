@@ -907,10 +907,14 @@ describe('MenuContent', () => {
       }
     });
 
+    await waitFor(() => {
+      expect(trigger.hasAttribute('data-highlighted')).toBe(true);
+    });
     fireEvent.click(trigger);
 
     await waitFor(() => {
       expect(screen.getByTestId('submenu-back').hasAttribute('data-highlighted')).toBe(true);
+      expect(trigger.hasAttribute('data-highlighted')).toBe(false);
     });
 
     fireEvent.click(screen.getByTestId('submenu-back'));
@@ -923,6 +927,7 @@ describe('MenuContent', () => {
       expect(screen.getByTestId('root-items').hasAttribute('inert')).toBe(false);
       expect(focus).toHaveBeenCalledWith({ preventScroll: true });
       expect(document.activeElement).toBe(trigger);
+      expect(trigger.hasAttribute('data-highlighted')).toBe(true);
     });
   });
 
