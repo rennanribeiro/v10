@@ -30,6 +30,8 @@ export interface PopupPositionerOptions {
   boundary?: PositioningBoundary;
   container?: Element | null;
   cssVars?: PositioningCSSVars;
+  /** Whether popup size changes should trigger repositioning. */
+  trackResize?: boolean;
   onSideChange?: (side: PositioningOptions['side']) => void;
 }
 
@@ -88,6 +90,7 @@ export class PopupPositioner {
       previous.trigger !== trigger ||
       previous.popup !== popup ||
       (previous.cssVars ?? PopoverCSSVars) !== cssVars ||
+      previous.trackResize !== options.trackResize ||
       this.#boundaryElement !== boundaryElement;
 
     if (trackingChanged) {
@@ -122,7 +125,8 @@ export class PopupPositioner {
     window.addEventListener('scroll', this.#schedule, { capture: true, passive: true, signal });
     window.addEventListener('resize', this.#schedule, { signal });
 
-    const resizeTargets: Element[] = [options.trigger, options.popup];
+    const resizeTargets: Element[] = [options.trigger];
+    if (options.trackResize !== false) resizeTargets.push(options.popup);
     if (this.#boundaryElement) resizeTargets.push(this.#boundaryElement);
     this.#stopObservingResize = observeResize(resizeTargets, () => this.#schedule());
   }

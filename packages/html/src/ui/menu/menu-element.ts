@@ -256,6 +256,7 @@ export class MenuElement extends MediaElement {
       boundary: this.boundary,
       container: this.#containerCtx.value?.container ?? null,
       cssVars: MenuPositioningCSSVars,
+      trackResize: false,
       onSideChange: (side) => this.setAttribute(MenuDataAttrs.side, side),
     });
   }

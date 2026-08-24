@@ -135,6 +135,7 @@ export const MenuContent = forwardRef<HTMLDivElement, MenuContentProps>(function
     boundary,
     container,
     cssVars: MenuPositioningCSSVars,
+    trackResize: false,
     onSideChange: setPositionedSide,
   });
 
