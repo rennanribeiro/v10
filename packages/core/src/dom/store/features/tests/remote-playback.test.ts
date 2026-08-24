@@ -48,9 +48,7 @@ function attach(media: Media) {
 describe('remotePlaybackFeature', () => {
   it('cancels availability watching on abort (W3C path)', () => {
     const remote = createRemote();
-    const media = /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ {
-      remote,
-    } as Media;
+    const media = Object.assign(document.createElement('video'), { remote });
 
     const { controller } = attach(media);
     controller.abort();
@@ -62,9 +60,7 @@ describe('remotePlaybackFeature', () => {
     // Simulate a custom element whose `remote` resolves to a partial object at
     // detach time — the captured reference must guard the method call.
     const remote = createRemote();
-    const media = /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ {
-      remote,
-    } as Media;
+    const media = Object.assign(document.createElement('video'), { remote });
 
     const { controller } = attach(media);
 

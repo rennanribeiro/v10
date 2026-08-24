@@ -175,12 +175,7 @@ describe('createPopover', () => {
       const finished = new Promise<void>((resolve) => {
         finishAnimation = resolve;
       });
-      const getAnimations = vi.fn(
-        () =>
-          /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ [
-            { finished },
-          ] as Animation[]
-      );
+      const getAnimations = vi.fn(() => [{ finished }]);
       Object.defineProperty(popup, 'getAnimations', { value: getAnimations });
       popover.setPopupElement(popup);
 
@@ -210,10 +205,7 @@ describe('createPopover', () => {
   describe('triggerProps', () => {
     it('opens on click when closed', () => {
       const { popover, onOpenChange } = createTestPopover();
-      const event =
-        /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ {
-          preventDefault: vi.fn(),
-        } as UIEvent;
+      const event = new UIEvent('click');
 
       popover.triggerProps.onClick(event);
 
@@ -227,11 +219,7 @@ describe('createPopover', () => {
       trigger.setAttribute('aria-disabled', 'true');
       popover.setTriggerElement(trigger);
 
-      popover.triggerProps.onClick(
-        /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ {
-          preventDefault: vi.fn(),
-        } as UIEvent
-      );
+      popover.triggerProps.onClick(new UIEvent('click'));
 
       expect(popover.input.current.active).toBe(false);
       expect(onOpenChange).not.toHaveBeenCalled();
@@ -243,11 +231,7 @@ describe('createPopover', () => {
       popover.open();
       onOpenChange.mockClear();
 
-      popover.triggerProps.onClick(
-        /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ {
-          preventDefault: vi.fn(),
-        } as UIEvent
-      );
+      popover.triggerProps.onClick(new UIEvent('click'));
 
       // active stays true until close animation completes
       expect(popover.input.current.active).toBe(true);
@@ -262,11 +246,7 @@ describe('createPopover', () => {
       onOpenChange.mockClear();
 
       // Click during close animation should re-open
-      popover.triggerProps.onClick(
-        /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ {
-          preventDefault: vi.fn(),
-        } as UIEvent
-      );
+      popover.triggerProps.onClick(new UIEvent('click'));
 
       expect(popover.input.current.active).toBe(true);
       expect(popover.input.current.status).not.toBe('ending');
@@ -283,11 +263,7 @@ describe('createPopover', () => {
         openOnHover: () => true,
       });
 
-      popover.triggerProps.onClick(
-        /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ {
-          preventDefault: vi.fn(),
-        } as UIEvent
-      );
+      popover.triggerProps.onClick(new UIEvent('click'));
 
       expect(onOpenChange).not.toHaveBeenCalled();
       expect(popover.input.current.active).toBe(false);

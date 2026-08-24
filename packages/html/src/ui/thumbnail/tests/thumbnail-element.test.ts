@@ -1,34 +1,32 @@
-import type { AnyPlayerStore } from '@videojs/core/dom';
+import type { AnyPlayerStore, PlayerTarget } from '@videojs/core/dom';
 import { ContextProvider } from '@videojs/element/context';
 import type { MediaTextTrackState } from '@videojs/media';
 import { createStore } from '@videojs/store';
 import { afterEach, describe, expect, it, vi } from 'vite-plus/test';
 
 import { playerContext } from '../../../player/context';
-import { MediaElement } from '../../media-element';
+import { UIElement } from '../../ui-element';
 import { ThumbnailElement } from '../thumbnail-element';
 
 function createTextTrackStore(
   thumbnailTrackCrossOrigin: MediaTextTrackState['thumbnailTrackCrossOrigin']
 ): AnyPlayerStore {
-  return /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ createStore<unknown>()<MediaTextTrackState>(
-    {
-      name: 'textTrack',
-      state: () => ({
-        chaptersCues: [],
-        thumbnailCues: [],
-        thumbnailTrackSrc: null,
-        thumbnailTrackCrossOrigin,
-        textTrackList: [],
-        subtitlesShowing: false,
-        toggleSubtitles: vi.fn(),
-        selectSubtitlesTrack: vi.fn(),
-      }),
-    }
-  ) as AnyPlayerStore;
+  return createStore<PlayerTarget>()({
+    name: 'textTrack',
+    state: () => ({
+      chaptersCues: [],
+      thumbnailCues: [],
+      thumbnailTrackSrc: null,
+      thumbnailTrackCrossOrigin,
+      textTrackList: [],
+      subtitlesShowing: false,
+      toggleSubtitles: vi.fn(),
+      selectSubtitlesTrack: vi.fn(),
+    }),
+  });
 }
 
-class TestPlayerProviderElement extends MediaElement {
+class TestPlayerProviderElement extends UIElement {
   readonly #provider = new ContextProvider(this, { context: playerContext });
 
   setStore(store: AnyPlayerStore): void {

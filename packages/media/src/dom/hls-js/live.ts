@@ -5,7 +5,9 @@ import Hls from 'hls.js';
 import { MediaStreamTypes } from '../../core/types';
 import type { HlsEngineHost, HlsPlaylistTypes } from './types';
 
-export function HlsJsMediaLiveMixin<Base extends Constructor<HlsEngineHost>>(BaseClass: Base) {
+export function HlsJsMediaLiveMixin<Base extends Constructor<HlsEngineHost>>(
+  BaseClass: Base
+): Base & Constructor<{ readonly liveEdgeStart: number; readonly targetLiveWindow: number }> {
   class HlsJsMediaLive
     extends /* SAFETY: The surrounding typed API establishes the asserted contract at this boundary. */ (BaseClass as Constructor<HlsEngineHost>)
   {
@@ -132,7 +134,8 @@ export function HlsJsMediaLiveMixin<Base extends Constructor<HlsEngineHost>>(Bas
     }
   }
 
-  return /* SAFETY: The surrounding typed API establishes the asserted contract at this boundary. */ HlsJsMediaLive as Base &
+  return /* SAFETY: The mixed class preserves the supplied base constructor. */ HlsJsMediaLive as typeof HlsJsMediaLive &
+    Base &
     Constructor<{ readonly liveEdgeStart: number; readonly targetLiveWindow: number }>;
 }
 

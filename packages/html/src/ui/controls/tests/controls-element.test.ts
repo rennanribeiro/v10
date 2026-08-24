@@ -1,15 +1,15 @@
 import { POPUP_HOST_ATTR } from '@videojs/core';
-import type { AnyPlayerStore } from '@videojs/core/dom';
+import type { AnyPlayerStore, PlayerTarget } from '@videojs/core/dom';
 import { ContextProvider } from '@videojs/element/context';
 import type { MediaControlsState } from '@videojs/media';
 import { createStore, flush } from '@videojs/store';
 import { afterEach, describe, expect, it, vi } from 'vite-plus/test';
 
 import { playerContext } from '../../../player/context';
-import { MediaElement } from '../../media-element';
 import { MenuElement } from '../../menu/menu-element';
 import { PopoverElement } from '../../popover/popover-element';
 import { TooltipElement } from '../../tooltip/tooltip-element';
+import { UIElement } from '../../ui-element';
 import { ControlsElement } from '../controls-element';
 
 function ensureCustomElementDefined(Constructor: CustomElementConstructor & { readonly tagName: string }): void {
@@ -35,31 +35,29 @@ function defineElement(tagName: string, Base: CustomElementConstructor): void {
 }
 
 function createControlsStore(): AnyPlayerStore {
-  return /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ createStore<unknown>()<MediaControlsState>(
-    {
-      name: 'controls',
-      state: ({ get, set }) => {
-        return {
-          userActive: true,
-          controlsVisible: true,
-          requestControlsLock: () => () => {},
-          toggleControls() {
-            const visible = !(
-              /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ (get()
-                .controlsVisible as boolean)
-            );
+  return createStore<PlayerTarget>()({
+    name: 'controls',
+    state: ({ get, set }) => {
+      return {
+        userActive: true,
+        controlsVisible: true,
+        requestControlsLock: () => () => {},
+        toggleControls() {
+          const visible = !(
+            /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ (get()
+              .controlsVisible as boolean)
+          );
 
-            set({ userActive: visible, controlsVisible: visible });
+          set({ userActive: visible, controlsVisible: visible });
 
-            return visible;
-          },
-        };
-      },
-    }
-  ) as AnyPlayerStore;
+          return visible;
+        },
+      };
+    },
+  });
 }
 
-class TestPlayerProviderElement extends MediaElement {
+class TestPlayerProviderElement extends UIElement {
   store = createControlsStore();
 
   readonly #provider = new ContextProvider(this, { context: playerContext, initialValue: this.store });

@@ -2,7 +2,9 @@ import type { Constructor } from '@videojs/utils/types';
 
 import type { ShakaEngineHost } from './types';
 
-export function ShakaMediaLiveMixin<Base extends Constructor<ShakaEngineHost>>(BaseClass: Base) {
+export function ShakaMediaLiveMixin<Base extends Constructor<ShakaEngineHost>>(
+  BaseClass: Base
+): Base & Constructor<{ readonly liveEdgeStart: number; readonly targetLiveWindow: number }> {
   class ShakaMediaLive
     extends /* SAFETY: The surrounding typed API establishes the asserted contract at this boundary. */ (BaseClass as Constructor<ShakaEngineHost>)
   {
@@ -164,6 +166,7 @@ export function ShakaMediaLiveMixin<Base extends Constructor<ShakaEngineHost>>(B
     }
   }
 
-  return /* SAFETY: The surrounding typed API establishes the asserted contract at this boundary. */ ShakaMediaLive as Base &
+  return /* SAFETY: The mixed class preserves the supplied base constructor. */ ShakaMediaLive as typeof ShakaMediaLive &
+    Base &
     Constructor<{ readonly liveEdgeStart: number; readonly targetLiveWindow: number }>;
 }

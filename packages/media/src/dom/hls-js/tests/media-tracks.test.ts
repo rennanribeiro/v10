@@ -18,10 +18,10 @@ const HlsJsMediaMediaTracks = HlsJsMediaMediaTracksMixin(MediaTracksMixin(FakeHo
 
 interface MockVideoLevel {
   url: string[];
-  width: number;
-  height: number;
-  videoCodec: string;
-  bitrate: number;
+  width?: number;
+  height?: number;
+  videoCodec?: string;
+  bitrate?: number;
 }
 
 interface MockAudioTrack {

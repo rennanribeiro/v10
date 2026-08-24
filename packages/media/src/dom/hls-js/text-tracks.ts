@@ -12,9 +12,25 @@ const HLS_TRACK_ATTR = 'data-removeondestroy';
 const TRACK_LOADED = 2;
 
 interface TextTrackSnapshot {
-  track: TextTrack;
+  track: PreservedTextTrack;
   mode: TextTrackMode;
   cues: TextTrackCue[];
+}
+
+interface PreservedTextTrack {
+  mode: TextTrackMode;
+  readonly cues: ArrayLike<TextTrackCue> | null;
+  addCue(cue: TextTrackCue): void;
+}
+
+interface PreservedTrackElement {
+  readonly track: PreservedTextTrack;
+  readonly readyState: number;
+  hasAttribute(name: string): boolean;
+}
+
+interface TextTrackHost {
+  querySelectorAll(selectors: 'track'): Iterable<PreservedTrackElement>;
 }
 
 /**
@@ -33,7 +49,7 @@ interface TextTrackSnapshot {
  * Cues are the objects the browser parsed, so putting back the ones hls.js took
  * restores the track without refetching its resource.
  */
-export function withPreservedTextTracks<T>(media: HTMLMediaElement | null, action: () => T): T {
+export function withPreservedTextTracks<T>(media: TextTrackHost | null, action: () => T): T {
   const snapshots = media ? snapshotTextTracks(media) : [];
 
   try {
@@ -43,7 +59,7 @@ export function withPreservedTextTracks<T>(media: HTMLMediaElement | null, actio
   }
 }
 
-function snapshotTextTracks(media: HTMLMediaElement): TextTrackSnapshot[] {
+function snapshotTextTracks(media: TextTrackHost): TextTrackSnapshot[] {
   const snapshots: TextTrackSnapshot[] = [];
 
   for (const trackEl of media.querySelectorAll('track')) {
@@ -71,7 +87,7 @@ function restoreTextTrack({ track, mode, cues }: TextTrackSnapshot): void {
   if (!cues.length) return;
 
   withReadableCues(track, () => {
-    const present = new Set<TextTrackCue>(track.cues ?? []);
+    const present = new Set<TextTrackCue>(Array.from(track.cues ?? []));
     for (const cue of cues) {
       if (!present.has(cue)) track.addCue(cue);
     }
@@ -79,7 +95,7 @@ function restoreTextTrack({ track, mode, cues }: TextTrackSnapshot): void {
 }
 
 /** Reads or writes cues through a mode that exposes them, leaving the track's own mode intact. */
-function withReadableCues<T>(track: TextTrack, action: () => T): T {
+function withReadableCues<T>(track: PreservedTextTrack, action: () => T): T {
   const { mode } = track;
   if (mode === 'disabled') track.mode = 'hidden';
 
@@ -100,7 +116,7 @@ function withReadableCues<T>(track: TextTrack, action: () => T): T {
  * forwards cues into them. It also syncs user track-mode changes back to
  * hls.js via `engine.subtitleTrack`.
  */
-export function HlsJsMediaTextTracksMixin<Base extends Constructor<HlsEngineHost>>(BaseClass: Base) {
+export function HlsJsMediaTextTracksMixin<Base extends Constructor<HlsEngineHost>>(BaseClass: Base): Base {
   class HlsJsMediaTextTracks
     extends /* SAFETY: The surrounding typed API establishes the asserted contract at this boundary. */ (BaseClass as Constructor<HlsEngineHost>)
   {
@@ -238,7 +254,8 @@ export function HlsJsMediaTextTracksMixin<Base extends Constructor<HlsEngineHost
     }
   }
 
-  return /* SAFETY: The surrounding typed API establishes the asserted contract at this boundary. */ HlsJsMediaTextTracks as Base;
+  return /* SAFETY: The mixed class preserves the supplied base constructor. */ HlsJsMediaTextTracks as typeof HlsJsMediaTextTracks &
+    Base;
 }
 
 function addTextTrack(

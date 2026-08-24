@@ -1,4 +1,3 @@
-import type { MediaFullscreenCapability } from '@videojs/media';
 import type { WebKitDocument, WebKitFullscreenElement, WebKitVideoElement } from '@videojs/utils/dom';
 import { isFunction } from '@videojs/utils/predicate';
 
@@ -53,9 +52,7 @@ export function isFullscreen(container: HTMLElement | null, media: EventTarget) 
 
   // isFullscreen is a non-standard property that is set by the video host
   // and checks internally if the video host target is the fullscreen element.
-  const video =
-    /* SAFETY: The surrounding typed API establishes the asserted contract at this boundary. */ media as MediaFullscreenCapability;
-  return video.isFullscreen ?? false;
+  return 'isFullscreen' in media && media.isFullscreen === true;
 }
 
 export async function requestFullscreen(container: HTMLElement | null, media: EventTarget) {
@@ -82,10 +79,8 @@ export async function requestFullscreen(container: HTMLElement | null, media: Ev
     return;
   }
 
-  const video =
-    /* SAFETY: The surrounding typed API establishes the asserted contract at this boundary. */ media as MediaFullscreenCapability;
-  if (isFunction(video.requestFullscreen)) {
-    return /* SAFETY: The surrounding typed API establishes the asserted contract at this boundary. */ video.requestFullscreen() as Promise<void>;
+  if ('requestFullscreen' in media && isFunction(media.requestFullscreen)) {
+    return media.requestFullscreen();
   }
 }
 
@@ -108,9 +103,7 @@ export async function exitFullscreen(media: EventTarget) {
     return doc.webkitExitFullscreen();
   }
 
-  const video =
-    /* SAFETY: The surrounding typed API establishes the asserted contract at this boundary. */ media as MediaFullscreenCapability;
-  if (isFunction(video.exitFullscreen)) {
-    return /* SAFETY: The surrounding typed API establishes the asserted contract at this boundary. */ video.exitFullscreen() as Promise<void>;
+  if ('exitFullscreen' in media && isFunction(media.exitFullscreen)) {
+    return media.exitFullscreen();
   }
 }

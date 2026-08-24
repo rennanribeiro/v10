@@ -1,4 +1,4 @@
-import type { AnyPlayerStore } from '@videojs/core/dom';
+import type { AnyPlayerStore, PlayerTarget } from '@videojs/core/dom';
 import { ContextProvider } from '@videojs/element/context';
 import type {
   MediaAudioTrackState,
@@ -12,13 +12,13 @@ import { afterEach, describe, expect, it, vi } from 'vite-plus/test';
 import { playerContext } from '../../player/context';
 import { AudioTrackRadioGroupElement } from '../../ui/audio-track-radio-group/audio-track-radio-group-element';
 import { CaptionsRadioGroupElement } from '../../ui/captions-radio-group/captions-radio-group-element';
-import { MediaElement } from '../../ui/media-element';
 import { MenuElement } from '../../ui/menu/menu-element';
 import { MenuItemElement } from '../../ui/menu/menu-item-element';
 import { MenuRadioGroupElement } from '../../ui/menu/menu-radio-group-element';
 import { MenuRadioItemElement } from '../../ui/menu/menu-radio-item-element';
 import { PlaybackRateRadioGroupElement } from '../../ui/playback-rate-radio-group/playback-rate-radio-group-element';
 import { QualityRadioGroupElement } from '../../ui/quality-radio-group/quality-radio-group-element';
+import { UIElement } from '../../ui/ui-element';
 
 type MenuMediaState = MediaAudioTrackState & MediaPlaybackRateState & MediaQualityState & MediaTextTrackState;
 
@@ -27,42 +27,40 @@ function defineElement(tagName: string, Base: CustomElementConstructor): void {
 }
 
 function createMenuStore(overrides: Partial<MenuMediaState> = {}): AnyPlayerStore {
-  return /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ createStore<unknown>()<MenuMediaState>(
-    {
-      name: 'videoMenuComposition',
-      state: () => ({
-        audioTrackList: [
-          { id: '0', kind: 'main', label: 'English', language: 'en', enabled: false },
-          { id: '1', kind: 'alternative', label: 'Spanish', language: 'es', enabled: true },
-        ],
-        selectAudioTrack: vi.fn(),
-        playbackRates: [0.5, 1, 1.5, 2],
-        playbackRate: 1.5,
-        setPlaybackRate: vi.fn(),
-        videoRenditionList: [
-          { id: '0', height: 1080, selected: false },
-          { id: '1', height: 720, selected: true },
-        ],
-        activeVideoRendition: null,
-        selectVideoRendition: vi.fn(),
-        chaptersCues: [],
-        thumbnailCues: [],
-        thumbnailTrackSrc: null,
-        thumbnailTrackCrossOrigin: null,
-        textTrackList: [
-          { kind: 'captions', label: 'English', language: 'en', mode: 'showing' },
-          { kind: 'subtitles', label: 'Spanish', language: 'es', mode: 'disabled' },
-        ],
-        subtitlesShowing: true,
-        toggleSubtitles: vi.fn(),
-        selectSubtitlesTrack: vi.fn(),
-        ...overrides,
-      }),
-    }
-  ) as AnyPlayerStore;
+  return createStore<PlayerTarget>()({
+    name: 'videoMenuComposition',
+    state: () => ({
+      audioTrackList: [
+        { id: '0', kind: 'main', label: 'English', language: 'en', enabled: false },
+        { id: '1', kind: 'alternative', label: 'Spanish', language: 'es', enabled: true },
+      ],
+      selectAudioTrack: vi.fn(),
+      playbackRates: [0.5, 1, 1.5, 2],
+      playbackRate: 1.5,
+      setPlaybackRate: vi.fn(),
+      videoRenditionList: [
+        { id: '0', height: 1080, selected: false },
+        { id: '1', height: 720, selected: true },
+      ],
+      activeVideoRendition: null,
+      selectVideoRendition: vi.fn(),
+      chaptersCues: [],
+      thumbnailCues: [],
+      thumbnailTrackSrc: null,
+      thumbnailTrackCrossOrigin: null,
+      textTrackList: [
+        { kind: 'captions', label: 'English', language: 'en', mode: 'showing' },
+        { kind: 'subtitles', label: 'Spanish', language: 'es', mode: 'disabled' },
+      ],
+      subtitlesShowing: true,
+      toggleSubtitles: vi.fn(),
+      selectSubtitlesTrack: vi.fn(),
+      ...overrides,
+    }),
+  });
 }
 
-class TestPlayerProviderElement extends MediaElement {
+class TestPlayerProviderElement extends UIElement {
   store: AnyPlayerStore = createMenuStore();
 
   readonly #provider = new ContextProvider(this, { context: playerContext });

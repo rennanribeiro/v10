@@ -1,33 +1,26 @@
 import { registerI18n } from '@videojs/core/i18n';
 import { afterEach, describe, expect, it, vi } from 'vite-plus/test';
 
-import { MediaI18nProviderElement } from '../../i18n/provider-element';
-import { MediaContainerElement } from '../container-element';
+import { MediaI18nProviderElement } from '../../../i18n/provider-element';
+import { ContainerElement } from '../container-element';
 
 let tagCounter = 0;
 
-function uniqueTag(base: string): string {
-  return `${base}-${tagCounter++}`;
-}
-
-function createElement<Element extends HTMLElement>(Base: abstract new () => Element): Element {
-  const tag = uniqueTag('test-media-container');
-  customElements.define(
-    tag,
-    class extends /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ (Base as typeof HTMLElement) {}
-  );
-  return /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ document.createElement(
-    tag
-  ) as Element;
+function createElement<Element extends HTMLElement>(Base: new () => Element): Element {
+  const tag = `test-media-container-${tagCounter++}`;
+  // SAFETY: The helper constrains Base to an HTMLElement constructor accepted by customElements.define.
+  customElements.define(tag, class extends (Base as typeof HTMLElement) {});
+  // SAFETY: The tag was defined immediately above with Base, so creation returns Element.
+  return document.createElement(tag) as Element;
 }
 
 afterEach(() => {
   document.body.replaceChildren();
 });
 
-describe('MediaContainerElement', () => {
+describe('ContainerElement', () => {
   it('provides default focus and accessibility attributes', () => {
-    const container = createElement(MediaContainerElement);
+    const container = createElement(ContainerElement);
 
     document.body.append(container);
 
@@ -37,7 +30,7 @@ describe('MediaContainerElement', () => {
   });
 
   it('preserves explicit role and aria-label', () => {
-    const container = createElement(MediaContainerElement);
+    const container = createElement(ContainerElement);
     container.setAttribute('role', 'region');
     container.setAttribute('aria-label', 'Video player');
 
@@ -48,7 +41,7 @@ describe('MediaContainerElement', () => {
   });
 
   it('uses aria-labelledby instead of the default label when provided', () => {
-    const container = createElement(MediaContainerElement);
+    const container = createElement(ContainerElement);
     container.setAttribute('aria-labelledby', 'player-title');
 
     document.body.append(container);
@@ -62,11 +55,9 @@ describe('MediaContainerElement', () => {
       customElements.define(MediaI18nProviderElement.tagName, MediaI18nProviderElement);
     }
     registerI18n('x-container', { container: { label: 'Translated media player' } });
-    const provider =
-      /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ document.createElement(
-        MediaI18nProviderElement.tagName
-      ) as MediaI18nProviderElement;
-    const container = createElement(MediaContainerElement);
+    // SAFETY: The tag is registered with MediaI18nProviderElement immediately above.
+    const provider = document.createElement(MediaI18nProviderElement.tagName) as MediaI18nProviderElement;
+    const container = createElement(ContainerElement);
     provider.lang = 'x-container';
     provider.append(container);
     document.body.append(provider);

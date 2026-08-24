@@ -1,3 +1,5 @@
+import type { State } from '@videojs/store';
+
 import type { Text, TextParams } from '../i18n';
 
 export type StateAttrMap<State> = {

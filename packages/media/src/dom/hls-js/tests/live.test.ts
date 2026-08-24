@@ -48,6 +48,12 @@ function levelDetails(overrides: Partial<LevelDetails>): LevelDetails {
   } as any;
 }
 
+function emptyPart(): NonNullable<LevelDetails['partList']>[number] {
+  const part = {};
+  return /* SAFETY: These tests only use the presence of a part to select low-latency behavior. */ part as typeof part &
+    NonNullable<LevelDetails['partList']>[number];
+}
+
 function emitLevelLoaded(engine: Hls, details: LevelDetails) {
   /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ (
     engine as any
@@ -153,7 +159,7 @@ describe('HlsJsMediaLiveMixin', () => {
       const host = new HlsJsMediaLive(engine);
       setTargetSeekable(host, [[0, 60]]);
 
-      emitLevelLoaded(engine, levelDetails({ live: true, partList: [{}], partHoldBack: 2, partTarget: 0.5 }));
+      emitLevelLoaded(engine, levelDetails({ live: true, partList: [emptyPart()], partHoldBack: 2, partTarget: 0.5 }));
 
       expect(host.liveEdgeStart).toBe(58);
     });
@@ -163,7 +169,7 @@ describe('HlsJsMediaLiveMixin', () => {
       const host = new HlsJsMediaLive(engine);
       setTargetSeekable(host, [[0, 60]]);
 
-      emitLevelLoaded(engine, levelDetails({ live: true, partList: [{}], partHoldBack: 0, partTarget: 0.5 }));
+      emitLevelLoaded(engine, levelDetails({ live: true, partList: [emptyPart()], partHoldBack: 0, partTarget: 0.5 }));
 
       expect(host.liveEdgeStart).toBe(59);
     });
@@ -349,7 +355,7 @@ describe('HlsJsMediaLiveMixin', () => {
       const host = new HlsJsMediaLive(engine);
       setTargetSeekable(host, [[0, 60]]);
 
-      emitLevelLoaded(engine, levelDetails({ live: true, partList: [{}], partHoldBack: 2, partTarget: 0.5 }));
+      emitLevelLoaded(engine, levelDetails({ live: true, partList: [emptyPart()], partHoldBack: 2, partTarget: 0.5 }));
 
       expect(
         /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ (

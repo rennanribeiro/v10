@@ -1,6 +1,6 @@
 import { act, cleanup, render } from '@testing-library/react';
 import type { MediaSnapshot } from '@videojs/core';
-import type { UnknownStore } from '@videojs/store';
+import type { UnknownState } from '@videojs/store';
 import type { ReactNode } from 'react';
 import { afterEach, describe, expect, it, vi } from 'vite-plus/test';
 
@@ -8,6 +8,10 @@ import { PlayerContextProvider, type PlayerContextValue } from '../../../player/
 import { StatusAnnouncer } from '../status-announcer';
 
 afterEach(cleanup);
+
+function toStoreState(snapshot: MediaSnapshot): UnknownState {
+  return { ...snapshot };
+}
 
 describe('StatusAnnouncer', () => {
   it('uses implicit live-region semantics without rendering text content', () => {
@@ -148,25 +152,34 @@ describe('StatusAnnouncer', () => {
 });
 
 function createTestStore(initialState: MediaSnapshot = {}) {
-  let state = initialState;
-  const target = {};
+  let state = toStoreState(initialState);
   const listeners = new Set<() => void>();
-  const store = /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ {
+  const store: PlayerContextValue['store'] = {
+    $state: {
+      get current() {
+        return state;
+      },
+      subscribe(callback: () => void) {
+        listeners.add(callback);
+        return () => listeners.delete(callback);
+      },
+    },
     get state() {
       return state;
     },
-    get target() {
-      return target;
-    },
+    target: null,
+    destroyed: false,
+    attach: () => () => {},
+    destroy: () => {},
     subscribe(callback: () => void) {
       listeners.add(callback);
       return () => listeners.delete(callback);
     },
-  } as UnknownStore;
+  };
 
   const setState = (partial: Partial<MediaSnapshot>) => {
     act(() => {
-      state = { ...state, ...partial };
+      state = toStoreState({ ...state, ...partial });
       for (const listener of listeners) listener();
     });
   };
@@ -175,7 +188,7 @@ function createTestStore(initialState: MediaSnapshot = {}) {
 }
 
 function createPlayerContextValue(
-  store: UnknownStore,
+  store: PlayerContextValue['store'],
   container: HTMLElement = document.createElement('div')
 ): PlayerContextValue {
   return /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ {
@@ -187,7 +200,11 @@ function createPlayerContextValue(
   } as PlayerContextValue;
 }
 
-function renderWithPlayer(ui: ReactNode, store: UnknownStore = createTestStore().store, container?: HTMLElement) {
+function renderWithPlayer(
+  ui: ReactNode,
+  store: PlayerContextValue['store'] = createTestStore().store,
+  container?: HTMLElement
+) {
   return render(<PlayerContextProvider value={createPlayerContextValue(store, container)}>{ui}</PlayerContextProvider>);
 }
 

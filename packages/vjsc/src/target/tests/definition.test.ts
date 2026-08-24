@@ -105,7 +105,7 @@ function createTarget() {
     const Div = element('div');
 
     // @ts-expect-error The target namespace only exposes canonical schema components.
-    target.Unknown;
+    void target.Unknown;
 
     return {
       source: '@fixture/components',

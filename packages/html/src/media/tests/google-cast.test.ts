@@ -6,17 +6,17 @@ import { HTMLVideoElementHost } from '@videojs/media/dom/video-host';
 import { afterEach, describe, expect, it } from 'vite-plus/test';
 
 import { mediaContext } from '../../player/context';
-import { MediaElement } from '../../ui/media-element';
+import { UIElement } from '../../ui/ui-element';
 import { GoogleCastElement } from '../google-cast';
 
-class TestMediaProvider extends MediaElement {
+class TestMediaProvider extends UIElement {
   readonly #provider = new ContextProvider(this, {
     context: mediaContext,
-    initialValue: { media: null, setMedia: () => {} },
+    initialValue: { media: null, registerMedia: () => () => {} },
   });
 
   setMedia(media: Media | null) {
-    this.#provider.setValue({ media, setMedia: () => {} });
+    this.#provider.setValue({ media, registerMedia: () => () => {} });
   }
 }
 
@@ -59,11 +59,7 @@ describe('GoogleCastElement', () => {
   it('resolves the host from a media element host property', () => {
     const { host, provider } = setup();
 
-    provider.setMedia(
-      /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ {
-        host,
-      } as Media
-    );
+    provider.setMedia(Object.assign(document.createElement('video'), { host }));
 
     expect(getMediaComponents(host).get(GoogleCast)).toBeInstanceOf(GoogleCast);
   });

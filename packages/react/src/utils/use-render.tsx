@@ -24,7 +24,7 @@ export interface UseRenderComponentProps<State> {
 export interface UseRenderParameters<State, RenderedElementType extends Element> {
   state: State;
   ref?: Ref<RenderedElementType> | Ref<RenderedElementType>[] | undefined;
-  props?: HTMLProps | HTMLProps[] | undefined;
+  props?: object | object[] | undefined;
   stateAttrMap?: StateAttrMap<State> | undefined;
 }
 
@@ -84,8 +84,13 @@ export function renderElement<
   const stateDataAttrs = stateAttrMap ? getStateDataAttrs(state, stateAttrMap) : {};
 
   // Merge: state data attrs first, then props (so props can override)
-  const propsArray = Array.isArray(props) ? props : props ? [props] : [];
-  const mergedProps = mergeProps(stateDataAttrs, ...propsArray);
+  const propsArray = /* SAFETY: React element props are object values consumed by the generic merge helper. */ (
+    Array.isArray(props) ? props : props ? [props] : []
+  ) as React.ComponentPropsWithRef<TagName>[];
+  const mergedProps = mergeProps<TagName>(
+    /* SAFETY: State data attributes are valid attributes for every intrinsic HTML element. */ stateDataAttrs as React.ComponentPropsWithRef<TagName>,
+    ...propsArray
+  );
 
   if (className !== undefined) {
     // Add resolved className and style
@@ -103,7 +108,10 @@ export function renderElement<
 
   if (isFunction(render)) {
     // Render function: call with props and state
-    const mergedRef = composeRefs(ref, mergedProps.ref);
+    const mergedRef = composeRefs(
+      ref,
+      /* SAFETY: The caller pairs RenderedElementType with the selected intrinsic element. */ mergedProps.ref as Ref<RenderedElementType>
+    );
     return render(
       /* SAFETY: The surrounding typed API establishes the asserted contract at this boundary. */ {
         ...mergedProps,
@@ -120,7 +128,7 @@ export function renderElement<
 
     const elementProps = mergeProps(
       mergedProps,
-      /* SAFETY: A valid React element exposes props accepted by cloneElement. */ render.props as HTMLProps
+      /* SAFETY: A valid render element's props are merged into the selected intrinsic element. */ render.props as React.ComponentPropsWithRef<TagName>
     );
     elementProps.ref = mergedRef;
 
@@ -128,8 +136,11 @@ export function renderElement<
   }
 
   // Default tag
-  const mergedRef = composeRefs(ref, mergedProps.ref);
-  mergedProps.ref = mergedRef;
+  const mergedRef = composeRefs(
+    ref,
+    /* SAFETY: The caller pairs RenderedElementType with the selected intrinsic element. */ mergedProps.ref as Ref<RenderedElementType>
+  );
+  Object.assign(mergedProps, { ref: mergedRef });
 
   return createElement(element, mergedProps);
 }

@@ -6,7 +6,9 @@ import { getStreamInfoFromSrc, looksLikeM3u8 } from './m3u8-utils';
 /**
  * @fires targetlivewindowchange - Fired when the target live window changes. Read `targetLiveWindow` for the new value.
  */
-export function NativeHlsMediaLiveMixin<Base extends Constructor<NativeMediaHost>>(BaseClass: Base) {
+export function NativeHlsMediaLiveMixin<Base extends Constructor<NativeMediaHost>>(
+  BaseClass: Base
+): Base & Constructor<{ readonly liveEdgeStart: number; readonly targetLiveWindow: number }> {
   // Native HLS does not expose manifest-level `HOLD-BACK` / `PART-HOLD-BACK`
   // through a JS API, so we fetch the m3u8 ourselves and parse the relevant
   // tags to derive `targetLiveWindow` and `liveEdgeStart` — mirroring the
@@ -123,6 +125,7 @@ export function NativeHlsMediaLiveMixin<Base extends Constructor<NativeMediaHost
     }
   }
 
-  return /* SAFETY: The surrounding typed API establishes the asserted contract at this boundary. */ NativeHlsMediaLive as Base &
+  return /* SAFETY: The mixed class preserves the supplied base constructor. */ NativeHlsMediaLive as typeof NativeHlsMediaLive &
+    Base &
     Constructor<{ readonly liveEdgeStart: number; readonly targetLiveWindow: number }>;
 }

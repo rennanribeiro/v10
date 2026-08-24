@@ -408,9 +408,14 @@ describe('setupMediaSource', () => {
       const mseUrl = mediaElement.querySelector<HTMLSourceElement>('source[type="video/mp4"]')!.src;
       Object.defineProperty(mediaElement, 'currentSrc', { value: mseUrl, configurable: true });
 
-      const seen = {} satisfies { fallbackPresentAtReset?: boolean };
+      let fallbackPresentAtReset: boolean | undefined;
+      const seen = {
+        get fallbackPresentAtReset(): boolean | undefined {
+          return fallbackPresentAtReset;
+        },
+      };
       const load = vi.spyOn(mediaElement, 'load').mockImplementation(() => {
-        seen.fallbackPresentAtReset = !!mediaElement.querySelector('source[type="application/x-mpegURL"]');
+        fallbackPresentAtReset = !!mediaElement.querySelector('source[type="application/x-mpegURL"]');
       });
 
       return { state, destroy, load, seen };

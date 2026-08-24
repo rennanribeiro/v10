@@ -20,6 +20,8 @@ interface MockShakaEvent {
   detail?: MockShakaError;
 }
 
+const shakaFixture: { engine: MockEngine | null } = vi.hoisted(() => ({ engine: null }));
+
 vi.mock('shaka-player/dist/shaka-player.compiled-es2021', () => {
   const CONFIG_DEFAULTS = { streaming: { bufferingGoal: 10, rebufferingGoal: 2 } };
 
@@ -79,6 +81,7 @@ vi.mock('shaka-player/dist/shaka-player.compiled-es2021', () => {
       },
     };
 
+    shakaFixture.engine = player;
     return player;
   }
 
@@ -154,12 +157,13 @@ function setup({ preload = 'auto' as const }: { preload?: ShakaMedia['preload'] 
   // preload suite opts back into the deferring defaults it is about.
   media.preload = preload;
   media.attach(video);
+  const engine = shakaFixture.engine;
+  if (!engine) throw new Error('The Shaka fixture did not create an engine.');
 
   return {
     media,
     video,
-    engine:
-      /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ media.engine as MockEngine,
+    engine,
   };
 }
 
@@ -220,8 +224,8 @@ describe('ShakaMedia', () => {
     it('loads a source that was assigned before there was a target', async () => {
       const video = document.createElement('video');
       const media = new ShakaMedia();
-      const engine =
-        /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ media.engine as MockEngine;
+      const engine = shakaFixture.engine;
+      if (!engine) throw new Error('The Shaka fixture did not create an engine.');
 
       media.src = MANIFEST;
       await flush();

@@ -52,15 +52,22 @@ export interface TwitchSourceEngineConfig {
   twitch?: TwitchEngineConfig | undefined;
 }
 
-/** Parsed pieces of a Twitch source URL. */
-export interface ParsedTwitchSource {
-  /** `'video'` for VODs, `'channel'` for live channels. */
-  kind: 'video' | 'channel';
-  /** Numeric VOD id, without the `v` prefix the embed parameter carries. Null for channels. */
-  id: string | null;
-  /** Channel name. Null for VODs. */
-  channel: string | null;
+/** Parsed pieces of a Twitch VOD source URL. */
+interface ParsedTwitchVideoSource {
+  kind: 'video';
+  id: string;
+  channel: null;
 }
+
+/** Parsed pieces of a Twitch channel source URL. */
+interface ParsedTwitchChannelSource {
+  kind: 'channel';
+  id: null;
+  channel: string;
+}
+
+/** Parsed pieces of a Twitch source URL. */
+export type ParsedTwitchSource = ParsedTwitchVideoSource | ParsedTwitchChannelSource;
 
 /** Extract a Twitch VOD id from any recognized video URL. */
 export function parseTwitchVideoId(src: string) {
@@ -102,8 +109,7 @@ export function buildTwitchIframeSrc(src: string, props: Partial<TwitchMediaProp
   };
 
   const query = new URLSearchParams();
-  for (const key in params) {
-    const value = params[key];
+  for (const [key, value] of Object.entries(params)) {
     // Twitch reads every parameter by value, so an empty one says nothing and is
     // left off. The shared `serializeEmbedParams` cannot be used for this reason:
     // it writes the `1` an HTML attribute's presence means, which `time` and

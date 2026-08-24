@@ -39,10 +39,14 @@ vi.mock('../../../actors/dom/segment-loader', async (importOriginal) => {
       (
         _sourceBufferActor: SourceBufferActor,
         _fetchBytes: Parameters<typeof createSegmentLoaderActor>[1]
-      ): SegmentLoaderActor =>
-        /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ ({
-          destroy: vi.fn(),
-        }) as SegmentLoaderActor
+      ): SegmentLoaderActor => ({
+        snapshot: signal({
+          value: 'idle',
+          context: { inFlightInitTrackId: null, inFlightSegment: null },
+        }),
+        send: vi.fn(),
+        destroy: vi.fn(),
+      })
     ),
   };
 });

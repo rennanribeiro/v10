@@ -10,6 +10,7 @@ import { createSourceBufferActor, type SourceBufferActor } from '../../../actors
 import type { TextTrackSegmentLoaderActor } from '../../../actors/text-track-segment-loader';
 import type { SegmentLoadingContext, SegmentLoadingState } from '../load-segments';
 import { loadVideoSegments } from '../load-segments';
+import { createSourceBufferDouble } from './source-buffer-test-double';
 
 // ============================================================================
 // Mocks
@@ -98,14 +99,14 @@ const makePresentation = (...tracks: ReturnType<typeof makeResolvedVideoTrack>[]
   }) as Presentation;
 
 const makeMockSourceBuffer = () => {
-  const sb = /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ {
+  const sb = createSourceBufferDouble({
     updating: false,
     buffered: { length: 0, start: vi.fn(), end: vi.fn() },
     addEventListener: vi.fn(),
     removeEventListener: vi.fn(),
     appendBuffer: vi.fn(),
     remove: vi.fn(),
-  } as SourceBuffer;
+  });
   return sb;
 };
 

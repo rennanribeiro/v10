@@ -30,19 +30,13 @@ describe('webkit', () => {
   describe('isWebKitAirPlayCapable', () => {
     it('returns true when supported and the media exposes the AirPlay flag', () => {
       stubWebKit(true);
-      const media =
-        /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ {
-          webkitCurrentPlaybackTargetIsWireless: false,
-        } as EventTarget;
+      const media = Object.assign(new EventTarget(), { webkitCurrentPlaybackTargetIsWireless: false });
       expect(isWebKitAirPlayCapable(media)).toBe(true);
     });
 
     it('returns false when WebKit is unsupported', () => {
       stubWebKit(false);
-      const media =
-        /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ {
-          webkitCurrentPlaybackTargetIsWireless: false,
-        } as EventTarget;
+      const media = Object.assign(new EventTarget(), { webkitCurrentPlaybackTargetIsWireless: false });
       expect(isWebKitAirPlayCapable(media)).toBe(false);
     });
 

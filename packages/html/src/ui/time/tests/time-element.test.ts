@@ -1,4 +1,4 @@
-import type { AnyPlayerStore } from '@videojs/core/dom';
+import type { AnyPlayerStore, PlayerTarget } from '@videojs/core/dom';
 import { registerI18n, resetI18nRegistry } from '@videojs/core/i18n';
 import { ContextProvider } from '@videojs/element/context';
 import type { MediaTimeState } from '@videojs/media';
@@ -8,7 +8,7 @@ import { afterEach, describe, expect, it, vi } from 'vite-plus/test';
 
 import { MediaI18nProviderElement } from '../../../i18n';
 import { playerContext } from '../../../player/context';
-import { MediaElement } from '../../media-element';
+import { UIElement } from '../../ui-element';
 import { TimeElement } from '../time-element';
 
 let tagCounter = 0;
@@ -17,7 +17,7 @@ function uniqueTag(base: string): string {
   return `${base}-${tagCounter++}`;
 }
 
-function createElement<Element extends HTMLElement>(Base: abstract new () => Element): Element {
+function createElement<Element extends HTMLElement>(Base: new () => Element): Element {
   const tag = uniqueTag('test-el');
   customElements.define(
     tag,
@@ -55,21 +55,19 @@ async function waitForAssertion(assertion: () => void): Promise<void> {
 }
 
 function createTimeStore(overrides: Partial<MediaTimeState> = {}): AnyPlayerStore {
-  return /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ createStore<unknown>()<MediaTimeState>(
-    {
-      name: 'time',
-      state: () => ({
-        currentTime: 90,
-        duration: 300,
-        seeking: false,
-        seek: vi.fn(),
-        ...overrides,
-      }),
-    }
-  ) as AnyPlayerStore;
+  return createStore<PlayerTarget>()({
+    name: 'time',
+    state: () => ({
+      currentTime: 90,
+      duration: 300,
+      seeking: false,
+      seek: vi.fn(),
+      ...overrides,
+    }),
+  });
 }
 
-class TestPlayerProviderElement extends MediaElement {
+class TestPlayerProviderElement extends UIElement {
   store: AnyPlayerStore = createTimeStore();
 
   readonly #provider = new ContextProvider(this, { context: playerContext });
@@ -80,9 +78,7 @@ class TestPlayerProviderElement extends MediaElement {
   }
 
   clearStore(): void {
-    this.#provider.setValue(
-      /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ undefined as AnyPlayerStore
-    );
+    this.replaceWith(...this.childNodes);
   }
 
   override connectedCallback(): void {

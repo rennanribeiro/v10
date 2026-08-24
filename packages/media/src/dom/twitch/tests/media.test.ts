@@ -19,6 +19,8 @@ interface EmbedWindow {
   postMessage: ReturnType<typeof vi.fn>;
 }
 
+const embeds = new WeakMap<HTMLIFrameElement, EmbedWindow>();
+
 type TwitchProtocolValue = string | number | boolean | null | TwitchProtocolParams | TwitchProtocolValue[];
 
 interface TwitchProtocolParams {
@@ -40,10 +42,12 @@ afterEach(() => {
  */
 function createIframe(): HTMLIFrameElement {
   const iframe = document.createElement('iframe');
+  const embed = { postMessage: vi.fn() } satisfies EmbedWindow;
   Object.defineProperty(iframe, 'contentWindow', {
-    value: { postMessage: vi.fn() } satisfies EmbedWindow,
+    value: embed,
     configurable: true,
   });
+  embeds.set(iframe, embed);
   return iframe;
 }
 
@@ -55,7 +59,9 @@ function createEmptySrcIframe(): HTMLIFrameElement {
 }
 
 function embedOf(iframe: HTMLIFrameElement): EmbedWindow {
-  return /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ iframe.contentWindow as EmbedWindow;
+  const embed = embeds.get(iframe);
+  if (!embed) throw new Error('The Twitch fixture did not create an embed window.');
+  return embed;
 }
 
 /**

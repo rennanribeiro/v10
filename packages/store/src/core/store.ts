@@ -76,9 +76,10 @@ export function createStore<Target = unknown>() {
 
     sourceState = initialSourceState;
     const initialDerivedState = derive(sourceState);
-    state = createState(publish(sourceState, initialDerivedState));
+    const initialPublicState = publish(sourceState, initialDerivedState);
+    state = createState(initialPublicState);
 
-    const store = /* SAFETY: The surrounding typed API establishes the asserted contract at this boundary. */ {
+    const storeBase: BaseStore<Target, PublicState> & { readonly [STORE_SYMBOL]: boolean } = {
       [STORE_SYMBOL]: true,
       get $state() {
         return state;
@@ -95,7 +96,11 @@ export function createStore<Target = unknown>() {
       attach,
       destroy,
       subscribe,
-    } as TargetStore;
+    };
+
+    // Seed each public state key so the object has the complete TargetStore
+    // contract before replacing those values with live getters below.
+    const store: TargetStore = Object.assign(storeBase, initialPublicState);
 
     for (const key of Object.keys(
       /* SAFETY: The surrounding typed API establishes the asserted contract at this boundary. */ state.current as object

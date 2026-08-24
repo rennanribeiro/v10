@@ -695,16 +695,14 @@ export function buildVimeoIframeSrc(src: string, props: Partial<VimeoMediaProps>
     playsinline: props.playsInline ?? vimeoMediaDefaultProps.playsInline,
     preload: props.preload ?? vimeoMediaDefaultProps.preload,
     transparent: false,
-    h: parsed.hash,
     // Vimeo-specific knobs (`autopause`, `byline`, `dnt`, …) flow through here.
     ...(props.source?.engine?.vimeo ?? undefined),
   } satisfies EmbedParams;
   if (parsed.kind === 'event') {
     const hashPath = parsed.hash ? `/${parsed.hash}` : '';
-    delete params.h;
     return `${EMBED_EVENT_BASE}/${parsed.id}/embed${hashPath}?${serializeEmbedParams(params)}`;
   }
-  return `${EMBED_VIDEO_BASE}/${parsed.id}?${serializeEmbedParams(params)}`;
+  return `${EMBED_VIDEO_BASE}/${parsed.id}?${serializeEmbedParams({ ...params, h: parsed.hash })}`;
 }
 
 const EMBED_VIDEO_BASE = 'https://player.vimeo.com/video';

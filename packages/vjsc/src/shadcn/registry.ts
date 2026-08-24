@@ -150,7 +150,7 @@ function buildPublishedItem<Item extends ComponentMeta>(
       title: item.title,
       description: item.description,
       files,
-      ...optionalList('dependencies', dependencies),
+      ...optionalDependencies(dependencies),
       registryDependencies: [...registryDependencies].sort(),
       ...mergedMeta(options.meta, item.meta),
     },
@@ -365,13 +365,9 @@ function mergedMeta(...values: Array<RegistryItem['meta'] | undefined>): { meta?
   return defined.length ? { meta: Object.assign({}, ...defined) } : {};
 }
 
-function optionalList<Key extends string>(key: Key, values: ReadonlySet<string>) {
+function optionalDependencies(values: ReadonlySet<string>): { dependencies?: string[] } {
   const list = [...values].sort();
-  return list.length
-    ? /* SAFETY: The surrounding typed API establishes the asserted contract at this boundary. */ ({
-        [key]: list,
-      } satisfies Partial<Record<Key, string[]>>)
-    : ({} satisfies Partial<Record<Key, string[]>>);
+  return list.length ? { dependencies: list } : {};
 }
 
 function validateRelativePath(path: string, label: string): void {

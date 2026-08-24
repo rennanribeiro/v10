@@ -8,11 +8,12 @@ import {
   shouldUpdateDuration,
   waitForSourceBuffersReady,
 } from '../duration';
+import { createSourceBufferDouble } from './source-buffer-test-double';
 
 function makeUpdatingSourceBuffer() {
   const updateEndListeners: Array<() => void> = [];
 
-  const buffer = /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ {
+  const buffer = createSourceBufferDouble({
     updating: true,
     buffered: /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ {
       length: 0,
@@ -37,12 +38,10 @@ function makeUpdatingSourceBuffer() {
       }
     },
     removeEventListener: vi.fn(),
-  } as SourceBuffer;
+  });
 
   const finishUpdating = () => {
-    /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ (
-      buffer satisfies { updating: boolean }
-    ).updating = false;
+    buffer.updating = false;
     for (const h of updateEndListeners.slice()) h();
   };
 

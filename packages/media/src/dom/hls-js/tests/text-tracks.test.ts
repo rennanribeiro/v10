@@ -54,9 +54,9 @@ function fakeTrackElement({ mode = 'showing', cues = [], readyState = 2, hlsOwne
 }
 
 function fakeMedia(...trackEls: ReturnType<typeof fakeTrackElement>[]) {
-  return /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ {
+  return {
     querySelectorAll: () => trackEls,
-  } as HTMLMediaElement;
+  };
 }
 
 function cueIds(track: FakeTextTrack): string[] {

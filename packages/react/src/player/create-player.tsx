@@ -107,8 +107,10 @@ export function createPlayer(config: CreatePlayerConfig<AnyPlayerFeature[]>): Cr
       }
 
       for (const key of configKeys) {
-        if (Object.is(previous.values[key], configValues[key])) continue;
-        setPlayerConfigValue(store, featureConfig[key]!, configValues[key]);
+        const previousValue = getConfigValue(previous.values, key);
+        const configValue = getConfigValue(configValues, key);
+        if (Object.is(previousValue, configValue)) continue;
+        setPlayerConfigValue(store, featureConfig[key]!, configValue);
       }
 
       syncedValues.current = { store, values: configValues };

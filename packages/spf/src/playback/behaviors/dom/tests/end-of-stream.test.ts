@@ -2,9 +2,10 @@ import { describe, expect, it, vi } from 'vite-plus/test';
 
 import type { ContextSignals, StateSignals } from '../../../../core/composition/create-composition';
 import { signal } from '../../../../core/signals/primitives';
-import type { MaybeResolvedPresentation, Presentation, Segment, VideoTrack } from '../../../../media/types';
+import type { AudioTrack, MaybeResolvedPresentation, Presentation, Segment, VideoTrack } from '../../../../media/types';
 import { createSourceBufferActor, type SourceBufferActor } from '../../../actors/dom/source-buffer';
 import { type EndOfStreamContext, type EndOfStreamState, endOfStream } from '../end-of-stream';
+import { createSourceBufferDouble } from './source-buffer-test-double';
 
 function makeState(initial: EndOfStreamState = {}): StateSignals<EndOfStreamState> {
   return {
@@ -21,6 +22,18 @@ function makeState(initial: EndOfStreamState = {}): StateSignals<EndOfStreamStat
 interface EndOfStreamTestContext extends EndOfStreamContext {
   videoBufferActor?: SourceBufferActor;
   audioBufferActor?: SourceBufferActor;
+}
+
+function makeSourceBufferList(sourceBuffers: SourceBuffer[]): SourceBufferList {
+  const events = new EventTarget();
+  return Object.assign(sourceBuffers, {
+    item: (index: number) => sourceBuffers[index] ?? null,
+    onaddsourcebuffer: null,
+    onremovesourcebuffer: null,
+    addEventListener: events.addEventListener.bind(events),
+    removeEventListener: events.removeEventListener.bind(events),
+    dispatchEvent: events.dispatchEvent.bind(events),
+  });
 }
 
 function makeContext(initial: EndOfStreamTestContext = {}): ContextSignals<EndOfStreamContext> & {
@@ -70,9 +83,7 @@ function makeMediaSource(
         readyState: { value: overrides.readyState ?? 'open', writable: true },
         duration: { value: overrides.duration ?? 0, writable: true },
         sourceBuffers: {
-          value:
-            /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ (overrides.sourceBuffers ??
-              []) as SourceBufferList,
+          value: makeSourceBufferList(overrides.sourceBuffers ?? []),
           writable: false,
         },
         addEventListener: { value: target.addEventListener.bind(target) },
@@ -93,7 +104,7 @@ function transitionMediaSource(mediaSource: MediaSource, readyState: MediaSource
 
 function makeSourceBuffer(): SourceBuffer {
   const listeners: Record<string, EventListener[]> = {};
-  return /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ {
+  return createSourceBufferDouble({
     buffered: /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ {
       length: 0,
       start: () => 0,
@@ -117,7 +128,7 @@ function makeSourceBuffer(): SourceBuffer {
     removeEventListener: vi.fn((type: string, listener: EventListener) => {
       listeners[type] = (listeners[type] ?? []).filter((l) => l !== listener);
     }),
-  } as SourceBuffer;
+  });
 }
 
 function makeSegments(count: number): Segment[] {
@@ -132,26 +143,32 @@ function makeSegments(count: number): Segment[] {
 // `complete` toggles the parser's completeness signal: a complete playlist has
 // a finite Track.duration (EXTINF sum), an incomplete (live) one is Infinity.
 function makeResolvedVideoTrack(segmentCount: number, id = 'video-1', complete = true): VideoTrack {
-  return /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ {
+  return {
     id,
     type: 'video' as const,
     url: 'https://example.com/video.m3u8',
     mimeType: 'video/mp4',
     bandwidth: 1_000_000,
-    initialization: { id: 'init', url: 'https://example.com/init.mp4' },
+    initialization: { url: 'https://example.com/init.mp4' },
     segments: makeSegments(segmentCount),
     startTime: 0,
     duration: complete ? segmentCount * 2.5 : Number.POSITIVE_INFINITY,
-    codecs: 'avc1.64001f',
-  } as VideoTrack;
+    codecs: ['avc1.64001f'],
+  };
 }
 
 function makePresentation(videoTrack: VideoTrack, id = 'pres-1'): Presentation {
-  return /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ {
+  return {
     id,
     url: 'https://example.com/playlist.m3u8',
-    selectionSets: [{ type: 'video', switchingSets: [{ tracks: [videoTrack] }] }],
-  } as Presentation;
+    selectionSets: [
+      {
+        id: 'video-selection',
+        type: 'video',
+        switchingSets: [{ id: 'video-switching', type: 'video', tracks: [videoTrack] }],
+      },
+    ],
+  };
 }
 
 function makeActorWithSegments(segmentIds: string[], trackId = 'video-1'): SourceBufferActor {
@@ -399,7 +416,7 @@ describe('endOfStream', () => {
     const track = makeResolvedVideoTrack(4);
     // SourceBuffer that stays `updating` so waitForSourceBuffersReady
     // never resolves on its own.
-    const buffer = /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ {
+    const buffer = createSourceBufferDouble({
       buffered: /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ {
         length: 0,
         start: () => 0,
@@ -408,7 +425,7 @@ describe('endOfStream', () => {
       updating: true,
       addEventListener: vi.fn(),
       removeEventListener: vi.fn(),
-    } as SourceBuffer;
+    });
     const mockMs = makeMediaSource({ sourceBuffers: [buffer] });
 
     const { state, cleanup } = setupEndOfStream(
@@ -432,22 +449,34 @@ describe('endOfStream', () => {
   it('composes against an audio-only configuration', async () => {
     // Audio-only: only audioBufferActor in scope; the behavior iterates
     // whatever's present without per-type-specialized paths.
-    const audioTrack =
-      /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ {
-        id: 'audio-1',
-        type: 'audio',
-        url: 'https://example.com/audio.m3u8',
-        mimeType: 'audio/mp4',
-        // Complete playlist — finite duration opens the completeness gate.
-        duration: 10,
-        segments: makeSegments(4).map((s) => ({ ...s, id: `audio-${s.id}` })),
-      } as VideoTrack;
-    const presentation =
-      /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ {
-        id: 'pres-1',
-        url: 'https://example.com/playlist.m3u8',
-        selectionSets: [{ type: 'audio', switchingSets: [{ tracks: [audioTrack] }] }],
-      } as Presentation;
+    const audioTrack: AudioTrack = {
+      id: 'audio-1',
+      type: 'audio',
+      url: 'https://example.com/audio.m3u8',
+      mimeType: 'audio/mp4',
+      bandwidth: 128_000,
+      initialization: { url: 'https://example.com/audio-init.mp4' },
+      codecs: ['mp4a.40.2'],
+      groupId: 'audio-group',
+      name: 'English',
+      sampleRate: 48_000,
+      channels: 2,
+      startTime: 0,
+      // Complete playlist — finite duration opens the completeness gate.
+      duration: 10,
+      segments: makeSegments(4).map((s) => ({ ...s, id: `audio-${s.id}` })),
+    };
+    const presentation: Presentation = {
+      id: 'pres-1',
+      url: 'https://example.com/playlist.m3u8',
+      selectionSets: [
+        {
+          id: 'audio-selection',
+          type: 'audio',
+          switchingSets: [{ id: 'audio-switching', type: 'audio', tracks: [audioTrack] }],
+        },
+      ],
+    };
 
     const mockMs = makeMediaSource();
     const audioBufferActor = makeActorWithSegments(

@@ -27,7 +27,7 @@ function createEngine(userConfig: Partial<Hls['config']> = {}): Hls {
 
 function stubKeySystemAccess() {
   const requestMediaKeySystemAccess = vi.fn(
-    async () =>
+    async (_keySystem: string, _configurations: MediaKeySystemConfiguration[]) =>
       /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ ({}) as MediaKeySystemAccess
   );
   Object.defineProperty(navigator, 'requestMediaKeySystemAccess', {
@@ -84,9 +84,9 @@ describe('setupDrm', () => {
         /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ configurations as any
       );
 
-      const [keySystem, requested] =
-        /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ requestMediaKeySystemAccess
-          .mock.calls[0] as [string, MediaKeySystemConfiguration[]];
+      const call = requestMediaKeySystemAccess.mock.calls[0];
+      if (!call) throw new Error('Expected a key-system access request.');
+      const [keySystem, requested] = call;
 
       expect(keySystem).toBe('com.widevine.alpha');
       expect(requested).toHaveLength(2);

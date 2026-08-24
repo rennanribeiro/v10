@@ -158,7 +158,7 @@ export class PopupPositioner {
     const anchorSupported = supportsAnchorPositioning();
     const getPosition = (popupRect: DOMRect) => {
       const side = getPositionedSide(triggerRect, popupRect, boundaryRect, preferredPosition, offsets);
-      const { positionAnchor: _, ...style } = getAnchorPositionStyle(
+      const { positionAnchor, ...style } = getAnchorPositionStyle(
         options.anchorName,
         { ...preferredPosition, side, direction: isRTL(trigger) ? 'rtl' : 'ltr' },
         triggerRect,
@@ -167,6 +167,7 @@ export class PopupPositioner {
         offsets,
         options.cssVars
       );
+      void positionAnchor;
 
       return { popupRect, side, style };
     };

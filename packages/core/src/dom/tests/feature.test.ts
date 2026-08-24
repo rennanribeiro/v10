@@ -1,4 +1,4 @@
-import { createSelector, createStore, type StateContext } from '@videojs/store';
+import { AbortControllerRegistry, createSelector, createStore, type StateContext } from '@videojs/store';
 import { assertType, describe, expect, it } from 'vite-plus/test';
 
 import { combinePlayerFeatureConfigs, definePlayerFeature, setPlayerConfigValue } from '../feature';
@@ -8,8 +8,7 @@ const stateContext = {
   target: () => {
     throw new Error('Target is not available in this test.');
   },
-  signals:
-    /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ undefined as StateContext<PlayerTarget>['signals'],
+  signals: new AbortControllerRegistry(),
   get: () => ({}),
   set: () => {},
 } satisfies StateContext<PlayerTarget>;

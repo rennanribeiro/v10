@@ -16,7 +16,9 @@ export type PreloadType = '' | 'none' | 'metadata' | 'auto';
  * Loading is started at most once per source. Widening the limits afterwards is
  * a plain config write, never a second `startLoad()`.
  */
-export function HlsJsMediaPreloadMixin<Base extends Constructor<HlsEngineHost>>(BaseClass: Base) {
+export function HlsJsMediaPreloadMixin<Base extends Constructor<HlsEngineHost>>(
+  BaseClass: Base
+): Base & Constructor<{ preload: PreloadType }> {
   class HlsJsMediaPreload
     extends /* SAFETY: The surrounding typed API establishes the asserted contract at this boundary. */ (BaseClass as Constructor<HlsEngineHost>)
   {
@@ -121,6 +123,7 @@ export function HlsJsMediaPreloadMixin<Base extends Constructor<HlsEngineHost>>(
     }
   }
 
-  return /* SAFETY: The surrounding typed API establishes the asserted contract at this boundary. */ HlsJsMediaPreload as Base &
+  return /* SAFETY: The mixed class preserves the supplied base constructor. */ HlsJsMediaPreload as typeof HlsJsMediaPreload &
+    Base &
     Constructor<{ preload: PreloadType }>;
 }

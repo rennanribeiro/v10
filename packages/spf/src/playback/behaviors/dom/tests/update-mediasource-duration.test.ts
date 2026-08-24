@@ -3,12 +3,25 @@ import { describe, expect, it, vi } from 'vite-plus/test';
 import { signal } from '../../../../core/signals/primitives';
 import type { MaybeResolvedPresentation, Presentation } from '../../../../media/types';
 import { updateMediaSourceDuration } from '../update-mediasource-duration';
+import { createSourceBufferDouble } from './source-buffer-test-double';
 
 function setupUpdateMediaSourceDuration() {
   const state = { presentation: signal<MaybeResolvedPresentation | undefined>(undefined) };
   const context = { mediaSource: signal<MediaSource | undefined>(undefined) };
   const reactor = updateMediaSourceDuration.setup({ state, context });
   return { state, context, reactor };
+}
+
+function makeSourceBufferList(sourceBuffers: SourceBuffer[]): SourceBufferList {
+  const events = new EventTarget();
+  return Object.assign(sourceBuffers, {
+    item: (index: number) => sourceBuffers[index] ?? null,
+    onaddsourcebuffer: null,
+    onremovesourcebuffer: null,
+    addEventListener: events.addEventListener.bind(events),
+    removeEventListener: events.removeEventListener.bind(events),
+    dispatchEvent: events.dispatchEvent.bind(events),
+  });
 }
 
 function makeMediaSource({
@@ -29,8 +42,7 @@ function makeMediaSource({
       readyState: { value: readyState, writable: true },
       duration: { value: duration, writable: true },
       sourceBuffers: {
-        value:
-          /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ sourceBuffers as SourceBufferList,
+        value: makeSourceBufferList(sourceBuffers),
         writable: false,
       },
       addEventListener: { value: target.addEventListener.bind(target) },
@@ -50,7 +62,7 @@ function transitionMediaSource(mediaSource: MediaSource, readyState: MediaSource
 function makeUpdatingSourceBuffer() {
   const updateEndListeners: Array<() => void> = [];
 
-  const buffer = /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ {
+  const buffer = createSourceBufferDouble({
     updating: true,
     buffered: /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ {
       length: 0,
@@ -61,12 +73,10 @@ function makeUpdatingSourceBuffer() {
       updateEndListeners.push(handler);
     },
     removeEventListener: vi.fn(),
-  } as SourceBuffer;
+  });
 
   const finishUpdating = () => {
-    /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ (
-      buffer satisfies { updating: boolean }
-    ).updating = false;
+    buffer.updating = false;
     for (const h of updateEndListeners) h();
   };
 

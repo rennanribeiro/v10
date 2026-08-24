@@ -10,15 +10,17 @@ import { signal } from '../../../../core/signals/primitives';
 import type { MaybeResolvedPresentation, Segment } from '../../../../media/types';
 import type { BandwidthState } from '../../../../network/bandwidth-estimator';
 import { createTrackedFetch, type FetchBytes, fetchStream } from '../../../../network/fetch';
-import { createSegmentLoaderActor, type SegmentLoaderActor } from '../../../actors/dom/segment-loader';
+import { createSegmentLoaderActor } from '../../../actors/dom/segment-loader';
 import { createSourceBufferActor, type SourceBufferActor } from '../../../actors/dom/source-buffer';
-import type { TextTrackSegmentLoaderActor } from '../../../actors/text-track-segment-loader';
 import {
   loadAudioSegments,
   loadVideoSegments,
+  type SegmentLoaderDispatcher,
   type SegmentLoadingContext,
   type SegmentLoadingState,
+  type TextTrackSegmentLoaderDispatcher,
 } from '../load-segments';
+import { createSourceBufferDouble } from './source-buffer-test-double';
 
 function makeState(initial: SegmentLoadingState = {}): StateSignals<SegmentLoadingState> {
   return {
@@ -42,17 +44,19 @@ function makeContext(
   initial: {
     videoBufferActor?: SourceBufferActor;
     audioBufferActor?: SourceBufferActor;
-    videoSegmentLoaderActor?: SegmentLoaderActor;
-    audioSegmentLoaderActor?: SegmentLoaderActor;
-    textTrackSegmentLoaderActor?: TextTrackSegmentLoaderActor;
+    videoSegmentLoaderActor?: SegmentLoaderDispatcher;
+    audioSegmentLoaderActor?: SegmentLoaderDispatcher;
+    textTrackSegmentLoaderActor?: TextTrackSegmentLoaderDispatcher;
   } = {}
 ): TestContext {
   return {
     videoBufferActor: signal<SourceBufferActor | undefined>(initial.videoBufferActor),
     audioBufferActor: signal<SourceBufferActor | undefined>(initial.audioBufferActor),
-    videoSegmentLoaderActor: signal<SegmentLoaderActor | undefined>(initial.videoSegmentLoaderActor),
-    audioSegmentLoaderActor: signal<SegmentLoaderActor | undefined>(initial.audioSegmentLoaderActor),
-    textTrackSegmentLoaderActor: signal<TextTrackSegmentLoaderActor | undefined>(initial.textTrackSegmentLoaderActor),
+    videoSegmentLoaderActor: signal<SegmentLoaderDispatcher | undefined>(initial.videoSegmentLoaderActor),
+    audioSegmentLoaderActor: signal<SegmentLoaderDispatcher | undefined>(initial.audioSegmentLoaderActor),
+    textTrackSegmentLoaderActor: signal<TextTrackSegmentLoaderDispatcher | undefined>(
+      initial.textTrackSegmentLoaderActor
+    ),
   };
 }
 
@@ -110,7 +114,7 @@ function makeSourceBuffer(
     ranges = next;
   };
 
-  return /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ {
+  return createSourceBufferDouble({
     get buffered() {
       return /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ {
         get length() {
@@ -145,7 +149,7 @@ function makeSourceBuffer(
     removeEventListener: vi.fn((type: string, listener: EventListener) => {
       listeners[type] = (listeners[type] ?? []).filter((l) => l !== listener);
     }),
-  } as SourceBuffer;
+  });
 }
 
 /**
@@ -1524,10 +1528,7 @@ describe('loadSegments orchestration (loadingSuspended)', () => {
 
   it('goes dormant while suspended, even with preload="auto"', async () => {
     const send = vi.fn();
-    const fakeLoader =
-      /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ {
-        send,
-      } as SegmentLoaderActor;
+    const fakeLoader = { send } satisfies SegmentLoaderDispatcher;
     const state = makeState({
       preload: 'auto',
       loadingSuspended: true,
@@ -1551,10 +1552,7 @@ describe('loadSegments orchestration (loadingSuspended)', () => {
     // actors are torn down by sourceclose moments later anyway; text
     // fetches are small and bounded).
     const send = vi.fn();
-    const fakeLoader =
-      /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ {
-        send,
-      } as SegmentLoaderActor;
+    const fakeLoader = { send } satisfies SegmentLoaderDispatcher;
     const state = makeState({
       preload: 'auto',
       selectedVideoTrackId: 'track-1',
@@ -1582,10 +1580,7 @@ describe('loadSegments orchestration (loadingSuspended)', () => {
     // No variant declares the key, so compositions without a writer have no
     // slot at all — the dispatcher must behave exactly as if unsuspended.
     const send = vi.fn();
-    const fakeLoader =
-      /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ {
-        send,
-      } as SegmentLoaderActor;
+    const fakeLoader = { send } satisfies SegmentLoaderDispatcher;
     const { loadingSuspended: _omitted, ...state } = makeState({
       preload: 'auto',
       selectedVideoTrackId: 'track-1',

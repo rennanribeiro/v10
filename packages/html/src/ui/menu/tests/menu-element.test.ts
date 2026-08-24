@@ -1,4 +1,4 @@
-import type { AnyPlayerStore } from '@videojs/core/dom';
+import type { AnyPlayerStore, PlayerTarget } from '@videojs/core/dom';
 import { ContextProvider } from '@videojs/element/context';
 import type { MediaControlsState } from '@videojs/media';
 import { createStore, flush } from '@videojs/store';
@@ -6,7 +6,7 @@ import { afterEach, describe, expect, it, vi } from 'vite-plus/test';
 
 import { playerContext } from '../../../player/context';
 import { ControlsElement } from '../../controls/controls-element';
-import { MediaElement } from '../../media-element';
+import { UIElement } from '../../ui-element';
 import { MenuCheckboxItemElement } from '../menu-checkbox-item-element';
 import { MenuElement } from '../menu-element';
 import { MenuGroupElement } from '../menu-group-element';
@@ -23,7 +23,7 @@ function uniqueTag(base: string): string {
   return `${base}-${tagCounter++}`;
 }
 
-function createElement<Element extends HTMLElement>(Base: abstract new () => Element): Element {
+function createElement<Element extends HTMLElement>(Base: new () => Element): Element {
   const tag = uniqueTag('test-el');
   customElements.define(
     tag,
@@ -43,31 +43,29 @@ function defineElement(tagName: string, Base: CustomElementConstructor): void {
 function createControlsStore(
   requestControlsLock: MediaControlsState['requestControlsLock'] = () => () => {}
 ): AnyPlayerStore {
-  return /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ createStore<unknown>()<MediaControlsState>(
-    {
-      name: 'controls',
-      state: ({ get, set }) => {
-        return {
-          userActive: true,
-          controlsVisible: true,
-          requestControlsLock,
-          toggleControls() {
-            const visible = !(
-              /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ (get()
-                .controlsVisible as boolean)
-            );
+  return createStore<PlayerTarget>()({
+    name: 'controls',
+    state: ({ get, set }) => {
+      return {
+        userActive: true,
+        controlsVisible: true,
+        requestControlsLock,
+        toggleControls() {
+          const visible = !(
+            /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ (get()
+              .controlsVisible as boolean)
+          );
 
-            set({ userActive: visible, controlsVisible: visible });
+          set({ userActive: visible, controlsVisible: visible });
 
-            return visible;
-          },
-        };
-      },
-    }
-  ) as AnyPlayerStore;
+          return visible;
+        },
+      };
+    },
+  });
 }
 
-class TestPlayerProviderElement extends MediaElement {
+class TestPlayerProviderElement extends UIElement {
   readonly releaseControlsLock = vi.fn();
   readonly requestControlsLock = vi.fn(() => this.releaseControlsLock);
   store = createControlsStore(this.requestControlsLock);

@@ -14,9 +14,11 @@ type FakeLevel = { width: number; height: number; bitrate: number };
 
 interface MockHlsEventData {
   levels?: FakeLevel[];
+  level?: number;
   firstLevel?: number;
   video?: boolean;
   media?: HTMLMediaElement;
+  droppedLevel?: number;
 }
 
 const level = (width: number, height: number, bitrate: number): FakeLevel => ({ width, height, bitrate });
@@ -35,23 +37,21 @@ const asLevels = (levels: FakeLevel[]) =>
 
 function createEngine(levels: FakeLevel[], config: Partial<Hls['config']> = {}) {
   const listeners = new Map<string, Set<{ fn: (...args: any[]) => void; ctx: Hls | undefined }>>();
+  const engine = new Hls({
+    capLevelToPlayerSize: true,
+    capLevelOnFPSDrop: true,
+    // Pin the scale factor so a retina host does not change the arithmetic.
+    ignoreDevicePixelRatio: true,
+    maxDevicePixelRatio: Number.POSITIVE_INFINITY,
+    ...config,
+  });
+  Object.defineProperty(engine, 'levels', { configurable: true, value: levels, writable: true });
+  engine.autoLevelCapping = -1;
+  // Where a manual selection lands. `-1` is hls.js for "nothing forced".
+  engine.nextLevel = -1;
+  engine.currentLevel = -1;
 
-  return /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ {
-    levels,
-    autoLevelCapping: -1,
-    autoLevelEnabled: true,
-    // Where a manual selection lands. `-1` is hls.js for "nothing forced".
-    nextLevel: -1,
-    currentLevel: -1,
-    logger: { log: () => {} },
-    config: {
-      capLevelToPlayerSize: true,
-      capLevelOnFPSDrop: true,
-      // Pin the scale factor so a retina host does not change the arithmetic.
-      ignoreDevicePixelRatio: true,
-      maxDevicePixelRatio: Number.POSITIVE_INFINITY,
-      ...config,
-    },
+  return Object.assign(engine, {
     on(event: string, fn: (...args: any[]) => void, ctx?: Hls) {
       if (!listeners.has(event)) listeners.set(event, new Set());
       listeners.get(event)!.add({ fn, ctx });
@@ -64,15 +64,11 @@ function createEngine(levels: FakeLevel[], config: Partial<Hls['config']> = {}) 
     emit(event: string, data: MockHlsEventData) {
       for (const { fn, ctx } of [...(listeners.get(event) ?? [])]) fn.call(ctx, event, data);
     },
-  } as Hls;
+  });
 }
 
-const emit = (engine: Hls, event: string, data: MockHlsEventData) =>
-  /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ (
-    engine as Hls & {
-      emit(event: string, data: MockHlsEventData): void;
-    }
-  ).emit(event, data);
+const emit = (engine: ReturnType<typeof createEngine>, event: string, data: MockHlsEventData) =>
+  engine.emit(event, data);
 
 const controllers: Array<{ destroy(): void }> = [];
 

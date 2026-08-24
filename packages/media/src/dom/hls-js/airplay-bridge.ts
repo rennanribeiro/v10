@@ -16,7 +16,7 @@ import type { HlsEngineHost } from './types';
  *
  * No-op on non-WebKit platforms (Chromium, Firefox).
  */
-export function HlsJsMediaAirPlayMixin<Base extends Constructor<HlsEngineHost>>(BaseClass: Base) {
+export function HlsJsMediaAirPlayMixin<Base extends Constructor<HlsEngineHost>>(BaseClass: Base): Base {
   class HlsJsMediaAirPlay
     extends /* SAFETY: The surrounding typed API establishes the asserted contract at this boundary. */ (BaseClass as Constructor<HlsEngineHost>)
   {
@@ -91,5 +91,6 @@ export function HlsJsMediaAirPlayMixin<Base extends Constructor<HlsEngineHost>>(
     }
   }
 
-  return /* SAFETY: The surrounding typed API establishes the asserted contract at this boundary. */ HlsJsMediaAirPlay as Base;
+  return /* SAFETY: The mixed class preserves the supplied base constructor. */ HlsJsMediaAirPlay as typeof HlsJsMediaAirPlay &
+    Base;
 }

@@ -194,7 +194,8 @@ export const textTrackFeature = definePlayerFeature({
       // Listen for <track> load events on tracks that don't have cues yet.
       // `addtrack` fires before cues are parsed — we need the `load` event
       // on the <track> element to know when cues are ready.
-      const tracks = (isQuerySelectorAllCapable<HTMLTrackElement>(media) && media.querySelectorAll('track')) || [];
+      const tracks =
+        (isQuerySelectorAllCapable<typeof media, HTMLTrackElement>(media) && media.querySelectorAll('track')) || [];
       const shadowTracks = (media instanceof HTMLElement && media.shadowRoot?.querySelectorAll('track')) || [];
 
       for (const trackEl of [...tracks, ...shadowTracks]) {

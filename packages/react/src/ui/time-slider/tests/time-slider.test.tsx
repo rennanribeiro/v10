@@ -18,6 +18,11 @@ import { TimeSliderRoot } from '../time-slider-root';
 
 // --- Hoisted mock data (available inside vi.mock factories) ---
 
+interface CapturedSliderOptions {
+  onDragStart?: () => void;
+  onDragEnd?: () => void;
+}
+
 const {
   mockSliderApi,
   mockSliderInput,
@@ -27,9 +32,15 @@ const {
   mockTextTrackState,
   capturedSliderOptions,
 } = vi.hoisted(() => {
+  let currentOptions: CapturedSliderOptions = {};
   const capturedSliderOptions = {
-    current: {},
-  } satisfies { current: { onDragStart?: () => void; onDragEnd?: () => void } };
+    get current(): CapturedSliderOptions {
+      return currentOptions;
+    },
+    set current(value: CapturedSliderOptions) {
+      currentOptions = value;
+    },
+  };
   const mockSliderInput = {
     pointerPercent: 0,
     dragPercent: 0,
@@ -38,7 +49,7 @@ const {
     focused: false,
   };
   return {
-    mockSliderApi: (options: { onDragStart?: () => void; onDragEnd?: () => void }) => {
+    mockSliderApi: (options: CapturedSliderOptions) => {
       capturedSliderOptions.current = options;
       return {
         input: {

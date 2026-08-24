@@ -44,7 +44,7 @@ export function onCastApiAvailable(callback: () => void) {
     /* SAFETY: The surrounding typed API establishes the asserted contract at this boundary. */ (
       globalThis as { __onGCastApiAvailable?: () => void }
     ).__onGCastApiAvailable = whenDefined;
-  } else if (isUndefined(cast) || !cast.framework) {
+  } else if (isUndefined(globalThis.cast) || !globalThis.cast.framework) {
     whenDefined();
   } else {
     callback();
@@ -62,7 +62,7 @@ export async function loadCastFramework() {
 }
 
 export function getCastContext() {
-  return isUndefined(cast) ? undefined : cast.framework?.CastContext.getInstance();
+  return isUndefined(globalThis.cast) ? undefined : globalThis.cast.framework?.CastContext.getInstance();
 }
 
 export function currentSession() {

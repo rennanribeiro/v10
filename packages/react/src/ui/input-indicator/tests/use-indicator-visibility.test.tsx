@@ -1,5 +1,4 @@
 import { cleanup, fireEvent, render } from '@testing-library/react';
-import type { UnknownStore } from '@videojs/store';
 import { afterEach, describe, expect, it, vi } from 'vite-plus/test';
 
 import { PlayerContextProvider, type PlayerContextValue } from '../../../player/context';
@@ -35,17 +34,25 @@ function VisibilityProbe({ close, id }: { close: () => void; id: string }) {
 }
 
 function createPlayerContextValue(): PlayerContextValue {
-  const store = /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ {
-    state: {},
-    target: {},
+  const state = {};
+  const store: PlayerContextValue['store'] = {
+    $state: {
+      current: state,
+      subscribe: () => () => {},
+    },
+    state,
+    target: null,
+    destroyed: false,
+    attach: () => () => {},
+    destroy: () => {},
     subscribe: () => () => {},
-  } as UnknownStore;
+  };
 
-  return /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ {
+  return {
     store,
     media: null,
     setMedia: vi.fn(),
     container: document.createElement('div'),
     setContainer: vi.fn(),
-  } as PlayerContextValue;
+  };
 }

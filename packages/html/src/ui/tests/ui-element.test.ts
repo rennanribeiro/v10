@@ -1,6 +1,6 @@
-import { afterEach, describe, expect, it, vi } from 'vite-plus/test';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { MediaElement } from '../media-element';
+import { UIElement } from '../ui-element';
 
 let tagCounter = 0;
 
@@ -8,7 +8,7 @@ function uniqueTag(base: string): string {
   return `${base}-${tagCounter++}`;
 }
 
-function createElement<T extends HTMLElement>(ctor: abstract new () => T): T {
+function createElement<T extends HTMLElement>(ctor: new () => T): T {
   const tag = uniqueTag('test-media');
   customElements.define(
     tag,
@@ -24,10 +24,10 @@ afterEach(() => {
   vi.restoreAllMocks();
 });
 
-describe('MediaElement', () => {
+describe('UIElement', () => {
   it('extends DestroyMixin(ReactiveElement)', () => {
-    const el = createElement(MediaElement);
-    expect(el).toBeInstanceOf(MediaElement);
+    const el = createElement(UIElement);
+    expect(el).toBeInstanceOf(UIElement);
     expect(el.destroyed).toBe(false);
   });
 });

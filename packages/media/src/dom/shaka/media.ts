@@ -523,13 +523,13 @@ function withDrmConfig(config: ShakaConfig | undefined, drm: DrmSystemsConfig | 
   } satisfies ShakaConfig;
 }
 
-const categoryToCode = {
-  [shaka.util.Error.Category.NETWORK]: MediaError.MEDIA_ERR_NETWORK,
-  [shaka.util.Error.Category.MEDIA]: MediaError.MEDIA_ERR_DECODE,
-  [shaka.util.Error.Category.MANIFEST]: MediaError.MEDIA_ERR_SRC_NOT_SUPPORTED,
-  [shaka.util.Error.Category.STREAMING]: MediaError.MEDIA_ERR_DECODE,
-  [shaka.util.Error.Category.DRM]: MediaError.MEDIA_ERR_ENCRYPTED,
-} satisfies Record<number, number>;
+const categoryToCode = new Map<number, number>([
+  [shaka.util.Error.Category.NETWORK, MediaError.MEDIA_ERR_NETWORK],
+  [shaka.util.Error.Category.MEDIA, MediaError.MEDIA_ERR_DECODE],
+  [shaka.util.Error.Category.MANIFEST, MediaError.MEDIA_ERR_SRC_NOT_SUPPORTED],
+  [shaka.util.Error.Category.STREAMING, MediaError.MEDIA_ERR_DECODE],
+  [shaka.util.Error.Category.DRM, MediaError.MEDIA_ERR_ENCRYPTED],
+]);
 
 /** Shaka codes for a load that a newer one replaced. */
 const abortedCodes = new Set<number>([shaka.util.Error.Code.LOAD_INTERRUPTED, shaka.util.Error.Code.OPERATION_ABORTED]);
@@ -561,7 +561,7 @@ function toMediaError<Failure>(error: Failure): MediaError | null {
     return null;
   }
 
-  const code = categoryToCode[error.category] ?? MediaError.MEDIA_ERR_CUSTOM;
+  const code = categoryToCode.get(error.category) ?? MediaError.MEDIA_ERR_CUSTOM;
   const mediaError = new MediaError(error.message, code, true, `shaka-${error.code}`);
   mediaError.data = error;
 

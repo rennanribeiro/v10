@@ -3,7 +3,7 @@ import { logMissingFeature } from '@videojs/core/dom';
 import { isText, translateText } from '@videojs/core/i18n';
 import type { Selector } from '@videojs/store';
 import { isUndefined } from '@videojs/utils/predicate';
-import type { ButtonHTMLAttributes, ForwardedRef, ForwardRefExoticComponent, RefAttributes } from 'react';
+import type { ButtonHTMLAttributes, ForwardRefExoticComponent, PropsWithoutRef, RefAttributes } from 'react';
 import { forwardRef, useLayoutEffect, useState } from 'react';
 
 import { useTranslator } from '../i18n/context';
@@ -45,9 +45,12 @@ function getLabelParams<Core extends MediaButtonComponent>(
 }
 
 /** Creates a media button React component from a core class and config. */
-export function createMediaButton<Core extends Required<MediaButtonComponent>, Props extends object>(
+export function createMediaButton<
+  Core extends Required<MediaButtonComponent>,
+  Props extends renderElementFn.ComponentProps<InferComponentState<Core>>,
+>(
   config: MediaButtonConfig<Core>
-): ForwardRefExoticComponent<Props & RefAttributes<HTMLButtonElement>> {
+): ForwardRefExoticComponent<PropsWithoutRef<Props> & RefAttributes<HTMLButtonElement>> {
   const {
     displayName,
     core: CoreClass,
@@ -63,10 +66,7 @@ export function createMediaButton<Core extends Required<MediaButtonComponent>, P
   // Props that exist in the core's defaultProps are routed to setProps; the rest go to the DOM element.
   const corePropKeys = new Set(Object.keys(CoreClass.defaultProps));
 
-  const Component = forwardRef<HTMLButtonElement, Props>(function MediaButton(
-    componentProps: Props,
-    forwardedRef: ForwardedRef<HTMLButtonElement>
-  ) {
+  const Component = forwardRef<HTMLButtonElement, Props>(function MediaButton(componentProps, forwardedRef) {
     const { render, className, style, ...rest } = componentProps;
 
     const coreProps = /* SAFETY: Only keys declared by CoreClass.defaultProps are assigned below. */ {} as Partial<
@@ -95,8 +95,8 @@ export function createMediaButton<Core extends Required<MediaButtonComponent>, P
 
     const [core] = useState(() => new CoreClass());
 
-    if (corePropKeys.has('menuTrigger') && isUndefined(coreProps.menuTrigger)) {
-      coreProps.menuTrigger = menuTriggerChild;
+    if (corePropKeys.has('menuTrigger') && (!('menuTrigger' in coreProps) || isUndefined(coreProps.menuTrigger))) {
+      Object.assign(coreProps, { menuTrigger: menuTriggerChild });
     }
 
     core.setProps(
@@ -113,7 +113,7 @@ export function createMediaButton<Core extends Required<MediaButtonComponent>, P
           if (__DEV__) console.error(`[${displayName}]`, error);
         });
       },
-      isDisabled: () => !!coreProps.disabled || !feature,
+      isDisabled: () => ('disabled' in coreProps && Boolean(coreProps.disabled)) || !feature,
     });
 
     // Derive state and label before the hooks boundary so the
@@ -170,7 +170,5 @@ export function createMediaButton<Core extends Required<MediaButtonComponent>, P
 
   Component.displayName = displayName;
 
-  return /* SAFETY: The surrounding typed API establishes the asserted contract at this boundary. */ Component as ForwardRefExoticComponent<
-    Props & RefAttributes<HTMLButtonElement>
-  >;
+  return Component;
 }

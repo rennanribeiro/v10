@@ -53,7 +53,7 @@ describe('createBackgroundVideoEngine', () => {
     // selectedAudioTrackId is declared by calculatePresentationDuration so
     // its signal is created, but it stays undefined since no audio-selection
     // behavior is composed in.
-    expect(state.selectedAudioTrackId).toBeUndefined();
+    expect('selectedAudioTrackId' in state ? state.selectedAudioTrackId : undefined).toBeUndefined();
 
     // Text-track and userVideoTrackSelection signals must not exist —
     // no behavior in this composition declares them.
@@ -251,7 +251,7 @@ describe('createBackgroundVideoEngine', () => {
     // `audioBufferActor` IS declared by `endOfStream` (cross-type EOS
     // coordination), so the signal exists — but no behavior in this
     // composition writes it, so it stays `undefined`.
-    expect(context.audioBufferActor).toBeUndefined();
+    expect('audioBufferActor' in context ? context.audioBufferActor : undefined).toBeUndefined();
 
     // The audio segment loader and both text-track actors aren't declared
     // by any behavior left in the composition — their signals don't exist.

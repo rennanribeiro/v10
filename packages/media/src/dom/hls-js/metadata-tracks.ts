@@ -11,7 +11,7 @@ import type { HlsEngineHost } from './types';
  * attaches. This mixin re-enables those tracks by forcing `mode = 'hidden'`
  * and reloading the track source when cues have been wiped.
  */
-export function HlsJsMediaMetadataTracksMixin<Base extends Constructor<HlsEngineHost>>(BaseClass: Base) {
+export function HlsJsMediaMetadataTracksMixin<Base extends Constructor<HlsEngineHost>>(BaseClass: Base): Base {
   class HlsJsMediaMetadataTracks
     extends /* SAFETY: The surrounding typed API establishes the asserted contract at this boundary. */ (BaseClass as Constructor<HlsEngineHost>)
   {
@@ -64,5 +64,6 @@ export function HlsJsMediaMetadataTracksMixin<Base extends Constructor<HlsEngine
     }
   }
 
-  return /* SAFETY: The surrounding typed API establishes the asserted contract at this boundary. */ HlsJsMediaMetadataTracks as Base;
+  return /* SAFETY: The mixed class preserves the supplied base constructor. */ HlsJsMediaMetadataTracks as typeof HlsJsMediaMetadataTracks &
+    Base;
 }

@@ -232,7 +232,7 @@ export function createMuxPosterURL(source?: MuxSourceBase | null): string | unde
   const { ext = 'webp', token, ...query } = poster ?? {};
 
   // Image tokens must carry the image (`t`) audience.
-  if (token && parseJwt<MuxJWT>(token)?.aud !== 't') return undefined;
+  if (token && parseJwt(token)?.aud !== 't') return undefined;
   // Signed playback requires a matching image token; an unsigned URL would be rejected.
   if (!token && playback?.token) return undefined;
 
@@ -251,7 +251,7 @@ export function createMuxStoryboardURL(source?: MuxSourceBase | null): string | 
   const { token, ...query } = storyboard ?? {};
 
   // Storyboard tokens must carry the storyboard (`s`) audience.
-  if (token && parseJwt<MuxJWT>(token)?.aud !== 's') return undefined;
+  if (token && parseJwt(token)?.aud !== 's') return undefined;
   // Signed playback requires a matching storyboard token; an unsigned URL would be rejected.
   if (!token && playback?.token) return undefined;
 

@@ -18,7 +18,6 @@ import {
   type SourcePart,
   type SourcePartCollection,
   type SourcePartFor,
-  type TargetOutput,
 } from '../target/definition';
 import { createTargetModuleImports } from '../target/module-imports';
 import { renderTargetElement, renderTargetOutput } from '../target/render';
@@ -97,8 +96,7 @@ export function componentTargetPlugin(options: ComponentTargetPluginOptions): Pl
             );
             const context: ComponentRewriteContext<RuntimeComponentDefinition> = {
               props: createSourceProps(source, node.openingElement, children),
-              children:
-                /* SAFETY: The surrounding typed API establishes the asserted contract at this boundary. */ children as TargetOutput,
+              children,
               parts: createSourceParts(code, node, path, bindings, scopes, descendants),
               id: (name) => sourceId(scope, name),
             };
@@ -172,8 +170,7 @@ export function primitiveTargetPlugin(options: ComponentTargetPluginOptions): Pl
           if (isFunction(rule) && !isTargetElement(rule)) {
             const output = rule({
               props: createSourceProps(source, node.openingElement, children),
-              children:
-                /* SAFETY: The surrounding typed API establishes the asserted contract at this boundary. */ children as TargetOutput,
+              children,
               id: (name) => `vjsc-${binding.name.toLowerCase()}-${occurrence}-${name}`,
             });
             const replacement = renderTargetOutput(output, { target: binding.target, imports });
@@ -436,8 +433,7 @@ function createSourceParts(
       group!.values.push({
         value: {
           props: createSourceProps(source, node.openingElement, children),
-          children:
-            /* SAFETY: The surrounding typed API establishes the asserted contract at this boundary. */ children as TargetOutput,
+          children,
         },
         children: group!.children,
       });
@@ -448,7 +444,13 @@ function createSourceParts(
 }
 
 function sourcePartCollection(name: string, group: CollectedPartGroup): RuntimeSourcePart {
-  const collection = /* SAFETY: The surrounding typed API establishes the asserted contract at this boundary. */ {
+  const collection: SourcePartCollection<object> = {
+    get props() {
+      return collection.one().props;
+    },
+    get children() {
+      return collection.one().children;
+    },
     one() {
       if (group.values.length !== 1) {
         throw new Error(`Component rewrite expected one <${name}> part, found ${group.values.length}.`);
@@ -458,17 +460,17 @@ function sourcePartCollection(name: string, group: CollectedPartGroup): RuntimeS
     all() {
       return group.values.map((item) => item.value);
     },
-  } as SourcePartCollection<object> & Record<string, RuntimeSourcePart>;
+  } satisfies SourcePartCollection<object>;
 
-  Object.defineProperties(collection, {
-    props: { enumerable: true, get: () => collection.one().props },
-    children: { enumerable: true, get: () => collection.one().children },
-  });
   for (const [childName, child] of group.children) {
-    collection[childName] = sourcePartCollection(`${name}.${childName}`, child);
+    Object.defineProperty(collection, childName, {
+      enumerable: true,
+      value: sourcePartCollection(`${name}.${childName}`, child),
+    });
   }
 
-  return collection;
+  // SAFETY: Every child group is installed above under its schema-defined part name.
+  return collection as RuntimeSourcePart;
 }
 
 function firstElementChild(node: JSXElement): JSXElement | undefined {

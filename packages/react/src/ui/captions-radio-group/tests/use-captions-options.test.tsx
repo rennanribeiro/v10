@@ -53,9 +53,23 @@ function renderCaptionsMenu({
 }
 
 function createReactiveTextTrackWrapper(initialState: PlayerContextValue['store']['state']) {
+  let state = initialState;
   const listeners = new Set<() => void>();
   const store = {
-    state: initialState,
+    $state: {
+      get current() {
+        return state;
+      },
+      subscribe: (callback: () => void) => {
+        listeners.add(callback);
+        return () => listeners.delete(callback);
+      },
+    },
+    target: null,
+    destroyed: false,
+    get state() {
+      return state;
+    },
     subscribe: (callback: () => void) => {
       listeners.add(callback);
       return () => listeners.delete(callback);
@@ -65,8 +79,7 @@ function createReactiveTextTrackWrapper(initialState: PlayerContextValue['store'
   };
 
   const value: PlayerContextValue = {
-    store:
-      /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ store as PlayerContextValue['store'],
+    store,
     media: null,
     setMedia: vi.fn(),
     container: null,
@@ -75,7 +88,7 @@ function createReactiveTextTrackWrapper(initialState: PlayerContextValue['store'
 
   return {
     updateState(next: PlayerContextValue['store']['state']) {
-      store.state = next;
+      state = next;
       for (const listener of listeners) listener();
     },
     Wrapper({ children }: { children: ReactNode }) {

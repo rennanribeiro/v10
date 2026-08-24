@@ -4,9 +4,6 @@ import { AbortControllerRegistry } from './abort-controller-registry';
 import { throwNoTargetError } from './errors';
 import type { Selector } from './shallow-equal';
 import type { AnySlice, InferSliceState, StateContext } from './slice';
-import type { StoreValue } from './value';
-
-type SelectorState = Readonly<Record<PropertyKey, StoreValue>>;
 
 const stateContext: StateContext<unknown> = {
   target: throwNoTargetError,
@@ -30,7 +27,7 @@ const stateContext: StateContext<unknown> = {
  *
  * @param slice - The slice to create a selector for.
  */
-export function createSelector<S extends AnySlice>(slice: S): Selector<SelectorState, InferSliceState<S> | undefined> {
+export function createSelector<S extends AnySlice>(slice: S): Selector<object, InferSliceState<S> | undefined> {
   const initialState = slice.state(stateContext);
   const keys = [
     ...Object.keys(
@@ -45,15 +42,14 @@ export function createSelector<S extends AnySlice>(slice: S): Selector<SelectorS
     return Object.assign(() => undefined, { displayName: slice.name });
   }
 
-  return Object.assign(
-    (state: SelectorState) => {
-      // WARN: Could be the source of a bug if two slices have overlapping state keys
-      if (!(firstKey in state)) return undefined;
-      return /* SAFETY: firstKey establishes this store contains the selected slice projection. */ pick(
-        state,
-        keys
-      ) as InferSliceState<S>;
-    },
-    { displayName: slice.name }
-  );
+  const select: Selector<object, InferSliceState<S> | undefined> = (state) => {
+    // WARN: Could be the source of a bug if two slices have overlapping state keys
+    if (!(firstKey in state)) return undefined;
+    return /* SAFETY: firstKey establishes this store contains the selected slice projection. */ pick(
+      state,
+      keys
+    ) as InferSliceState<S>;
+  };
+
+  return Object.assign(select, { displayName: slice.name });
 }

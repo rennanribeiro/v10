@@ -80,12 +80,7 @@ export function templateTargetPlugin(options: ComponentTargetPluginOptions): Plu
                 template.openingElement,
                 children
               ).omit('name');
-              const output = applyRule(
-                definition.render,
-                props,
-                /* SAFETY: The surrounding typed API establishes the asserted contract at this boundary. */ children as TargetOutput,
-                `vjsc-template-${occurrence}`
-              );
+              const output = applyRule(definition.render, props, children, `vjsc-template-${occurrence}`);
 
               if (isHostOutput(output)) {
                 const attributes = renderTargetAttributes(output, { target: owner.target, imports });
@@ -179,12 +174,7 @@ function templateChildren(
         node.openingElement,
         partChildren
       ).omit('name');
-      const output = applyRule(
-        rule,
-        props,
-        /* SAFETY: The surrounding typed API establishes the asserted contract at this boundary. */ partChildren as TargetOutput,
-        `vjsc-template-part-${name}`
-      );
+      const output = applyRule(rule, props, partChildren, `vjsc-template-part-${name}`);
 
       replacements.push({
         start: node.start - template.openingElement.end,

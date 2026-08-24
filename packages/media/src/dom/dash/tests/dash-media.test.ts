@@ -14,6 +14,8 @@ interface MockDashEvent {
   newRepresentation?: { id: string };
 }
 
+const dashFixture: { engine: MockEngine | null } = vi.hoisted(() => ({ engine: null }));
+
 vi.mock('dashjs', () => {
   const events = {
     STREAM_INITIALIZED: 'streamInitialized',
@@ -71,6 +73,7 @@ vi.mock('dashjs', () => {
       },
     };
 
+    dashFixture.engine = player;
     return player;
   }
 
@@ -113,12 +116,13 @@ function setup() {
 
   const media = new DashMedia();
   media.attach(video);
+  const engine = dashFixture.engine;
+  if (!engine) throw new Error('The dash.js fixture did not create an engine.');
 
   return {
     media,
     video,
-    engine:
-      /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ media.engine as MockEngine,
+    engine,
   };
 }
 

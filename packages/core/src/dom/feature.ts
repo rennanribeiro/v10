@@ -73,7 +73,8 @@ export function setPlayerConfigValue<Value>(
   if (!(entry.action in store)) {
     throw new TypeError(`Missing config action "${String(entry.action)}"`);
   }
-  const action = store[entry.action];
+  const descriptor = Object.getOwnPropertyDescriptor(store, entry.action);
+  const action = descriptor?.get ? descriptor.get.call(store) : descriptor?.value;
   if (!isFunction(action)) {
     throw new TypeError(`Missing config action "${String(entry.action)}"`);
   }

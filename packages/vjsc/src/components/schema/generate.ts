@@ -34,12 +34,7 @@ export function createSchemaModule(options: CreateSchemaModuleOptions): SchemaMo
   const { cwd = process.cwd(), exclude, include, output, source } = options;
 
   const outputAbsolute = absolutePath(cwd, output);
-  let discoverOptions: DiscoverSchemaOptions;
-  discoverOptions = {
-    cwd,
-    include,
-  };
-  if (exclude) discoverOptions.exclude = exclude;
+  const discoverOptions: DiscoverSchemaOptions = exclude ? { cwd, include, exclude } : { cwd, include };
   const discovered = discoverSchema(discoverOptions);
 
   const entries = [...discovered.components].sort((a, b) => a.name.localeCompare(b.name));

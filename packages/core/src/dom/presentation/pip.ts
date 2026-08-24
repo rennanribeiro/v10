@@ -1,4 +1,3 @@
-import type { MediaPictureInPictureCapability } from '@videojs/media';
 import { isMediaPictureInPictureCapable } from '@videojs/media';
 import type { WebKitVideoElement } from '@videojs/utils/dom';
 import { isFunction } from '@videojs/utils/predicate';
@@ -44,9 +43,7 @@ export function isPictureInPicture(media: EventTarget) {
 
   // isPictureInPicture is a non-standard property that is set by the video host
   // and checks internally if the video host target is the picture-in-picture element.
-  const video =
-    /* SAFETY: The surrounding typed API establishes the asserted contract at this boundary. */ media as MediaPictureInPictureCapability;
-  return video.isPictureInPicture ?? false;
+  return 'isPictureInPicture' in media && media.isPictureInPicture === true;
 }
 
 export async function requestPictureInPicture(media: EventTarget) {
@@ -57,10 +54,8 @@ export async function requestPictureInPicture(media: EventTarget) {
     return;
   }
 
-  const video =
-    /* SAFETY: The surrounding typed API establishes the asserted contract at this boundary. */ media as MediaPictureInPictureCapability;
-  if (isFunction(video.requestPictureInPicture)) {
-    return /* SAFETY: The surrounding typed API establishes the asserted contract at this boundary. */ video.requestPictureInPicture() as Promise<void>;
+  if (isMediaPictureInPictureCapable(media)) {
+    return media.requestPictureInPicture();
   }
 }
 
@@ -79,9 +74,7 @@ export async function exitPictureInPicture(media: EventTarget) {
     return document.exitPictureInPicture();
   }
 
-  const video =
-    /* SAFETY: The surrounding typed API establishes the asserted contract at this boundary. */ media as MediaPictureInPictureCapability;
-  if (isFunction(video.exitPictureInPicture)) {
-    return /* SAFETY: The surrounding typed API establishes the asserted contract at this boundary. */ video.exitPictureInPicture() as Promise<void>;
+  if ('exitPictureInPicture' in media && isFunction(media.exitPictureInPicture)) {
+    return media.exitPictureInPicture();
   }
 }

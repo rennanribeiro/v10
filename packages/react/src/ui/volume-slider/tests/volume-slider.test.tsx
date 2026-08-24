@@ -1,4 +1,5 @@
 import { cleanup, render } from '@testing-library/react';
+import type { MediaVolumeState } from '@videojs/media';
 import { isObject } from '@videojs/utils/predicate';
 import { createRef } from 'react';
 import { afterEach, describe, expect, it, vi } from 'vite-plus/test';
@@ -18,6 +19,7 @@ const { mockSliderApi, mockVolumeState, mutableVolume } = vi.hoisted(() => {
     volume: 0.8,
     muted: false,
     volumeAvailability: 'available' as const,
+    mutedAvailability: 'available' as const,
     setVolume: vi.fn(),
     toggleMuted: vi.fn(),
   };
@@ -70,7 +72,7 @@ vi.mock('@videojs/core/dom', async (importOriginal) => {
 vi.mock('@videojs/store/react', () => ({
   useSnapshot: vi.fn((state: { current: unknown }) => state.current),
   useStore: vi.fn(
-    <Selection,>(_store: PlayerContextValue['store'], selector?: (state: typeof mockVolumeState) => Selection) => {
+    <Selection,>(_store: PlayerContextValue['store'], selector?: (state: MediaVolumeState) => Selection) => {
       if (!selector) return _store;
 
       // Return the mutable volume state directly for volume selectors.

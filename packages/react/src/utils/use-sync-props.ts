@@ -5,11 +5,12 @@ function hasKey<Owner extends object>(owner: Owner, key: PropertyKey): key is ke
   return key in owner;
 }
 
-export function useSyncProps<Props extends object, Rest extends object>(
-  target: Props,
+export function useSyncProps<Props extends object, Rest extends object, Target extends Props = Props>(
+  target: Target,
   props: Partial<Props> & Rest,
   defaults: Props
 ): Omit<Rest, keyof Props> {
+  const syncTarget: Props = target;
   const rest = /* SAFETY: Properties outside the media contract are copied into this object below. */ {} as Omit<
     Rest,
     keyof Props
@@ -18,7 +19,7 @@ export function useSyncProps<Props extends object, Rest extends object>(
   const prevSyncedRef = useRef<Set<keyof Props & string> | null>(null);
 
   const sync = <Key extends keyof Props>(key: Key, value: Props[Key]) => {
-    if (target[key] !== value) target[key] = value;
+    if (syncTarget[key] !== value) syncTarget[key] = value;
   };
 
   // Reset props the consumer stopped passing (or passed as `undefined`) back to
@@ -31,11 +32,18 @@ export function useSyncProps<Props extends object, Rest extends object>(
 
   for (const key in props) {
     if (hasKey(defaults, key)) {
-      if (isUndefined(props[key])) continue;
+      const value = props[key];
+      if (isUndefined(value)) continue;
       synced.add(key);
-      sync(key, props[key]);
+      sync(
+        key,
+        /* SAFETY: A present Partial<Props> value preserves the corresponding Props property contract. */ value as typeof value &
+          Props[typeof key]
+      );
     } else {
-      Object.assign(rest, { [key]: props[key] });
+      Object.assign(rest, {
+        [key]: props[/* SAFETY: A for-in key comes from props. */ key as keyof typeof props],
+      });
     }
   }
 

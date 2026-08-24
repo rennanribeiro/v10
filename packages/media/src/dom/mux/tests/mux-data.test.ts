@@ -1,19 +1,20 @@
+import Mux from 'mux-embed';
 import { afterEach, describe, expect, it, vi } from 'vite-plus/test';
 
 import { MuxData } from '..';
-import type { MuxDataSdk } from '../types';
 
 function createSdk() {
   const monitor = vi.fn();
-  const sdk = /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ {
+  const sdk = {
+    ...Mux,
     monitor,
-    utils: { now: () => 0, generateUUID: () => 'uuid' },
-  } as MuxDataSdk;
+    utils: { ...Mux.utils, now: () => 0, generateUUID: () => 'uuid' },
+  };
   return { sdk, monitor };
 }
 
 class FakeMedia extends EventTarget {
-  engine = null satisfies unknown;
+  engine: FakeHlsJsEngine | FakeDashJsEngine | null = null;
   src = '';
 }
 

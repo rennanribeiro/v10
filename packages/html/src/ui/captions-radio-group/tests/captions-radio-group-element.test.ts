@@ -1,4 +1,4 @@
-import type { AnyPlayerStore } from '@videojs/core/dom';
+import type { AnyPlayerStore, PlayerTarget } from '@videojs/core/dom';
 import { registerI18n, resetI18nRegistry } from '@videojs/core/i18n';
 import { ContextProvider } from '@videojs/element/context';
 import type { MediaTextTrackState } from '@videojs/media';
@@ -7,9 +7,9 @@ import { afterEach, describe, expect, it, vi } from 'vite-plus/test';
 
 import { MediaI18nProviderElement } from '../../../i18n/provider-element';
 import { playerContext } from '../../../player/context';
-import { MediaElement } from '../../media-element';
 import { MenuElement } from '../../menu/menu-element';
 import { MenuRadioItemElement } from '../../menu/menu-radio-item-element';
+import { UIElement } from '../../ui-element';
 import { CaptionsRadioGroupElement } from '../captions-radio-group-element';
 
 function defineElement(tagName: string, Base: CustomElementConstructor): void {
@@ -47,24 +47,22 @@ function createTextTrackStore({
   subtitlesShowing?: boolean | undefined;
   selectSubtitlesTrack?: MediaTextTrackState['selectSubtitlesTrack'] | undefined;
 } = {}): AnyPlayerStore {
-  return /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ createStore<unknown>()<MediaTextTrackState>(
-    {
-      name: 'textTrack',
-      state: () => ({
-        chaptersCues: [],
-        thumbnailCues: [],
-        thumbnailTrackSrc: null,
-        thumbnailTrackCrossOrigin: null,
-        textTrackList,
-        subtitlesShowing,
-        toggleSubtitles: vi.fn(),
-        selectSubtitlesTrack,
-      }),
-    }
-  ) as AnyPlayerStore;
+  return createStore<PlayerTarget>()({
+    name: 'textTrack',
+    state: () => ({
+      chaptersCues: [],
+      thumbnailCues: [],
+      thumbnailTrackSrc: null,
+      thumbnailTrackCrossOrigin: null,
+      textTrackList,
+      subtitlesShowing,
+      toggleSubtitles: vi.fn(),
+      selectSubtitlesTrack,
+    }),
+  });
 }
 
-class TestPlayerProviderElement extends MediaElement {
+class TestPlayerProviderElement extends UIElement {
   readonly #provider = new ContextProvider(this, { context: playerContext });
 
   setStore(store: AnyPlayerStore): void {

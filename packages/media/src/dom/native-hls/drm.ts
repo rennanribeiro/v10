@@ -44,7 +44,7 @@ export type NativeHlsDrmHost = NativeMediaHost & {
  * Encrypted content with nothing configured fails loudly. Safari otherwise
  * stalls without explanation, which is indistinguishable from a slow network.
  */
-export function NativeHlsMediaDrmMixin<Base extends Constructor<NativeHlsDrmHost>>(BaseClass: Base) {
+export function NativeHlsMediaDrmMixin<Base extends Constructor<NativeHlsDrmHost>>(BaseClass: Base): Base {
   class NativeHlsMediaDrm
     extends /* SAFETY: The surrounding typed API establishes the asserted contract at this boundary. */ (BaseClass as Constructor<NativeHlsDrmHost>)
   {
@@ -219,5 +219,6 @@ export function NativeHlsMediaDrmMixin<Base extends Constructor<NativeHlsDrmHost
     }
   }
 
-  return /* SAFETY: The surrounding typed API establishes the asserted contract at this boundary. */ NativeHlsMediaDrm as Base;
+  return /* SAFETY: The mixed class preserves the supplied base constructor. */ NativeHlsMediaDrm as typeof NativeHlsMediaDrm &
+    Base;
 }

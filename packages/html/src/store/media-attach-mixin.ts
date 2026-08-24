@@ -9,7 +9,7 @@ export type MediaAttachMixin = <Class extends AnyConstructor<HTMLElement>>(BaseC
 
 /**
  * Create a mixin that consumes `mediaContext` and registers the
- * element as the media with the provider.
+ * element as the media with the player.
  *
  * Uses the raw context-request protocol so it works with any
  * `HTMLElement` subclass — no `ReactiveControllerHost` required.
@@ -18,14 +18,14 @@ export type MediaAttachMixin = <Class extends AnyConstructor<HTMLElement>>(BaseC
  */
 export function createMediaAttachMixin(context: MediaContext): MediaAttachMixin {
   return <Class extends AnyConstructor<HTMLElement>>(BaseClass: Class) => {
-    class MediaAttachElement
-      extends /* SAFETY: The surrounding typed API establishes the asserted contract at this boundary. */ (BaseClass as Constructor<CustomElement>)
-    {
-      #setMedia: ((media: Media | null) => void) | null = null;
+    // SAFETY: Every HTMLElement base satisfies the CustomElement lifecycle surface used by this mixin.
+    class MediaAttachElement extends (BaseClass as Constructor<CustomElement>) {
+      #releaseMedia: (() => void) | null = null;
       #unsubscribe: (() => void) | null = null;
 
       getMediaTarget(): Media | null {
-        return /* SAFETY: The surrounding typed API establishes the asserted contract at this boundary. */ this as Media;
+        // SAFETY: MediaAttachMixin is applied only to media host elements registered with the player.
+        return this as this & Media;
       }
 
       override connectedCallback() {
@@ -37,12 +37,15 @@ export function createMediaAttachMixin(context: MediaContext): MediaAttachMixin 
             this,
             (value, unsubscribe) => {
               if (unsubscribe) this.#unsubscribe = unsubscribe;
-              this.#setMedia = value?.setMedia ?? null;
-              if (this.isConnected) {
-                this.#setMedia?.(this.getMediaTarget());
+              this.#releaseMedia?.();
+              this.#releaseMedia = null;
+
+              const target = this.getMediaTarget();
+              if (this.isConnected && value && target) {
+                this.#releaseMedia = value.registerMedia(target);
               }
             },
-            true
+            false
           )
         );
       }
@@ -52,15 +55,16 @@ export function createMediaAttachMixin(context: MediaContext): MediaAttachMixin 
         // (e.g. remote-playback) can clean up against the real underlying
         // element. Destroying the media host first would null the layer
         // chain's target before listeners get a chance to unwind.
-        this.#setMedia?.(null);
+        this.#releaseMedia?.();
+        this.#releaseMedia = null;
         this.#unsubscribe?.();
         this.#unsubscribe = null;
-        this.#setMedia = null;
         super.disconnectedCallback?.();
       }
     }
 
-    return /* SAFETY: The surrounding typed API establishes the asserted contract at this boundary. */ MediaAttachElement as Class;
+    // SAFETY: The generated subclass preserves BaseClass's constructor and augments only lifecycle behavior.
+    return MediaAttachElement as typeof MediaAttachElement & Class;
   };
 }
 

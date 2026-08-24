@@ -10,25 +10,28 @@ import { SliderThumb } from '../slider-thumb';
 import { SliderTrack } from '../slider-track';
 import { SliderValue } from '../slider-value';
 
+interface SliderOptions {
+  getElement?: () => HTMLElement;
+  getThumbElement?: () => HTMLElement | null;
+  adjustPercent?: (raw: number, thumb: number, track: number) => number;
+  onDragStart?: () => void;
+  onDragEnd?: () => void;
+}
+
 const { mockSliderApi, sliderOptionsRef } = vi.hoisted(() => {
-  const sliderOptionsRef = { current: undefined } satisfies {
-    current:
-      | {
-          onDragStart?: () => void;
-          onDragEnd?: () => void;
-        }
-      | undefined;
+  let currentOptions: SliderOptions | undefined;
+  const sliderOptionsRef = {
+    get current(): SliderOptions | undefined {
+      return currentOptions;
+    },
+    set current(value: SliderOptions | undefined) {
+      currentOptions = value;
+    },
   };
 
   return {
     sliderOptionsRef,
-    mockSliderApi: (options?: {
-      getElement?: () => HTMLElement;
-      getThumbElement?: () => HTMLElement | null;
-      adjustPercent?: (raw: number, thumb: number, track: number) => number;
-      onDragStart?: () => void;
-      onDragEnd?: () => void;
-    }) => {
+    mockSliderApi: (options?: SliderOptions) => {
       sliderOptionsRef.current = options;
 
       return {

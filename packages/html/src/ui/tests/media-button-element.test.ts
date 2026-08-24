@@ -7,8 +7,8 @@ import { afterEach, describe, expect, it, vi } from 'vite-plus/test';
 
 import { MediaI18nProviderElement } from '../../i18n';
 import { containerContext, playerContext } from '../../player/context';
-import { MediaElement } from '../media-element';
 import { PlayButtonElement } from '../play-button/play-button-element';
+import { UIElement } from '../ui-element';
 
 let tagCounter = 0;
 
@@ -16,7 +16,7 @@ function uniqueTag(base: string): string {
   return `${base}-${tagCounter++}`;
 }
 
-function createElement<Element extends HTMLElement>(Base: abstract new () => Element): Element {
+function createElement<Element extends HTMLElement>(Base: new () => Element): Element {
   const tag = uniqueTag('test-el');
   customElements.define(
     tag,
@@ -55,17 +55,17 @@ function createPlaybackStore(): AnyPlayerStore {
   return store;
 }
 
-class TestContainerProviderElement extends MediaElement {
+class TestContainerProviderElement extends UIElement {
   readonly provider = new ContextProvider(this, {
     context: containerContext,
     initialValue: {
       container: this,
-      setContainer: () => {},
+      registerContainer: () => () => {},
     },
   });
 }
 
-class TestPlayerProviderElement extends MediaElement {
+class TestPlayerProviderElement extends UIElement {
   static readonly tagName = 'test-media-button-player';
 
   store = createPlaybackStore();

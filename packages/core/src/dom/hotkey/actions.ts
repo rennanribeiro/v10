@@ -40,7 +40,8 @@ const HOTKEY_ACTIONS = {
   togglePaused({ store }) {
     const playback = selectPlayback(store.state);
     if (!playback) return;
-    playback.paused ? playback.play() : playback.pause();
+    if (playback.paused) playback.play();
+    else playback.pause();
   },
 
   toggleMuted({ store }) {
@@ -50,7 +51,8 @@ const HOTKEY_ACTIONS = {
   toggleFullscreen({ store }) {
     const fs = selectFullscreen(store.state);
     if (!fs) return;
-    fs.fullscreen ? fs.exitFullscreen() : fs.requestFullscreen();
+    if (fs.fullscreen) fs.exitFullscreen();
+    else fs.requestFullscreen();
   },
 
   toggleSubtitles({ store }) {
@@ -60,7 +62,8 @@ const HOTKEY_ACTIONS = {
   togglePictureInPicture({ store }) {
     const pip = selectPiP(store.state);
     if (!pip) return;
-    pip.pip ? pip.exitPictureInPicture() : pip.requestPictureInPicture();
+    if (pip.pip) pip.exitPictureInPicture();
+    else pip.requestPictureInPicture();
   },
 
   seekStep: MEDIA_INPUT_ACTION_OVERRIDES.seekStep,

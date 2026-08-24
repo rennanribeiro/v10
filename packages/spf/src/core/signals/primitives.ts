@@ -18,12 +18,13 @@ export const untrack: <T>(fn: () => T) => T = SignalNS.subtle.untrack;
  * const value = peek(someSignal);
  * const id = peek(presentationSignal, (p) => p?.id);
  */
-export function peek<T, R = T>(
-  source: { get(): T },
-  transform: (value: T) => R = (v: T) =>
-    /* SAFETY: The surrounding typed API establishes the asserted contract at this boundary. */ v as R
-): R {
-  return untrack(() => transform(source.get()));
+export function peek<T>(source: { get(): T }): T;
+export function peek<T, R>(source: { get(): T }, transform: (value: T) => R): R;
+export function peek<T, R>(source: { get(): T }, transform?: (value: T) => R): T | R {
+  return untrack(() => {
+    const value = source.get();
+    return transform ? transform(value) : value;
+  });
 }
 
 /** A writable reactive value (read + write). */

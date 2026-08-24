@@ -1,11 +1,11 @@
 import { SliderDataAttrs, type SliderState } from '@videojs/core';
 import { ContextProvider } from '@videojs/element/context';
-import { afterEach, describe, expect, it, vi } from 'vite-plus/test';
+import { afterEach, describe, expect, it, vi } from 'vitest';
 
-import { MediaElement } from '../../media-element';
 import { sliderContext } from '../../slider/context';
 import { SliderThumbElement } from '../../slider/slider-thumb-element';
 import { SliderValueElement } from '../../slider/slider-value-element';
+import { UIElement } from '../../ui-element';
 import { TimeSliderChapterTitleElement } from '../time-slider-chapters/time-slider-chapter-title-element';
 import { TimeSliderChaptersElement } from '../time-slider-chapters/time-slider-chapters-element';
 import { TimeSliderElement } from '../time-slider-element';
@@ -16,7 +16,7 @@ function uniqueTag(base: string): string {
   return `${base}-${tagCounter++}`;
 }
 
-function createElement<Element extends HTMLElement>(Base: abstract new () => Element): Element {
+function createElement<Element extends HTMLElement>(Base: new () => Element): Element {
   const tag = uniqueTag('test-el');
   customElements.define(
     tag,
@@ -27,7 +27,7 @@ function createElement<Element extends HTMLElement>(Base: abstract new () => Ele
   ) as Element;
 }
 
-class TestSliderProviderElement extends MediaElement {
+class TestSliderProviderElement extends UIElement {
   readonly provider = new ContextProvider(this, {
     context: sliderContext,
     initialValue: createSliderContext(),

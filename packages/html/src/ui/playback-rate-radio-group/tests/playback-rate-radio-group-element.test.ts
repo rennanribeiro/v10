@@ -1,16 +1,16 @@
-import type { AnyPlayerStore } from '@videojs/core/dom';
+import type { AnyPlayerStore, PlayerTarget } from '@videojs/core/dom';
 import { ContextProvider } from '@videojs/element/context';
 import type { MediaPlaybackRateState } from '@videojs/media';
 import { createStore } from '@videojs/store';
 import { afterEach, describe, expect, it, vi } from 'vite-plus/test';
 
 import { playerContext } from '../../../player/context';
-import { MediaElement } from '../../media-element';
 import { MenuElement } from '../../menu/menu-element';
 import { MenuItemIndicatorElement } from '../../menu/menu-item-indicator-element';
 import { MenuRadioGroupElement } from '../../menu/menu-radio-group-element';
 import { MenuRadioItemElement } from '../../menu/menu-radio-item-element';
 import { PlaybackRateButtonElement } from '../../playback-rate-button/playback-rate-button-element';
+import { UIElement } from '../../ui-element';
 import { PlaybackRateRadioGroupElement } from '../playback-rate-radio-group-element';
 
 let tagCounter = 0;
@@ -19,7 +19,7 @@ function uniqueTag(base: string): string {
   return `${base}-${tagCounter++}`;
 }
 
-function createElement<Element extends HTMLElement>(Base: abstract new () => Element): Element {
+function createElement<Element extends HTMLElement>(Base: new () => Element): Element {
   const tag = uniqueTag('test-el');
   customElements.define(
     tag,
@@ -65,21 +65,19 @@ function createPlaybackRateStore({
   playbackRate?: number | undefined;
   setPlaybackRate?: ((rate: number) => void) | undefined;
 } = {}): AnyPlayerStore {
-  return /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ createStore<unknown>()<MediaPlaybackRateState>(
-    {
-      name: 'playbackRate',
-      state: () => {
-        return {
-          playbackRates,
-          playbackRate,
-          setPlaybackRate,
-        };
-      },
-    }
-  ) as AnyPlayerStore;
+  return createStore<PlayerTarget>()({
+    name: 'playbackRate',
+    state: () => {
+      return {
+        playbackRates,
+        playbackRate,
+        setPlaybackRate,
+      };
+    },
+  });
 }
 
-class TestPlayerProviderElement extends MediaElement {
+class TestPlayerProviderElement extends UIElement {
   store: AnyPlayerStore = createPlaybackRateStore();
 
   readonly #provider = new ContextProvider(this, { context: playerContext });

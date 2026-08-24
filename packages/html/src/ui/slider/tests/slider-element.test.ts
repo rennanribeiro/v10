@@ -1,11 +1,11 @@
-import type { AnyPlayerStore } from '@videojs/core/dom';
+import type { AnyPlayerStore, PlayerTarget } from '@videojs/core/dom';
 import { ContextProvider } from '@videojs/element/context';
 import type { MediaControlsState } from '@videojs/media';
 import { createStore } from '@videojs/store';
 import { afterEach, describe, expect, it, vi } from 'vite-plus/test';
 
 import { playerContext } from '../../../player/context';
-import { MediaElement } from '../../media-element';
+import { UIElement } from '../../ui-element';
 import { SliderBufferElement } from '../slider-buffer-element';
 import { SliderElement } from '../slider-element';
 import { SliderFillElement } from '../slider-fill-element';
@@ -20,7 +20,7 @@ function uniqueTag(base: string): string {
   return `${base}-${tagCounter++}`;
 }
 
-function createElement<Element extends HTMLElement>(Base: abstract new () => Element): Element {
+function createElement<Element extends HTMLElement>(Base: new () => Element): Element {
   const tag = uniqueTag('test-el');
   customElements.define(
     tag,
@@ -32,20 +32,18 @@ function createElement<Element extends HTMLElement>(Base: abstract new () => Ele
 }
 
 function createControlsStore(requestControlsLock: MediaControlsState['requestControlsLock']): AnyPlayerStore {
-  return /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ createStore<unknown>()<MediaControlsState>(
-    {
-      name: 'controls',
-      state: () => ({
-        userActive: true,
-        controlsVisible: true,
-        requestControlsLock,
-        toggleControls: () => true,
-      }),
-    }
-  ) as AnyPlayerStore;
+  return createStore<PlayerTarget>()({
+    name: 'controls',
+    state: () => ({
+      userActive: true,
+      controlsVisible: true,
+      requestControlsLock,
+      toggleControls: () => true,
+    }),
+  });
 }
 
-class TestPlayerProviderElement extends MediaElement {
+class TestPlayerProviderElement extends UIElement {
   readonly releaseControlsLock = vi.fn();
   readonly requestControlsLock = vi.fn(() => this.releaseControlsLock);
   readonly store = createControlsStore(this.requestControlsLock);

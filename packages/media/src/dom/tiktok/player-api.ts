@@ -67,26 +67,12 @@ export function isTikTokPlayerMessage<Value>(data: Value): data is Value & TikTo
 
 /** Whether a value is the pair `onCurrentTime` reports. */
 export function isTikTokCurrentTime<Value>(value: Value): value is Value & TikTokCurrentTime {
-  return (
-    isObject(value) &&
-    isNumber(
-      /* SAFETY: The surrounding typed API establishes the asserted contract at this boundary. */ (
-        value as TikTokCurrentTime
-      ).currentTime
-    )
-  );
+  return isObject(value) && 'currentTime' in value && isNumber(value.currentTime);
 }
 
 /** Whether a value is the payload `onPlayerError` reports. */
 export function isTikTokPlayerError<Value>(value: Value): value is Value & TikTokPlayerError {
-  return (
-    isObject(value) &&
-    isNumber(
-      /* SAFETY: The surrounding typed API establishes the asserted contract at this boundary. */ (
-        value as TikTokPlayerError
-      ).errorCode
-    )
-  );
+  return isObject(value) && 'errorCode' in value && isNumber(value.errorCode);
 }
 
 /** Build a command message. A command without a value must not carry one at all. */

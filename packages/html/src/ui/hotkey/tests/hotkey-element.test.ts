@@ -2,7 +2,7 @@ import { ContextProvider } from '@videojs/element/context';
 import { afterEach, describe, expect, it } from 'vite-plus/test';
 
 import { containerContext } from '../../../player/context';
-import { MediaElement } from '../../media-element';
+import { UIElement } from '../../ui-element';
 import { AriaKeyShortcutsController } from '../aria-key-shortcuts-controller';
 import { HotkeyElement } from '../hotkey-element';
 
@@ -12,7 +12,7 @@ function uniqueTag(base: string): string {
   return `${base}-${tagCounter++}`;
 }
 
-function createElement<Element extends HTMLElement>(Base: abstract new () => Element): Element {
+function createElement<Element extends HTMLElement>(Base: new () => Element): Element {
   const tag = uniqueTag('test-el');
   customElements.define(
     tag,
@@ -51,12 +51,12 @@ describe('HotkeyElement', () => {
 });
 
 describe('AriaKeyShortcutsController', () => {
-  class TestContainerProviderElement extends MediaElement {
+  class TestContainerProviderElement extends UIElement {
     readonly provider = new ContextProvider(this, {
       context: containerContext,
       initialValue: {
         container: this,
-        setContainer: () => {},
+        registerContainer: () => () => {},
       },
     });
   }

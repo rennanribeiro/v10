@@ -25,7 +25,7 @@ export const pipFeature = definePlayerFeature({
         await exitFullscreen(media);
       }
 
-      return requestPictureInPicture(media);
+      await requestPictureInPicture(media);
     },
 
     async exitPictureInPicture() {
@@ -44,7 +44,7 @@ export const pipFeature = definePlayerFeature({
         await exitFullscreen(media);
       }
 
-      return requestPictureInPicture(media);
+      await requestPictureInPicture(media);
     },
   }),
 

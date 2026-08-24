@@ -11,6 +11,7 @@ import type {
 } from '../components/definition';
 import type { GroupProps, SlotProps, TemplatePartProps, TemplateProps, TextProps } from '../components/jsx-runtime';
 import { createTargetCode } from './expression';
+import type { SourceChildrenToken, SourcePropToken } from './source';
 
 export const TARGET_ELEMENT = Symbol.for('vjsc/target-element');
 export const TARGET_FRAGMENT = Symbol.for('vjsc/target-fragment');
@@ -79,6 +80,8 @@ export type TargetOutput =
   | TargetNode
   | TargetExpression
   | TargetWithProps
+  | SourceChildrenToken
+  | SourcePropToken
   | string
   | number
   | false

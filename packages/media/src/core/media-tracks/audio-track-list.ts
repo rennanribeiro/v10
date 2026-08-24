@@ -110,7 +110,8 @@ export class AudioTrackList extends EventTarget {
       this.#addTrackCallback = callback;
       this.addEventListener(
         'addtrack',
-        /* SAFETY: The surrounding typed API establishes the asserted contract at this boundary. */ callback as EventListener
+        /* SAFETY: DOM dispatch supplies the event argument accepted by this media-track callback. */ callback as typeof callback &
+          EventListener
       );
     }
   }
@@ -128,7 +129,8 @@ export class AudioTrackList extends EventTarget {
       this.#removeTrackCallback = callback;
       this.addEventListener(
         'removetrack',
-        /* SAFETY: The surrounding typed API establishes the asserted contract at this boundary. */ callback as EventListener
+        /* SAFETY: DOM dispatch supplies the event argument accepted by this media-track callback. */ callback as typeof callback &
+          EventListener
       );
     }
   }

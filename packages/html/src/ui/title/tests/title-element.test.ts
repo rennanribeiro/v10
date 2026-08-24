@@ -5,7 +5,7 @@ import { combine, createStore } from '@videojs/store';
 import { afterEach, describe, expect, it } from 'vite-plus/test';
 
 import { playerContext } from '../../../player/context';
-import { MediaElement } from '../../media-element';
+import { UIElement } from '../../ui-element';
 import { TitleElement } from '../title-element';
 
 let tagCounter = 0;
@@ -14,15 +14,12 @@ function uniqueTag(base: string): string {
   return `${base}-${tagCounter++}`;
 }
 
-function createElement<Element extends HTMLElement>(Base: abstract new () => Element): Element {
+function createElement<Element extends HTMLElement>(Base: new () => Element): Element {
   const tag = uniqueTag('test-el');
-  customElements.define(
-    tag,
-    class extends /* SAFETY: The fixture base implements the HTMLElement constructor contract. */ (Base as typeof HTMLElement) {}
-  );
-  return /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ document.createElement(
-    tag
-  ) as Element;
+  // SAFETY: The helper constrains Base to an HTMLElement constructor accepted by customElements.define.
+  customElements.define(tag, class extends (Base as typeof HTMLElement) {});
+  // SAFETY: The tag was defined immediately above with Base, so creation returns Element.
+  return document.createElement(tag) as Element;
 }
 
 function defineElement(tagName: string, Base: CustomElementConstructor): void {
@@ -70,7 +67,7 @@ class FakeMedia extends EventTarget {
     this.dispatchEvent(new Event('pause'));
   }
 
-  play(): void {
+  async play(): Promise<void> {
     this.paused = false;
     this.dispatchEvent(new Event('play'));
   }
@@ -91,6 +88,10 @@ function createMetadataOnlyStore() {
 }
 
 type TitleStore = ReturnType<typeof createTitleStore>;
+type TestPlayerStore =
+  | TitleStore
+  | ReturnType<typeof createNoControlsStore>
+  | ReturnType<typeof createMetadataOnlyStore>;
 type ConfigurableStore = Parameters<typeof setPlayerConfigValue>[0];
 
 const titleConfig = metadataFeature.config!.title;
@@ -100,9 +101,9 @@ function setTitle(store: ConfigurableStore, value: string | null): void {
   setPlayerConfigValue(store, titleConfig, value);
 }
 
-class TestPlayerProviderElement extends MediaElement {
-  store: AnyPlayerStore =
-    /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ createTitleStore() as AnyPlayerStore;
+class TestPlayerProviderElement extends UIElement {
+  // SAFETY: createTitleStore returns the AnyPlayerStore contract consumed by playerContext.
+  store: AnyPlayerStore = createTitleStore() as AnyPlayerStore;
 
   readonly #provider = new ContextProvider(this, { context: playerContext });
 
@@ -114,14 +115,13 @@ class TestPlayerProviderElement extends MediaElement {
 
 defineElement('test-title-player', TestPlayerProviderElement);
 
-async function setup(store?: ConfigurableStore) {
-  const provider =
-    /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ document.createElement(
-      'test-title-player'
-    ) as TestPlayerProviderElement;
-  if (store)
-    provider.store =
-      /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ store as AnyPlayerStore;
+async function setup(store?: TestPlayerStore) {
+  // SAFETY: test-title-player is registered with TestPlayerProviderElement above.
+  const provider = document.createElement('test-title-player') as TestPlayerProviderElement;
+  if (store) {
+    // SAFETY: Every TestPlayerStore variant implements the AnyPlayerStore context contract.
+    provider.store = store as AnyPlayerStore;
+  }
 
   const title = createElement(TitleElement);
 
@@ -174,11 +174,8 @@ describe('TitleElement', () => {
   it('ignores controls and playback state', async () => {
     const store: TitleStore = createTitleStore();
     const media = new FakeMedia();
-    store.attach({
-      media:
-        /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ media as PlayerTarget['media'],
-      container: null,
-    });
+    // SAFETY: FakeMedia implements the playback capability surface used by this test's feature set.
+    store.attach({ media, container: null });
 
     const { title } = await setup(store);
 

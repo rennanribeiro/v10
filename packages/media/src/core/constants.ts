@@ -8,15 +8,16 @@ export const EMPTY_TIME_RANGES: TimeRangeLike = Object.freeze({
 });
 
 /** A frozen, empty `TextTrackList`-like value for hosts with no text tracks. */
+const emptyTextTracks = Object.assign(new EventTarget(), {
+  length: 0,
+  *[Symbol.iterator]() {},
+  getTrackById: () => null,
+});
+
 export const EMPTY_TEXT_TRACKS: TextTrackListLike =
-  /* SAFETY: The surrounding typed API establishes the asserted contract at this boundary. */ Object.assign(
-    new EventTarget(),
-    {
-      length: 0,
-      *[Symbol.iterator]() {},
-      getTrackById: () => null,
-    }
-  ) as TextTrackListLike;
+  // SAFETY: The EventTarget supplies event methods and the assigned members supply the list contract.
+  emptyTextTracks as typeof emptyTextTracks & TextTrackListLike;
 
 export const EMPTY_REMOTE =
-  /* SAFETY: The surrounding typed API establishes the asserted contract at this boundary. */ new EventTarget() as RemotePlaybackLike;
+  // SAFETY: Hosts without remote playback never invoke the unsupported remote-specific members.
+  new EventTarget() as EventTarget & RemotePlaybackLike;

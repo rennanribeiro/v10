@@ -31,7 +31,10 @@ interface MediaTracksPrototype extends MediaTracksHost {
 
 export type WithMediaTracks<Base extends AnyConstructor<any>> = MixinReturn<
   Base,
-  MediaVideoTrackCapability & MediaAudioTrackCapability & MediaVideoRenditionCapability & MediaAudioRenditionCapability
+  MediaVideoTrackCapability &
+    MediaAudioTrackCapability &
+    MediaVideoRenditionCapability &
+    MediaAudioRenditionCapability & { detach(): void }
 >;
 
 const HTMLMediaElementConstructor =

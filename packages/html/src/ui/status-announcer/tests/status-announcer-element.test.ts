@@ -4,7 +4,7 @@ import { ContextProvider } from '@videojs/element/context';
 import { afterEach, describe, expect, it, vi } from 'vite-plus/test';
 
 import { containerContext, playerContext } from '../../../player/context';
-import { MediaElement } from '../../media-element';
+import { UIElement } from '../../ui-element';
 import { StatusAnnouncerElement } from '../status-announcer-element';
 
 afterEach(() => {
@@ -40,7 +40,7 @@ function createTestStore(initialState: MediaSnapshot = {}) {
   return { store, setState };
 }
 
-class TestStatusAnnouncerPlayerElement extends MediaElement {
+class TestStatusAnnouncerPlayerElement extends UIElement {
   readonly #provider = new ContextProvider(this, { context: playerContext });
   readonly #containerProvider = new ContextProvider(this, { context: containerContext });
   #store = createTestStore().store;
@@ -56,7 +56,7 @@ class TestStatusAnnouncerPlayerElement extends MediaElement {
 
   override connectedCallback(): void {
     this.#provider.setValue(this.#store);
-    this.#containerProvider.setValue({ container: this, setContainer: vi.fn() });
+    this.#containerProvider.setValue({ container: this, registerContainer: () => vi.fn() });
     super.connectedCallback();
   }
 }

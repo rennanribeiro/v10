@@ -17,7 +17,7 @@ export type PlayerControllerHost = ReactiveControllerHost & HTMLElement;
  * @example
  * ```ts
  * // Store access (no subscription)
- * class Controls extends MediaElement {
+ * class Controls extends UIElement {
  *   #player = new PlayerController(this, playerContext);
  *
  *   handleClick() {
@@ -26,7 +26,7 @@ export type PlayerControllerHost = ReactiveControllerHost & HTMLElement;
  * }
  *
  * // Selector-based subscription
- * class PlayButton extends MediaElement {
+ * class PlayButton extends UIElement {
  *   #playback = new PlayerController(this, playerContext, selectPlayback);
  * }
  * ```
@@ -78,7 +78,8 @@ export class PlayerController<Store extends PlayerStore, Result = Store> impleme
 
     // Without selector: return store directly
     if (!this.#selector)
-      return /* SAFETY: The surrounding typed API establishes the asserted contract at this boundary. */ store as Result;
+      return /* SAFETY: The no-selector constructor overload establishes that Result is Store. */ store as Store &
+        Result;
 
     // With selector: use StoreController
     return this.#store?.value;

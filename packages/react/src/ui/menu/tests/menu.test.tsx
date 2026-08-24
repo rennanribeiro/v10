@@ -658,17 +658,16 @@ describe('MenuContent', () => {
 
   it('propagates the deepest submenu size to the root content', async () => {
     vi.spyOn(HTMLElement.prototype, 'getBoundingClientRect').mockImplementation(function (this: HTMLElement) {
-      const widths = {
-        'root-items': 180,
-        'first-submenu-items': 200,
-        'second-submenu-item': 220,
-      } satisfies Record<string, number>;
-      const heights = {
-        'root-items': 100,
-        'first-submenu-items': 150,
-        'second-submenu-item': 240,
-      } satisfies Record<string, number>;
-      return createRect(widths[this.dataset.testid ?? ''] ?? 0, heights[this.dataset.testid ?? ''] ?? 0);
+      switch (this.dataset.testid) {
+        case 'root-items':
+          return createRect(180, 100);
+        case 'first-submenu-items':
+          return createRect(200, 150);
+        case 'second-submenu-item':
+          return createRect(220, 240);
+        default:
+          return createRect(0, 0);
+      }
     });
 
     render(<NestedSubmenuFixture />);

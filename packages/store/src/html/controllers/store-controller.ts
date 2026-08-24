@@ -83,7 +83,8 @@ export class StoreController<Store extends AnyStore, Result = Store> implements 
 
     // Without selector: return store
     if (isUndefined(this.#selector)) {
-      return /* SAFETY: The surrounding typed API establishes the asserted contract at this boundary. */ store as Result;
+      // SAFETY: The no-selector constructor overload fixes Result to its default Store type.
+      return store as Store & Result;
     }
 
     // With selector: delegate to snapshot controller

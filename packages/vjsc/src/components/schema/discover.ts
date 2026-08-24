@@ -24,7 +24,7 @@ export interface DiscoverSchemaOptions {
 
 interface DiscoveryGlobOptions {
   cwd: string;
-  exclude?: string[];
+  exclude?: readonly string[];
 }
 
 export interface ManifestSchemaComponent {

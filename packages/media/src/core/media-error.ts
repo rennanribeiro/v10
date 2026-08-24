@@ -44,7 +44,11 @@ export class MediaError extends Error {
     this.fatal = fatal ?? (code >= MediaError.MEDIA_ERR_NETWORK && code <= MediaError.MEDIA_ERR_ENCRYPTED);
 
     if (!this.message) {
-      this.message = MediaError.defaultMessages[this.code] ?? '';
+      this.message = isDefaultMessageCode(this.code) ? MediaError.defaultMessages[this.code] : '';
     }
   }
+}
+
+function isDefaultMessageCode(code: number): code is keyof typeof MediaError.defaultMessages {
+  return code in MediaError.defaultMessages;
 }

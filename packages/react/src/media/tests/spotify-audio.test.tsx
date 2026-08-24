@@ -1,5 +1,5 @@
 import { render, waitFor } from '@testing-library/react';
-import type { SpotifyControllerOptions } from '@videojs/media/dom/spotify';
+import type { SpotifyIframeApi } from '@videojs/media/dom/spotify';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vite-plus/test';
 
 import { SpotifyAudio } from '../spotify-audio/media';
@@ -33,7 +33,7 @@ beforeEach(() => {
   vi.stubGlobal('SpotifyIframeApi', {
     createController: (
       target: HTMLIFrameElement,
-      _options: SpotifyControllerOptions,
+      _options: Parameters<SpotifyIframeApi['createController']>[1],
       callback: (controller: MockController) => void
     ) => callback(new MockController(target)),
   });

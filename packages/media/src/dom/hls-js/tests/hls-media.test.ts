@@ -519,12 +519,14 @@ describe('HlsJsMedia', () => {
      */
     function probeEngine(levels: Array<{ width: number; height: number; bitrate: number }>) {
       const listeners = new Map<string, Array<{ fn: (...args: any[]) => void; ctx: Hls | undefined }>>();
-      return /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ {
-        levels,
-        autoLevelCapping: -1,
-        autoLevelEnabled: true,
-        logger: { log: () => {} },
-        config: { capLevelToPlayerSize: false, ignoreDevicePixelRatio: true, maxDevicePixelRatio: Infinity },
+      const engine = new Hls({
+        capLevelToPlayerSize: false,
+        ignoreDevicePixelRatio: true,
+        maxDevicePixelRatio: Infinity,
+      });
+      Object.defineProperty(engine, 'levels', { configurable: true, value: levels, writable: true });
+      engine.autoLevelCapping = -1;
+      return Object.assign(engine, {
         on(event: string, fn: (...args: any[]) => void, ctx?: Hls) {
           listeners.set(event, [...(listeners.get(event) ?? []), { fn, ctx }]);
         },
@@ -532,7 +534,7 @@ describe('HlsJsMedia', () => {
         emit(event: string, data: { levels: Array<{ width: number; height: number; bitrate: number }> }) {
           for (const { fn, ctx } of listeners.get(event) ?? []) fn.call(ctx, event, data);
         },
-      } as Hls;
+      });
     }
 
     const LADDER = [

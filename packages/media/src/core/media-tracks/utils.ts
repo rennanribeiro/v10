@@ -2,14 +2,20 @@ interface MediaTrackOwner {
   readonly constructor: Function;
 }
 
-type PrivateMediaTrackValue =
-  | MediaTrackOwner
-  | WeakRef<MediaTrackOwner>
-  | ReadonlySet<MediaTrackOwner>
-  | AbortController
-  | boolean
-  | undefined;
-type PrivateMediaTrackState = Record<string, PrivateMediaTrackValue>;
+interface PrivateMediaTrackState {
+  activeChangeRequested?: boolean;
+  audioRenditions?: MediaTrackOwner;
+  audioTracks?: MediaTrackOwner;
+  audioTracksCleanup?: AbortController;
+  changeRequested?: boolean;
+  media?: WeakRef<HTMLMediaElement>;
+  renditionSet?: ReadonlySet<MediaTrackOwner>;
+  track?: MediaTrackOwner;
+  trackSet?: ReadonlySet<MediaTrackOwner>;
+  videoRenditions?: MediaTrackOwner;
+  videoTracks?: MediaTrackOwner;
+  videoTracksCleanup?: AbortController;
+}
 
 const privateProps = new WeakMap<object, PrivateMediaTrackState>();
 

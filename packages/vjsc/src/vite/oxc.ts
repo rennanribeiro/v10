@@ -1,7 +1,7 @@
 import type { Program } from '@oxc-project/types';
 import { isFunction, isString } from '@videojs/utils/predicate';
 import MagicString from 'magic-string';
-import type { ModuleType, Plugin, RolldownMagicString, TransformPluginContext, TransformResult } from 'rolldown';
+import type { ModuleType, Plugin, TransformPluginContext, TransformResult } from 'rolldown';
 
 import { moduleFilename } from '../utils/module-id';
 
@@ -9,7 +9,7 @@ interface RolldownTransformOptions {
   readonly moduleType: ModuleType;
   readonly ssr?: boolean | undefined;
   readonly ast: Program;
-  readonly magicString: RolldownMagicString;
+  readonly magicString: MagicString;
 }
 
 interface ViteTransformOptions {
@@ -51,8 +51,7 @@ export function viteOxcPlugin(plugin: Plugin): ViteOxcPlugin {
       ...options,
       moduleType,
       ast,
-      magicString:
-        /* SAFETY: The surrounding typed API establishes the asserted contract at this boundary. */ magicString as RolldownMagicString,
+      magicString,
     });
 
     if (!result || isString(result) || result.code === undefined || isString(result.code)) {

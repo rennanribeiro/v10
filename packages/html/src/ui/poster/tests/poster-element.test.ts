@@ -5,7 +5,7 @@ import { combine, createStore } from '@videojs/store';
 import { afterEach, describe, expect, it, vi } from 'vite-plus/test';
 
 import { playerContext } from '../../../player/context';
-import { MediaElement } from '../../media-element';
+import { UIElement } from '../../ui-element';
 import { PosterElement } from '../poster-element';
 
 type ConfigurableStore = Parameters<typeof setPlayerConfigValue>[0];
@@ -19,7 +19,7 @@ function setUserPoster(store: ConfigurableStore, value: string | null): void {
   setPlayerConfigValue(store, metadataFeature.config!.poster, value);
 }
 
-class TestProviderElement extends MediaElement {
+class TestProviderElement extends UIElement {
   static readonly tagName = 'test-poster-provider';
 
   readonly store =

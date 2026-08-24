@@ -86,17 +86,17 @@ export interface PartialInstallFlags {
 
 export function mapRawSkin(skinFlag: string, useCase: UseCase): Skin {
   const isAudio = getInstallationPreset(useCase).mediaType === 'audio';
-  const map = {
-    default: isAudio ? 'audio' : 'video',
-    minimal: isAudio ? 'minimal-audio' : 'minimal-video',
-    none: 'none',
-  } satisfies Record<string, Skin>;
-  const result = map[skinFlag];
-  if (!result) {
-    console.error(`Invalid skin: "${skinFlag}". Must be "default", "minimal", or "none".`);
-    process.exit(1);
+  switch (skinFlag) {
+    case 'default':
+      return isAudio ? 'audio' : 'video';
+    case 'minimal':
+      return isAudio ? 'minimal-audio' : 'minimal-video';
+    case 'none':
+      return 'none';
+    default:
+      console.error(`Invalid skin: "${skinFlag}". Must be "default", "minimal", or "none".`);
+      process.exit(1);
   }
-  return result;
 }
 
 export async function promptInstallOptions(

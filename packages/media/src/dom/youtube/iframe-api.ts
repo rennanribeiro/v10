@@ -82,10 +82,10 @@ export const STATE_PAUSED = 2;
 export const STATE_BUFFERING = 3;
 
 // https://developers.google.com/youtube/iframe_api_reference#onError
-export const youtubeErrorCodeToMediaErrorCode = {
-  2: MediaError.MEDIA_ERR_SRC_NOT_SUPPORTED, // invalid parameter (e.g. malformed video id)
-  5: MediaError.MEDIA_ERR_DECODE, // HTML5 player error
-  100: MediaError.MEDIA_ERR_SRC_NOT_SUPPORTED, // video not found, removed, or private
-  101: MediaError.MEDIA_ERR_SRC_NOT_SUPPORTED, // embedding not allowed
-  150: MediaError.MEDIA_ERR_SRC_NOT_SUPPORTED, // embedding not allowed (alias of 101)
-} satisfies Record<number, number>;
+export const youtubeErrorCodeToMediaErrorCode = new Map<number, number>([
+  [2, MediaError.MEDIA_ERR_SRC_NOT_SUPPORTED], // invalid parameter (e.g. malformed video id)
+  [5, MediaError.MEDIA_ERR_DECODE], // HTML5 player error
+  [100, MediaError.MEDIA_ERR_SRC_NOT_SUPPORTED], // video not found, removed, or private
+  [101, MediaError.MEDIA_ERR_SRC_NOT_SUPPORTED], // embedding not allowed
+  [150, MediaError.MEDIA_ERR_SRC_NOT_SUPPORTED], // embedding not allowed (alias of 101)
+]);

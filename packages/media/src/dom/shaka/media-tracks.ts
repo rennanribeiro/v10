@@ -26,7 +26,7 @@ type MediaTracksHost = ShakaEngineHost &
  * earlier in the chain so the host exposes `addVideoTrack`, `videoRenditions`,
  * and friends.
  */
-export function ShakaMediaMediaTracksMixin<Base extends Constructor<MediaTracksHost>>(BaseClass: Base) {
+export function ShakaMediaMediaTracksMixin<Base extends Constructor<MediaTracksHost>>(BaseClass: Base): Base {
   class ShakaMediaMediaTracks
     extends /* SAFETY: The surrounding typed API establishes the asserted contract at this boundary. */ (BaseClass as Constructor<MediaTracksHost>)
   {
@@ -262,7 +262,8 @@ export function ShakaMediaMediaTracksMixin<Base extends Constructor<MediaTracksH
     }
   }
 
-  return /* SAFETY: The surrounding typed API establishes the asserted contract at this boundary. */ ShakaMediaMediaTracks as Base;
+  return /* SAFETY: The mixed class preserves the supplied base constructor. */ ShakaMediaMediaTracks as typeof ShakaMediaMediaTracks &
+    Base;
 }
 
 function videoTracksKey(tracks: shaka.extern.VideoTrack[]) {

@@ -145,7 +145,7 @@ export const htmlComponentTarget: ComponentTarget<CoreSchema> = defineComponentT
   return {
     source: '@videojs/core/vjsc',
     resolve: ({ component, part }) => {
-      const name = part ? componentParts[component]?.[part] : component === 'Container' ? 'MediaContainer' : component;
+      const name = part ? getComponentPart(component, part) : component === 'Container' ? 'MediaContainer' : component;
       return name ? htmlElementTarget(name, element) : undefined;
     },
     components: {
@@ -221,11 +221,22 @@ export const htmlComponentTarget: ComponentTarget<CoreSchema> = defineComponentT
 });
 
 function htmlElementTarget(name: string, element: ComponentTargetHelpers<CoreSchema>['element']) {
-  const publicName = publicNames[name] ?? kebabCase(name === 'MediaContainer' ? 'container' : name);
-  const moduleName = groupedModules[name] ?? publicName;
-  const source = name === 'MediaContainer' ? `@videojs/html/media/${moduleName}` : `@videojs/html/ui/${moduleName}`;
+  const publicName = getMappedValue(publicNames, name) ?? kebabCase(name === 'MediaContainer' ? 'container' : name);
+  const moduleName = getMappedValue(groupedModules, name) ?? publicName;
+  const source = `@videojs/html/ui/${moduleName}`;
 
   return element(`media-${publicName}`, { import: { from: source, sideEffect: true } });
+}
+
+function getComponentPart(component: string, part: string): string | undefined {
+  const parts = getMappedValue(componentParts, component);
+  return parts ? getMappedValue(parts, part) : undefined;
+}
+
+function getMappedValue<Map extends object>(map: Map, key: string): Map[keyof Map] | undefined {
+  if (!(key in map)) return undefined;
+  // SAFETY: The membership check proves key names a property of map.
+  return map[key as keyof Map];
 }
 
 function kebabCase(value: string): string {

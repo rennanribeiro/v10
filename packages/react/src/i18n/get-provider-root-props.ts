@@ -1,4 +1,4 @@
-import type { Translations } from '@videojs/core';
+import type { Translations } from '@videojs/core/i18n';
 import { isObject } from '@videojs/utils/predicate';
 
 import type { AddLocaleRoot, I18nContextValue } from './context';
@@ -12,10 +12,10 @@ function mergeTranslations(
   parent: I18nProviderProps['translations'],
   child: I18nProviderProps['translations']
 ): I18nProviderProps['translations'] {
-  const translations = /* SAFETY: The surrounding typed API establishes the asserted contract at this boundary. */ {
+  const translations: Partial<Translations> = {
     ...parent,
     ...child,
-  } as I18nProviderProps['translations'];
+  };
   if (parent && child) {
     Object.assign(
       translations,

@@ -13,7 +13,9 @@ const hlsErrorTypeToCode = {
   [Hls.ErrorTypes.OTHER_ERROR]: MediaError.MEDIA_ERR_CUSTOM,
 } satisfies Record<string, number>;
 
-export function HlsJsMediaErrorsMixin<Base extends Constructor<HlsEngineHost>>(BaseClass: Base) {
+export function HlsJsMediaErrorsMixin<Base extends Constructor<HlsEngineHost>>(
+  BaseClass: Base
+): MixinReturn<Base, { readonly error: MediaError | null }> {
   class HlsJsMediaErrors extends BaseClass {
     #disconnect: AbortController | null = null;
     #error: MediaError | null = null;
@@ -69,8 +71,6 @@ export function HlsJsMediaErrorsMixin<Base extends Constructor<HlsEngineHost>>(B
     }
   }
 
-  return /* SAFETY: The surrounding typed API establishes the asserted contract at this boundary. */ HlsJsMediaErrors as MixinReturn<
-    Base,
-    { readonly error: MediaError | null }
-  >;
+  return /* SAFETY: The mixed class preserves the supplied base constructor. */ HlsJsMediaErrors as typeof HlsJsMediaErrors &
+    MixinReturn<Base, { readonly error: MediaError | null }>;
 }

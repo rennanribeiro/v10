@@ -57,9 +57,9 @@ class DashMediaBase
   detach() {
     super.detach();
     // dash.js types don't reflect null support, but null is valid for detaching
-    this.#engine.attachView(
-      /* SAFETY: The surrounding typed API establishes the asserted contract at this boundary. */ null as HTMLVideoElement
-    );
+    // SAFETY: dash.js accepts null at runtime to detach the current view despite its narrower declaration.
+    const engine = this.#engine as dashjs.MediaPlayerClass & { attachView(target: null): void };
+    engine.attachView(null);
   }
 
   destroy() {

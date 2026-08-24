@@ -13,7 +13,7 @@ import type {
 } from '../../../../media/types';
 import type { TextTrackSegmentLoaderActor } from '../../../actors/text-track-segment-loader';
 import type { TextTracksActor } from '../../../actors/text-tracks';
-import { loadTextTrackSegments } from '../load-segments';
+import { loadTextTrackSegments, type TextTrackSegmentLoaderDispatcher } from '../load-segments';
 import { setupTextTrackActors, type TextTrackActorsContext } from '../setup-text-track-actors';
 
 // Local narrow type aliases — the text-specific slice of the
@@ -79,6 +79,17 @@ function makeContext(initial: ComposedContext = {}): ContextSignals<ComposedCont
           | undefined
       ) as ContextSignals<ComposedContext>['textTracksActor'],
     textTrackSegmentLoaderActor: signal<TextTrackSegmentLoaderActor | undefined>(initial.textTrackSegmentLoaderActor),
+  };
+}
+
+function makeTextTrackLoader(send: TextTrackSegmentLoaderDispatcher['send']): TextTrackSegmentLoaderActor {
+  return {
+    snapshot: signal({
+      value: 'idle',
+      context: { inFlightTrackId: null, inFlightSegmentId: null },
+    }),
+    send,
+    destroy: vi.fn(),
   };
 }
 
@@ -164,13 +175,11 @@ describe('loadTextTrackSegments', () => {
       });
 
       Object.defineProperty(trackElement.track, 'cues', {
-        get: () =>
-          /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ Object.assign(
-            persistedCues,
-            {
-              item: (i: number) => persistedCues[i] ?? null,
-            }
-          ) as TextTrackCueList,
+        get: (): TextTrackCueList =>
+          Object.assign(new EventTarget(), persistedCues, {
+            item: (index: number) => persistedCues[index] ?? null,
+            getCueById: (id: string) => persistedCues.find((cue) => cue.id === id) ?? null,
+          }),
         configurable: true,
       });
 
@@ -670,10 +679,7 @@ describe('loadTextTrackSegments', () => {
   describe('loadingSuspended (observed dormant gate)', () => {
     it('does not dispatch while suspended, even with preload="auto"', async () => {
       const send = vi.fn();
-      const fakeLoader =
-        /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ {
-          send,
-        } as TextTrackSegmentLoaderActor;
+      const fakeLoader = makeTextTrackLoader(send);
       const state = makeState({
         preload: 'auto',
         loadingSuspended: true,
@@ -696,10 +702,7 @@ describe('loadTextTrackSegments', () => {
       // (text fetches are small and bounded), and the derive re-dispatches
       // when the writer clears the slot.
       const send = vi.fn();
-      const fakeLoader =
-        /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ {
-          send,
-        } as TextTrackSegmentLoaderActor;
+      const fakeLoader = makeTextTrackLoader(send);
       const state = makeState({
         preload: 'auto',
         selectedTextTrackId: 'text-1',

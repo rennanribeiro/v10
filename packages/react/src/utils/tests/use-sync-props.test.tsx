@@ -52,10 +52,11 @@ describe('useSyncProps', () => {
 
   it('does not let an undefined prop wipe a value derived from another prop', () => {
     // Mirrors MuxMedia: setting `source` derives `src`, resetting `src` clears `source`.
-    const derivedDefaults = { src: '', source: null } satisfies {
+    interface DerivedDefaults {
       src: string | undefined;
       source: { id: string } | null;
-    };
+    }
+    const derivedDefaults: DerivedDefaults = { src: '', source: null };
     const target = {
       _src: /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ '' as
         | string
