@@ -90,6 +90,7 @@
     align-items: center;
     padding: calc(var(--spacing) * 1.5) calc(var(--spacing) * 2);
     text-align: start;
+    white-space: nowrap;
     text-shadow: 0 1px 0 var(--shadow-current-color);
     cursor: pointer;
     user-select: none;
@@ -204,7 +205,7 @@
   /* Settings menu */
   &.media-menu--settings {
     width: var(--media-menu-width);
-    min-width: calc(var(--spacing) * 48);
+    min-width: calc(var(--spacing) * 44);
     height: var(--media-menu-height);
     overflow: hidden;
     /* Only the menu size changes between panels. */

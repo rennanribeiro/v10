@@ -15,7 +15,7 @@ const submenuPanel = cn(
 
 const itemBase = cn(
   'group/menu-item relative flex cursor-pointer select-none items-center gap-1.5 rounded-(--menu-item-border-radius) py-1.5 px-2',
-  'text-start',
+  'text-start whitespace-nowrap',
   'text-shadow-2xs text-shadow-(color:--shadow-current-color)',
   'outline-2 -outline-offset-2 outline-transparent',
   'transition-colors duration-100 ease-in-out',
@@ -74,7 +74,7 @@ export const menu = {
     // Don't transition size on open/close.
     'data-starting-style:[--popup-transition:var(--popup-base-transition)]',
     'data-ending-style:[--popup-transition:var(--popup-base-transition)]',
-    'min-w-48! w-(--media-menu-width) h-(--media-menu-height)',
+    'min-w-44! w-(--media-menu-width) h-(--media-menu-height)',
     '[&>:not([data-submenu])]:translate-none [&>:not([data-submenu])]:transition-[translate,filter]',
     '[&>:not([data-submenu])]:duration-(--menu-transition-duration) [&>:not([data-submenu])]:ease-out',
     '[--submenu-parent-translate:-100%] [&:dir(rtl)]:[--submenu-parent-translate:100%]',

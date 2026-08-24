@@ -73,7 +73,7 @@ export const MenuPositioningCSSVars = {
   availableHeight: MenuCSSVars.availableHeight,
 } as const satisfies PositioningCSSVars;
 
-const submenuParents = new WeakMap<MenuApi, MenuApi>();
+const parents = new WeakMap<MenuApi, MenuApi>();
 
 export interface MenuApi {
   /** Reactive transition state for platforms to subscribe to. */
@@ -425,17 +425,17 @@ export function createMenu(options: MenuOptions): MenuApi {
 
   function registerSubmenu(menu: MenuApi): () => void {
     submenus.add(menu);
-    submenuParents.set(menu, api);
+    parents.set(menu, api);
 
     return () => {
       submenus.delete(menu);
-      if (submenuParents.get(menu) === api) submenuParents.delete(menu);
+      if (parents.get(menu) === api) parents.delete(menu);
     };
   }
 
   function syncOpen(open: boolean): void {
     if (open) {
-      submenuParents.get(api)?.highlight(null);
+      parents.get(api)?.highlight(null);
     } else {
       for (const submenu of submenus) submenu.close('imperative-action');
     }
@@ -448,10 +448,10 @@ export function createMenu(options: MenuOptions): MenuApi {
     openRafId = 0;
     clearTypeahead();
     for (const submenu of submenus) {
-      if (submenuParents.get(submenu) === api) submenuParents.delete(submenu);
+      if (parents.get(submenu) === api) parents.delete(submenu);
     }
     submenus.clear();
-    submenuParents.delete(api);
+    parents.delete(api);
     popover.destroy();
   }
 
