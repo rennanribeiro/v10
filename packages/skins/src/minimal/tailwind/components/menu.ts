@@ -89,6 +89,8 @@ export const menu = {
   item: cn(
     itemBase,
     'justify-between tabular-nums text-inherit',
+    '[&.media-menu__item--submenu>:not(.media-icon):not(.media-menu__hint)]:min-w-0',
+    '[&.media-menu__item--submenu>:not(.media-icon):not(.media-menu__hint)]:truncate',
     'supports-[top:anchor(top)]:data-highlighted:[anchor-name:--menu-item-highlight-anchor]',
     'supports-[top:anchor(top)]:data-highlighted:bg-transparent',
     'data-[availability=unavailable]:hidden data-[availability=unsupported]:hidden',
