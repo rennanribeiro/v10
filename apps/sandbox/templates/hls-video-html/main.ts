@@ -9,7 +9,7 @@ import '@app/styles.css';
 //   media-play-button: [data-paused], [data-ended]
 //   media-mute-button: [data-muted]
 import '@videojs/html/video/player';
-import '@videojs/html/media/container';
+import '@videojs/html/ui/container';
 import '@videojs/html/media/hls-video';
 import '@videojs/html/ui/play-button';
 import '@videojs/html/ui/mute-button';
