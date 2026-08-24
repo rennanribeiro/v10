@@ -13,12 +13,12 @@ const entry = await getEntry('ejectedSkins', id);
 if (!entry) return;
 const skin = entry.data;
 
-const EXT_TO_LANG: Record<string, BundledLanguage> = {
+const EXT_TO_LANG = {
   ts: 'ts',
   tsx: 'tsx',
   js: 'js',
   jsx: 'jsx',
-};
+} satisfies Record<string, BundledLanguage>;
 
 function langFromFilename(filename: string): BundledLanguage {
   const ext = filename.split('.').pop() ?? '';

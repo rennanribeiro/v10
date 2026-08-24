@@ -1,4 +1,5 @@
 import { act, cleanup, render } from '@testing-library/react';
+import type { MediaSnapshot } from '@videojs/core';
 import type { UnknownStore } from '@videojs/store';
 import type { ReactNode } from 'react';
 import { afterEach, describe, expect, it, vi } from 'vite-plus/test';
@@ -92,7 +93,7 @@ describe('StatusAnnouncer', () => {
     {
       name: 'completed seeks',
       initialState: { currentTime: 10, duration: 120, seeking: false },
-      update: async (setState: (partial: Record<string, unknown>) => void) => {
+      update: async (setState: (partial: Partial<MediaSnapshot>) => void) => {
         setState({ currentTime: 45, seeking: true });
         await act(async () => {});
         setState({ seeking: false });
@@ -101,7 +102,7 @@ describe('StatusAnnouncer', () => {
     {
       name: 'volume changes',
       initialState: { volume: 0.5, muted: false },
-      update: async (setState: (partial: Record<string, unknown>) => void) => {
+      update: async (setState: (partial: Partial<MediaSnapshot>) => void) => {
         setState({ volume: 0.75 });
       },
     },
@@ -146,11 +147,11 @@ describe('StatusAnnouncer', () => {
   });
 });
 
-function createTestStore(initialState: Record<string, unknown> = {}) {
+function createTestStore(initialState: MediaSnapshot = {}) {
   let state = initialState;
   const target = {};
   const listeners = new Set<() => void>();
-  const store = {
+  const store = /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ {
     get state() {
       return state;
     },
@@ -161,9 +162,9 @@ function createTestStore(initialState: Record<string, unknown> = {}) {
       listeners.add(callback);
       return () => listeners.delete(callback);
     },
-  } as unknown as UnknownStore;
+  } as UnknownStore;
 
-  const setState = (partial: Record<string, unknown>) => {
+  const setState = (partial: Partial<MediaSnapshot>) => {
     act(() => {
       state = { ...state, ...partial };
       for (const listener of listeners) listener();
@@ -177,13 +178,13 @@ function createPlayerContextValue(
   store: UnknownStore,
   container: HTMLElement = document.createElement('div')
 ): PlayerContextValue {
-  return {
+  return /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ {
     store,
     media: null,
     setMedia: vi.fn(),
     container,
     setContainer: vi.fn(),
-  } as unknown as PlayerContextValue;
+  } as PlayerContextValue;
 }
 
 function renderWithPlayer(ui: ReactNode, store: UnknownStore = createTestStore().store, container?: HTMLElement) {

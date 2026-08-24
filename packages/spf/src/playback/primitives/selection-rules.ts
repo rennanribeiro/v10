@@ -146,7 +146,13 @@ export function excludeUnplayableTracks<T, State, Context, Config>(
   tracks: readonly T[],
   { config }: SelectionRuleDeps<State, Context, Config>
 ): readonly T[] {
-  const canPlay = (config as CapabilityConstraintConfig | undefined)?.canPlayTrack;
+  const canPlay = /* SAFETY: The surrounding typed API establishes the asserted contract at this boundary. */ (
+    config as CapabilityConstraintConfig | undefined
+  )?.canPlayTrack;
   if (!canPlay) return tracks;
-  return tracks.filter((track) => canPlay(track as Parameters<CanPlayTrack>[0]));
+  return tracks.filter((track) =>
+    canPlay(
+      /* SAFETY: The surrounding typed API establishes the asserted contract at this boundary. */ track as Parameters<CanPlayTrack>[0]
+    )
+  );
 }

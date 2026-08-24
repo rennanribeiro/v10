@@ -4,25 +4,29 @@ import { isNumber } from '@videojs/utils/predicate';
 import type { ThumbnailCoords, ThumbnailImage } from './types';
 
 /** Parse `url#xywh=x,y,w,h` into a URL and optional sprite coordinates. */
-export function parseMediaFragment(
-  text: string,
-  baseURL?: string
-): {
-  url: string;
-  width?: number;
-  height?: number;
-  coords?: ThumbnailCoords;
-} {
+export function parseMediaFragment(text: string, baseURL?: string) {
   const parts = text.trim().split('#');
   const rawURL = parts[0] ?? '';
   const hash = parts[1];
 
   const url = baseURL ? new URL(rawURL, baseURL).href : rawURL;
 
-  if (!hash) return { url };
+  if (!hash)
+    return { url } satisfies {
+      url: string;
+      width?: number;
+      height?: number;
+      coords?: ThumbnailCoords;
+    };
 
   const eqIndex = hash.indexOf('=');
-  if (eqIndex === -1) return { url };
+  if (eqIndex === -1)
+    return { url } satisfies {
+      url: string;
+      width?: number;
+      height?: number;
+      coords?: ThumbnailCoords;
+    };
 
   const keys = hash.slice(0, eqIndex);
   const values = hash
@@ -39,13 +43,18 @@ export function parseMediaFragment(
     }
   }
 
-  const result: { url: string; width?: number; height?: number; coords?: ThumbnailCoords } = { url };
+  const result = { url } satisfies { url: string; width?: number; height?: number; coords?: ThumbnailCoords };
 
   if (isNumber(data.w)) result.width = data.w;
   if (isNumber(data.h)) result.height = data.h;
   if (isNumber(data.x) && isNumber(data.y)) result.coords = { x: data.x, y: data.y };
 
-  return result;
+  return result satisfies {
+    url: string;
+    width?: number;
+    height?: number;
+    coords?: ThumbnailCoords;
+  };
 }
 
 /**

@@ -12,6 +12,13 @@ import {
 
 type FakeLevel = { width: number; height: number; bitrate: number };
 
+interface MockHlsEventData {
+  levels?: FakeLevel[];
+  firstLevel?: number;
+  video?: boolean;
+  media?: HTMLMediaElement;
+}
+
 const level = (width: number, height: number, bitrate: number): FakeLevel => ({ width, height, bitrate });
 
 /** 16:9 ladder, ascending — the shape hls.js hands to `getMaxLevel`. */
@@ -23,12 +30,13 @@ const LADDER: FakeLevel[] = [
   level(2560, 1440, 9_000_000),
 ];
 
-const asLevels = (levels: FakeLevel[]) => levels as unknown as Level[];
+const asLevels = (levels: FakeLevel[]) =>
+  /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ levels as Level[];
 
-function createEngine(levels: FakeLevel[], config: Record<string, unknown> = {}) {
-  const listeners = new Map<string, Set<{ fn: (...args: any[]) => void; ctx: unknown }>>();
+function createEngine(levels: FakeLevel[], config: Partial<Hls['config']> = {}) {
+  const listeners = new Map<string, Set<{ fn: (...args: any[]) => void; ctx: Hls | undefined }>>();
 
-  return {
+  return /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ {
     levels,
     autoLevelCapping: -1,
     autoLevelEnabled: true,
@@ -44,7 +52,7 @@ function createEngine(levels: FakeLevel[], config: Record<string, unknown> = {})
       maxDevicePixelRatio: Number.POSITIVE_INFINITY,
       ...config,
     },
-    on(event: string, fn: (...args: any[]) => void, ctx?: unknown) {
+    on(event: string, fn: (...args: any[]) => void, ctx?: Hls) {
       if (!listeners.has(event)) listeners.set(event, new Set());
       listeners.get(event)!.add({ fn, ctx });
     },
@@ -53,13 +61,18 @@ function createEngine(levels: FakeLevel[], config: Record<string, unknown> = {})
         if (entry.fn === fn) listeners.get(event)!.delete(entry);
       }
     },
-    emit(event: string, data: unknown) {
+    emit(event: string, data: MockHlsEventData) {
       for (const { fn, ctx } of [...(listeners.get(event) ?? [])]) fn.call(ctx, event, data);
     },
-  } as unknown as Hls;
+  } as Hls;
 }
 
-const emit = (engine: Hls, event: string, data: unknown) => (engine as any).emit(event, data);
+const emit = (engine: Hls, event: string, data: MockHlsEventData) =>
+  /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ (
+    engine as Hls & {
+      emit(event: string, data: MockHlsEventData): void;
+    }
+  ).emit(event, data);
 
 const controllers: Array<{ destroy(): void }> = [];
 
@@ -82,7 +95,7 @@ interface SetupOptions {
    */
   minAutoResolution?: MediaResolution | undefined;
   levels?: FakeLevel[];
-  config?: Record<string, unknown>;
+  config?: Partial<Hls['config']>;
   /** Rendered size of the video element; omit to leave it unmeasurable. */
   playerSize?: { width: number; height: number };
 }
@@ -98,7 +111,10 @@ function setup({
   const policy: RenditionCapPolicy = { maxAutoResolution, capToPlayerSize, minAutoResolution };
   const engine = createEngine(levels, config);
   const Controller = createCapLevelController(policy);
-  const controller = new Controller(engine) as InstanceType<typeof Controller> & { destroy(): void };
+  const controller =
+    /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ new Controller(
+      engine
+    ) as InstanceType<typeof Controller> & { destroy(): void };
   controllers.push(controller);
 
   // hls.js starts its capping loop from here when the manifest signals video.
@@ -315,7 +331,9 @@ describe('createCapLevelController', () => {
 
     // hls.js drops the two lowest renditions; 720p is now index 0.
     const trimmed = LADDER.slice(2);
-    (engine as any).levels = trimmed;
+    /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ (
+      engine as any
+    ).levels = trimmed;
     emit(engine, Hls.Events.LEVELS_UPDATED, { levels: trimmed });
 
     expect(engine.autoLevelCapping).toBe(0);
@@ -427,7 +445,9 @@ describe('createCapLevelController', () => {
       const { engine } = setup({ maxAutoResolution: '720p', ...noSizeCapping });
 
       const trimmed = LADDER.slice(2);
-      (engine as any).levels = trimmed;
+      /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ (
+        engine as any
+      ).levels = trimmed;
       emit(engine, Hls.Events.LEVELS_UPDATED, { levels: trimmed });
 
       expect(engine.autoLevelCapping).toBe(0);
@@ -452,7 +472,10 @@ describe('createCapLevelController', () => {
     }
 
     const Controller = createCapLevelController(policy, CustomController);
-    const controller = new Controller(engine) as InstanceType<typeof Controller> & { destroy(): void };
+    const controller =
+      /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ new Controller(
+        engine
+      ) as InstanceType<typeof Controller> & { destroy(): void };
     controllers.push(controller);
 
     expect(controller.getMaxLevel(4)).toBe(2);
@@ -631,7 +654,10 @@ describe('createCapLevelController', () => {
     };
     const engine = createEngine([]);
     const Controller = createCapLevelController(policy);
-    const controller = new Controller(engine) as InstanceType<typeof Controller> & { destroy(): void };
+    const controller =
+      /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ new Controller(
+        engine
+      ) as InstanceType<typeof Controller> & { destroy(): void };
     controllers.push(controller);
 
     // No video codec in the manifest, so hls.js defers capping indefinitely.

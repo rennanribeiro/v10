@@ -33,10 +33,10 @@ import { getMediaPlaylistMetadata, type ResolvedTrack, type TrackType } from '..
 export type ReportUnsupportedTrackConditions = (track: ResolvedTrack) => readonly SvtaError[];
 
 /** Unsupported-format code per type; text has none — absent captions aren't a failure. */
-const UNSUPPORTED_FORMAT_CODE: Partial<Record<TrackType, number>> = {
+const UNSUPPORTED_FORMAT_CODE = {
   video: SVTA_UNSUPPORTED_VIDEO_FORMAT,
   audio: SVTA_UNSUPPORTED_AUDIO_FORMAT,
-};
+} satisfies Partial<Record<TrackType, number>>;
 
 /**
  * The types a reported cause can legitimately describe: the ones whose candidates

@@ -94,7 +94,7 @@ function sandboxTemplateSyncPlugin(): Plugin {
 }
 
 /** Discover sandbox entries by finding subdirectories of src/ that contain an index.html. */
-function getSandboxEntries(): Record<string, string> {
+function getSandboxEntries() {
   const srcDir = resolve(__dirname, 'src');
   const entries: Record<string, string> = {};
 
@@ -107,7 +107,7 @@ function getSandboxEntries(): Record<string, string> {
     }
   }
 
-  return entries;
+  return entries satisfies Record<string, string>;
 }
 
 function serveAppShell(): Plugin {
@@ -149,11 +149,14 @@ export default defineConfig({
   appType: 'mpa',
   plugins: [sandboxTemplateSyncPlugin(), cdnSandboxI18nPlugin(), tailwindcss(), react(), serveAppShell()],
   resolve: {
-    alias: {
-      '@app': resolve(__dirname, 'app'),
-      '@videojs/html/cdn/i18n': htmlCdnI18nRegistry,
-      ...(existsSync(cdnSandboxMainTemplate) ? { [cdnSandboxMainSrc]: cdnSandboxMainTemplate } : {}),
-    },
+    alias: (() => {
+      const aliases = {
+        '@app': resolve(__dirname, 'app'),
+        '@videojs/html/cdn/i18n': htmlCdnI18nRegistry,
+      } satisfies Record<string, string>;
+      if (existsSync(cdnSandboxMainTemplate)) aliases[cdnSandboxMainSrc] = cdnSandboxMainTemplate;
+      return aliases;
+    })(),
     conditions: ['development', 'import', 'module', 'browser', 'default'],
     dedupe: ['react', 'react-dom'],
   },

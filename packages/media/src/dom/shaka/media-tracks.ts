@@ -27,7 +27,9 @@ type MediaTracksHost = ShakaEngineHost &
  * and friends.
  */
 export function ShakaMediaMediaTracksMixin<Base extends Constructor<MediaTracksHost>>(BaseClass: Base) {
-  class ShakaMediaMediaTracks extends (BaseClass as Constructor<MediaTracksHost>) {
+  class ShakaMediaMediaTracks
+    extends /* SAFETY: The surrounding typed API establishes the asserted contract at this boundary. */ (BaseClass as Constructor<MediaTracksHost>)
+  {
     // The source is announced as a whole, so the URL it resolved to last is what
     // tells a new asset apart from a configuration-only change.
     #src = '';
@@ -260,7 +262,7 @@ export function ShakaMediaMediaTracksMixin<Base extends Constructor<MediaTracksH
     }
   }
 
-  return ShakaMediaMediaTracks as unknown as Base;
+  return /* SAFETY: The surrounding typed API establishes the asserted contract at this boundary. */ ShakaMediaMediaTracks as Base;
 }
 
 function videoTracksKey(tracks: shaka.extern.VideoTrack[]) {

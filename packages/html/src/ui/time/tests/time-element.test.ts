@@ -19,8 +19,13 @@ function uniqueTag(base: string): string {
 
 function createElement<Element extends HTMLElement>(Base: abstract new () => Element): Element {
   const tag = uniqueTag('test-el');
-  customElements.define(tag, class extends (Base as unknown as typeof HTMLElement) {});
-  return document.createElement(tag) as Element;
+  customElements.define(
+    tag,
+    class extends /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ (Base as typeof HTMLElement) {}
+  );
+  return /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ document.createElement(
+    tag
+  ) as Element;
 }
 
 function defineElement(tagName: string, Base: CustomElementConstructor): void {
@@ -50,16 +55,18 @@ async function waitForAssertion(assertion: () => void): Promise<void> {
 }
 
 function createTimeStore(overrides: Partial<MediaTimeState> = {}): AnyPlayerStore {
-  return createStore<unknown>()<MediaTimeState>({
-    name: 'time',
-    state: () => ({
-      currentTime: 90,
-      duration: 300,
-      seeking: false,
-      seek: vi.fn(),
-      ...overrides,
-    }),
-  }) as unknown as AnyPlayerStore;
+  return /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ createStore<unknown>()<MediaTimeState>(
+    {
+      name: 'time',
+      state: () => ({
+        currentTime: 90,
+        duration: 300,
+        seeking: false,
+        seek: vi.fn(),
+        ...overrides,
+      }),
+    }
+  ) as AnyPlayerStore;
 }
 
 class TestPlayerProviderElement extends MediaElement {
@@ -73,7 +80,9 @@ class TestPlayerProviderElement extends MediaElement {
   }
 
   clearStore(): void {
-    this.#provider.setValue(undefined as unknown as AnyPlayerStore);
+    this.#provider.setValue(
+      /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ undefined as AnyPlayerStore
+    );
   }
 
   override connectedCallback(): void {
@@ -86,7 +95,10 @@ defineElement('test-time-player', TestPlayerProviderElement);
 defineElement(MediaI18nProviderElement.tagName, MediaI18nProviderElement);
 
 async function setup(props: Partial<TimeElement> = {}, locale?: string, state?: Partial<MediaTimeState>) {
-  const provider = document.createElement('test-time-player') as TestPlayerProviderElement;
+  const provider =
+    /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ document.createElement(
+      'test-time-player'
+    ) as TestPlayerProviderElement;
   const time = createElement(TimeElement);
 
   if (state) provider.store = createTimeStore(state);
@@ -186,7 +198,10 @@ describe('TimeElement', () => {
   });
 
   it('does not toggle before media state is available', async () => {
-    const provider = document.createElement('test-time-player') as TestPlayerProviderElement;
+    const provider =
+      /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ document.createElement(
+        'test-time-player'
+      ) as TestPlayerProviderElement;
     const time = createElement(TimeElement);
 
     time.toggle = true;

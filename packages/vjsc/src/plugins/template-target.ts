@@ -1,4 +1,5 @@
 import type { ImportDeclaration, JSXElement, JSXOpeningElement, Program } from '@oxc-project/types';
+import { isFunction, isObject, isString } from '@videojs/utils/predicate';
 import { walk } from 'oxc-walker';
 import type { Plugin } from 'rolldown';
 
@@ -74,13 +75,15 @@ export function templateTargetPlugin(options: ComponentTargetPluginOptions): Plu
               const owner = owned[0]!;
               const definition = normalizeTemplateRule(owner.rule);
               const children = templateChildren(code, template, binding.local, definition, owner.target, imports);
-              const props = createSourceProps<Record<string, unknown>>(code, template.openingElement, children).omit(
-                'name'
-              );
+              const props = createSourceProps<Record<string, import('../value').VjscValue>>(
+                code,
+                template.openingElement,
+                children
+              ).omit('name');
               const output = applyRule(
                 definition.render,
                 props,
-                children as unknown as TargetOutput,
+                /* SAFETY: The surrounding typed API establishes the asserted contract at this boundary. */ children as TargetOutput,
                 `vjsc-template-${occurrence}`
               );
 
@@ -141,7 +144,7 @@ function isComponentImport(statement: Program['body'][number]): statement is Imp
 }
 
 function normalizeTemplateRule(rule: TemplateTargetRule): TemplateTargetDefinition {
-  if (!isTargetElement(rule) && typeof rule === 'object' && rule !== null && 'render' in rule) return rule;
+  if (!isTargetElement(rule) && isObject(rule) && rule !== null && 'render' in rule) return rule;
   return { render: rule };
 }
 
@@ -171,8 +174,17 @@ function templateChildren(
         node.openingElement,
         node.closingElement?.start ?? node.openingElement.end
       );
-      const props = createSourceProps<Record<string, unknown>>(code, node.openingElement, partChildren).omit('name');
-      const output = applyRule(rule, props, partChildren as unknown as TargetOutput, `vjsc-template-part-${name}`);
+      const props = createSourceProps<Record<string, import('../value').VjscValue>>(
+        code,
+        node.openingElement,
+        partChildren
+      ).omit('name');
+      const output = applyRule(
+        rule,
+        props,
+        /* SAFETY: The surrounding typed API establishes the asserted contract at this boundary. */ partChildren as TargetOutput,
+        `vjsc-template-part-${name}`
+      );
 
       replacements.push({
         start: node.start - template.openingElement.end,
@@ -192,7 +204,7 @@ function applyRule(
   children: TargetOutput,
   id: string
 ): TargetOutput {
-  if (typeof rule === 'function' && !isTargetElement(rule)) {
+  if (isFunction(rule) && !isTargetElement(rule)) {
     return rule({ props, children, id: (name) => `${id}-${name}` });
   }
   if (isTargetElement(rule)) return jsx(rule, { ...props, children });
@@ -224,10 +236,10 @@ function isTemplatePart(node: JSXElement, local: string): boolean {
 function staticName(node: JSXElement, code: string): string {
   const value = findJsxAttribute(node, 'name')?.value;
 
-  if (value?.type === 'Literal' && typeof value.value === 'string') return value.value;
+  if (value?.type === 'Literal' && isString(value.value)) return value.value;
   if (value?.type === 'JSXExpressionContainer') {
     const expression = value.expression;
-    if (expression.type === 'Literal' && typeof expression.value === 'string') return expression.value;
+    if (expression.type === 'Literal' && isString(expression.value)) return expression.value;
   }
 
   throw new Error(

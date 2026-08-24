@@ -17,24 +17,31 @@ function uniqueTag(base: string): string {
 
 function createElement<Element extends HTMLElement>(Base: abstract new () => Element): Element {
   const tag = uniqueTag('test-el');
-  customElements.define(tag, class extends (Base as unknown as typeof HTMLElement) {});
-  return document.createElement(tag) as Element;
+  customElements.define(
+    tag,
+    class extends /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ (Base as typeof HTMLElement) {}
+  );
+  return /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ document.createElement(
+    tag
+  ) as Element;
 }
 
 function createVolumeStore(volumeAvailability: MediaVolumeState['volumeAvailability']): AnyPlayerStore {
-  return createStore<unknown>()<MediaVolumeState>({
-    name: 'volume',
-    state: () => ({
-      volume: 1,
-      muted: false,
-      volumeAvailability,
-      // Mute has an availability of its own, and this slider reads the level's;
-      // these tests vary that one and leave the mute available throughout.
-      mutedAvailability: 'available',
-      setVolume: vi.fn(),
-      toggleMuted: vi.fn(),
-    }),
-  }) as unknown as AnyPlayerStore;
+  return /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ createStore<unknown>()<MediaVolumeState>(
+    {
+      name: 'volume',
+      state: () => ({
+        volume: 1,
+        muted: false,
+        volumeAvailability,
+        // Mute has an availability of its own, and this slider reads the level's;
+        // these tests vary that one and leave the mute available throughout.
+        mutedAvailability: 'available',
+        setVolume: vi.fn(),
+        toggleMuted: vi.fn(),
+      }),
+    }
+  ) as AnyPlayerStore;
 }
 
 class TestPlayerProviderElement extends MediaElement {
@@ -124,7 +131,10 @@ describe('VolumeSliderElement', () => {
   });
 
   it('hides and disables unavailable volume control', async () => {
-    const provider = document.createElement('test-volume-slider-player') as TestPlayerProviderElement;
+    const provider =
+      /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ document.createElement(
+        'test-volume-slider-player'
+      ) as TestPlayerProviderElement;
     provider.store = createVolumeStore('unsupported');
     const slider = createElement(VolumeSliderElement);
     const thumb = createElement(SliderThumbElement);

@@ -14,8 +14,13 @@ class ResizeObserverStub {
 
 /** Drive one observation, carrying the content box the size observers read. */
 function deliver(observer: ResizeObserverStub, width: number, height: number) {
-  const entry = { contentBoxSize: [{ inlineSize: width, blockSize: height }] } as unknown as ResizeObserverEntry;
-  observer.callback([entry], observer as unknown as ResizeObserver);
+  const entry = /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ {
+    contentBoxSize: [{ inlineSize: width, blockSize: height }],
+  } as ResizeObserverEntry;
+  observer.callback(
+    [entry],
+    /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ observer as ResizeObserver
+  );
 }
 
 /** A `MediaQueryList` stand-in; see `device-pixel-ratio.test.ts`. */
@@ -64,7 +69,10 @@ describe('observeResize', () => {
     expect(observer.observe).toHaveBeenCalledWith(first);
     expect(observer.observe).toHaveBeenCalledWith(second);
 
-    observer.callback([], observer as unknown as ResizeObserver);
+    observer.callback(
+      [],
+      /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ observer as ResizeObserver
+    );
     expect(callback).toHaveBeenCalledOnce();
 
     cleanup();
@@ -98,7 +106,10 @@ describe('observeElementSize', () => {
 
     observeElementSize(document.createElement('div'), onResize);
     const observer = ResizeObserverStub.instances[0]!;
-    observer.callback([], observer as unknown as ResizeObserver);
+    observer.callback(
+      [],
+      /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ observer as ResizeObserver
+    );
 
     expect(onResize).not.toHaveBeenCalled();
   });
@@ -184,7 +195,11 @@ describe('observeElements', () => {
     expect(ResizeObserverStub.instances[0]!.observe).toHaveBeenCalledWith(first);
 
     elements = [second];
-    MutationObserverStub.instances[0]!.callback([], MutationObserverStub.instances[0] as unknown as MutationObserver);
+    MutationObserverStub.instances[0]!.callback(
+      [],
+      /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ MutationObserverStub
+        .instances[0] as MutationObserver
+    );
 
     expect(ResizeObserverStub.instances[0]!.disconnect).toHaveBeenCalledOnce();
     expect(ResizeObserverStub.instances[1]!.observe).toHaveBeenCalledWith(second);

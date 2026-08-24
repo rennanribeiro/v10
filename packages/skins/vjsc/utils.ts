@@ -1,3 +1,4 @@
+import { isFunction } from '@videojs/utils/predicate';
 import { type ClassValue, clsx } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 
@@ -8,5 +9,5 @@ export function cn(...inputs: ClassValue[]): string {
 export type ClassName<State> = string | ((state: State) => string | undefined) | undefined;
 
 export function resolveClassName<State>(className: ClassName<State>, state: State): string | undefined {
-  return typeof className === 'function' ? className(state) : className;
+  return !isFunction(className) ? className(state) : className;
 }

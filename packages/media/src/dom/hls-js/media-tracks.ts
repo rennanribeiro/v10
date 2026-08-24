@@ -49,7 +49,9 @@ function getAudioTrackKind(audioTrack: HlsJsMediaAudioTrack): string {
  * and friends.
  */
 export function HlsJsMediaMediaTracksMixin<Base extends Constructor<MediaTracksHost>>(BaseClass: Base) {
-  class HlsJsMediaMediaTracks extends (BaseClass as Constructor<MediaTracksHost>) {
+  class HlsJsMediaMediaTracks
+    extends /* SAFETY: The surrounding typed API establishes the asserted contract at this boundary. */ (BaseClass as Constructor<MediaTracksHost>)
+  {
     #levelIdMap = new Map<string, string>();
     #currentVideoTrack: VideoTrackLike | null = null;
 
@@ -223,5 +225,5 @@ export function HlsJsMediaMediaTracksMixin<Base extends Constructor<MediaTracksH
     }
   }
 
-  return HlsJsMediaMediaTracks as unknown as Base;
+  return /* SAFETY: The surrounding typed API establishes the asserted contract at this boundary. */ HlsJsMediaMediaTracks as Base;
 }

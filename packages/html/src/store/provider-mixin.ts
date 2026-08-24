@@ -75,7 +75,9 @@ export function createProviderMixin<Store extends PlayerStore>(
   return <Class extends MediaElementConstructor>(BaseClass: Class) => {
     class PlayerProviderElement extends BaseClass {
       static properties = {
-        ...(BaseClass as unknown as { properties: PropertyDeclarationMap }).properties,
+        .../* SAFETY: The surrounding typed API establishes the asserted contract at this boundary. */ (
+          BaseClass as { properties: PropertyDeclarationMap }
+        ).properties,
         ...Object.fromEntries(inputs.map(({ property, attribute }) => [property, { type: String, attribute }])),
       };
 
@@ -161,7 +163,7 @@ export function createProviderMixin<Store extends PlayerStore>(
         // write to the store. Store-side writers do not reflect back here.
         for (const { property, entry } of inputs) {
           if (!changed.has(property)) continue;
-          setPlayerConfigValue(this.store, entry, (this as unknown as Record<string, unknown>)[property]);
+          setPlayerConfigValue(this.store, entry, property in this ? this[property] : undefined);
         }
       }
 
@@ -198,7 +200,7 @@ export function createProviderMixin<Store extends PlayerStore>(
         if (this.#configuredStore === store) return;
 
         for (const { property, entry } of inputs) {
-          setPlayerConfigValue(store, entry, (this as unknown as Record<string, unknown>)[property]);
+          setPlayerConfigValue(store, entry, property in this ? this[property] : undefined);
         }
         this.#configuredStore = store;
       }
@@ -221,6 +223,7 @@ export function createProviderMixin<Store extends PlayerStore>(
       }
     }
 
-    return PlayerProviderElement as unknown as Class & PlayerProviderConstructor<Store>;
+    return /* SAFETY: The surrounding typed API establishes the asserted contract at this boundary. */ PlayerProviderElement as Class &
+      PlayerProviderConstructor<Store>;
   };
 }

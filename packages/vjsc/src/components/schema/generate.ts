@@ -2,7 +2,13 @@ import { dirname, posix } from 'node:path';
 
 import { absolutePath, toPosixPath } from '../../utils/path';
 import { type ComponentSchema, defineSchema } from '../definition';
-import { type ComponentSource, discoverSchema, type ManifestSchemaComponent, type SchemaComponent } from './discover';
+import {
+  type ComponentSource,
+  discoverSchema,
+  type DiscoverSchemaOptions,
+  type ManifestSchemaComponent,
+  type SchemaComponent,
+} from './discover';
 
 export type { ComponentFileSet, ComponentSource } from './discover';
 
@@ -28,7 +34,13 @@ export function createSchemaModule(options: CreateSchemaModuleOptions): SchemaMo
   const { cwd = process.cwd(), exclude, include, output, source } = options;
 
   const outputAbsolute = absolutePath(cwd, output);
-  const discovered = discoverSchema({ cwd, include, ...(exclude ? { exclude } : {}) });
+  let discoverOptions: DiscoverSchemaOptions;
+  discoverOptions = {
+    cwd,
+    include,
+  };
+  if (exclude) discoverOptions.exclude = exclude;
+  const discovered = discoverSchema(discoverOptions);
 
   const entries = [...discovered.components].sort((a, b) => a.name.localeCompare(b.name));
 

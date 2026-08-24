@@ -8,7 +8,8 @@ const stateContext = {
   target: () => {
     throw new Error('Target is not available in this test.');
   },
-  signals: undefined as unknown as StateContext<PlayerTarget>['signals'],
+  signals:
+    /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ undefined as StateContext<PlayerTarget>['signals'],
   get: () => ({}),
   set: () => {},
 } satisfies StateContext<PlayerTarget>;
@@ -54,7 +55,9 @@ describe('definePlayerFeature', () => {
 
     const store = createStore<PlayerTarget>()(feature);
     setPlayerConfigValue(store, feature.config!.label, 'provided');
-    const detach = store.attach({} as PlayerTarget);
+    const detach = store.attach(
+      /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ {} as PlayerTarget
+    );
     detach();
 
     expect(store.label).toBe('provided');

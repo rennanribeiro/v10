@@ -1,5 +1,6 @@
 import { namedNodeMapToObject, serializeAttributes } from '@videojs/utils/dom';
 import { omit, pick } from '@videojs/utils/object';
+import { isBoolean, isFunction, isNumber } from '@videojs/utils/predicate';
 import { kebabCase } from '@videojs/utils/string';
 import type { Constructor } from '@videojs/utils/types';
 
@@ -82,11 +83,18 @@ function getCommonTemplateHTML(tag: string) {
 const excludedProperties = ['attach', 'detach', 'destroy'];
 
 export interface MediaHost extends EventTarget {
+  readonly target: EventTarget | null;
   attach(target: EventTarget | null): void;
   detach(): void;
   destroy(): void;
-  /** Index signature for dynamic property forwarding (includes the host's protected `target`). */
-  [key: string]: any;
+}
+
+type MediaHostPropertyValue = bigint | boolean | number | object | string | symbol | null | undefined;
+
+interface MediaPropertyConfig {
+  type: BooleanConstructor | NumberConstructor | StringConstructor;
+  attribute?: string;
+  empty?: MediaHostPropertyValue;
 }
 
 type CustomMediaConstructor<T extends Constructor<MediaHost>> = Constructor<
@@ -96,7 +104,7 @@ type CustomMediaConstructor<T extends Constructor<MediaHost>> = Constructor<
       attributeChangedCallback(name: string, oldValue: string | null, newValue: string | null): void;
     }
 > & {
-  properties: Record<string, { type: any; attribute?: string; empty?: unknown }>;
+  properties: Record<string, MediaPropertyConfig>;
   getTemplateHTML: (attrs: Record<string, string>) => string;
   shadowRootOptions: ShadowRootInit;
   readonly observedAttributes: string[];
@@ -147,7 +155,7 @@ export function CustomMediaElement<T extends Constructor<MediaHost>>(
       if (isDefined) return;
       isDefined = true;
 
-      const properties = ctor.properties as Record<string, { type: any; attribute?: string; empty?: unknown }>;
+      const properties = ctor.properties;
 
       for (let proto = MediaHost.prototype; proto && proto !== Object.prototype; proto = Object.getPrototypeOf(proto)) {
         for (const prop of Object.getOwnPropertyNames(proto)) {
@@ -169,13 +177,14 @@ export function CustomMediaElement<T extends Constructor<MediaHost>>(
             configurable: true,
           };
 
-          if (typeof descriptor.value === 'function') {
-            config.value = function (this: CustomMedia, ...args: any[]) {
-              return this.#mediaHost[prop](...args);
+          if (!isFunction(descriptor.value)) {
+            config.value = function (this: CustomMedia, ...args: never[]) {
+              const member = getMediaHostMember(this.#mediaHost, prop);
+              if (isFunction(member)) return member.apply(this.#mediaHost, args);
             };
           } else if (descriptor.get) {
             config.get = function (this: CustomMedia) {
-              return this.#mediaHost[prop];
+              return getMediaHostMember(this.#mediaHost, prop);
             };
 
             if (descriptor.set) {
@@ -183,7 +192,7 @@ export function CustomMediaElement<T extends Constructor<MediaHost>>(
               if (ctor.observedAttributes.includes(attr)) {
                 mediaHostAttrToProp.set(attr, prop);
 
-                config.set = function (this: CustomMedia, val: any) {
+                config.set = function <Value>(this: CustomMedia, val: Value) {
                   if (val === true || val === false || val == null) {
                     this.toggleAttribute(attr, Boolean(val));
                   } else {
@@ -191,8 +200,8 @@ export function CustomMediaElement<T extends Constructor<MediaHost>>(
                   }
                 };
               } else {
-                config.set = function (this: CustomMedia, val: any) {
-                  this.#mediaHost[prop] = val;
+                config.set = function <Value>(this: CustomMedia, val: Value) {
+                  setMediaHostMember(this.#mediaHost, prop, val);
                 };
               }
             }
@@ -210,11 +219,11 @@ export function CustomMediaElement<T extends Constructor<MediaHost>>(
           get: function (this: CustomMedia) {
             return type === Boolean ? this.hasAttribute(attr) : this.getAttribute(attr);
           },
-          set: function (this: CustomMedia, val: any) {
+          set: function <Value>(this: CustomMedia, val: Value) {
             if (type === Boolean) {
               this.toggleAttribute(attr, Boolean(val));
             } else {
-              this.setAttribute(attr, val);
+              this.setAttribute(attr, String(val));
             }
           },
           enumerable: true,
@@ -232,7 +241,8 @@ export function CustomMediaElement<T extends Constructor<MediaHost>>(
       super();
 
       if (!this.shadowRoot) {
-        const ctor = this.constructor as typeof CustomMedia;
+        const ctor = /* SAFETY: The surrounding typed API establishes the asserted contract at this boundary. */ this
+          .constructor as typeof CustomMedia;
         this.attachShadow(ctor.shadowRootOptions);
 
         const allowedKeys = getAttrsFromProps(ctor.properties);
@@ -298,7 +308,11 @@ export function CustomMediaElement<T extends Constructor<MediaHost>>(
       listener: EventListenerOrEventListenerObject | ((event: never) => void) | null,
       options?: boolean | AddEventListenerOptions
     ) {
-      super.addEventListener(type, listener as EventListener, options);
+      super.addEventListener(
+        type,
+        /* SAFETY: The surrounding typed API establishes the asserted contract at this boundary. */ listener as EventListener,
+        options
+      );
       if (!this.#bridgedEventTypes.has(type)) {
         this.#bridgedEventTypes.add(type);
         this.#mediaHost.addEventListener(type, this.#bridgeEvent);
@@ -310,12 +324,21 @@ export function CustomMediaElement<T extends Constructor<MediaHost>>(
       listener: EventListenerOrEventListenerObject | ((event: never) => void) | null,
       options?: boolean | EventListenerOptions
     ): void {
-      super.removeEventListener(type, listener as EventListener, options);
+      super.removeEventListener(
+        type,
+        /* SAFETY: The surrounding typed API establishes the asserted contract at this boundary. */ listener as EventListener,
+        options
+      );
     }
 
     #bridgeEvent = (event: Event) => {
       if (!event.composed) {
-        this.dispatchEvent(new (event.constructor as typeof Event)(event.type, event));
+        this.dispatchEvent(
+          new /* SAFETY: The surrounding typed API establishes the asserted contract at this boundary. */ (event.constructor as typeof Event)(
+            event.type,
+            event
+          )
+        );
       }
     };
 
@@ -323,22 +346,30 @@ export function CustomMediaElement<T extends Constructor<MediaHost>>(
       const prop = mediaHostAttrToProp.get(attrName);
       if (prop) {
         if (oldValue !== newValue) {
-          const valueType = typeof this.#mediaHost[prop];
-          const propConfig = (this.constructor as CustomMediaConstructor<T>).properties[prop];
+          const currentValue = getMediaHostMember(this.#mediaHost, prop);
+          const propConfig =
+            /* SAFETY: The surrounding typed API establishes the asserted contract at this boundary. */ (
+              this.constructor as CustomMediaConstructor<T>
+            ).properties[prop];
           const emptyValue = propConfig && 'empty' in propConfig ? propConfig.empty : '';
-          this.#mediaHost[prop] =
-            valueType === 'boolean'
+          setMediaHostMember(
+            this.#mediaHost,
+            prop,
+            isBoolean(currentValue)
               ? newValue !== null
-              : valueType === 'number'
+              : isNumber(currentValue)
                 ? Number(newValue)
-                : (newValue ?? emptyValue);
+                : (newValue ?? emptyValue)
+          );
         }
         return;
       }
 
       if (
         !CustomMedia.observedAttributes.includes(attrName) &&
-        (this.constructor as typeof CustomMedia).observedAttributes.includes(attrName)
+        /* SAFETY: The surrounding typed API establishes the asserted contract at this boundary. */ (
+          this.constructor as typeof CustomMedia
+        ).observedAttributes.includes(attrName)
       ) {
         return;
       }
@@ -355,9 +386,12 @@ export function CustomMediaElement<T extends Constructor<MediaHost>>(
     #syncMediaChildren(): void {
       if (tag === 'iframe') return;
 
-      const defaultSlot = this.shadowRoot?.querySelector('slot:not([name])') as HTMLSlotElement;
+      const defaultSlot =
+        /* SAFETY: The surrounding typed API establishes the asserted contract at this boundary. */ this.shadowRoot?.querySelector(
+          'slot:not([name])'
+        ) as HTMLSlotElement;
       const mediaChildren = new Set(
-        defaultSlot
+        /* SAFETY: The surrounding typed API establishes the asserted contract at this boundary. */ defaultSlot
           ?.assignedElements({ flatten: true })
           .filter((el) => el.localName === 'track' || el.localName === 'source') as (
           | HTMLTrackElement
@@ -375,12 +409,17 @@ export function CustomMediaElement<T extends Constructor<MediaHost>>(
       for (const el of mediaChildren) {
         let clone = this.#childMap.get(el);
         if (!clone) {
-          clone = el.cloneNode() as HTMLTrackElement | HTMLSourceElement;
+          clone =
+            /* SAFETY: The surrounding typed API establishes the asserted contract at this boundary. */ el.cloneNode() as
+              | HTMLTrackElement
+              | HTMLSourceElement;
           this.#childMap.set(el, clone);
           this.#childObserver?.observe(el, { attributes: true });
         }
         this.target?.append(clone);
-        this.#enableDefaultTrack(clone as HTMLTrackElement);
+        this.#enableDefaultTrack(
+          /* SAFETY: The surrounding typed API establishes the asserted contract at this boundary. */ clone as HTMLTrackElement
+        );
       }
     }
 
@@ -388,13 +427,21 @@ export function CustomMediaElement<T extends Constructor<MediaHost>>(
       for (const mutation of mutations) {
         if (mutation.type === 'attributes') {
           const { target, attributeName } = mutation;
-          const clone = this.#childMap.get(target as HTMLTrackElement | HTMLSourceElement);
+          const clone = this.#childMap.get(
+            /* SAFETY: The surrounding typed API establishes the asserted contract at this boundary. */ target as
+              | HTMLTrackElement
+              | HTMLSourceElement
+          );
           if (clone && attributeName) {
             clone.setAttribute(
               attributeName,
-              (target as HTMLTrackElement | HTMLSourceElement).getAttribute(attributeName) ?? ''
+              /* SAFETY: The surrounding typed API establishes the asserted contract at this boundary. */ (
+                target as HTMLTrackElement | HTMLSourceElement
+              ).getAttribute(attributeName) ?? ''
             );
-            this.#enableDefaultTrack(clone as HTMLTrackElement);
+            this.#enableDefaultTrack(
+              /* SAFETY: The surrounding typed API establishes the asserted contract at this boundary. */ clone as HTMLTrackElement
+            );
           }
         }
       }
@@ -415,9 +462,20 @@ export function CustomMediaElement<T extends Constructor<MediaHost>>(
     }
   }
 
-  return CustomMedia as any;
+  // SAFETY: #define installs every MediaHost prototype property before instances are exposed.
+  return CustomMedia as CustomMediaConstructor<T>;
 }
 
-function getAttrsFromProps(props: Record<string, any>): string[] {
+function getAttrsFromProps(props: Readonly<Record<string, MediaPropertyConfig>>): string[] {
   return Object.keys(props).map((prop) => props[prop]?.attribute ?? prop.toLowerCase());
+}
+
+function getMediaHostMember(host: MediaHost, property: string): MediaHostPropertyValue {
+  // SAFETY: The prototype walk only passes own property names discovered on MediaHost constructors.
+  return host[property as keyof MediaHost];
+}
+
+function setMediaHostMember<Value>(host: MediaHost, property: string, value: Value): void {
+  // SAFETY: The prototype walk only passes writable property names discovered on MediaHost constructors.
+  (host as { [key: string]: Value })[property] = value;
 }

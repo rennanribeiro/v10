@@ -52,7 +52,7 @@ function renderCaptionsMenu({
   return { selectSubtitlesTrack };
 }
 
-function createReactiveTextTrackWrapper(initialState: Record<string, unknown>) {
+function createReactiveTextTrackWrapper(initialState: PlayerContextValue['store']['state']) {
   const listeners = new Set<() => void>();
   const store = {
     state: initialState,
@@ -65,7 +65,8 @@ function createReactiveTextTrackWrapper(initialState: Record<string, unknown>) {
   };
 
   const value: PlayerContextValue = {
-    store: store as unknown as PlayerContextValue['store'],
+    store:
+      /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ store as PlayerContextValue['store'],
     media: null,
     setMedia: vi.fn(),
     container: null,
@@ -73,7 +74,7 @@ function createReactiveTextTrackWrapper(initialState: Record<string, unknown>) {
   };
 
   return {
-    updateState(next: Record<string, unknown>) {
+    updateState(next: PlayerContextValue['store']['state']) {
       store.state = next;
       for (const listener of listeners) listener();
     },

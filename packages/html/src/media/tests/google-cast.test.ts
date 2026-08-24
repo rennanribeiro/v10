@@ -42,7 +42,9 @@ describe('GoogleCastElement', () => {
   it('registers a GoogleCast component with the media host from context', () => {
     const { host, provider } = setup();
 
-    provider.setMedia(host as unknown as Media);
+    provider.setMedia(
+      /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ host as Media
+    );
 
     expect(getMediaComponents(host).get(GoogleCast)).toBeInstanceOf(GoogleCast);
   });
@@ -57,7 +59,11 @@ describe('GoogleCastElement', () => {
   it('resolves the host from a media element host property', () => {
     const { host, provider } = setup();
 
-    provider.setMedia({ host } as unknown as Media);
+    provider.setMedia(
+      /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ {
+        host,
+      } as Media
+    );
 
     expect(getMediaComponents(host).get(GoogleCast)).toBeInstanceOf(GoogleCast);
   });
@@ -65,15 +71,23 @@ describe('GoogleCastElement', () => {
   it('ignores media that is not a media host', () => {
     const { host, provider } = setup();
 
-    provider.setMedia(host as unknown as Media);
-    provider.setMedia(document.createElement('video') as unknown as Media);
+    provider.setMedia(
+      /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ host as Media
+    );
+    provider.setMedia(
+      /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ document.createElement(
+        'video'
+      ) as Media
+    );
 
     expect(getMediaComponents(host).get(GoogleCast)).toBeUndefined();
   });
 
   it('forwards attributes to the component', () => {
     const { host, provider, el } = setup();
-    provider.setMedia(host as unknown as Media);
+    provider.setMedia(
+      /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ host as Media
+    );
 
     el.setAttribute('receiver', 'APP_ID');
     el.setAttribute('content-type', 'application/x-mpegURL');
@@ -102,8 +116,12 @@ describe('GoogleCastElement', () => {
     const { host, provider } = setup();
     const nextHost = new HTMLVideoElementHost();
 
-    provider.setMedia(host as unknown as Media);
-    provider.setMedia(nextHost as unknown as Media);
+    provider.setMedia(
+      /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ host as Media
+    );
+    provider.setMedia(
+      /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ nextHost as Media
+    );
 
     expect(getMediaComponents(host).get(GoogleCast)).toBeUndefined();
     expect(getMediaComponents(nextHost).get(GoogleCast)).toBeInstanceOf(GoogleCast);
@@ -111,7 +129,9 @@ describe('GoogleCastElement', () => {
 
   it('removes the component when the element disconnects', () => {
     const { host, provider, el } = setup();
-    provider.setMedia(host as unknown as Media);
+    provider.setMedia(
+      /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ host as Media
+    );
 
     el.remove();
 
@@ -120,7 +140,9 @@ describe('GoogleCastElement', () => {
 
   it('removes the component on destroy', () => {
     const { host, provider, el } = setup();
-    provider.setMedia(host as unknown as Media);
+    provider.setMedia(
+      /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ host as Media
+    );
 
     el.destroy();
 

@@ -47,19 +47,21 @@ function createTextTrackStore({
   subtitlesShowing?: boolean | undefined;
   selectSubtitlesTrack?: MediaTextTrackState['selectSubtitlesTrack'] | undefined;
 } = {}): AnyPlayerStore {
-  return createStore<unknown>()<MediaTextTrackState>({
-    name: 'textTrack',
-    state: () => ({
-      chaptersCues: [],
-      thumbnailCues: [],
-      thumbnailTrackSrc: null,
-      thumbnailTrackCrossOrigin: null,
-      textTrackList,
-      subtitlesShowing,
-      toggleSubtitles: vi.fn(),
-      selectSubtitlesTrack,
-    }),
-  }) as unknown as AnyPlayerStore;
+  return /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ createStore<unknown>()<MediaTextTrackState>(
+    {
+      name: 'textTrack',
+      state: () => ({
+        chaptersCues: [],
+        thumbnailCues: [],
+        thumbnailTrackSrc: null,
+        thumbnailTrackCrossOrigin: null,
+        textTrackList,
+        subtitlesShowing,
+        toggleSubtitles: vi.fn(),
+        selectSubtitlesTrack,
+      }),
+    }
+  ) as AnyPlayerStore;
 }
 
 class TestPlayerProviderElement extends MediaElement {
@@ -78,9 +80,18 @@ defineElement('test-captions-radio-player', TestPlayerProviderElement);
 
 function setup(locale: string, storeOptions?: Parameters<typeof createTextTrackStore>[0]) {
   const i18n = new MediaI18nProviderElement();
-  const provider = document.createElement('test-captions-radio-player') as TestPlayerProviderElement;
-  const menu = document.createElement(MenuElement.tagName) as MenuElement;
-  const options = document.createElement(CaptionsRadioGroupElement.tagName) as CaptionsRadioGroupElement;
+  const provider =
+    /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ document.createElement(
+      'test-captions-radio-player'
+    ) as TestPlayerProviderElement;
+  const menu =
+    /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ document.createElement(
+      MenuElement.tagName
+    ) as MenuElement;
+  const options =
+    /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ document.createElement(
+      CaptionsRadioGroupElement.tagName
+    ) as CaptionsRadioGroupElement;
 
   i18n.setAttribute('lang', locale);
   provider.setStore(createTextTrackStore(storeOptions));

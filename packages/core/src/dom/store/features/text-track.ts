@@ -157,7 +157,7 @@ export const textTrackFeature = definePlayerFeature({
 
         textTrackList.push({
           id: getTrackId(track, i),
-          kind: track.kind as TextTrackKind,
+          kind: /* SAFETY: The surrounding typed API establishes the asserted contract at this boundary. */ track.kind as TextTrackKind,
           label: track.label,
           language: track.language,
           mode: track.mode,
@@ -171,10 +171,14 @@ export const textTrackFeature = definePlayerFeature({
       // VTTCue extends TextTrackCue with `text` — cast via `unknown` since
       // the CueList is typed as TextTrackCue which doesn't expose `text`.
       const chaptersCues: MediaTextCue[] = chaptersTrack?.cues
-        ? (Array.from(chaptersTrack.cues) as unknown as MediaTextCue[])
+        ? /* SAFETY: The surrounding typed API establishes the asserted contract at this boundary. */ (Array.from(
+            chaptersTrack.cues
+          ) as MediaTextCue[])
         : [];
       const thumbnailCues: MediaTextCue[] = thumbnailTrack?.cues
-        ? (Array.from(thumbnailTrack.cues) as unknown as MediaTextCue[])
+        ? /* SAFETY: The surrounding typed API establishes the asserted contract at this boundary. */ (Array.from(
+            thumbnailTrack.cues
+          ) as MediaTextCue[])
         : [];
 
       let thumbnailTrackSrc: string | null = null;

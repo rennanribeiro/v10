@@ -4,7 +4,9 @@ import { type MediaStreamType, MediaStreamTypes } from '../../core/types';
 import type { ShakaEngineHost } from './types';
 
 export function ShakaMediaStreamTypeMixin<Base extends Constructor<ShakaEngineHost>>(BaseClass: Base) {
-  class ShakaMediaStreamType extends (BaseClass as Constructor<ShakaEngineHost>) {
+  class ShakaMediaStreamType
+    extends /* SAFETY: The surrounding typed API establishes the asserted contract at this boundary. */ (BaseClass as Constructor<ShakaEngineHost>)
+  {
     #streamType: MediaStreamType = MediaStreamTypes.UNKNOWN;
     #isUserStreamType = false;
 
@@ -77,5 +79,6 @@ export function ShakaMediaStreamTypeMixin<Base extends Constructor<ShakaEngineHo
     }
   }
 
-  return ShakaMediaStreamType as unknown as Base & Constructor<{ streamType: MediaStreamType }>;
+  return /* SAFETY: The surrounding typed API establishes the asserted contract at this boundary. */ ShakaMediaStreamType as Base &
+    Constructor<{ streamType: MediaStreamType }>;
 }

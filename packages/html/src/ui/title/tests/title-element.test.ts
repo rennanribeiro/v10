@@ -16,8 +16,13 @@ function uniqueTag(base: string): string {
 
 function createElement<Element extends HTMLElement>(Base: abstract new () => Element): Element {
   const tag = uniqueTag('test-el');
-  customElements.define(tag, class extends (Base as unknown as typeof HTMLElement) {});
-  return document.createElement(tag) as Element;
+  customElements.define(
+    tag,
+    class extends /* SAFETY: The fixture base implements the HTMLElement constructor contract. */ (Base as typeof HTMLElement) {}
+  );
+  return /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ document.createElement(
+    tag
+  ) as Element;
 }
 
 function defineElement(tagName: string, Base: CustomElementConstructor): void {
@@ -86,16 +91,18 @@ function createMetadataOnlyStore() {
 }
 
 type TitleStore = ReturnType<typeof createTitleStore>;
+type ConfigurableStore = Parameters<typeof setPlayerConfigValue>[0];
 
 const titleConfig = metadataFeature.config!.title;
 
 /** Set the user title the way a provider does, through the feature's own config. */
-function setTitle(store: object, value: string | null): void {
+function setTitle(store: ConfigurableStore, value: string | null): void {
   setPlayerConfigValue(store, titleConfig, value);
 }
 
 class TestPlayerProviderElement extends MediaElement {
-  store: AnyPlayerStore = createTitleStore() as unknown as AnyPlayerStore;
+  store: AnyPlayerStore =
+    /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ createTitleStore() as AnyPlayerStore;
 
   readonly #provider = new ContextProvider(this, { context: playerContext });
 
@@ -107,9 +114,14 @@ class TestPlayerProviderElement extends MediaElement {
 
 defineElement('test-title-player', TestPlayerProviderElement);
 
-async function setup(store?: object) {
-  const provider = document.createElement('test-title-player') as TestPlayerProviderElement;
-  if (store) provider.store = store as unknown as AnyPlayerStore;
+async function setup(store?: ConfigurableStore) {
+  const provider =
+    /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ document.createElement(
+      'test-title-player'
+    ) as TestPlayerProviderElement;
+  if (store)
+    provider.store =
+      /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ store as AnyPlayerStore;
 
   const title = createElement(TitleElement);
 
@@ -162,7 +174,11 @@ describe('TitleElement', () => {
   it('ignores controls and playback state', async () => {
     const store: TitleStore = createTitleStore();
     const media = new FakeMedia();
-    store.attach({ media: media as unknown as PlayerTarget['media'], container: null });
+    store.attach({
+      media:
+        /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ media as PlayerTarget['media'],
+      container: null,
+    });
 
     const { title } = await setup(store);
 

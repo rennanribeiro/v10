@@ -66,19 +66,17 @@ export async function createShadcnRegistryFiles<Item extends ComponentMeta>(
 
   const assets: ShadcnOutputFile[] = [{ path: 'registry.json', content: JSON.stringify(registry) }];
   for (const item of registry.items) {
-    const output = {
+    const output: RegistryItem = {
       $schema: 'https://ui.shadcn.com/schema/registry-item.json',
       ...item,
-      ...(item.files
-        ? {
-            files: item.files.map((file) => {
-              const content = contents.get(file.path);
-              if (content === undefined) throw new Error(`Shadcn registry source does not exist: ${file.path}`);
-              return { ...file, content };
-            }),
-          }
-        : {}),
     };
+    if (item.files) {
+      output.files = item.files.map((file) => {
+        const content = contents.get(file.path);
+        if (content === undefined) throw new Error(`Shadcn registry source does not exist: ${file.path}`);
+        return { ...file, content };
+      });
+    }
     registryItemSchema.parse(output);
     assets.push({ path: `${item.name}.json`, content: JSON.stringify(output) });
   }
@@ -208,7 +206,7 @@ function rewriteImports<Item extends ComponentMeta>(
   modules: ReadonlyMap<string, RegistrySourceModule<Item>>,
   published: ReadonlyMap<string, PublishedModule<Item>>,
   options: ShadcnPluginOptions<Item>
-): { source: string; dependencies: string[] } {
+) {
   const replacements: ImportReplacement[] = [];
   const dependencies = new Set<string>();
 
@@ -233,7 +231,10 @@ function rewriteImports<Item extends ComponentMeta>(
     }
   }
 
-  return { source: replaceImportSpecifiers(module.source, replacements), dependencies: [...dependencies].sort() };
+  return {
+    source: replaceImportSpecifiers(module.source, replacements),
+    dependencies: [...dependencies].sort(),
+  } satisfies { source: string; dependencies: string[] };
 }
 
 function publishedImport<Item extends ComponentMeta>(
@@ -364,9 +365,13 @@ function mergedMeta(...values: Array<RegistryItem['meta'] | undefined>): { meta?
   return defined.length ? { meta: Object.assign({}, ...defined) } : {};
 }
 
-function optionalList<Key extends string>(key: Key, values: ReadonlySet<string>): Partial<Record<Key, string[]>> {
+function optionalList<Key extends string>(key: Key, values: ReadonlySet<string>) {
   const list = [...values].sort();
-  return list.length ? ({ [key]: list } as Partial<Record<Key, string[]>>) : {};
+  return list.length
+    ? /* SAFETY: The surrounding typed API establishes the asserted contract at this boundary. */ ({
+        [key]: list,
+      } satisfies Partial<Record<Key, string[]>>)
+    : ({} satisfies Partial<Record<Key, string[]>>);
 }
 
 function validateRelativePath(path: string, label: string): void {

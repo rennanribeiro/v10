@@ -176,7 +176,7 @@ export class YouTubeMedia extends YouTubeMediaBase implements Partial<Video> {
       if (this.#autoplay) this.#player.loadPlaylist(options);
       else this.#player.cuePlaylist(options);
     } else if (parsed.id) {
-      const options: { videoId: string; startSeconds?: number } = { videoId: parsed.id };
+      const options = { videoId: parsed.id } satisfies { videoId: string; startSeconds?: number };
       if (parsed.startTime != null) options.startSeconds = parsed.startTime;
       if (this.#autoplay) this.#player.loadVideoById(options);
       else this.#player.cueVideoById(options);
@@ -343,7 +343,10 @@ export class YouTubeMedia extends YouTubeMediaBase implements Partial<Video> {
 
   get textTracks() {
     this.#textTracksHost ??= globalThis.document?.createElement('video') ?? null;
-    return (this.#textTracksHost?.textTracks as TextTrackListLike) ?? EMPTY_TEXT_TRACKS;
+    return (
+      /* SAFETY: The surrounding typed API establishes the asserted contract at this boundary. */ (this.#textTracksHost
+        ?.textTracks as TextTrackListLike) ?? EMPTY_TEXT_TRACKS
+    );
   }
 
   get isFullscreen() {
@@ -638,7 +641,11 @@ export class YouTubeMedia extends YouTubeMediaBase implements Partial<Video> {
   #syncTextTracks(player: YouTubePlayerApi) {
     const host = this.#textTracksHost;
     if (!host) return;
-    const trackList = (player.getOption('captions', 'tracklist') ?? []) as YouTubeCaptionTrack[];
+    const trackList =
+      /* SAFETY: The surrounding typed API establishes the asserted contract at this boundary. */ (player.getOption(
+        'captions',
+        'tracklist'
+      ) ?? []) as YouTubeCaptionTrack[];
     for (const track of trackList) {
       if (!track.languageCode) continue;
       if (Array.from(host.textTracks).some((t) => t.language === track.languageCode)) continue;

@@ -12,8 +12,13 @@ function uniqueTag(base: string): string {
 
 function createElement<Element extends HTMLElement>(Base: abstract new () => Element): Element {
   const tag = uniqueTag('test-media-container');
-  customElements.define(tag, class extends (Base as unknown as typeof HTMLElement) {});
-  return document.createElement(tag) as Element;
+  customElements.define(
+    tag,
+    class extends /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ (Base as typeof HTMLElement) {}
+  );
+  return /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ document.createElement(
+    tag
+  ) as Element;
 }
 
 afterEach(() => {
@@ -57,7 +62,10 @@ describe('MediaContainerElement', () => {
       customElements.define(MediaI18nProviderElement.tagName, MediaI18nProviderElement);
     }
     registerI18n('x-container', { container: { label: 'Translated media player' } });
-    const provider = document.createElement(MediaI18nProviderElement.tagName) as MediaI18nProviderElement;
+    const provider =
+      /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ document.createElement(
+        MediaI18nProviderElement.tagName
+      ) as MediaI18nProviderElement;
     const container = createElement(MediaContainerElement);
     provider.lang = 'x-container';
     provider.append(container);

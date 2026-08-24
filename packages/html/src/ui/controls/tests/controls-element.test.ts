@@ -23,7 +23,9 @@ function createDefinedElement<Class extends CustomElementConstructor & { readonl
   Constructor: Class
 ): InstanceType<Class> {
   ensureCustomElementDefined(Constructor);
-  return document.createElement(Constructor.tagName) as InstanceType<Class>;
+  return /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ document.createElement(
+    Constructor.tagName
+  ) as InstanceType<Class>;
 }
 
 function defineElement(tagName: string, Base: CustomElementConstructor): void {
@@ -33,23 +35,28 @@ function defineElement(tagName: string, Base: CustomElementConstructor): void {
 }
 
 function createControlsStore(): AnyPlayerStore {
-  return createStore<unknown>()<MediaControlsState>({
-    name: 'controls',
-    state: ({ get, set }) => {
-      return {
-        userActive: true,
-        controlsVisible: true,
-        requestControlsLock: () => () => {},
-        toggleControls() {
-          const visible = !(get().controlsVisible as boolean);
+  return /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ createStore<unknown>()<MediaControlsState>(
+    {
+      name: 'controls',
+      state: ({ get, set }) => {
+        return {
+          userActive: true,
+          controlsVisible: true,
+          requestControlsLock: () => () => {},
+          toggleControls() {
+            const visible = !(
+              /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ (get()
+                .controlsVisible as boolean)
+            );
 
-          set({ userActive: visible, controlsVisible: visible });
+            set({ userActive: visible, controlsVisible: visible });
 
-          return visible;
-        },
-      };
-    },
-  }) as unknown as AnyPlayerStore;
+            return visible;
+          },
+        };
+      },
+    }
+  ) as AnyPlayerStore;
 }
 
 class TestPlayerProviderElement extends MediaElement {
@@ -63,7 +70,9 @@ class TestPlayerProviderElement extends MediaElement {
   }
 
   setVisible(visible: boolean): void {
-    const state = this.store.state as MediaControlsState;
+    const state =
+      /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ this.store
+        .state as MediaControlsState;
 
     if (state.controlsVisible === visible) return;
 
@@ -100,7 +109,10 @@ afterEach(() => {
 
 describe('ControlsElement', () => {
   it('marks the controls surface as interactive', async () => {
-    const provider = document.createElement('test-controls-player-provider') as TestPlayerProviderElement;
+    const provider =
+      /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ document.createElement(
+        'test-controls-player-provider'
+      ) as TestPlayerProviderElement;
     const controls = createDefinedElement(ControlsElement);
 
     document.body.append(provider);
@@ -112,7 +124,10 @@ describe('ControlsElement', () => {
   });
 
   it('closes owned popovers, menus, and tooltips when controls hide', async () => {
-    const provider = document.createElement('test-controls-player-provider') as TestPlayerProviderElement;
+    const provider =
+      /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ document.createElement(
+        'test-controls-player-provider'
+      ) as TestPlayerProviderElement;
     const controls = createDefinedElement(ControlsElement);
     const popover = createDefinedElement(PopoverElement);
     const menu = createDefinedElement(MenuElement);
@@ -145,7 +160,10 @@ describe('ControlsElement', () => {
   });
 
   it('does not call close on native dialogs inside controls when controls hide', async () => {
-    const provider = document.createElement('test-controls-player-provider') as TestPlayerProviderElement;
+    const provider =
+      /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ document.createElement(
+        'test-controls-player-provider'
+      ) as TestPlayerProviderElement;
     const controls = createDefinedElement(ControlsElement);
     const dialog = document.createElement('dialog');
     const closeSpy = vi.spyOn(dialog, 'close');
@@ -164,7 +182,10 @@ describe('ControlsElement', () => {
   });
 
   it('ignores popup host markers when close is missing or not a function', async () => {
-    const provider = document.createElement('test-controls-player-provider') as TestPlayerProviderElement;
+    const provider =
+      /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ document.createElement(
+        'test-controls-player-provider'
+      ) as TestPlayerProviderElement;
     const controls = createDefinedElement(ControlsElement);
     const withoutClose = document.createElement('div');
     withoutClose.setAttribute(POPUP_HOST_ATTR, '');

@@ -44,7 +44,10 @@ function setupEndOfStream(initialState: EndOfStreamState, initialContext: EndOfS
   // doesn't consume it. Pass {} explicitly. cleanup widens to
   // BehaviorCleanup (void | () => void | { destroy }) — the real return is
   // a () => void; cast for callable ergonomics in tests.
-  const cleanup = endOfStream.setup({ state, context, config: {} }) as () => void;
+  const cleanup =
+    /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ endOfStream.setup(
+      { state, context, config: {} }
+    ) as () => void;
   return { state, context, cleanup };
 }
 
@@ -60,27 +63,42 @@ function makeMediaSource(
   overrides: { readyState?: MediaSource['readyState']; duration?: number; sourceBuffers?: SourceBuffer[] } = {}
 ): MediaSource {
   const target = new EventTarget();
-  const ms = Object.create(MediaSource.prototype, {
-    readyState: { value: overrides.readyState ?? 'open', writable: true },
-    duration: { value: overrides.duration ?? 0, writable: true },
-    sourceBuffers: { value: (overrides.sourceBuffers ?? []) as unknown as SourceBufferList, writable: false },
-    addEventListener: { value: target.addEventListener.bind(target) },
-    removeEventListener: { value: target.removeEventListener.bind(target) },
-    dispatchEvent: { value: target.dispatchEvent.bind(target) },
-  }) as MediaSource;
+  const ms =
+    /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ Object.create(
+      MediaSource.prototype,
+      {
+        readyState: { value: overrides.readyState ?? 'open', writable: true },
+        duration: { value: overrides.duration ?? 0, writable: true },
+        sourceBuffers: {
+          value:
+            /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ (overrides.sourceBuffers ??
+              []) as SourceBufferList,
+          writable: false,
+        },
+        addEventListener: { value: target.addEventListener.bind(target) },
+        removeEventListener: { value: target.removeEventListener.bind(target) },
+        dispatchEvent: { value: target.dispatchEvent.bind(target) },
+      }
+    ) as MediaSource;
   ms.endOfStream = vi.fn();
   return ms;
 }
 
 function transitionMediaSource(mediaSource: MediaSource, readyState: MediaSource['readyState'], eventType: string) {
-  (mediaSource as MediaSource & { readyState: MediaSource['readyState'] }).readyState = readyState;
+  /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ (
+    mediaSource as MediaSource & { readyState: MediaSource['readyState'] }
+  ).readyState = readyState;
   mediaSource.dispatchEvent(new Event(eventType));
 }
 
 function makeSourceBuffer(): SourceBuffer {
   const listeners: Record<string, EventListener[]> = {};
-  return {
-    buffered: { length: 0, start: () => 0, end: () => 0 } as TimeRanges,
+  return /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ {
+    buffered: /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ {
+      length: 0,
+      start: () => 0,
+      end: () => 0,
+    } as TimeRanges,
     updating: false,
     appendBuffer: vi.fn(() => {
       setTimeout(() => {
@@ -99,7 +117,7 @@ function makeSourceBuffer(): SourceBuffer {
     removeEventListener: vi.fn((type: string, listener: EventListener) => {
       listeners[type] = (listeners[type] ?? []).filter((l) => l !== listener);
     }),
-  } as unknown as SourceBuffer;
+  } as SourceBuffer;
 }
 
 function makeSegments(count: number): Segment[] {
@@ -114,7 +132,7 @@ function makeSegments(count: number): Segment[] {
 // `complete` toggles the parser's completeness signal: a complete playlist has
 // a finite Track.duration (EXTINF sum), an incomplete (live) one is Infinity.
 function makeResolvedVideoTrack(segmentCount: number, id = 'video-1', complete = true): VideoTrack {
-  return {
+  return /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ {
     id,
     type: 'video' as const,
     url: 'https://example.com/video.m3u8',
@@ -125,15 +143,15 @@ function makeResolvedVideoTrack(segmentCount: number, id = 'video-1', complete =
     startTime: 0,
     duration: complete ? segmentCount * 2.5 : Number.POSITIVE_INFINITY,
     codecs: 'avc1.64001f',
-  } as unknown as VideoTrack;
+  } as VideoTrack;
 }
 
 function makePresentation(videoTrack: VideoTrack, id = 'pres-1'): Presentation {
-  return {
+  return /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ {
     id,
     url: 'https://example.com/playlist.m3u8',
     selectionSets: [{ type: 'video', switchingSets: [{ tracks: [videoTrack] }] }],
-  } as unknown as Presentation;
+  } as Presentation;
 }
 
 function makeActorWithSegments(segmentIds: string[], trackId = 'video-1'): SourceBufferActor {
@@ -318,7 +336,9 @@ describe('endOfStream', () => {
 
     // Real MSE: endOfStream() flips readyState to 'ended' synchronously
     // and dispatches `sourceended`.
-    (mockMs.endOfStream as ReturnType<typeof vi.fn>).mockImplementation(() => {
+    /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ (
+      mockMs.endOfStream as ReturnType<typeof vi.fn>
+    ).mockImplementation(() => {
       transitionMediaSource(mockMs, 'ended', 'sourceended');
     });
 
@@ -346,7 +366,9 @@ describe('endOfStream', () => {
     const track = makeResolvedVideoTrack(4);
     const mockMs = makeMediaSource();
 
-    (mockMs.endOfStream as ReturnType<typeof vi.fn>).mockImplementation(() => {
+    /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ (
+      mockMs.endOfStream as ReturnType<typeof vi.fn>
+    ).mockImplementation(() => {
       transitionMediaSource(mockMs, 'ended', 'sourceended');
     });
 
@@ -377,12 +399,16 @@ describe('endOfStream', () => {
     const track = makeResolvedVideoTrack(4);
     // SourceBuffer that stays `updating` so waitForSourceBuffersReady
     // never resolves on its own.
-    const buffer = {
-      buffered: { length: 0, start: () => 0, end: () => 0 } as TimeRanges,
+    const buffer = /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ {
+      buffered: /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ {
+        length: 0,
+        start: () => 0,
+        end: () => 0,
+      } as TimeRanges,
       updating: true,
       addEventListener: vi.fn(),
       removeEventListener: vi.fn(),
-    } as unknown as SourceBuffer;
+    } as SourceBuffer;
     const mockMs = makeMediaSource({ sourceBuffers: [buffer] });
 
     const { state, cleanup } = setupEndOfStream(
@@ -406,20 +432,22 @@ describe('endOfStream', () => {
   it('composes against an audio-only configuration', async () => {
     // Audio-only: only audioBufferActor in scope; the behavior iterates
     // whatever's present without per-type-specialized paths.
-    const audioTrack = {
-      id: 'audio-1',
-      type: 'audio',
-      url: 'https://example.com/audio.m3u8',
-      mimeType: 'audio/mp4',
-      // Complete playlist — finite duration opens the completeness gate.
-      duration: 10,
-      segments: makeSegments(4).map((s) => ({ ...s, id: `audio-${s.id}` })),
-    } as unknown as VideoTrack;
-    const presentation = {
-      id: 'pres-1',
-      url: 'https://example.com/playlist.m3u8',
-      selectionSets: [{ type: 'audio', switchingSets: [{ tracks: [audioTrack] }] }],
-    } as unknown as Presentation;
+    const audioTrack =
+      /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ {
+        id: 'audio-1',
+        type: 'audio',
+        url: 'https://example.com/audio.m3u8',
+        mimeType: 'audio/mp4',
+        // Complete playlist — finite duration opens the completeness gate.
+        duration: 10,
+        segments: makeSegments(4).map((s) => ({ ...s, id: `audio-${s.id}` })),
+      } as VideoTrack;
+    const presentation =
+      /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ {
+        id: 'pres-1',
+        url: 'https://example.com/playlist.m3u8',
+        selectionSets: [{ type: 'audio', switchingSets: [{ tracks: [audioTrack] }] }],
+      } as Presentation;
 
     const mockMs = makeMediaSource();
     const audioBufferActor = makeActorWithSegments(

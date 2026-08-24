@@ -45,13 +45,13 @@ export interface TooltipApi extends Omit<PopoverApi, 'triggerProps' | 'popupProp
 }
 
 /** Map popover reasons to tooltip reasons, filtering out click/outside-click. */
-const REASON_MAP: Partial<Record<PopoverOpenChangeReason, TooltipOpenChangeReason>> = {
+const REASON_MAP = {
   hover: 'hover',
   focus: 'focus',
   escape: 'escape',
   blur: 'blur',
   'imperative-action': 'imperative-action',
-};
+} satisfies Partial<Record<PopoverOpenChangeReason, TooltipOpenChangeReason>>;
 
 export function createTooltip(options: TooltipOptions): TooltipApi {
   const popoverOpts: PopoverOptions = {

@@ -99,10 +99,10 @@ export function extractDataAttrs(
             // Get JSDoc comment and optional @type for this property
             const { description: jsDocComment, type: jsDocType } = parseJsDoc(prop, sourceFile);
 
-            const attrEntry: { name: string; description: string; type?: string } = {
+            const attrEntry = {
               name: dataAttrValue || `data-${propName}`,
               description: jsDocComment || '',
-            };
+            } satisfies { name: string; description: string; type?: string };
 
             // JSDoc @type takes priority, then inferred type from satisfies
             if (jsDocType) {
@@ -132,22 +132,19 @@ export function extractDataAttrs(
 /**
  * Parse JSDoc comment, extracting description and optional `@type` tag.
  */
-export function parseJsDoc(
-  node: ts.PropertyAssignment,
-  sourceFile: ts.SourceFile
-): { description: string; type?: string } {
+export function parseJsDoc(node: ts.PropertyAssignment, sourceFile: ts.SourceFile) {
   const raw = getJsDocComment(node, sourceFile);
-  if (!raw) return { description: '' };
+  if (!raw) return { description: '' } satisfies { description: string; type?: string };
 
   // Extract @type {value} tag
   const typeMatch = raw.match(/@type\s*\{([^}]+)\}/);
-  if (!typeMatch) return { description: raw };
+  if (!typeMatch) return { description: raw } satisfies { description: string; type?: string };
 
   const type = typeMatch[1]!.trim();
   // Remove the @type line from description
   const description = raw.replace(/@type\s*\{[^}]+\}/, '').trim();
 
-  return { description, type };
+  return { description, type } satisfies { description: string; type?: string };
 }
 
 /**

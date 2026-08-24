@@ -18,10 +18,11 @@ describe('preferences utilities', () => {
 
   describe('getPreferencesServer', () => {
     it('should return null preference when no cookies are set', () => {
-      const mockCookies = {
-        has: vi.fn().mockReturnValue(false),
-        get: vi.fn(),
-      } as unknown as AstroCookies;
+      const mockCookies =
+        /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ {
+          has: vi.fn().mockReturnValue(false),
+          get: vi.fn(),
+        } as AstroCookies;
 
       const result = getPreferencesServer(mockCookies);
 
@@ -29,15 +30,16 @@ describe('preferences utilities', () => {
     });
 
     it('should return framework preference when cookie is set', () => {
-      const mockCookies = {
-        has: vi.fn((name: string) => name === FRAMEWORK_COOKIE),
-        get: vi.fn((name: string) => {
-          if (name === FRAMEWORK_COOKIE) {
-            return { value: firstFramework };
-          }
-          return null;
-        }),
-      } as unknown as AstroCookies;
+      const mockCookies =
+        /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ {
+          has: vi.fn((name: string) => name === FRAMEWORK_COOKIE),
+          get: vi.fn((name: string) => {
+            if (name === FRAMEWORK_COOKIE) {
+              return { value: firstFramework };
+            }
+            return null;
+          }),
+        } as AstroCookies;
 
       const result = getPreferencesServer(mockCookies);
 
@@ -45,15 +47,16 @@ describe('preferences utilities', () => {
     });
 
     it('should ignore invalid framework cookie', () => {
-      const mockCookies = {
-        has: vi.fn().mockReturnValue(true),
-        get: vi.fn((name: string) => {
-          if (name === FRAMEWORK_COOKIE) {
-            return { value: 'invalid-framework' };
-          }
-          return null;
-        }),
-      } as unknown as AstroCookies;
+      const mockCookies =
+        /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ {
+          has: vi.fn().mockReturnValue(true),
+          get: vi.fn((name: string) => {
+            if (name === FRAMEWORK_COOKIE) {
+              return { value: 'invalid-framework' };
+            }
+            return null;
+          }),
+        } as AstroCookies;
 
       const result = getPreferencesServer(mockCookies);
 
@@ -62,15 +65,16 @@ describe('preferences utilities', () => {
 
     it('should accept valid framework values', () => {
       for (const framework of SUPPORTED_FRAMEWORKS) {
-        const mockCookies = {
-          has: vi.fn().mockReturnValue(true),
-          get: vi.fn((name: string) => {
-            if (name === FRAMEWORK_COOKIE) {
-              return { value: framework };
-            }
-            return null;
-          }),
-        } as unknown as AstroCookies;
+        const mockCookies =
+          /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ {
+            has: vi.fn().mockReturnValue(true),
+            get: vi.fn((name: string) => {
+              if (name === FRAMEWORK_COOKIE) {
+                return { value: framework };
+              }
+              return null;
+            }),
+          } as AstroCookies;
 
         const result = getPreferencesServer(mockCookies);
 

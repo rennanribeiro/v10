@@ -109,12 +109,14 @@ function createTarget() {
 
     return {
       source: '@fixture/components',
-      resolve: ({ component, part }) =>
-        imported({
+      resolve: ({ component, part }) => {
+        const targetImport: Parameters<typeof imported>[0] = {
           from: '@fixture/react',
           name: component,
-          ...(part ? { path: part.split('.') } : {}),
-        }),
+        };
+        if (part) Object.assign(targetImport, { path: part.split('.') });
+        return imported(targetImport);
+      },
       components: {
         Poster: ({ props, children }) => {
           expectTypeOf(props.src).toEqualTypeOf<string | undefined>();

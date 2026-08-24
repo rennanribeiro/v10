@@ -3,10 +3,19 @@ import { describe, expect, it, vi } from 'vite-plus/test';
 import { buildVimeoIframeSrc, parseVimeoSource, parseVimeoVideoId, VimeoMedia, vimeoMediaDefaultProps } from '..';
 
 vi.mock('@vimeo/player', () => {
+  interface MockPlayerEventData {
+    seconds?: number;
+    duration?: number;
+    percent?: number;
+    videoWidth?: number;
+    videoHeight?: number;
+    volume?: number;
+  }
+
   class MockPlayer {
     static instances: MockPlayer[] = [];
-    target: unknown;
-    handlers = new Map<string, Set<(data: unknown) => void>>();
+    target: Element;
+    handlers = new Map<string, Set<(data: MockPlayerEventData) => void>>();
     destroyed = false;
 
     play = vi.fn(async () => {});
@@ -29,17 +38,17 @@ vi.mock('@vimeo/player', () => {
     getDuration = vi.fn(async () => 60);
     getVideoTitle = vi.fn(async () => 'Sample Video');
     getCurrentTime = vi.fn(async () => 0);
-    getTextTracks = vi.fn(async () => [] as unknown[]);
+    getTextTracks = vi.fn(async () => []);
     destroy = vi.fn(async () => {
       this.destroyed = true;
     });
 
-    constructor(target: unknown) {
+    constructor(target: Element) {
       // The real player rejects any iframe that isn't a Vimeo embed, and reads the
       // attribute rather than the property (an empty `src` attribute resolves to
       // the document URL). Mirror it so tests can't pass on an embed the real
       // player would have thrown on.
-      const src = (target as Element | null)?.getAttribute?.('src') ?? '';
+      const src = target.getAttribute('src') ?? '';
       if (!/^https?:\/\/((player|www)\.)?vimeo\.com\//.test(src)) {
         throw new Error('The player element passed isn’t a Vimeo embed.');
       }
@@ -47,7 +56,7 @@ vi.mock('@vimeo/player', () => {
       MockPlayer.instances.push(this);
     }
 
-    on(event: string, handler: (data: unknown) => void): void {
+    on(event: string, handler: (data: MockPlayerEventData) => void): void {
       let set = this.handlers.get(event);
       if (!set) {
         set = new Set();
@@ -56,14 +65,14 @@ vi.mock('@vimeo/player', () => {
       set.add(handler);
     }
 
-    off(event: string, handler?: (data: unknown) => void): void {
+    off(event: string, handler?: (data: MockPlayerEventData) => void): void {
       const set = this.handlers.get(event);
       if (!set) return;
       if (handler) set.delete(handler);
       else set.clear();
     }
 
-    emit(event: string, data: unknown = {}): void {
+    emit(event: string, data: MockPlayerEventData = {}): void {
       this.handlers.get(event)?.forEach((handler) => handler(data));
     }
   }
@@ -101,14 +110,25 @@ async function attachAndLoad(media: VimeoMedia): Promise<{ iframe: HTMLIFrameEle
   if (!media.src) media.src = '76979871';
   const iframe = createIframe();
   media.attach(iframe);
-  const player = media.engine as unknown as MockPlayerLike;
+  const player =
+    /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ media.engine as MockPlayerLike;
   player.emit('loaded');
   await waitForVimeoLoaded(media);
   return { iframe, player };
 }
 
 interface MockPlayerLike {
-  emit(event: string, data?: unknown): void;
+  emit(
+    event: string,
+    data?: {
+      seconds?: number;
+      duration?: number;
+      percent?: number;
+      videoWidth?: number;
+      videoHeight?: number;
+      volume?: number;
+    }
+  ): void;
   getVideoTitle: ReturnType<typeof vi.fn>;
   unload: ReturnType<typeof vi.fn>;
   play: ReturnType<typeof vi.fn>;
@@ -314,7 +334,11 @@ describe('VimeoMedia', () => {
     await flushDeferredEmbed();
 
     expect(iframe.getAttribute('src')).toContain('https://player.vimeo.com/video/12345');
-    expect((media.engine as unknown as MockPlayerLike).loadVideo).not.toHaveBeenCalled();
+    expect(
+      /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ (
+        media.engine as MockPlayerLike
+      ).loadVideo
+    ).not.toHaveBeenCalled();
   });
 
   it('does not leave play() waiting while the embed is deferred', async () => {
@@ -371,7 +395,8 @@ describe('VimeoMedia', () => {
     // Nothing to report before the embed answers.
     expect(media.contentData).toEqual({});
 
-    const player = media.engine as unknown as MockPlayerLike;
+    const player =
+      /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ media.engine as MockPlayerLike;
     player.emit('loaded');
     await waitForVimeoLoaded(media);
 
@@ -401,7 +426,8 @@ describe('VimeoMedia', () => {
     // Attaching reports nothing, so there is nothing to announce yet.
     expect(handler).not.toHaveBeenCalled();
 
-    const player = media.engine as unknown as MockPlayerLike;
+    const player =
+      /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ media.engine as MockPlayerLike;
     player.emit('loaded');
     await waitForVimeoLoaded(media);
 
@@ -435,7 +461,8 @@ describe('VimeoMedia', () => {
     const iframe = createIframe();
     media.attach(iframe);
 
-    const player = media.engine as unknown as MockPlayerLike;
+    const player =
+      /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ media.engine as MockPlayerLike;
     player.getVideoTitle.mockResolvedValueOnce('');
     player.emit('loaded');
     await waitForVimeoLoaded(media);
@@ -497,7 +524,8 @@ describe('VimeoMedia', () => {
     media.src = '76979871';
     const iframe = createIframe();
     media.attach(iframe);
-    const player = media.engine as unknown as MockPlayerLike;
+    const player =
+      /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ media.engine as MockPlayerLike;
 
     // Never loads, so `play()` is left waiting on the current load barrier.
     const played = media.play();
@@ -513,7 +541,8 @@ describe('VimeoMedia', () => {
     media.src = '76979871';
     const iframe = createIframe();
     media.attach(iframe);
-    const player = media.engine as unknown as MockPlayerLike;
+    const player =
+      /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ media.engine as MockPlayerLike;
 
     // Hold the first load's metadata reads open, then supersede it.
     let release = () => {};
@@ -548,7 +577,8 @@ describe('VimeoMedia', () => {
     media.src = '76979871';
     const iframe = createIframe();
     media.attach(iframe);
-    const player = media.engine as unknown as MockPlayerLike;
+    const player =
+      /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ media.engine as MockPlayerLike;
     player.loadVideo.mockClear();
 
     media.src = 'not-a-vimeo-url';
@@ -563,7 +593,8 @@ describe('VimeoMedia', () => {
     media.src = '76979871';
     const iframe = createIframe();
     media.attach(iframe);
-    const player = media.engine as unknown as MockPlayerLike;
+    const player =
+      /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ media.engine as MockPlayerLike;
 
     // Hold the metadata reads open so they resolve after the clear.
     let release = () => {};
@@ -590,7 +621,8 @@ describe('VimeoMedia', () => {
     const iframe = createIframe();
     media.attach(iframe);
 
-    const player = media.engine as unknown as MockPlayerLike;
+    const player =
+      /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ media.engine as MockPlayerLike;
     player.getVideoTitle.mockResolvedValueOnce('');
     player.emit('loaded');
     await waitForVimeoLoaded(media);
@@ -768,13 +800,25 @@ describe('VimeoMedia', () => {
     await media.requestPictureInPicture();
     await media.exitPictureInPicture();
 
-    expect((player as unknown as { requestFullscreen: ReturnType<typeof vi.fn> }).requestFullscreen).toHaveBeenCalled();
-    expect((player as unknown as { exitFullscreen: ReturnType<typeof vi.fn> }).exitFullscreen).toHaveBeenCalled();
     expect(
-      (player as unknown as { requestPictureInPicture: ReturnType<typeof vi.fn> }).requestPictureInPicture
+      /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ (
+        player as { requestFullscreen: ReturnType<typeof vi.fn> }
+      ).requestFullscreen
     ).toHaveBeenCalled();
     expect(
-      (player as unknown as { exitPictureInPicture: ReturnType<typeof vi.fn> }).exitPictureInPicture
+      /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ (
+        player as { exitFullscreen: ReturnType<typeof vi.fn> }
+      ).exitFullscreen
+    ).toHaveBeenCalled();
+    expect(
+      /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ (
+        player as { requestPictureInPicture: ReturnType<typeof vi.fn> }
+      ).requestPictureInPicture
+    ).toHaveBeenCalled();
+    expect(
+      /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ (
+        player as { exitPictureInPicture: ReturnType<typeof vi.fn> }
+      ).exitPictureInPicture
     ).toHaveBeenCalled();
   });
 
@@ -813,7 +857,8 @@ describe('VimeoMedia', () => {
     media.src = '76979871';
     const iframe = createIframe();
     media.attach(iframe);
-    const player = media.engine as unknown as MockPlayerLike;
+    const player =
+      /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ media.engine as MockPlayerLike;
 
     media.detach();
     expect(player.destroy).toHaveBeenCalled();

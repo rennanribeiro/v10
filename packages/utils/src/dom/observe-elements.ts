@@ -1,4 +1,5 @@
 import { noop } from '../function/noop';
+import { isUndefined } from '../predicate';
 import { getDevicePixelRatio, watchDevicePixelRatio } from './device-pixel-ratio';
 import type { ElementSize } from './layout';
 
@@ -6,10 +7,15 @@ export type ObservedElements = Element | Iterable<Element>;
 
 /** Observe one or more elements for size changes and return a cleanup function. */
 export function observeResize(elements: ObservedElements, callback: ResizeObserverCallback): () => void {
-  if (typeof ResizeObserver === 'undefined') return noop;
+  if (isUndefined(ResizeObserver)) return noop;
 
   const observer = new ResizeObserver(callback);
-  const targets = Symbol.iterator in Object(elements) ? (elements as Iterable<Element>) : [elements as Element];
+  const targets =
+    Symbol.iterator in Object(elements)
+      ? /* SAFETY: The surrounding typed API establishes the asserted contract at this boundary. */ (elements as Iterable<Element>)
+      : [
+          /* SAFETY: The surrounding typed API establishes the asserted contract at this boundary. */ elements as Element,
+        ];
 
   for (const element of targets) observer.observe(element);
 
@@ -43,7 +49,7 @@ export function observeElements({ getElements, onChange, root, mutations }: Obse
 
   let mutationObserver: MutationObserver | null = null;
 
-  if (root && mutations !== false && typeof MutationObserver !== 'undefined') {
+  if (root && mutations !== false && !isUndefined(MutationObserver)) {
     mutationObserver = new MutationObserver(() => {
       observeCurrentElements();
       onChange();

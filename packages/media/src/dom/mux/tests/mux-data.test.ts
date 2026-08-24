@@ -5,15 +5,15 @@ import type { MuxDataSdk } from '../types';
 
 function createSdk() {
   const monitor = vi.fn();
-  const sdk = {
+  const sdk = /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ {
     monitor,
     utils: { now: () => 0, generateUUID: () => 'uuid' },
-  } as unknown as MuxDataSdk;
+  } as MuxDataSdk;
   return { sdk, monitor };
 }
 
 class FakeMedia extends EventTarget {
-  engine: unknown = null;
+  engine = null satisfies unknown;
   src = '';
 }
 

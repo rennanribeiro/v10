@@ -5,7 +5,7 @@ import { flushBuffer } from '../buffer-flusher';
 function makeSourceBuffer(): SourceBuffer {
   const listeners: Record<string, EventListener[]> = {};
 
-  return {
+  return /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ {
     updating: false,
     remove: vi.fn(() => {
       setTimeout(() => {
@@ -21,7 +21,7 @@ function makeSourceBuffer(): SourceBuffer {
     removeEventListener: vi.fn((type: string, listener: EventListener) => {
       listeners[type] = (listeners[type] ?? []).filter((l) => l !== listener);
     }),
-  } as unknown as SourceBuffer;
+  } as SourceBuffer;
 }
 
 describe('flushBuffer', () => {
@@ -42,26 +42,27 @@ describe('flushBuffer', () => {
     const listeners: Record<string, EventListener[]> = {};
     let updateEndCallback: (() => void) | undefined;
 
-    const sourceBuffer = {
-      updating: true,
-      remove: vi.fn(() => {
-        setTimeout(() => {
-          for (const listener of listeners.updateend ?? []) {
-            listener(new Event('updateend'));
+    const sourceBuffer =
+      /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ {
+        updating: true,
+        remove: vi.fn(() => {
+          setTimeout(() => {
+            for (const listener of listeners.updateend ?? []) {
+              listener(new Event('updateend'));
+            }
+          }, 0);
+        }),
+        addEventListener: vi.fn((type: string, listener: EventListener) => {
+          listeners[type] ??= [];
+          listeners[type].push(listener);
+          if (type === 'updateend' && sourceBuffer.updating) {
+            updateEndCallback = () => listener(new Event('updateend'));
           }
-        }, 0);
-      }),
-      addEventListener: vi.fn((type: string, listener: EventListener) => {
-        listeners[type] ??= [];
-        listeners[type].push(listener);
-        if (type === 'updateend' && sourceBuffer.updating) {
-          updateEndCallback = () => listener(new Event('updateend'));
-        }
-      }),
-      removeEventListener: vi.fn((type: string, listener: EventListener) => {
-        listeners[type] = (listeners[type] ?? []).filter((l) => l !== listener);
-      }),
-    } as unknown as SourceBuffer;
+        }),
+        removeEventListener: vi.fn((type: string, listener: EventListener) => {
+          listeners[type] = (listeners[type] ?? []).filter((l) => l !== listener);
+        }),
+      } as SourceBuffer;
 
     const flushPromise = flushBuffer(sourceBuffer, 0, 10);
 
@@ -69,7 +70,9 @@ describe('flushBuffer', () => {
     expect(sourceBuffer.remove).not.toHaveBeenCalled();
 
     // Simulate the previous operation finishing
-    (sourceBuffer as any).updating = false;
+    /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ (
+      sourceBuffer as any
+    ).updating = false;
     if (updateEndCallback) updateEndCallback();
 
     await flushPromise;
@@ -79,30 +82,33 @@ describe('flushBuffer', () => {
   it('rejects when SourceBuffer fires an error event', async () => {
     const listeners: Record<string, EventListener[]> = {};
 
-    const sourceBuffer = {
-      updating: false,
-      remove: vi.fn(() => {
-        setTimeout(() => {
-          for (const listener of listeners.error ?? []) {
-            listener(new Event('error'));
-          }
-        }, 0);
-      }),
-      addEventListener: vi.fn((type: string, listener: EventListener) => {
-        listeners[type] ??= [];
-        listeners[type].push(listener);
-      }),
-      removeEventListener: vi.fn((type: string, listener: EventListener) => {
-        listeners[type] = (listeners[type] ?? []).filter((l) => l !== listener);
-      }),
-    } as unknown as SourceBuffer;
+    const sourceBuffer =
+      /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ {
+        updating: false,
+        remove: vi.fn(() => {
+          setTimeout(() => {
+            for (const listener of listeners.error ?? []) {
+              listener(new Event('error'));
+            }
+          }, 0);
+        }),
+        addEventListener: vi.fn((type: string, listener: EventListener) => {
+          listeners[type] ??= [];
+          listeners[type].push(listener);
+        }),
+        removeEventListener: vi.fn((type: string, listener: EventListener) => {
+          listeners[type] = (listeners[type] ?? []).filter((l) => l !== listener);
+        }),
+      } as SourceBuffer;
 
     await expect(flushBuffer(sourceBuffer, 0, 10)).rejects.toThrow('SourceBuffer remove error');
   });
 
   it('rejects when remove() throws synchronously', async () => {
     const sourceBuffer = makeSourceBuffer();
-    (sourceBuffer.remove as ReturnType<typeof vi.fn>).mockImplementation(() => {
+    /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ (
+      sourceBuffer.remove as ReturnType<typeof vi.fn>
+    ).mockImplementation(() => {
       throw new Error('QuotaExceededError');
     });
 

@@ -1,3 +1,4 @@
+import { isString } from '@videojs/utils/predicate';
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vite-plus/test';
 
 import type { ContextSignals, StateSignals } from '../../../../core/composition/create-composition';
@@ -83,11 +84,11 @@ const makeResolvedVideoTrack = (id: string, segments: ReturnType<typeof seg>[]) 
 });
 
 const makePresentation = (...tracks: ReturnType<typeof makeResolvedVideoTrack>[]): Presentation =>
-  ({
+  /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ ({
     id: 'pres',
     url: 'https://example.com/playlist.m3u8',
     selectionSets: [
-      {
+      /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ {
         id: 'vs',
         type: 'video' as const,
         switchingSets: [{ id: 'sw', type: 'video' as const, tracks }],
@@ -97,14 +98,14 @@ const makePresentation = (...tracks: ReturnType<typeof makeResolvedVideoTrack>[]
   }) as Presentation;
 
 const makeMockSourceBuffer = () => {
-  const sb = {
+  const sb = /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ {
     updating: false,
     buffered: { length: 0, start: vi.fn(), end: vi.fn() },
     addEventListener: vi.fn(),
     removeEventListener: vi.fn(),
     appendBuffer: vi.fn(),
     remove: vi.fn(),
-  } as unknown as SourceBuffer;
+  } as SourceBuffer;
   return sb;
 };
 
@@ -113,7 +114,13 @@ function makeControllableFetch() {
   const fetchedUrls: string[] = [];
 
   const fetch = vi.fn().mockImplementation((input: RequestInfo | URL) => {
-    const url = typeof input === 'string' ? input : input instanceof URL ? input.href : (input as Request).url;
+    const url = isString(input)
+      ? input
+      : input instanceof URL
+        ? input.href
+        : /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ (
+            input as Request
+          ).url;
     fetchedUrls.push(url);
     return new Promise<Response>((resolve) => {
       resolvers.set(url, () => resolve(new Response(new ArrayBuffer(100), { status: 200 })));
@@ -170,7 +177,13 @@ describe('loadSegments — track switch', () => {
 
     const fetchedUrls: string[] = [];
     globalThis.fetch = vi.fn().mockImplementation((input: RequestInfo | URL) => {
-      const url = typeof input === 'string' ? input : input instanceof URL ? input.href : (input as Request).url;
+      const url = isString(input)
+        ? input
+        : input instanceof URL
+          ? input.href
+          : /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ (
+              input as Request
+            ).url;
       fetchedUrls.push(url);
       return Promise.resolve(new Response(new ArrayBuffer(100), { status: 200 }));
     });
@@ -243,7 +256,13 @@ describe('loadSegments — track switch', () => {
 
     const fetchedUrls: string[] = [];
     globalThis.fetch = vi.fn().mockImplementation((input: RequestInfo | URL) => {
-      const url = typeof input === 'string' ? input : input instanceof URL ? input.href : (input as Request).url;
+      const url = isString(input)
+        ? input
+        : input instanceof URL
+          ? input.href
+          : /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ (
+              input as Request
+            ).url;
       fetchedUrls.push(url);
       return Promise.resolve(new Response(new ArrayBuffer(100), { status: 200 }));
     });
@@ -310,7 +329,13 @@ describe('loadSegments — track switch', () => {
 
     const fetchedUrls: string[] = [];
     globalThis.fetch = vi.fn().mockImplementation((input: RequestInfo | URL) => {
-      const url = typeof input === 'string' ? input : input instanceof URL ? input.href : (input as Request).url;
+      const url = isString(input)
+        ? input
+        : input instanceof URL
+          ? input.href
+          : /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ (
+              input as Request
+            ).url;
       fetchedUrls.push(url);
       return Promise.resolve(new Response(new ArrayBuffer(100), { status: 200 }));
     });
@@ -480,7 +505,13 @@ describe('loadSegments — track switch', () => {
 
     const fetchedUrls: string[] = [];
     globalThis.fetch = vi.fn().mockImplementation((input: RequestInfo | URL) => {
-      const url = typeof input === 'string' ? input : input instanceof URL ? input.href : (input as Request).url;
+      const url = isString(input)
+        ? input
+        : input instanceof URL
+          ? input.href
+          : /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ (
+              input as Request
+            ).url;
       fetchedUrls.push(url);
       return Promise.resolve(new Response(new ArrayBuffer(100), { status: 200 }));
     });

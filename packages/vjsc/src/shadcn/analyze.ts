@@ -1,4 +1,5 @@
 import type { Node } from '@oxc-project/types';
+import { isString } from '@videojs/utils/predicate';
 import { parseSync } from 'oxc-parser';
 import { walk } from 'oxc-walker';
 
@@ -78,7 +79,7 @@ function importReference(
     return { literal: node.source, kind: node.exportKind === 'type' ? 'type' : 'static' };
   }
   if (node.type === 'ImportExpression') {
-    if (node.source.type === 'Literal' && typeof node.source.value === 'string') {
+    if (node.source.type === 'Literal' && isString(node.source.value)) {
       return { literal: node.source, kind: 'dynamic' };
     }
     if (node.source.type === 'TemplateLiteral' && node.source.expressions.length === 0) {

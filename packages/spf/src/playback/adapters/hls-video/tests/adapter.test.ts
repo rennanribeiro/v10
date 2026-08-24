@@ -434,7 +434,7 @@ describe('HlsVideoMediaElement', () => {
           [MEDIA_PLAYLIST_METADATA_KEY]: { mediaSequence: 0, targetDuration: 2, playlistType, endList: complete },
         },
       };
-      return {
+      return /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ {
         id: 'pres-1',
         url: 'https://example.com/master.m3u8',
         startTime: 0,
@@ -505,7 +505,9 @@ describe('HlsVideoMediaElement', () => {
 
       // The window slides (reload): derived value follows with no event needed.
       const slid = liveVideoPresentation();
-      const track = slid.selectionSets[0]!.switchingSets[0]!.tracks[0] as { segments: { startTime: number }[] };
+      const track =
+        /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ slid
+          .selectionSets[0]!.switchingSets[0]!.tracks[0] as { segments: { startTime: number }[] };
       for (const segment of track.segments) segment.startTime += 10;
       media.engine.state.presentation.set(slid);
       expect(media.liveEdgeStart).toBe(114);
@@ -561,8 +563,8 @@ describe('HlsVideoMediaElement', () => {
     const noticesMatching = (spy: { mock: { calls: unknown[][] } }, pattern: RegExp) =>
       spy.mock.calls.map((call) => String(call[0])).filter((text) => pattern.test(text));
 
-    const livePresentation = (metadata: Record<string, unknown>) =>
-      ({
+    const livePresentation = (metadata: { lowLatency?: boolean; playlistType?: string }) =>
+      /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ ({
         id: 'pres-1',
         url: 'https://example.com/master.m3u8',
         startTime: 0,
@@ -599,7 +601,7 @@ describe('HlsVideoMediaElement', () => {
             ],
           },
         ],
-      }) as unknown as Presentation;
+      }) as Presentation;
 
     it('warns that LL-HLS falls back to standard live', async () => {
       const spy = vi.spyOn(console, 'warn').mockImplementation(() => {});

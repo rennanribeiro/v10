@@ -1,3 +1,6 @@
+import * as fs from 'node:fs';
+import * as path from 'node:path';
+
 /**
  * Util reference handler — TAE-based auto-discovery.
  *
@@ -32,9 +35,7 @@
  * All overloads are preserved. When a function or constructor has multiple
  * overload signatures, each becomes a separate entry in the overloads array.
  */
-import * as fs from 'node:fs';
-import * as path from 'node:path';
-
+import { isObject, isString } from '@videojs/utils/predicate';
 import * as ts from 'typescript';
 import * as tae from 'typescript-api-extractor';
 
@@ -269,14 +270,14 @@ function getDisplayName(name: string): string {
   return name;
 }
 
-function normalizeDescription(description: unknown): string | undefined {
+function normalizeDescription(description: import('./boundary-types').ApiDocInput): string | undefined {
   if (!description) return undefined;
-  if (typeof description === 'string') return description;
+  if (isString(description)) return description;
   if (Array.isArray(description)) {
     const text = description
       .map((part) => {
-        if (typeof part === 'string') return part;
-        if (part && typeof part === 'object' && 'text' in part && typeof part.text === 'string') {
+        if (isString(part)) return part;
+        if (part && isObject(part) && 'text' in part && isString(part.text)) {
           return part.text;
         }
         return '';
@@ -372,7 +373,11 @@ function buildReturnValue(type: tae.AnyType, allExports?: tae.ExportNode[]): Ret
         ? formatDetailedType(prop.type, allExports, prop.optional)
         : formatType(prop.type, prop.optional);
       const propAbbrev = abbreviateType(prop.name, propType);
-      const field: { type: string; detailedType?: string; description?: string } = { type: propAbbrev ?? propType };
+      const field = { type: propAbbrev ?? propType } satisfies {
+        type: string;
+        detailedType?: string;
+        description?: string;
+      };
       if (propAbbrev && propType !== propAbbrev) field.detailedType = propType;
       if (prop.documentation?.description) field.description = prop.documentation.description;
       fields[prop.name] = field;
@@ -518,10 +523,7 @@ function extractControllerOverloads(filePath: string, program: ts.Program, class
   });
 }
 
-function extractPublicMembers(
-  classDecl: ts.ClassDeclaration,
-  sourceFile: ts.SourceFile
-): Record<string, { type: string; detailedType?: string; description?: string }> {
+function extractPublicMembers(classDecl: ts.ClassDeclaration, sourceFile: ts.SourceFile) {
   const fields: Record<string, { type: string; detailedType?: string; description?: string }> = {};
 
   for (const member of classDecl.members) {
@@ -552,7 +554,11 @@ function extractPublicMembers(
       const abbreviated = abbreviateType(name, typeStr);
       const description = getJSDocDescription(member);
 
-      const field: { type: string; detailedType?: string; description?: string } = { type: abbreviated ?? typeStr };
+      const field = { type: abbreviated ?? typeStr } satisfies {
+        type: string;
+        detailedType?: string;
+        description?: string;
+      };
       if (abbreviated && typeStr !== abbreviated) field.detailedType = typeStr;
       if (description) field.description = description;
 
@@ -572,7 +578,11 @@ function extractPublicMembers(
       const abbreviated = abbreviateType(name, typeStr);
       const description = getJSDocDescription(member);
 
-      const field: { type: string; detailedType?: string; description?: string } = { type: abbreviated ?? typeStr };
+      const field = { type: abbreviated ?? typeStr } satisfies {
+        type: string;
+        detailedType?: string;
+        description?: string;
+      };
       if (abbreviated && typeStr !== abbreviated) field.detailedType = typeStr;
       if (description) field.description = description;
 
@@ -580,7 +590,7 @@ function extractPublicMembers(
     }
   }
 
-  return fields;
+  return fields satisfies Record<string, { type: string; detailedType?: string; description?: string }>;
 }
 
 function getClassTypeParams(classDecl: ts.ClassDeclaration): string {
@@ -635,10 +645,9 @@ function getJSDocParamDescription(node: ts.Node, paramName: string): string | un
     for (const tag of doc.tags) {
       if (ts.isJSDocParameterTag(tag) && ts.isIdentifier(tag.name) && tag.name.text === paramName) {
         if (!tag.comment) return undefined;
-        const raw =
-          typeof tag.comment === 'string'
-            ? tag.comment
-            : tag.comment.map((c: ts.JSDocComment) => ('text' in c ? c.text : '')).join('');
+        const raw = isString(tag.comment)
+          ? tag.comment
+          : tag.comment.map((c: ts.JSDocComment) => ('text' in c ? c.text : '')).join('');
         return raw.replace(/^\s*-\s+/, '');
       }
     }
@@ -885,7 +894,11 @@ function extractReturnTypeFields(
     const abbreviated = abbreviateType(name, typeStr);
     const description = getJSDocDescription(member);
 
-    const field: { type: string; detailedType?: string; description?: string } = { type: abbreviated ?? typeStr };
+    const field = { type: abbreviated ?? typeStr } satisfies {
+      type: string;
+      detailedType?: string;
+      description?: string;
+    };
     if (abbreviated && typeStr !== abbreviated) field.detailedType = typeStr;
     if (description) field.description = description;
 

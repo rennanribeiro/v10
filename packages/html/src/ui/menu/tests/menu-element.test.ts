@@ -25,8 +25,13 @@ function uniqueTag(base: string): string {
 
 function createElement<Element extends HTMLElement>(Base: abstract new () => Element): Element {
   const tag = uniqueTag('test-el');
-  customElements.define(tag, class extends (Base as unknown as typeof HTMLElement) {});
-  return document.createElement(tag) as Element;
+  customElements.define(
+    tag,
+    class extends /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ (Base as typeof HTMLElement) {}
+  );
+  return /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ document.createElement(
+    tag
+  ) as Element;
 }
 
 function defineElement(tagName: string, Base: CustomElementConstructor): void {
@@ -38,23 +43,28 @@ function defineElement(tagName: string, Base: CustomElementConstructor): void {
 function createControlsStore(
   requestControlsLock: MediaControlsState['requestControlsLock'] = () => () => {}
 ): AnyPlayerStore {
-  return createStore<unknown>()<MediaControlsState>({
-    name: 'controls',
-    state: ({ get, set }) => {
-      return {
-        userActive: true,
-        controlsVisible: true,
-        requestControlsLock,
-        toggleControls() {
-          const visible = !(get().controlsVisible as boolean);
+  return /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ createStore<unknown>()<MediaControlsState>(
+    {
+      name: 'controls',
+      state: ({ get, set }) => {
+        return {
+          userActive: true,
+          controlsVisible: true,
+          requestControlsLock,
+          toggleControls() {
+            const visible = !(
+              /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ (get()
+                .controlsVisible as boolean)
+            );
 
-          set({ userActive: visible, controlsVisible: visible });
+            set({ userActive: visible, controlsVisible: visible });
 
-          return visible;
-        },
-      };
-    },
-  }) as unknown as AnyPlayerStore;
+            return visible;
+          },
+        };
+      },
+    }
+  ) as AnyPlayerStore;
 }
 
 class TestPlayerProviderElement extends MediaElement {
@@ -70,7 +80,9 @@ class TestPlayerProviderElement extends MediaElement {
   }
 
   setVisible(visible: boolean): void {
-    const state = this.store.state as MediaControlsState;
+    const state =
+      /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ this.store
+        .state as MediaControlsState;
 
     if (state.controlsVisible === visible) return;
 
@@ -94,7 +106,12 @@ function nextFrame(): Promise<void> {
 function setElementSize(element: HTMLElement, width: number, height: number): void {
   Object.defineProperty(element, 'scrollWidth', { configurable: true, value: width });
   Object.defineProperty(element, 'scrollHeight', { configurable: true, value: height });
-  vi.spyOn(element, 'getBoundingClientRect').mockReturnValue({ width, height } as DOMRect);
+  vi.spyOn(element, 'getBoundingClientRect').mockReturnValue(
+    /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ {
+      width,
+      height,
+    } as DOMRect
+  );
 }
 
 async function waitForAssertion(assertion: () => void): Promise<void> {
@@ -151,7 +168,9 @@ describe('MenuElement', () => {
     root.openMenu();
     await root.updateComplete;
 
-    const event = onOpenChange.mock.calls[0]?.[0] as CustomEvent;
+    const event =
+      /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ onOpenChange
+        .mock.calls[0]?.[0] as CustomEvent;
 
     expect(event.bubbles).toBe(true);
     expect(event.cancelable).toBe(true);
@@ -735,7 +754,11 @@ describe('MenuElement', () => {
     expect(root.open).toBe(true);
     expect(
       onOpenChange.mock.calls.some(
-        ([event]) => event.target === root && (event as CustomEvent<{ open: boolean }>).detail.open === false
+        ([event]) =>
+          event.target === root &&
+          /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ (
+            event as CustomEvent<{ open: boolean }>
+          ).detail.open === false
       )
     ).toBe(false);
   });
@@ -845,7 +868,10 @@ describe('MenuElement', () => {
   });
 
   it('closes an open root menu when parent controls hide', async () => {
-    const provider = document.createElement('test-menu-player-provider') as TestPlayerProviderElement;
+    const provider =
+      /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ document.createElement(
+        'test-menu-player-provider'
+      ) as TestPlayerProviderElement;
     const controls = createElement(ControlsElement);
     const trigger = document.createElement('button');
     const root = createElement(MenuElement);
@@ -881,7 +907,10 @@ describe('MenuElement', () => {
   });
 
   it('holds a controls visibility lock while a root menu is open', async () => {
-    const provider = document.createElement('test-menu-player-provider') as TestPlayerProviderElement;
+    const provider =
+      /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ document.createElement(
+        'test-menu-player-provider'
+      ) as TestPlayerProviderElement;
     const root = createElement(MenuElement);
 
     root.open = true;

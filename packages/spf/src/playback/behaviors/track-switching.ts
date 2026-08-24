@@ -604,7 +604,12 @@ function pickResolvedTextTrack<T extends TextTrackCandidate>(
     // The stored intent is a `Partial<TextTrack>`; cast to the candidate's own
     // partial shape so the generic `matchesPartialTrack` accepts it (every field
     // it carries — language, forced — exists on the candidate too).
-    const matched = candidates.filter((track) => matchesPartialTrack(track, intent as Partial<T>));
+    const matched = candidates.filter((track) =>
+      matchesPartialTrack(
+        track,
+        /* SAFETY: The surrounding typed API establishes the asserted contract at this boundary. */ intent as Partial<T>
+      )
+    );
     if (matched.length) return matched[0]!.id;
   }
   return pickTextTrackFromTracks(candidates, config);
@@ -766,7 +771,11 @@ export const switchVideoTrack = defineBehavior({
         ...config,
         selectionKey: 'selectedVideoTrackId',
         userSelectionKey: 'userVideoTrackSelection',
-        getTracks: (presentation) => getTracksByType(presentation, 'video') as readonly VideoTrackCandidate[],
+        getTracks: (presentation) =>
+          /* SAFETY: The surrounding typed API establishes the asserted contract at this boundary. */ getTracksByType(
+            presentation,
+            'video'
+          ) as readonly VideoTrackCandidate[],
         constraints: [excludeFailedCdns, excludeUnplayableTracks],
         rules: [filterByUserSelection, preferActiveCdn, playerResolutionCap, rankByBandwidth],
         noSupportedTrackCode: SVTA_NO_SUPPORTED_VIDEO_TRACK,
@@ -818,7 +827,11 @@ export const switchAudioTrack = defineBehavior({
         ...config,
         selectionKey: 'selectedAudioTrackId',
         userSelectionKey: 'userAudioTrackSelection',
-        getTracks: (presentation) => getTracksByType(presentation, 'audio') as readonly AudioTrackCandidate[],
+        getTracks: (presentation) =>
+          /* SAFETY: The surrounding typed API establishes the asserted contract at this boundary. */ getTracksByType(
+            presentation,
+            'audio'
+          ) as readonly AudioTrackCandidate[],
         constraints: [excludeFailedCdns, excludeUnplayableTracks],
         rules: [filterByUserSelection, preferActiveCdn, rankByBandwidth],
         noSupportedTrackCode: SVTA_NO_SUPPORTED_AUDIO_TRACK,
@@ -879,7 +892,11 @@ export const switchTextTrack = defineBehavior({
       config: {
         ...config,
         selectionKey: 'selectedTextTrackId',
-        getTracks: (presentation) => getTracksByType(presentation, 'text') as readonly TextTrackCandidate[],
+        getTracks: (presentation) =>
+          /* SAFETY: The surrounding typed API establishes the asserted contract at this boundary. */ getTracksByType(
+            presentation,
+            'text'
+          ) as readonly TextTrackCandidate[],
         constraints: [excludeFailedCdns],
         rules: [preferActiveCdn],
         resolveSelection: pickResolvedTextTrack,

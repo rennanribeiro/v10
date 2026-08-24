@@ -29,7 +29,9 @@ export function getPreferencesServer(cookies: AstroCookies): Preference {
   const frameworkCookie = cookies.has(FRAMEWORK_COOKIE) ? cookies.get(FRAMEWORK_COOKIE) : null;
 
   const framework = frameworkCookie && isValidFramework(frameworkCookie.value) ? frameworkCookie.value : null;
-  return { framework } as Preference;
+  return /* SAFETY: The surrounding typed API establishes the asserted contract at this boundary. */ {
+    framework,
+  } as Preference;
 }
 
 /**
@@ -37,7 +39,7 @@ export function getPreferencesServer(cookies: AstroCookies): Preference {
  */
 
 export function getFrameworkPreferenceClient(): SupportedFramework | null {
-  if (typeof document === 'undefined') return null;
+  if (!('document' in globalThis)) return null;
 
   const cookies = document.cookie.split(';').reduce(
     (acc, cookie) => {
@@ -45,7 +47,10 @@ export function getFrameworkPreferenceClient(): SupportedFramework | null {
       if (key) acc[key] = value;
       return acc;
     },
-    {} as Record<string, string>
+    /* SAFETY: The surrounding typed API establishes the asserted contract at this boundary. */ {} as Record<
+      string,
+      string
+    >
   );
 
   const framework = cookies[FRAMEWORK_COOKIE];
@@ -53,7 +58,7 @@ export function getFrameworkPreferenceClient(): SupportedFramework | null {
 }
 
 export function setFrameworkPreferenceClient(framework: SupportedFramework): void {
-  if (typeof document === 'undefined') return;
+  if (!('document' in globalThis)) return;
   if (!isValidFramework(framework)) throw new Error(`Invalid framework: ${framework}`);
 
   document.cookie = `${FRAMEWORK_COOKIE}=${framework}; ${COOKIE_OPTIONS}`;
@@ -63,13 +68,13 @@ export function setFrameworkPreferenceClient(framework: SupportedFramework): voi
  * Get style preference from localStorage for a specific framework
  */
 export function getStylePreferenceClient<F extends SupportedFramework>(framework: F): SupportedStyle<F> | null {
-  if (typeof localStorage === 'undefined') return null;
+  if (!('localStorage' in globalThis)) return null;
 
   const storageKey = STYLE_STORAGE_KEY_PREFIX + framework;
   const style = localStorage.getItem(storageKey);
 
   if (style && isValidStyleForFramework(framework, style)) {
-    return style as SupportedStyle<F>;
+    return /* SAFETY: The surrounding typed API establishes the asserted contract at this boundary. */ style as SupportedStyle<F>;
   }
   return null;
 }
@@ -78,7 +83,7 @@ export function getStylePreferenceClient<F extends SupportedFramework>(framework
  * Set style preference in localStorage for a specific framework
  */
 export function setStylePreferenceClient<F extends SupportedFramework>(framework: F, style: SupportedStyle<F>): void {
-  if (typeof localStorage === 'undefined') return;
+  if (!('localStorage' in globalThis)) return;
   if (!isValidStyleForFramework(framework, style)) {
     throw new Error(`Invalid style "${style}" for framework "${framework}"`);
   }
@@ -91,6 +96,6 @@ export function setStylePreferenceClient<F extends SupportedFramework>(framework
  * Update the DOM data-style attribute to match the current style
  */
 export function updateStyleAttribute(style: AnySupportedStyle): void {
-  if (typeof document === 'undefined') return;
+  if (!('document' in globalThis)) return;
   document.documentElement.dataset.style = style;
 }

@@ -40,7 +40,7 @@ export type MediaErrorTranslationKey = Extract<
   | 'common.empty'
 >;
 
-const MEDIA_ERROR_TRANSLATIONS: Record<number, Text | undefined> = {
+const MEDIA_ERROR_TRANSLATIONS = {
   [MediaError.MEDIA_ERR_ABORTED]: abortedText,
   [MediaError.MEDIA_ERR_NETWORK]: networkText,
   [MediaError.MEDIA_ERR_DECODE]: decodeText,
@@ -51,18 +51,20 @@ const MEDIA_ERROR_TRANSLATIONS: Record<number, Text | undefined> = {
   // unavailable or unsupported by their *browser*, which is wrong here. The
   // browser is fine; this player can't play the source.
   [SVTA_UNSUPPORTED_PLAYBACK_FEATURE]: unplayableText,
-};
+} satisfies Record<number, Text | undefined>;
 
-const STANDARD_CODE_UA_MESSAGES: Partial<Record<number, readonly string[]>> = {
+const STANDARD_CODE_UA_MESSAGES = {
   [MediaError.MEDIA_ERR_SRC_NOT_SUPPORTED]: ['Failed to open media'],
-};
+} satisfies Partial<Record<number, readonly string[]>>;
 
 function isStandardMediaErrorCode(code: number): boolean {
   return code >= MediaError.MEDIA_ERR_ABORTED && code <= MediaError.MEDIA_ERR_ENCRYPTED;
 }
 
 export function getMediaErrorTranslationKey(code: number): MediaErrorTranslationKey | undefined {
-  return MEDIA_ERROR_TRANSLATIONS[code]?.key as MediaErrorTranslationKey | undefined;
+  return /* SAFETY: The surrounding typed API establishes the asserted contract at this boundary. */ MEDIA_ERROR_TRANSLATIONS[
+    code
+  ]?.key as MediaErrorTranslationKey | undefined;
 }
 
 export function getErrorDialogTitleText(): Text {

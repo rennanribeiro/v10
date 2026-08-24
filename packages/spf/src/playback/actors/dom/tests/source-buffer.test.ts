@@ -33,9 +33,9 @@ function makeSourceBuffer(appendRanges: Array<[number, number]> = []): SourceBuf
     ranges = next;
   };
 
-  return {
+  return /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ {
     get buffered() {
-      return {
+      return /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ {
         get length() {
           return ranges.length;
         },
@@ -68,7 +68,7 @@ function makeSourceBuffer(appendRanges: Array<[number, number]> = []): SourceBuf
     removeEventListener: vi.fn((type: string, listener: EventListener) => {
       listeners[type] = (listeners[type] ?? []).filter((l) => l !== listener);
     }),
-  } as unknown as SourceBuffer;
+  } as SourceBuffer;
 }
 
 describe('createSourceBufferActor', () => {

@@ -1,4 +1,5 @@
 import type { TranslationKey, TranslationParams } from './params';
+import type { TextParams } from './text';
 import type { TranslationOptions, Translator } from './translator';
 
 type ResolveTranslationArgs<Key extends string> = Key extends TranslationKey
@@ -14,6 +15,9 @@ export function resolveTranslation<Key extends string>(
   ...args: ResolveTranslationArgs<Key>
 ): string {
   const [params] = args;
-  const translate = translator as (key: string, params?: unknown) => string;
+  const translate = /* SAFETY: The Translator overload accepts fallback keys with text parameters. */ translator as (
+    key: string,
+    params?: TextParams & TranslationOptions
+  ) => string;
   return params !== undefined ? translate(key, params) : translate(key);
 }

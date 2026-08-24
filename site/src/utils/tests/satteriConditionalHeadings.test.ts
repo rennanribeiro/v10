@@ -15,16 +15,18 @@ interface Heading {
 }
 
 function collect(source: string): Heading[] {
+  const frontmatter: Record<string, import('../site-data-value').SiteDataValue> = {};
   const data = {
     astro: {
-      frontmatter: {} as Record<string, unknown>,
+      frontmatter,
       headings: [],
       localImagePaths: new Set<string>(),
       remoteImagePaths: new Set<string>(),
     },
   };
   mdxToJs(source, { mdastPlugins: [satteriConditionalHeadings()], data });
-  return (data.astro.frontmatter.conditionalHeadings ?? []) as Heading[];
+  return /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ (data.astro
+    .frontmatter.conditionalHeadings ?? []) as Heading[];
 }
 
 describe('satteriConditionalHeadings', () => {

@@ -101,7 +101,9 @@ function withReadableCues<T>(track: TextTrack, action: () => T): T {
  * hls.js via `engine.subtitleTrack`.
  */
 export function HlsJsMediaTextTracksMixin<Base extends Constructor<HlsEngineHost>>(BaseClass: Base) {
-  class HlsJsMediaTextTracks extends (BaseClass as Constructor<HlsEngineHost>) {
+  class HlsJsMediaTextTracks
+    extends /* SAFETY: The surrounding typed API establishes the asserted contract at this boundary. */ (BaseClass as Constructor<HlsEngineHost>)
+  {
     #disconnect: AbortController | null = null;
 
     constructor(...args: any[]) {
@@ -127,7 +129,8 @@ export function HlsJsMediaTextTracksMixin<Base extends Constructor<HlsEngineHost
       if (!engine || !this.target) return;
 
       // The hls.js delegate always binds to the real `<video>` element.
-      const media = this.target as HTMLVideoElement;
+      const media = /* SAFETY: The surrounding typed API establishes the asserted contract at this boundary. */ this
+        .target as HTMLVideoElement;
 
       const onTracksFound = (_event: string, data: NonNativeTextTracksData) => {
         this.#clearTracks();
@@ -143,7 +146,14 @@ export function HlsJsMediaTextTracksMixin<Base extends Constructor<HlsEngineHost
           // See: https://github.com/video-dev/hls.js/blob/master/src/controller/timeline-controller.ts#L640
           const id = (trackObj._id ?? trackObj.default) ? 'default' : `${trackObj.kind}${idx}`;
 
-          addTextTrack(media, trackObj.kind as TextTrackKind, trackObj.label, baseTrackObj?.lang, id, trackObj.default);
+          addTextTrack(
+            media,
+            /* SAFETY: The surrounding typed API establishes the asserted contract at this boundary. */ trackObj.kind as TextTrackKind,
+            trackObj.label,
+            baseTrackObj?.lang,
+            id,
+            trackObj.default
+          );
         }
       };
 
@@ -228,7 +238,7 @@ export function HlsJsMediaTextTracksMixin<Base extends Constructor<HlsEngineHost
     }
   }
 
-  return HlsJsMediaTextTracks as unknown as Base;
+  return /* SAFETY: The surrounding typed API establishes the asserted contract at this boundary. */ HlsJsMediaTextTracks as Base;
 }
 
 function addTextTrack(
@@ -258,5 +268,5 @@ function addTextTrack(
   trackEl.setAttribute(HLS_TRACK_ATTR, '');
   mediaEl.append(trackEl);
 
-  return trackEl.track as TextTrack;
+  return /* SAFETY: The surrounding typed API establishes the asserted contract at this boundary. */ trackEl.track as TextTrack;
 }

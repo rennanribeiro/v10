@@ -10,7 +10,8 @@ import { MuxData } from '../mux-data';
 function setup() {
   const media = new MuxMedia();
   const { value, Wrapper } = createPlayerWrapper();
-  value.media = media as unknown as Media;
+  value.media =
+    /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ media as Media;
   return { media, Wrapper };
 }
 
@@ -36,10 +37,11 @@ describe('MuxData', () => {
 
   it('disables monitoring when MuxDataSdk is explicitly undefined', () => {
     const { media, Wrapper } = setup();
-    const MuxDataSdk = {
-      monitor: vi.fn(),
-      utils: { now: () => 0 },
-    } as unknown as NonNullable<MuxDataComponent['MuxDataSdk']>;
+    const MuxDataSdk =
+      /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ {
+        monitor: vi.fn(),
+        utils: { now: () => 0 },
+      } as NonNullable<MuxDataComponent['MuxDataSdk']>;
 
     const { rerender } = render(<MuxData MuxDataSdk={MuxDataSdk} />, { wrapper: Wrapper });
     const component = getMediaComponents(media).get(MuxDataComponent)!;

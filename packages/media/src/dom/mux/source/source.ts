@@ -88,6 +88,11 @@ export interface MuxStoryboardParams {
   [param: string]: string | number | undefined;
 }
 
+export interface MuxQueryParams {
+  token?: string | undefined;
+  [param: string]: string | number | boolean | null | undefined;
+}
+
 /**
  * Mux's DRM authoring input: a license token, in place of the license servers
  * `source.drm` normally names. Servers named outright alongside it still win,
@@ -128,7 +133,7 @@ export interface MuxSourceBase {
  * `snake_case` and skipping nullish values. A `token` replaces every other
  * param — signed URLs bake all modifiers into the token itself.
  */
-export function createMuxQuery(params: Record<string, unknown> = {}): string {
+export function createMuxQuery(params: MuxQueryParams = {}): string {
   const { token, ...rest } = params;
   if (token) return `?${new URLSearchParams({ token: String(token) })}`;
 

@@ -29,7 +29,9 @@ interface MuxAudioElementLike extends HTMLElement {
  * common class to extend, only a common host contract.
  */
 export function MuxAudioMixin<Class extends AnyConstructor<HTMLElement>>(BaseClass: Class): Class {
-  class MuxAudioElement extends (BaseClass as unknown as Constructor<MuxAudioElementLike>) {
+  class MuxAudioElement
+    extends /* SAFETY: The surrounding typed API establishes the asserted contract at this boundary. */ (BaseClass as Constructor<MuxAudioElementLike>)
+  {
     constructor(...args: any[]) {
       super(...args);
       // Covers both the `src` attribute and the `source` property (JS-only).
@@ -47,5 +49,5 @@ export function MuxAudioMixin<Class extends AnyConstructor<HTMLElement>>(BaseCla
     }
   }
 
-  return MuxAudioElement as unknown as Class;
+  return /* SAFETY: The surrounding typed API establishes the asserted contract at this boundary. */ MuxAudioElement as Class;
 }

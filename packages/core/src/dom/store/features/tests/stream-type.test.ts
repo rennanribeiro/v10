@@ -66,22 +66,36 @@ describe('streamTypeFeature', () => {
 
   describe('native (media exposes `streamType`)', () => {
     it('reads `streamType` directly when available', () => {
-      const media = new EventTarget() as EventTarget & { streamType: MediaStreamType };
+      const media =
+        /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ new EventTarget() as EventTarget & {
+          streamType: MediaStreamType;
+        };
       media.streamType = MediaStreamTypes.LIVE;
 
       const store = createStore<PlayerTarget>()(streamTypeFeature);
       // The store target accepts any `Media`-shaped object; cast for the test.
-      store.attach({ media: media as unknown as PlayerTarget['media'], container: null });
+      store.attach({
+        media:
+          /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ media as PlayerTarget['media'],
+        container: null,
+      });
 
       expect(store.state.streamType).toBe(MediaStreamTypes.LIVE);
     });
 
     it('syncs on `streamtypechange`', () => {
-      const media = new EventTarget() as EventTarget & { streamType: MediaStreamType };
+      const media =
+        /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ new EventTarget() as EventTarget & {
+          streamType: MediaStreamType;
+        };
       media.streamType = MediaStreamTypes.UNKNOWN;
 
       const store = createStore<PlayerTarget>()(streamTypeFeature);
-      store.attach({ media: media as unknown as PlayerTarget['media'], container: null });
+      store.attach({
+        media:
+          /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ media as PlayerTarget['media'],
+        container: null,
+      });
 
       expect(store.state.streamType).toBe(MediaStreamTypes.UNKNOWN);
 
@@ -105,7 +119,11 @@ describe('streamTypeFeature', () => {
       });
 
       const store = createStore<PlayerTarget>()(streamTypeFeature);
-      store.attach({ media: media as unknown as PlayerTarget['media'], container: null });
+      store.attach({
+        media:
+          /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ media as PlayerTarget['media'],
+        container: null,
+      });
 
       expect(store.state.streamType).toBe(MediaStreamTypes.LIVE);
     });

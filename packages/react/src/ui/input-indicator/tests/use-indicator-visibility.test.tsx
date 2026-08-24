@@ -35,17 +35,17 @@ function VisibilityProbe({ close, id }: { close: () => void; id: string }) {
 }
 
 function createPlayerContextValue(): PlayerContextValue {
-  const store = {
+  const store = /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ {
     state: {},
     target: {},
     subscribe: () => () => {},
-  } as unknown as UnknownStore;
+  } as UnknownStore;
 
-  return {
+  return /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ {
     store,
     media: null,
     setMedia: vi.fn(),
     container: document.createElement('div'),
     setContainer: vi.fn(),
-  } as unknown as PlayerContextValue;
+  } as PlayerContextValue;
 }

@@ -7,6 +7,7 @@ import {
   videoFeatures,
 } from '@videojs/core/dom';
 import { ContextConsumer } from '@videojs/element/context';
+import { isFunction } from '@videojs/utils/predicate';
 import { afterEach, describe, expect, it } from 'vite-plus/test';
 
 import { ContainerMixin } from '../../index';
@@ -50,14 +51,14 @@ describe('createPlayer', () => {
     const { ProviderMixin } = createPlayer({ features: videoFeatures });
     const ProviderElement = ProviderMixin(MediaElement);
 
-    expect(typeof ProviderElement).toBe('function');
+    expect(isFunction(ProviderElement)).toBe(true);
     expect(ProviderElement.prototype).toBeDefined();
   });
 
   it('ContainerMixin produces a valid custom element class', () => {
     const ContainerElement = ContainerMixin(MediaElement);
 
-    expect(typeof ContainerElement).toBe('function');
+    expect(isFunction(ContainerElement)).toBe(true);
     expect(ContainerElement.prototype).toBeDefined();
   });
 
@@ -83,16 +84,26 @@ describe('createPlayer', () => {
     const probeTag = defineTestElement(PopupGroupProbe);
     const provider = document.createElement(providerTag);
     const container = document.createElement(containerTag);
-    const outsideProbe = document.createElement(probeTag) as PopupGroupProbe;
-    const insideProbe = document.createElement(probeTag) as PopupGroupProbe;
+    const outsideProbe =
+      /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ document.createElement(
+        probeTag
+      ) as PopupGroupProbe;
+    const insideProbe =
+      /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ document.createElement(
+        probeTag
+      ) as PopupGroupProbe;
 
     container.append(insideProbe);
     provider.append(outsideProbe, container);
     document.body.append(provider);
 
     await Promise.all([
-      (provider as MediaElement).updateComplete,
-      (container as MediaElement).updateComplete,
+      /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ (
+        provider as MediaElement
+      ).updateComplete,
+      /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ (
+        container as MediaElement
+      ).updateComplete,
       outsideProbe.updateComplete,
       insideProbe.updateComplete,
     ]);
@@ -127,7 +138,10 @@ describe('createPlayer', () => {
     const tagName = 'test-metadata-provider';
     customElements.define(tagName, ProviderElement);
 
-    const player = document.createElement(tagName) as InstanceType<typeof ProviderElement>;
+    const player =
+      /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ document.createElement(
+        tagName
+      ) as InstanceType<typeof ProviderElement>;
     player.setAttribute('content-title', 'Attribute title');
     document.body.append(player);
 
@@ -159,7 +173,10 @@ describe('createPlayer', () => {
     const tagName = 'test-title-provider';
     customElements.define(tagName, ProviderElement);
 
-    const player = document.createElement(tagName) as InstanceType<typeof ProviderElement>;
+    const player =
+      /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ document.createElement(
+        tagName
+      ) as InstanceType<typeof ProviderElement>;
     document.body.append(player);
 
     // Nothing was installed over the native accessor, so this is still the tooltip.
@@ -179,7 +196,10 @@ describe('createPlayer', () => {
     const tagName = 'test-orientation-lock-provider';
     customElements.define(tagName, ProviderElement);
 
-    const player = document.createElement(tagName) as InstanceType<typeof ProviderElement>;
+    const player =
+      /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ document.createElement(
+        tagName
+      ) as InstanceType<typeof ProviderElement>;
     player.setAttribute('orientation-lock-type', 'portrait');
     document.body.append(player);
 

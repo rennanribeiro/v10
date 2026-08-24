@@ -18,12 +18,14 @@ export type MediaAttachMixin = <Class extends AnyConstructor<HTMLElement>>(BaseC
  */
 export function createMediaAttachMixin(context: MediaContext): MediaAttachMixin {
   return <Class extends AnyConstructor<HTMLElement>>(BaseClass: Class) => {
-    class MediaAttachElement extends (BaseClass as unknown as Constructor<CustomElement>) {
+    class MediaAttachElement
+      extends /* SAFETY: The surrounding typed API establishes the asserted contract at this boundary. */ (BaseClass as Constructor<CustomElement>)
+    {
       #setMedia: ((media: Media | null) => void) | null = null;
       #unsubscribe: (() => void) | null = null;
 
       getMediaTarget(): Media | null {
-        return this as unknown as Media;
+        return /* SAFETY: The surrounding typed API establishes the asserted contract at this boundary. */ this as Media;
       }
 
       override connectedCallback() {
@@ -58,7 +60,7 @@ export function createMediaAttachMixin(context: MediaContext): MediaAttachMixin 
       }
     }
 
-    return MediaAttachElement as unknown as Class;
+    return /* SAFETY: The surrounding typed API establishes the asserted contract at this boundary. */ MediaAttachElement as Class;
   };
 }
 

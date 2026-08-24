@@ -1,3 +1,4 @@
+import { isUndefined } from '@videojs/utils/predicate';
 /**
  * MediaSource Setup
  *
@@ -11,7 +12,7 @@
  * Check if MediaSource API is supported.
  */
 export function supportsMediaSource(): boolean {
-  return typeof MediaSource !== 'undefined';
+  return !isUndefined(MediaSource);
 }
 
 /**
@@ -19,7 +20,7 @@ export function supportsMediaSource(): boolean {
  * ManagedMediaSource is a newer Safari API with better lifecycle management.
  */
 export function supportsManagedMediaSource(): boolean {
-  return typeof ManagedMediaSource !== 'undefined';
+  return !isUndefined(ManagedMediaSource);
 }
 
 /**

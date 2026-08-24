@@ -1,6 +1,7 @@
 import type { ComponentSchema } from '../../vjsc/src/components/index.ts';
 import { type ComponentTarget, defineComponentTarget, type SourceProps } from '../../vjsc/src/target/index.ts';
 import { jsx } from '../../vjsc/src/target/jsx-runtime.ts';
+import type { VjscValue } from '../../vjsc/src/value.ts';
 
 export interface IconTargetOptions {
   readonly family?: string | undefined;
@@ -17,15 +18,17 @@ export function createHtmlIconTarget(options: IconTargetOptions = {}): Component
       source: '@videojs/icons/vjsc',
       resolve:
         ({ component }) =>
-        ({ props }: { props: SourceProps<Record<string, unknown>> }) =>
-          jsx(Icon, {
+        ({ props }: { props: SourceProps<Record<string, VjscValue>> }) => {
+          const iconProps: SourceProps<Record<string, VjscValue>> = {
             ...props,
-            ...(family === 'default' ? {} : { family }),
             name: component
               .replace(/Icon$/, '')
               .replace(/([a-z0-9])([A-Z])/g, '$1-$2')
               .toLowerCase(),
-          }),
+          };
+          if (family !== 'default') iconProps.family = family;
+          return jsx(Icon, iconProps);
+        },
       jsx: {
         importSource: 'vjsc/html-runtime',
         attributes: 'html',

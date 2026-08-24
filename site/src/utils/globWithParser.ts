@@ -5,7 +5,7 @@ import { glob } from 'astro/loaders';
  * Parser function that runs before Astro's schema validation.
  * Receives the entry and the original filename (before generateId transforms it).
  */
-type Parser = <TData extends Record<string, unknown>>(
+type Parser = <TData extends Record<string, import('./site-data-value').SiteDataValue>>(
   options: ParseDataOptions<TData>,
   originalEntry: string
 ) => Promise<ParseDataOptions<TData>>;

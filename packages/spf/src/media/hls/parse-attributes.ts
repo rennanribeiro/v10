@@ -70,9 +70,9 @@ const AUDIO_CODEC_PREFIXES = ['mp4a.', 'ac-3', 'ec-3', 'ac-4', 'opus', 'flac', '
 /**
  * Parse CODECS attribute into separate video and audio codecs.
  */
-export function parseCodecs(codecs: string): { video?: string; audio?: string } {
+export function parseCodecs(codecs: string) {
   const parts = codecs.split(',').map((s) => s.trim());
-  const result: { video?: string; audio?: string } = {};
+  const result = {} satisfies { video?: string; audio?: string };
 
   for (const codec of parts) {
     const lower = codec.toLowerCase();
@@ -83,7 +83,7 @@ export function parseCodecs(codecs: string): { video?: string; audio?: string } 
     }
   }
 
-  return result;
+  return result satisfies { video?: string; audio?: string };
 }
 
 /**

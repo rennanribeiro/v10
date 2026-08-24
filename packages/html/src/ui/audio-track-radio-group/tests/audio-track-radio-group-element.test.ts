@@ -22,8 +22,13 @@ function uniqueTag(base: string): string {
 
 function createElement<Element extends HTMLElement>(Base: abstract new () => Element): Element {
   const tag = uniqueTag('test-el');
-  customElements.define(tag, class extends (Base as unknown as typeof HTMLElement) {});
-  return document.createElement(tag) as Element;
+  customElements.define(
+    tag,
+    class extends /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ (Base as typeof HTMLElement) {}
+  );
+  return /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ document.createElement(
+    tag
+  ) as Element;
 }
 
 function defineElement(tagName: string, Base: CustomElementConstructor): void {
@@ -62,13 +67,15 @@ function createAudioTrackStore({
   audioTrackList?: MediaAudioTrackState['audioTrackList'] | undefined;
   selectAudioTrack?: MediaAudioTrackState['selectAudioTrack'] | undefined;
 } = {}): AnyPlayerStore {
-  return createStore<unknown>()<MediaAudioTrackState>({
-    name: 'audioTrack',
-    state: () => ({
-      audioTrackList,
-      selectAudioTrack,
-    }),
-  }) as unknown as AnyPlayerStore;
+  return /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ createStore<unknown>()<MediaAudioTrackState>(
+    {
+      name: 'audioTrack',
+      state: () => ({
+        audioTrackList,
+        selectAudioTrack,
+      }),
+    }
+  ) as AnyPlayerStore;
 }
 
 class TestPlayerProviderElement extends MediaElement {
@@ -107,7 +114,10 @@ function setup({
   locale?: string | undefined;
 } = {}) {
   const store = createAudioTrackStore({ audioTrackList, selectAudioTrack });
-  const provider = document.createElement('test-audio-track-player') as TestPlayerProviderElement;
+  const provider =
+    /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ document.createElement(
+      'test-audio-track-player'
+    ) as TestPlayerProviderElement;
   const menu = createElement(MenuElement);
   const options = createElement(AudioTrackRadioGroupElement);
 

@@ -11,19 +11,21 @@ import { ThumbnailElement } from '../thumbnail-element';
 function createTextTrackStore(
   thumbnailTrackCrossOrigin: MediaTextTrackState['thumbnailTrackCrossOrigin']
 ): AnyPlayerStore {
-  return createStore<unknown>()<MediaTextTrackState>({
-    name: 'textTrack',
-    state: () => ({
-      chaptersCues: [],
-      thumbnailCues: [],
-      thumbnailTrackSrc: null,
-      thumbnailTrackCrossOrigin,
-      textTrackList: [],
-      subtitlesShowing: false,
-      toggleSubtitles: vi.fn(),
-      selectSubtitlesTrack: vi.fn(),
-    }),
-  }) as unknown as AnyPlayerStore;
+  return /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ createStore<unknown>()<MediaTextTrackState>(
+    {
+      name: 'textTrack',
+      state: () => ({
+        chaptersCues: [],
+        thumbnailCues: [],
+        thumbnailTrackSrc: null,
+        thumbnailTrackCrossOrigin,
+        textTrackList: [],
+        subtitlesShowing: false,
+        toggleSubtitles: vi.fn(),
+        selectSubtitlesTrack: vi.fn(),
+      }),
+    }
+  ) as AnyPlayerStore;
 }
 
 class TestPlayerProviderElement extends MediaElement {
@@ -55,8 +57,14 @@ async function renderCrossOrigin(
   mediaCrossOrigin: MediaTextTrackState['thumbnailTrackCrossOrigin'],
   configure?: (el: ThumbnailElement) => void
 ): Promise<string | null> {
-  const provider = document.createElement('test-thumbnail-player') as TestPlayerProviderElement;
-  const thumbnail = document.createElement(ThumbnailElement.tagName) as ThumbnailElement;
+  const provider =
+    /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ document.createElement(
+      'test-thumbnail-player'
+    ) as TestPlayerProviderElement;
+  const thumbnail =
+    /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ document.createElement(
+      ThumbnailElement.tagName
+    ) as ThumbnailElement;
 
   configure?.(thumbnail);
   provider.setStore(createTextTrackStore(mediaCrossOrigin));

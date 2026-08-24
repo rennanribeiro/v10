@@ -1,5 +1,5 @@
 export interface BuildMagicString {
-  overwrite(start: number, end: number, content: string): unknown;
+  overwrite(start: number, end: number, content: string): BuildMagicString;
   toString(): string;
 }
 
@@ -31,7 +31,7 @@ export interface BuildPlugin {
     this: void,
     code: string,
     chunk: { fileName: string },
-    outputOptions?: unknown,
+    outputOptions?: import('rolldown').OutputOptions,
     meta?: BuildRenderChunkMeta
   ) => BuildCodeResult | null;
   writeBundle?: (this: void) => void;

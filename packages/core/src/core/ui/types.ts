@@ -1,5 +1,3 @@
-import type { State } from '@videojs/store';
-
 import type { Text, TextParams } from '../i18n';
 
 export type StateAttrMap<State> = {
@@ -14,8 +12,12 @@ export interface UIComponent<Props = object, State extends object = object> {
 }
 
 /** Constraint for core UI classes that derive component state from media state. */
-export interface MediaUIComponent<Props = object, State extends object = object> extends UIComponent<Props, State> {
-  setMedia(media: object): void;
+export interface MediaUIComponent<
+  Props = object,
+  State extends object = object,
+  Media extends object = object,
+> extends UIComponent<Props, State> {
+  setMedia(media: Media): void;
 }
 
 export interface ButtonState {

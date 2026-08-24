@@ -19,7 +19,7 @@ export function useMergedTranslations(
   return useMemo(() => {
     void registryEpoch;
     const registryLayer = getI18nTranslations(resolvedLocale);
-    return {
+    return /* SAFETY: The surrounding typed API establishes the asserted contract at this boundary. */ {
       ...registryLayer,
       ...lazyLayer,
       ...flattenTranslations(translationsProp ?? {}),

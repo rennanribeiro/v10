@@ -72,7 +72,7 @@ const API_REFERENCE_SUBSECTIONS: readonly SubsectionDef[] = Object.freeze([
 
 export const API_REFERENCE_SUBSECTION_TITLES = Object.freeze(API_REFERENCE_SUBSECTIONS.map((section) => section.title));
 
-function hasEntries(value: Record<string, unknown> | undefined): boolean {
+function hasEntries(value: Record<string, import('./site-data-value').SiteDataValue> | undefined): boolean {
   return Object.keys(value ?? {}).length > 0;
 }
 
@@ -85,11 +85,9 @@ function createSections(
       return [];
     }
 
-    const frameworks: SupportedFramework[] | undefined =
+    const frameworks =
       definition.key === 'props'
-        ? ([
-            ...new Set(Object.values(source.props).flatMap((prop) => prop.frameworks ?? (['html', 'react'] as const))),
-          ] as SupportedFramework[])
+        ? [...new Set(Object.values(source.props).flatMap((prop) => prop.frameworks ?? (['html', 'react'] as const)))]
         : undefined;
     const frameworkRestriction = frameworks?.length === 1 ? { frameworks } : {};
 
@@ -223,13 +221,14 @@ export function buildComponentReferenceTocHeadings(apiReferenceModel: ComponentR
         const frameworks = section.frameworks
           ? part.frameworks.filter((framework) => section.frameworks!.includes(framework))
           : part.frameworks;
-        headings.push({
+        const heading: TocHeading = {
           depth: section.depth,
           text: section.title,
           slug: section.id,
           tocKind: section.tocKind,
-          ...(frameworks.length < 2 ? { frameworks } : {}),
-        });
+        };
+        if (frameworks.length < 2) heading.frameworks = frameworks;
+        headings.push(heading);
       }
     }
 
@@ -237,12 +236,13 @@ export function buildComponentReferenceTocHeadings(apiReferenceModel: ComponentR
   }
 
   for (const section of apiReferenceModel.sections) {
-    headings.push({
+    const heading: TocHeading = {
       depth: section.depth,
       text: section.title,
       slug: section.id,
-      ...(section.frameworks ? { frameworks: section.frameworks } : {}),
-    });
+    };
+    if (section.frameworks) heading.frameworks = section.frameworks;
+    headings.push(heading);
   }
 
   return headings;

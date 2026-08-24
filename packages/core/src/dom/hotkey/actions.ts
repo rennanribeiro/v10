@@ -36,7 +36,7 @@ export function isHotkeyToggleAction(action: string): boolean {
   return action.startsWith('toggle');
 }
 
-const HOTKEY_ACTIONS: Record<HotkeyActionName, HotkeyActionResolver> = {
+const HOTKEY_ACTIONS = {
   togglePaused({ store }) {
     const playback = selectPlayback(store.state);
     if (!playback) return;
@@ -87,10 +87,13 @@ const HOTKEY_ACTIONS: Record<HotkeyActionName, HotkeyActionResolver> = {
 
     time.seek((percent / 100) * time.duration);
   },
-};
+} satisfies Record<HotkeyActionName, HotkeyActionResolver>;
 
 export function resolveHotkeyAction(name: string): HotkeyActionResolver | undefined {
-  const resolver = HOTKEY_ACTIONS[name as HotkeyActionName];
+  const resolver =
+    HOTKEY_ACTIONS[
+      /* SAFETY: The surrounding typed API establishes the asserted contract at this boundary. */ name as HotkeyActionName
+    ];
 
   if (__DEV__ && !resolver) {
     console.warn(`[vjs-hotkey] Unknown action: "${name}"`);

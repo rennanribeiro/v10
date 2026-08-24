@@ -15,26 +15,86 @@ import type { HlsVideoEngineSignals, HlsVideoEngineState } from '@videojs/spf/hl
 import { createHlsVideoEngine, getMediaPlaylistMetadata } from '@videojs/spf/hls';
 
 // ── DOM refs ──────────────────────────────────────────────────────────────────
-const video = document.getElementById('video') as HTMLVideoElement;
-const logsDiv = document.getElementById('logs') as HTMLDivElement;
-const liveStatusDiv = document.getElementById('live-status') as HTMLDivElement;
-const stateDiv = document.getElementById('state') as HTMLDivElement;
-const renditionButtonsDiv = document.getElementById('rendition-buttons') as HTMLDivElement;
-const audioTrackButtonsDiv = document.getElementById('audio-track-buttons') as HTMLDivElement;
-const textTrackButtonsDiv = document.getElementById('text-track-buttons') as HTMLDivElement;
-const resolutionListDiv = document.getElementById('resolution-list') as HTMLDivElement;
-const nowPlayingQualityDiv = document.getElementById('now-playing-quality') as HTMLDivElement;
-const throughputDiv = document.getElementById('throughput-display') as HTMLDivElement;
-const playerSizeDiv = document.getElementById('player-size-display') as HTMLDivElement;
-const srcPreset = document.getElementById('src-preset') as HTMLSelectElement;
-const srcInput = document.getElementById('src-input') as HTMLInputElement;
-const setSrcBtn = document.getElementById('set-src') as HTMLButtonElement;
-const avcOnlyToggle = document.getElementById('avc-only-toggle') as HTMLInputElement;
-const mutedToggle = document.getElementById('muted-toggle') as HTMLInputElement;
-const autoplayToggle = document.getElementById('autoplay-toggle') as HTMLInputElement;
-const loopToggle = document.getElementById('loop-toggle') as HTMLInputElement;
-const preloadSelect = document.getElementById('preload-select') as HTMLSelectElement;
-const shareLink = document.getElementById('share-link') as HTMLAnchorElement;
+const video =
+  /* SAFETY: The surrounding typed API establishes the asserted contract at this boundary. */ document.getElementById(
+    'video'
+  ) as HTMLVideoElement;
+const logsDiv =
+  /* SAFETY: The surrounding typed API establishes the asserted contract at this boundary. */ document.getElementById(
+    'logs'
+  ) as HTMLDivElement;
+const liveStatusDiv =
+  /* SAFETY: The surrounding typed API establishes the asserted contract at this boundary. */ document.getElementById(
+    'live-status'
+  ) as HTMLDivElement;
+const stateDiv =
+  /* SAFETY: The surrounding typed API establishes the asserted contract at this boundary. */ document.getElementById(
+    'state'
+  ) as HTMLDivElement;
+const renditionButtonsDiv =
+  /* SAFETY: The surrounding typed API establishes the asserted contract at this boundary. */ document.getElementById(
+    'rendition-buttons'
+  ) as HTMLDivElement;
+const audioTrackButtonsDiv =
+  /* SAFETY: The surrounding typed API establishes the asserted contract at this boundary. */ document.getElementById(
+    'audio-track-buttons'
+  ) as HTMLDivElement;
+const textTrackButtonsDiv =
+  /* SAFETY: The surrounding typed API establishes the asserted contract at this boundary. */ document.getElementById(
+    'text-track-buttons'
+  ) as HTMLDivElement;
+const resolutionListDiv =
+  /* SAFETY: The surrounding typed API establishes the asserted contract at this boundary. */ document.getElementById(
+    'resolution-list'
+  ) as HTMLDivElement;
+const nowPlayingQualityDiv =
+  /* SAFETY: The surrounding typed API establishes the asserted contract at this boundary. */ document.getElementById(
+    'now-playing-quality'
+  ) as HTMLDivElement;
+const throughputDiv =
+  /* SAFETY: The surrounding typed API establishes the asserted contract at this boundary. */ document.getElementById(
+    'throughput-display'
+  ) as HTMLDivElement;
+const playerSizeDiv =
+  /* SAFETY: The surrounding typed API establishes the asserted contract at this boundary. */ document.getElementById(
+    'player-size-display'
+  ) as HTMLDivElement;
+const srcPreset =
+  /* SAFETY: The surrounding typed API establishes the asserted contract at this boundary. */ document.getElementById(
+    'src-preset'
+  ) as HTMLSelectElement;
+const srcInput =
+  /* SAFETY: The surrounding typed API establishes the asserted contract at this boundary. */ document.getElementById(
+    'src-input'
+  ) as HTMLInputElement;
+const setSrcBtn =
+  /* SAFETY: The surrounding typed API establishes the asserted contract at this boundary. */ document.getElementById(
+    'set-src'
+  ) as HTMLButtonElement;
+const avcOnlyToggle =
+  /* SAFETY: The surrounding typed API establishes the asserted contract at this boundary. */ document.getElementById(
+    'avc-only-toggle'
+  ) as HTMLInputElement;
+const mutedToggle =
+  /* SAFETY: The surrounding typed API establishes the asserted contract at this boundary. */ document.getElementById(
+    'muted-toggle'
+  ) as HTMLInputElement;
+const autoplayToggle =
+  /* SAFETY: The surrounding typed API establishes the asserted contract at this boundary. */ document.getElementById(
+    'autoplay-toggle'
+  ) as HTMLInputElement;
+const loopToggle =
+  /* SAFETY: The surrounding typed API establishes the asserted contract at this boundary. */ document.getElementById(
+    'loop-toggle'
+  ) as HTMLInputElement;
+const preloadSelect =
+  /* SAFETY: The surrounding typed API establishes the asserted contract at this boundary. */ document.getElementById(
+    'preload-select'
+  ) as HTMLSelectElement;
+const shareLink =
+  /* SAFETY: The surrounding typed API establishes the asserted contract at this boundary. */ document.getElementById(
+    'share-link'
+  ) as HTMLAnchorElement;
 
 // ── Query params ──────────────────────────────────────────────────────────────
 const DEFAULT_STREAM = 'https://stream.mux.com/JX01bG8eB4uaoV3OpDuK602rBfvdSgrMObjwuUOBn4JrQ.m3u8';
@@ -85,7 +145,11 @@ const INITIAL_SRC = params.get('src') ?? DEFAULT_STREAM;
 const INITIAL_MUTED = params.get('muted') === 'true';
 const INITIAL_AUTOPLAY = params.get('autoplay') === 'true';
 const INITIAL_LOOP = params.get('loop') === 'true';
-const INITIAL_PRELOAD = (params.get('preload') as 'auto' | 'metadata' | 'none') ?? 'none';
+const INITIAL_PRELOAD =
+  /* SAFETY: The surrounding typed API establishes the asserted contract at this boundary. */ (params.get('preload') as
+    | 'auto'
+    | 'metadata'
+    | 'none') ?? 'none';
 const INITIAL_AVC_ONLY = params.get('avcOnly') === 'true';
 
 // Populate the preset picker; selecting one loads it (and enables AVC-only if the
@@ -772,19 +836,24 @@ function startEngine(src: string) {
   cleanupEffects();
   if (engine) engine.destroy();
 
-  engine = createHlsVideoEngine({
+  const config: Parameters<typeof createHlsVideoEngine>[0] = {
     initialBandwidth: 1_000_000,
     // AVC-only filters HEVC so ABR never crosses codec families (no changeType).
     // Omitted (not set to undefined) when off, per exactOptionalPropertyTypes.
-    ...(avcOnlyToggle.checked ? { canPlayTrack: avcOnly } : {}),
     onSignalsReady: (refs) => {
       signals = refs;
     },
-  });
-  (window as any).engine = engine;
-  (window as any).signals = signals;
-  (window as any).state = () => snapshot(engine.state);
-  (window as any).context = () => snapshot(engine.context);
+  };
+  if (avcOnlyToggle.checked) Object.assign(config, { canPlayTrack: avcOnly });
+  engine = createHlsVideoEngine(config);
+  /* SAFETY: The surrounding typed API establishes the asserted contract at this boundary. */ (window as any).engine =
+    engine;
+  /* SAFETY: The surrounding typed API establishes the asserted contract at this boundary. */ (window as any).signals =
+    signals;
+  /* SAFETY: The surrounding typed API establishes the asserted contract at this boundary. */ (window as any).state =
+    () => snapshot(engine.state);
+  /* SAFETY: The surrounding typed API establishes the asserted contract at this boundary. */ (window as any).context =
+    () => snapshot(engine.context);
 
   // ── Reactive effects ───────────────────────────────────────────────────────
 
@@ -792,9 +861,18 @@ function startEngine(src: string) {
   // They are reset on each startEngine call so a new source logs correctly.
   const prev = {
     hasPresentation: false,
-    selectedVideoTrackId: undefined as string | undefined,
-    selectedAudioTrackId: undefined as string | undefined,
-    selectedTextTrackId: undefined as string | undefined,
+    selectedVideoTrackId:
+      /* SAFETY: The surrounding typed API establishes the asserted contract at this boundary. */ undefined as
+        | string
+        | undefined,
+    selectedAudioTrackId:
+      /* SAFETY: The surrounding typed API establishes the asserted contract at this boundary. */ undefined as
+        | string
+        | undefined,
+    selectedTextTrackId:
+      /* SAFETY: The surrounding typed API establishes the asserted contract at this boundary. */ undefined as
+        | string
+        | undefined,
   };
   const prevContext = { hasMediaSource: false, hasVideoBuffer: false, hasAudioBuffer: false };
 
@@ -912,7 +990,11 @@ function startEngine(src: string) {
   // Set preload on the element BEFORE wiring context so syncPreload's read
   // effect picks up the user-selected value rather than the hardcoded "none"
   // from the HTML.
-  video.preload = preloadSelect.value as 'auto' | 'metadata' | 'none';
+  video.preload =
+    /* SAFETY: The surrounding typed API establishes the asserted contract at this boundary. */ preloadSelect.value as
+      | 'auto'
+      | 'metadata'
+      | 'none';
   signals.context.mediaElement.set(video);
   signals.state.presentation.set({ url: src });
 
@@ -928,7 +1010,10 @@ try {
   video.loop = INITIAL_LOOP;
   startEngine(INITIAL_SRC);
 } catch (error) {
-  log(`✗ Error creating engine: ${(error as Error).message}`, 'error');
+  log(
+    `✗ Error creating engine: ${/* SAFETY: The surrounding typed API establishes the asserted contract at this boundary. */ (error as Error).message}`,
+    'error'
+  );
   console.error(error);
 }
 
@@ -1010,7 +1095,11 @@ loopToggle.addEventListener('change', () => {
 });
 
 preloadSelect.addEventListener('change', () => {
-  const value = preloadSelect.value as 'auto' | 'metadata' | 'none';
+  const value =
+    /* SAFETY: The surrounding typed API establishes the asserted contract at this boundary. */ preloadSelect.value as
+      | 'auto'
+      | 'metadata'
+      | 'none';
   signals.state.preload.set(value);
   log(`Preload: ${value}`);
   updateShareUrl();

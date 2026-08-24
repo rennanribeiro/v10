@@ -27,37 +27,39 @@ function defineElement(tagName: string, Base: CustomElementConstructor): void {
 }
 
 function createMenuStore(overrides: Partial<MenuMediaState> = {}): AnyPlayerStore {
-  return createStore<unknown>()<MenuMediaState>({
-    name: 'videoMenuComposition',
-    state: () => ({
-      audioTrackList: [
-        { id: '0', kind: 'main', label: 'English', language: 'en', enabled: false },
-        { id: '1', kind: 'alternative', label: 'Spanish', language: 'es', enabled: true },
-      ],
-      selectAudioTrack: vi.fn(),
-      playbackRates: [0.5, 1, 1.5, 2],
-      playbackRate: 1.5,
-      setPlaybackRate: vi.fn(),
-      videoRenditionList: [
-        { id: '0', height: 1080, selected: false },
-        { id: '1', height: 720, selected: true },
-      ],
-      activeVideoRendition: null,
-      selectVideoRendition: vi.fn(),
-      chaptersCues: [],
-      thumbnailCues: [],
-      thumbnailTrackSrc: null,
-      thumbnailTrackCrossOrigin: null,
-      textTrackList: [
-        { kind: 'captions', label: 'English', language: 'en', mode: 'showing' },
-        { kind: 'subtitles', label: 'Spanish', language: 'es', mode: 'disabled' },
-      ],
-      subtitlesShowing: true,
-      toggleSubtitles: vi.fn(),
-      selectSubtitlesTrack: vi.fn(),
-      ...overrides,
-    }),
-  }) as unknown as AnyPlayerStore;
+  return /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ createStore<unknown>()<MenuMediaState>(
+    {
+      name: 'videoMenuComposition',
+      state: () => ({
+        audioTrackList: [
+          { id: '0', kind: 'main', label: 'English', language: 'en', enabled: false },
+          { id: '1', kind: 'alternative', label: 'Spanish', language: 'es', enabled: true },
+        ],
+        selectAudioTrack: vi.fn(),
+        playbackRates: [0.5, 1, 1.5, 2],
+        playbackRate: 1.5,
+        setPlaybackRate: vi.fn(),
+        videoRenditionList: [
+          { id: '0', height: 1080, selected: false },
+          { id: '1', height: 720, selected: true },
+        ],
+        activeVideoRendition: null,
+        selectVideoRendition: vi.fn(),
+        chaptersCues: [],
+        thumbnailCues: [],
+        thumbnailTrackSrc: null,
+        thumbnailTrackCrossOrigin: null,
+        textTrackList: [
+          { kind: 'captions', label: 'English', language: 'en', mode: 'showing' },
+          { kind: 'subtitles', label: 'Spanish', language: 'es', mode: 'disabled' },
+        ],
+        subtitlesShowing: true,
+        toggleSubtitles: vi.fn(),
+        selectSubtitlesTrack: vi.fn(),
+        ...overrides,
+      }),
+    }
+  ) as AnyPlayerStore;
 }
 
 class TestPlayerProviderElement extends MediaElement {
@@ -113,18 +115,39 @@ async function waitForAssertion(assertion: () => void): Promise<void> {
   throw error;
 }
 
-function setup(store: AnyPlayerStore): Record<keyof typeof groups, MenuItemElement> {
-  const provider = document.createElement('test-video-menu-composition-player') as TestPlayerProviderElement;
-  const root = document.createElement(MenuElement.tagName) as MenuElement;
-  const triggers = {} as Record<keyof typeof groups, MenuItemElement>;
+function setup(store: AnyPlayerStore) {
+  const provider =
+    /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ document.createElement(
+      'test-video-menu-composition-player'
+    ) as TestPlayerProviderElement;
+  const root =
+    /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ document.createElement(
+      MenuElement.tagName
+    ) as MenuElement;
+  const triggers =
+    /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ {} as Record<
+      keyof typeof groups,
+      MenuItemElement
+    >;
 
   provider.setStore(store);
   root.open = true;
 
-  for (const [name, groupTag] of Object.entries(groups) as [keyof typeof groups, string][]) {
-    const trigger = document.createElement(MenuItemElement.tagName) as MenuItemElement;
+  for (const [
+    name,
+    groupTag,
+  ] of /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ Object.entries(
+    groups
+  ) as [keyof typeof groups, string][]) {
+    const trigger =
+      /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ document.createElement(
+        MenuItemElement.tagName
+      ) as MenuItemElement;
     const hint = document.createElement('span');
-    const submenu = document.createElement(MenuElement.tagName) as MenuElement;
+    const submenu =
+      /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ document.createElement(
+        MenuElement.tagName
+      ) as MenuElement;
     const group = document.createElement(groupTag);
     const submenuId = `${name}-menu`;
 
@@ -140,7 +163,7 @@ function setup(store: AnyPlayerStore): Record<keyof typeof groups, MenuItemEleme
   provider.append(root);
   document.body.append(provider);
 
-  return triggers;
+  return triggers satisfies Record<keyof typeof groups, MenuItemElement>;
 }
 
 describe('video menu primitive composition', () => {

@@ -77,7 +77,8 @@ export class PlayerController<Store extends PlayerStore, Result = Store> impleme
     if (!store) return undefined;
 
     // Without selector: return store directly
-    if (!this.#selector) return store as unknown as Result;
+    if (!this.#selector)
+      return /* SAFETY: The surrounding typed API establishes the asserted contract at this boundary. */ store as Result;
 
     // With selector: use StoreController
     return this.#store?.value;

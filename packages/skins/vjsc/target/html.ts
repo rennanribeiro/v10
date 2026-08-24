@@ -10,7 +10,7 @@ import { Host, jsx } from '../../../vjsc/src/target/jsx-runtime.ts';
 
 type CoreSchema = typeof coreSchema;
 
-const componentParts: Readonly<Record<string, Readonly<Record<string, string>>>> = {
+const componentParts = {
   Controls: {
     Root: 'Controls',
     Group: 'ControlsGroup',
@@ -99,9 +99,9 @@ const componentParts: Readonly<Record<string, Readonly<Record<string, string>>>>
     Preview: 'SliderPreview',
     Value: 'SliderValue',
   },
-};
+} satisfies Readonly<Record<string, Readonly<Record<string, string>>>>;
 
-const groupedModules: Readonly<Record<string, string>> = {
+const groupedModules = {
   MenuCheckboxItem: 'menu',
   MenuGroup: 'menu',
   MenuGroupLabel: 'menu',
@@ -113,12 +113,12 @@ const groupedModules: Readonly<Record<string, string>> = {
   SliderPreview: 'slider',
   TooltipLabel: 'tooltip',
   TooltipShortcut: 'tooltip',
-};
+} satisfies Readonly<Record<string, string>>;
 
-const publicNames: Readonly<Record<string, string>> = {
+const publicNames = {
   AirPlayButton: 'airplay-button',
   PiPButton: 'pip-button',
-};
+} satisfies Readonly<Record<string, string>>;
 
 export const htmlComponentTarget: ComponentTarget<CoreSchema> = defineComponentTarget<CoreSchema>()(({
   target,

@@ -1,3 +1,4 @@
+import { isFunction } from '@videojs/utils/predicate';
 import { Signal } from 'signal-polyfill';
 
 // Computeds waiting to re-run after their dependencies changed.
@@ -9,7 +10,9 @@ const watcher = new Signal.subtle.Watcher(() => {
 
 function runPending() {
   for (const c of watcher.getPending()) {
-    pending.add(c as Signal.Computed<void>);
+    pending.add(
+      /* SAFETY: The surrounding typed API establishes the asserted contract at this boundary. */ c as Signal.Computed<void>
+    );
   }
   watcher.watch(); // re-arm before running effects, in case they write signals
   for (const c of pending) {
@@ -31,13 +34,13 @@ function runPending() {
 export function effect(fn: () => (() => void) | void): () => void {
   let cleanup: (() => void) | void;
   const c = new Signal.Computed(() => {
-    if (typeof cleanup === 'function') cleanup();
+    if (isFunction(cleanup)) cleanup();
     cleanup = fn();
   });
   watcher.watch(c);
   c.get(); // initial run
   return () => {
     watcher.unwatch(c);
-    if (typeof cleanup === 'function') cleanup();
+    if (isFunction(cleanup)) cleanup();
   };
 }

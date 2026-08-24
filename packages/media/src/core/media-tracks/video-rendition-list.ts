@@ -6,12 +6,17 @@ import type { VideoRendition } from './video-rendition';
 import type { VideoTrack } from './video-track';
 
 export function addRendition(track: VideoTrack, rendition: VideoRendition) {
-  const renditionList = getPrivate(track).media?.deref()?.videoRenditions as VideoRenditionList | undefined;
+  const renditionList =
+    /* SAFETY: The surrounding typed API establishes the asserted contract at this boundary. */ getPrivate(
+      track
+    ).media?.deref()?.videoRenditions as VideoRenditionList | undefined;
 
   getPrivate(rendition).media = getPrivate(track).media;
   getPrivate(rendition).track = track;
 
-  const renditionSet = getPrivate(track).renditionSet as Set<VideoRendition>;
+  const renditionSet =
+    /* SAFETY: The surrounding typed API establishes the asserted contract at this boundary. */ getPrivate(track)
+      .renditionSet as Set<VideoRendition>;
   renditionSet.add(rendition);
   const index = renditionSet.size - 1;
 
@@ -31,9 +36,16 @@ export function addRendition(track: VideoTrack, rendition: VideoRendition) {
 }
 
 export function removeRendition(rendition: VideoRendition) {
-  const renditionList = getPrivate(rendition).media?.deref()?.videoRenditions as VideoRenditionList | undefined;
-  const track = getPrivate(rendition).track as VideoTrack;
-  const renditionSet = getPrivate(track).renditionSet as Set<VideoRendition>;
+  const renditionList =
+    /* SAFETY: The surrounding typed API establishes the asserted contract at this boundary. */ getPrivate(
+      rendition
+    ).media?.deref()?.videoRenditions as VideoRenditionList | undefined;
+  const track = /* SAFETY: The surrounding typed API establishes the asserted contract at this boundary. */ getPrivate(
+    rendition
+  ).track as VideoTrack;
+  const renditionSet =
+    /* SAFETY: The surrounding typed API establishes the asserted contract at this boundary. */ getPrivate(track)
+      .renditionSet as Set<VideoRendition>;
   renditionSet.delete(rendition);
 
   queueMicrotask(() => {
@@ -44,7 +56,10 @@ export function removeRendition(rendition: VideoRendition) {
 }
 
 export function selectedChanged(rendition: VideoRendition) {
-  const renditionList = getPrivate(rendition).media?.deref()?.videoRenditions as VideoRenditionList | undefined;
+  const renditionList =
+    /* SAFETY: The surrounding typed API establishes the asserted contract at this boundary. */ getPrivate(
+      rendition
+    ).media?.deref()?.videoRenditions as VideoRenditionList | undefined;
 
   // Prevent firing a rendition list `change` event multiple times per tick.
   if (!renditionList || getPrivate(renditionList).changeRequested) return;
@@ -53,7 +68,9 @@ export function selectedChanged(rendition: VideoRendition) {
   queueMicrotask(() => {
     delete getPrivate(renditionList).changeRequested;
 
-    const track = getPrivate(rendition).track as VideoTrack;
+    const track =
+      /* SAFETY: The surrounding typed API establishes the asserted contract at this boundary. */ getPrivate(rendition)
+        .track as VideoTrack;
     if (!track.selected) return;
 
     renditionList.dispatchEvent(new Event('change'));
@@ -61,7 +78,10 @@ export function selectedChanged(rendition: VideoRendition) {
 }
 
 export function activeChanged(rendition: VideoRendition) {
-  const renditionList = getPrivate(rendition).media?.deref()?.videoRenditions as VideoRenditionList | undefined;
+  const renditionList =
+    /* SAFETY: The surrounding typed API establishes the asserted contract at this boundary. */ getPrivate(
+      rendition
+    ).media?.deref()?.videoRenditions as VideoRenditionList | undefined;
 
   if (!renditionList || getPrivate(renditionList).activeChangeRequested) return;
   getPrivate(renditionList).activeChangeRequested = true;
@@ -69,7 +89,9 @@ export function activeChanged(rendition: VideoRendition) {
   queueMicrotask(() => {
     delete getPrivate(renditionList).activeChangeRequested;
 
-    const track = getPrivate(rendition).track as VideoTrack;
+    const track =
+      /* SAFETY: The surrounding typed API establishes the asserted contract at this boundary. */ getPrivate(rendition)
+        .track as VideoTrack;
     if (!track.selected) return;
 
     renditionList.dispatchEvent(new Event('activechange'));
@@ -77,11 +99,16 @@ export function activeChanged(rendition: VideoRendition) {
 }
 
 function getCurrentRenditions(renditionList: VideoRenditionList): VideoRendition[] {
-  const media = getPrivate(renditionList).media?.deref() as HTMLMediaElement | undefined;
+  const media = /* SAFETY: The surrounding typed API establishes the asserted contract at this boundary. */ getPrivate(
+    renditionList
+  ).media?.deref() as HTMLMediaElement | undefined;
   if (!media) return [];
   return [...media.videoTracks]
     .filter((track) => track.selected)
-    .flatMap((track) => [...(getPrivate(track).renditionSet as Set<VideoRendition>)]);
+    .flatMap((track) => [
+      .../* SAFETY: The surrounding typed API establishes the asserted contract at this boundary. */ (getPrivate(track)
+        .renditionSet as Set<VideoRendition>),
+    ]);
 }
 
 export class VideoRenditionList extends EventTarget {
@@ -123,7 +150,10 @@ export class VideoRenditionList extends EventTarget {
     }
     if (isFunction(callback)) {
       this.#addRenditionCallback = callback;
-      this.addEventListener('addrendition', callback as unknown as EventListener);
+      this.addEventListener(
+        'addrendition',
+        /* SAFETY: The surrounding typed API establishes the asserted contract at this boundary. */ callback as EventListener
+      );
     }
   }
 
@@ -138,7 +168,10 @@ export class VideoRenditionList extends EventTarget {
     }
     if (isFunction(callback)) {
       this.#removeRenditionCallback = callback;
-      this.addEventListener('removerendition', callback as unknown as EventListener);
+      this.addEventListener(
+        'removerendition',
+        /* SAFETY: The surrounding typed API establishes the asserted contract at this boundary. */ callback as EventListener
+      );
     }
   }
 

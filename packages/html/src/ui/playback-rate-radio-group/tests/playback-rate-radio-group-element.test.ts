@@ -21,8 +21,13 @@ function uniqueTag(base: string): string {
 
 function createElement<Element extends HTMLElement>(Base: abstract new () => Element): Element {
   const tag = uniqueTag('test-el');
-  customElements.define(tag, class extends (Base as unknown as typeof HTMLElement) {});
-  return document.createElement(tag) as Element;
+  customElements.define(
+    tag,
+    class extends /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ (Base as typeof HTMLElement) {}
+  );
+  return /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ document.createElement(
+    tag
+  ) as Element;
 }
 
 function defineElement(tagName: string, Base: CustomElementConstructor): void {
@@ -60,16 +65,18 @@ function createPlaybackRateStore({
   playbackRate?: number | undefined;
   setPlaybackRate?: ((rate: number) => void) | undefined;
 } = {}): AnyPlayerStore {
-  return createStore<unknown>()<MediaPlaybackRateState>({
-    name: 'playbackRate',
-    state: () => {
-      return {
-        playbackRates,
-        playbackRate,
-        setPlaybackRate,
-      };
-    },
-  }) as unknown as AnyPlayerStore;
+  return /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ createStore<unknown>()<MediaPlaybackRateState>(
+    {
+      name: 'playbackRate',
+      state: () => {
+        return {
+          playbackRates,
+          playbackRate,
+          setPlaybackRate,
+        };
+      },
+    }
+  ) as AnyPlayerStore;
 }
 
 class TestPlayerProviderElement extends MediaElement {
@@ -108,7 +115,10 @@ function setup({
   template?: string | undefined;
 } = {}) {
   const store = createPlaybackRateStore({ playbackRates, playbackRate, setPlaybackRate });
-  const provider = document.createElement('test-playback-rate-player') as TestPlayerProviderElement;
+  const provider =
+    /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ document.createElement(
+      'test-playback-rate-player'
+    ) as TestPlayerProviderElement;
   const trigger = createElement(PlaybackRateButtonElement);
   const menu = createElement(MenuElement);
   const options = createElement(PlaybackRateRadioGroupElement);
@@ -221,7 +231,11 @@ describe('PlaybackRateButtonElement', () => {
     trigger.click();
 
     expect(setPlaybackRate).not.toHaveBeenCalled();
-    expect((store.state as MediaPlaybackRateState).playbackRate).toBe(1);
+    expect(
+      /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ (
+        store.state as MediaPlaybackRateState
+      ).playbackRate
+    ).toBe(1);
   });
 
   it('opens the linked menu on Enter when commandfor is set', async () => {

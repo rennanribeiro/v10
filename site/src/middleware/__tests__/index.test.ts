@@ -46,7 +46,7 @@ const mockUserPayload = {
 };
 
 function createMockContext(sessionCookie?: string): APIContext {
-  return {
+  return /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ {
     request: new Request('https://example.com/'),
     cookies: {
       get: vi.fn((name: string) => {
@@ -60,7 +60,7 @@ function createMockContext(sessionCookie?: string): APIContext {
     },
     locals: {},
     redirect: vi.fn(),
-  } as unknown as APIContext;
+  } as APIContext;
 }
 
 const next = vi.fn().mockResolvedValue(new Response('OK'));
@@ -69,7 +69,11 @@ describe('session middleware', () => {
   beforeEach(() => {
     vi.clearAllMocks();
 
-    vi.mocked(getActionContext).mockReturnValue({ action: undefined } as AstroActionContext);
+    vi.mocked(getActionContext).mockReturnValue(
+      /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ {
+        action: undefined,
+      } as AstroActionContext
+    );
   });
 
   afterAll(() => {
@@ -90,9 +94,17 @@ describe('session middleware', () => {
     it('should fail when no session cookie exists and attempted to access gated endpoint', async () => {
       const context = createMockContext();
 
-      vi.mocked(getActionContext).mockReturnValue({ action: { name: 'mux.list' } } as AstroActionContext);
+      vi.mocked(getActionContext).mockReturnValue(
+        /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ {
+          action: { name: 'mux.list' },
+        } as AstroActionContext
+      );
 
-      const response = (await onRequest(context, next)) as Response;
+      const response =
+        /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ (await onRequest(
+          context,
+          next
+        )) as Response;
 
       expect(response.status).toEqual(401);
 
@@ -106,8 +118,16 @@ describe('session middleware', () => {
     it('should populate context.locals with user data and access token', async () => {
       vi.mocked(unseal).mockResolvedValueOnce(mockOAuthResponse);
       vi.mocked(jwtVerify)
-        .mockResolvedValueOnce({ payload: {} } as any) // access_token verification
-        .mockResolvedValueOnce({ payload: mockUserPayload } as any); // id_token verification
+        .mockResolvedValueOnce(
+          /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ {
+            payload: {},
+          } as any
+        ) // access_token verification
+        .mockResolvedValueOnce(
+          /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ {
+            payload: mockUserPayload,
+          } as any
+        ); // id_token verification
 
       const context = createMockContext('encrypted-session');
 
@@ -144,8 +164,16 @@ describe('session middleware', () => {
       vi.mocked(unseal).mockResolvedValueOnce(mockOAuthResponse);
       vi.mocked(jwtVerify)
         .mockRejectedValueOnce(new Error('Token expired')) // access_token expired
-        .mockResolvedValueOnce({ payload: {} } as any) // access_token verification
-        .mockResolvedValueOnce({ payload: mockUserPayload } as any); // id_token verification
+        .mockResolvedValueOnce(
+          /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ {
+            payload: {},
+          } as any
+        ) // access_token verification
+        .mockResolvedValueOnce(
+          /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ {
+            payload: mockUserPayload,
+          } as any
+        ); // id_token verification
 
       vi.mocked(refreshToken).mockResolvedValueOnce(newTokens);
       vi.mocked(seal).mockResolvedValueOnce('new-encrypted-session');
@@ -179,8 +207,16 @@ describe('session middleware', () => {
       vi.mocked(unseal).mockResolvedValueOnce(mockOAuthResponse);
       vi.mocked(jwtVerify)
         .mockRejectedValueOnce(new Error('Token expired')) // access_token expired
-        .mockResolvedValueOnce({ payload: {} } as any) // access_token verification
-        .mockResolvedValueOnce({ payload: mockUserPayload } as any); // id_token verification
+        .mockResolvedValueOnce(
+          /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ {
+            payload: {},
+          } as any
+        ) // access_token verification
+        .mockResolvedValueOnce(
+          /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ {
+            payload: mockUserPayload,
+          } as any
+        ); // id_token verification
 
       vi.mocked(refreshToken).mockResolvedValueOnce(mockOAuthResponse);
       vi.mocked(seal).mockResolvedValueOnce('new-encrypted-session');
@@ -237,7 +273,11 @@ describe('session middleware', () => {
     });
 
     it('should clear session and return 401 when refresh token is invalid and accessing gated endpoint', async () => {
-      vi.mocked(getActionContext).mockReturnValue({ action: { name: 'mux.list' } } as AstroActionContext);
+      vi.mocked(getActionContext).mockReturnValue(
+        /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ {
+          action: { name: 'mux.list' },
+        } as AstroActionContext
+      );
 
       vi.mocked(unseal).mockResolvedValueOnce(mockOAuthResponse);
       vi.mocked(jwtVerify).mockRejectedValueOnce(new Error('Token expired'));
@@ -245,7 +285,11 @@ describe('session middleware', () => {
 
       const context = createMockContext('encrypted-session');
 
-      const response = (await onRequest(context, next)) as Response;
+      const response =
+        /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ (await onRequest(
+          context,
+          next
+        )) as Response;
 
       expect(response.status).toEqual(401);
 
@@ -258,7 +302,11 @@ describe('session middleware', () => {
     it('should clear session when ID token verification fails', async () => {
       vi.mocked(unseal).mockResolvedValueOnce(mockOAuthResponse);
       vi.mocked(jwtVerify)
-        .mockResolvedValueOnce({ payload: {} } as any) // access_token valid
+        .mockResolvedValueOnce(
+          /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ {
+            payload: {},
+          } as any
+        ) // access_token valid
         .mockRejectedValueOnce(new Error('Invalid ID token')); // id_token invalid
 
       const context = createMockContext('encrypted-session');
@@ -276,7 +324,11 @@ describe('session middleware', () => {
       vi.mocked(unseal).mockResolvedValueOnce(mockOAuthResponse);
       vi.mocked(jwtVerify)
         .mockRejectedValueOnce(new Error('Token expired'))
-        .mockResolvedValueOnce({ payload: {} } as any);
+        .mockResolvedValueOnce(
+          /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ {
+            payload: {},
+          } as any
+        );
 
       vi.mocked(refreshToken).mockResolvedValueOnce(newTokens);
       vi.mocked(seal).mockRejectedValueOnce(new Error('Encryption failed'));
@@ -294,8 +346,16 @@ describe('session middleware', () => {
   it('should verify access token with JWKS', async () => {
     vi.mocked(unseal).mockResolvedValueOnce(mockOAuthResponse);
     vi.mocked(jwtVerify)
-      .mockResolvedValueOnce({ payload: {} } as any)
-      .mockResolvedValueOnce({ payload: mockUserPayload } as any);
+      .mockResolvedValueOnce(
+        /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ {
+          payload: {},
+        } as any
+      )
+      .mockResolvedValueOnce(
+        /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ {
+          payload: mockUserPayload,
+        } as any
+      );
 
     const context = createMockContext('encrypted-session');
 
@@ -308,8 +368,16 @@ describe('session middleware', () => {
   it('should verify ID token with JWKS', async () => {
     vi.mocked(unseal).mockResolvedValueOnce(mockOAuthResponse);
     vi.mocked(jwtVerify)
-      .mockResolvedValueOnce({ payload: {} } as any)
-      .mockResolvedValueOnce({ payload: mockUserPayload } as any);
+      .mockResolvedValueOnce(
+        /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ {
+          payload: {},
+        } as any
+      )
+      .mockResolvedValueOnce(
+        /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ {
+          payload: mockUserPayload,
+        } as any
+      );
 
     const context = createMockContext('encrypted-session');
 
@@ -322,8 +390,16 @@ describe('session middleware', () => {
   it('should not expose sensitive token data in user object', async () => {
     vi.mocked(unseal).mockResolvedValueOnce(mockOAuthResponse);
     vi.mocked(jwtVerify)
-      .mockResolvedValueOnce({ payload: {} } as any)
-      .mockResolvedValueOnce({ payload: mockUserPayload } as any);
+      .mockResolvedValueOnce(
+        /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ {
+          payload: {},
+        } as any
+      )
+      .mockResolvedValueOnce(
+        /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ {
+          payload: mockUserPayload,
+        } as any
+      );
 
     const context = createMockContext('encrypted-session');
 

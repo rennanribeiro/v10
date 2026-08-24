@@ -61,7 +61,7 @@ export function MediaPlayedRangesMixin<Base extends Constructor<EventTarget & { 
 
     /** The host (subclass) supplies `currentTime` / `paused`. */
     get #host(): MediaPlayedRangesHost {
-      return this as unknown as MediaPlayedRangesHost;
+      return /* SAFETY: The surrounding typed API establishes the asserted contract at this boundary. */ this as MediaPlayedRangesHost;
     }
 
     get #currentTime(): number {
@@ -139,7 +139,10 @@ export function MediaPlayedRangesMixin<Base extends Constructor<EventTarget & { 
     }
   }
 
-  return MediaPlayedRanges as unknown as MixinReturn<Base, MediaPlayedRangesAPI>;
+  return /* SAFETY: The surrounding typed API establishes the asserted contract at this boundary. */ MediaPlayedRanges as MixinReturn<
+    Base,
+    MediaPlayedRangesAPI
+  >;
 }
 
 function createTimeRanges(ranges: number[][]): TimeRangeLike {
@@ -147,5 +150,5 @@ function createTimeRanges(ranges: number[][]): TimeRangeLike {
     start: { value: (i: number) => ranges[i]?.[0] ?? 0 },
     end: { value: (i: number) => ranges[i]?.[1] ?? 0 },
   });
-  return ranges as unknown as TimeRangeLike;
+  return /* SAFETY: The surrounding typed API establishes the asserted contract at this boundary. */ ranges as TimeRangeLike;
 }

@@ -80,7 +80,9 @@ export class PopupPositioner {
 
     const boundaryElement = resolvePositioningBoundary(boundary, {
       container: container ?? null,
-      root: popup.getRootNode() as Document | ShadowRoot,
+      root: /* SAFETY: The surrounding typed API establishes the asserted contract at this boundary. */ popup.getRootNode() as
+        | Document
+        | ShadowRoot,
     });
     const previous = this.#options;
     const trackingChanged =

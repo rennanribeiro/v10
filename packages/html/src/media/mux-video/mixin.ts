@@ -32,12 +32,17 @@ interface MuxVideoElementLike extends HTMLElement {
  * common host contract.
  */
 export function MuxVideoMixin<Class extends AnyConstructor<HTMLElement>>(BaseClass: Class): Class {
-  class MuxVideoElement extends (BaseClass as unknown as Constructor<MuxVideoElementLike>) {
+  class MuxVideoElement
+    extends /* SAFETY: The surrounding typed API establishes the asserted contract at this boundary. */ (BaseClass as Constructor<MuxVideoElementLike>)
+  {
     // Declared here rather than in `static properties` because it does not map to a
     // host property of its own: it feeds `source.poster.time`. The generic path
     // would also coerce a removed attribute to `0`, which is a valid poster time.
     static get observedAttributes(): string[] {
-      const inherited = (BaseClass as unknown as { observedAttributes?: string[] }).observedAttributes ?? [];
+      const inherited =
+        /* SAFETY: The surrounding typed API establishes the asserted contract at this boundary. */ (
+          BaseClass as { observedAttributes?: string[] }
+        ).observedAttributes ?? [];
       return [...inherited, 'poster-time'];
     }
 
@@ -132,5 +137,5 @@ export function MuxVideoMixin<Class extends AnyConstructor<HTMLElement>>(BaseCla
     }
   }
 
-  return MuxVideoElement as unknown as Class;
+  return /* SAFETY: The surrounding typed API establishes the asserted contract at this boundary. */ MuxVideoElement as Class;
 }

@@ -1,4 +1,4 @@
-const HTML_ATTRIBUTE_ALIASES: Readonly<Record<string, string>> = {
+const HTML_ATTRIBUTE_ALIASES = {
   className: 'class',
   htmlFor: 'for',
   xlinkActuate: 'xlink:actuate',
@@ -12,7 +12,7 @@ const HTML_ATTRIBUTE_ALIASES: Readonly<Record<string, string>> = {
   xmlLang: 'xml:lang',
   xmlSpace: 'xml:space',
   xmlnsXlink: 'xmlns:xlink',
-};
+} satisfies Readonly<Record<string, string>>;
 
 const CASE_SENSITIVE_SVG_ATTRIBUTES = new Set(
   'attributeName attributeType baseFrequency baseProfile calcMode clipPathUnits diffuseConstant edgeMode filterUnits glyphRef gradientTransform gradientUnits kernelMatrix kernelUnitLength keyPoints keySplines keyTimes lengthAdjust limitingConeAngle markerHeight markerUnits markerWidth maskContentUnits maskUnits numOctaves pathLength patternContentUnits patternTransform patternUnits pointsAtX pointsAtY pointsAtZ preserveAlpha preserveAspectRatio primitiveUnits refX refY repeatCount repeatDur requiredExtensions requiredFeatures specularConstant specularExponent spreadMethod startOffset stdDeviation stitchTiles surfaceScale systemLanguage tableValues targetX targetY textLength viewBox viewTarget xChannelSelector yChannelSelector zoomAndPan'.split(

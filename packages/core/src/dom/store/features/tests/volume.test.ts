@@ -35,7 +35,11 @@ describe('volumeFeature', () => {
       // Reading one availability for both would hide a mute button that works.
       const media = { muted: false, addEventListener() {}, removeEventListener() {} };
       const store = createStore<PlayerTarget>()(volumeFeature);
-      store.attach({ media: media as unknown as HTMLVideoElement, container: null });
+      store.attach({
+        media:
+          /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ media as HTMLVideoElement,
+        container: null,
+      });
 
       expect(store.state.mutedAvailability).toBe('available');
       expect(store.state.volumeAvailability).toBe('unavailable');
@@ -45,7 +49,11 @@ describe('volumeFeature', () => {
       // Spotify: the embed takes no volume or mute command and reports neither.
       const media = { addEventListener() {}, removeEventListener() {} };
       const store = createStore<PlayerTarget>()(volumeFeature);
-      store.attach({ media: media as unknown as HTMLVideoElement, container: null });
+      store.attach({
+        media:
+          /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ media as HTMLVideoElement,
+        container: null,
+      });
 
       expect(store.state.mutedAvailability).toBe('unavailable');
       expect(store.state.volumeAvailability).toBe('unavailable');

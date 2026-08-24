@@ -9,7 +9,7 @@ import { MEDIA_PLAYLIST_METADATA_KEY, type ResolvedTrack, type TrackType } from 
 import { reportUnsupportedTrackConditions } from '../report-track-conditions';
 
 const track = (type: TrackType, opts: { mimeType?: string; encrypted?: boolean } = {}): ResolvedTrack =>
-  ({
+  /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ ({
     id: `${type}-1`,
     type,
     url: `https://example.com/${type}.m3u8`,
@@ -26,7 +26,7 @@ const track = (type: TrackType, opts: { mimeType?: string; encrypted?: boolean }
         encrypted: opts.encrypted ?? false,
       },
     },
-  }) as unknown as ResolvedTrack;
+  }) as ResolvedTrack;
 
 const codes = (t: ResolvedTrack) => reportUnsupportedTrackConditions(t).map((error) => error.code);
 
