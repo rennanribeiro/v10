@@ -5,11 +5,10 @@ import { MuxData } from '..';
 
 function createSdk() {
   const monitor = vi.fn();
-  const sdk = {
-    ...Mux,
+  const sdk = Object.assign(Mux.bind(null), Mux, {
     monitor,
     utils: { ...Mux.utils, now: () => 0, generateUUID: () => 'uuid' },
-  };
+  });
   return { sdk, monitor };
 }
 
