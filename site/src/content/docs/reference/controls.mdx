@@ -53,6 +53,14 @@ User activity is tracked via pointer movement, keyboard input, and focus events 
 
 `Controls.Backdrop` / `<media-controls-backdrop>` is an optional presentational layer. It receives the same controls state data attributes as the root, allowing a skin to render a controls-visible scrim without selecting across sibling components.
 
+Every Controls part receives `data-active-popup` while a named popover in the same player container is open. Use it when a control's own layout responds to that popup without inspecting unrelated descendants:
+
+```css
+.timeline[data-active-popup="volume"] {
+  mask-image: linear-gradient(to right, transparent, black 25%);
+}
+```
+
 By default, controls have the following styles:
 
 <FrameworkCase frameworks={["html"]}>

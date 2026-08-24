@@ -2,7 +2,9 @@ import { act, cleanup, fireEvent, render, screen, waitFor } from '@testing-libra
 import { afterEach, describe, expect, it } from 'vite-plus/test';
 
 import { VolumePopover } from '..';
+import { Container } from '../../../player/container';
 import { createPlayerWrapper } from '../../../testing/mocks';
+import { Controls } from '../../controls';
 import { MuteButton } from '../../mute-button/mute-button';
 
 const availableVolume = {
@@ -41,6 +43,31 @@ describe('VolumePopover', () => {
       expect(screen.getByTestId('popup').getAttribute('data-availability')).toBe('available');
       expect(screen.getByTestId('trigger').getAttribute('aria-expanded')).toBe('true');
     });
+  });
+
+  it('registers with its player popup group as volume', async () => {
+    const { Wrapper } = createPlayerWrapper({
+      ...availableVolume,
+      controlsVisible: true,
+      userActive: true,
+    });
+
+    render(
+      <Wrapper>
+        <Container>
+          <Controls.Root data-testid="controls">
+            <VolumePopover.Root>
+              <VolumePopover.Trigger render={<button type="button">Volume</button>} />
+              <VolumePopover.Popup>Slider</VolumePopover.Popup>
+            </VolumePopover.Root>
+          </Controls.Root>
+        </Container>
+      </Wrapper>
+    );
+
+    fireEvent.click(screen.getByRole('button', { name: 'Volume' }));
+
+    await waitFor(() => expect(screen.getByTestId('controls').getAttribute('data-active-popup')).toBe('volume'));
   });
 
   it.each(['unavailable', 'unsupported'] as const)(

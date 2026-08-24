@@ -153,11 +153,15 @@ describe('createPopover', () => {
 
     it('clears the grouped popover when destroyed', () => {
       const group = createPopupGroup();
-      const first = createTestPopover({ group: () => group });
+      const first = createTestPopover({ group: () => group, name: () => 'first' });
       const second = createTestPopover({ group: () => group });
 
       first.popover.open();
+      expect(group.activeName).toBe('first');
+
       first.popover.destroy();
+      expect(group.activeName).toBeNull();
+
       first.onOpenChange.mockClear();
 
       second.popover.open();

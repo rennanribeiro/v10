@@ -9,6 +9,8 @@ export type PopoverSide = 'top' | 'bottom' | 'left' | 'right';
 export type PopoverAlign = 'start' | 'center' | 'end';
 
 export interface PopoverProps {
+  /** Stable name reflected by owning controls while this popover is open. */
+  name?: string | undefined;
   /** Preferred side of the trigger for the popup. */
   side?: PopoverSide | undefined;
   /** Alignment of the popup along the trigger's edge. */
@@ -52,6 +54,7 @@ export interface PopoverState extends TransitionFlags {
 
 export class PopoverCore {
   static readonly defaultProps: NonNullableObject<PopoverProps> = {
+    name: '',
     side: 'top',
     align: 'center',
     modal: false,

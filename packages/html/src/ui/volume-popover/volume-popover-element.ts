@@ -20,6 +20,8 @@ const unavailableVolume: MediaVolumeState = {
 export class VolumePopoverElement extends PopoverElement {
   static override readonly tagName = 'media-volume-popover';
 
+  override name = 'volume';
+
   readonly #core = new VolumePopoverCore();
   readonly #volume = new PlayerController(this, playerContext, selectVolume);
 

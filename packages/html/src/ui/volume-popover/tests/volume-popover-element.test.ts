@@ -52,6 +52,7 @@ afterEach(() => {
 describe('VolumePopoverElement', () => {
   it('has the correct tag name', () => {
     expect(VolumePopoverElement.tagName).toBe('media-volume-popover');
+    expect(createPopover().name).toBe('volume');
   });
 
   it.each([

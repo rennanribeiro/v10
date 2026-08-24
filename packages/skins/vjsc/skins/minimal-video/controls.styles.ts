@@ -51,8 +51,8 @@ export default styles({
         '@2xl/media-root:[--media-slider-height:--spacing(8)]',
         '@2xl/media-root:[mask-position:100%_0] @2xl/media-root:[mask-size:200%_100%]',
         '@2xl/media-root:[transition:mask-position_50ms_ease-out]',
-        'group-has-[[data-volume-level][aria-expanded=true]]/controls:@2xl/media-root:[mask-image:linear-gradient(to_right,transparent_10%,black_25%,black_100%)]',
-        'group-has-[[data-volume-level][aria-expanded=true]]/controls:@2xl/media-root:[mask-position:0_0]',
+        '@2xl/media-root:data-[active-popup=volume]:[mask-image:linear-gradient(to_right,transparent_10%,black_25%,black_100%)]',
+        '@2xl/media-root:data-[active-popup=volume]:[mask-position:0_0]',
       ],
     },
     timeGroup: {

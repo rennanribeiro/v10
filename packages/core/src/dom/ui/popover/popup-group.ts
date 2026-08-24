@@ -2,10 +2,12 @@ export type PopupGroupCloseReason = 'group-open';
 
 export interface PopupGroupMember {
   close: (reason: PopupGroupCloseReason) => void;
+  readonly name: string | null;
   readonly triggerElement: HTMLElement | null;
 }
 
 export interface PopupGroup {
+  readonly activeName: string | null;
   open: (member: PopupGroupMember) => void;
   close: (member: PopupGroupMember) => void;
   isOpenFor: (trigger: HTMLElement | null) => boolean;
@@ -21,6 +23,10 @@ export function createPopupGroup(): PopupGroup {
   }
 
   return {
+    get activeName() {
+      return current?.name ?? null;
+    },
+
     open(member) {
       if (current === member) return;
 

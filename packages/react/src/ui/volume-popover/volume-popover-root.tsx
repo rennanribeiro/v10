@@ -22,15 +22,15 @@ const unavailableVolume: MediaVolumeState = {
 export interface VolumePopoverRootProps extends PopoverRootProps {}
 
 /** Owns volume availability and the popover interaction lifecycle. */
-export function VolumePopoverRoot({ children, ...props }: VolumePopoverRootProps): ReactNode {
+export function VolumePopoverRoot({ children, name = 'volume', ...props }: VolumePopoverRootProps): ReactNode {
   const volume = usePlayer(selectVolume);
-  const [core] = useState(() => new VolumePopoverCore(props));
+  const [core] = useState(() => new VolumePopoverCore({ name, ...props }));
 
-  core.setProps(props);
+  core.setProps({ name, ...props });
   core.setMedia(volume ?? unavailableVolume);
 
   return (
-    <Popover.Root {...props}>
+    <Popover.Root name={name} {...props}>
       <VolumePopoverState core={core}>{children}</VolumePopoverState>
     </Popover.Root>
   );

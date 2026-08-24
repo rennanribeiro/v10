@@ -23,6 +23,7 @@ export class PopoverElement extends UIElement {
   static readonly tagName: string = 'media-popover';
 
   static override properties = {
+    name: { type: String },
     open: { type: Boolean },
     defaultOpen: { type: Boolean, attribute: 'default-open' },
     side: { type: String },
@@ -36,6 +37,7 @@ export class PopoverElement extends UIElement {
     boundary: { type: String },
   } satisfies PropertyDeclarationMap<keyof PopoverCore.Props | 'boundary'>;
 
+  name = PopoverCore.defaultProps.name;
   open = PopoverCore.defaultProps.open;
   defaultOpen = PopoverCore.defaultProps.defaultOpen;
   side = PopoverCore.defaultProps.side;
@@ -81,6 +83,7 @@ export class PopoverElement extends UIElement {
       delay: () => this.delay,
       closeDelay: () => this.closeDelay,
       group: () => this.#popupGroupCtx.value,
+      name: () => this.name,
     });
 
     // Register self as the popup element — the element IS the popup.

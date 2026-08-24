@@ -30,6 +30,7 @@ export interface PopoverRootProps extends CorePopoverProps {
 }
 
 export function PopoverRoot({
+  name = PopoverCore.defaultProps.name,
   open: controlledOpen,
   defaultOpen = PopoverCore.defaultProps.defaultOpen,
   onOpenChange: onOpenChangeProp,
@@ -62,6 +63,7 @@ export function PopoverRoot({
   const closeDelayRef = useLatestRef(closeDelay);
 
   const popupGroupRef = useLatestRef(popupGroup);
+  const nameRef = useLatestRef(name);
 
   const [popover] = useState(() => {
     const instance = createPopover({
@@ -78,6 +80,7 @@ export function PopoverRoot({
       delay: () => delayRef.current,
       closeDelay: () => closeDelayRef.current,
       group: () => popupGroupRef.current,
+      name: () => nameRef.current,
     });
 
     // Apply defaultOpen on creation (uncontrolled only)

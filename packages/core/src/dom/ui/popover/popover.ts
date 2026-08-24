@@ -33,6 +33,8 @@ export interface PopoverOptions {
   delay?: () => number;
   closeDelay?: () => number;
   group?: () => PopupGroup | undefined;
+  /** Stable name exposed by the popup group while this popover is open. */
+  name?: () => string | undefined;
   /** Request open changes without applying them until `syncOpen` is called. */
   deferOpenChanges?: boolean;
 }
@@ -95,6 +97,9 @@ export function createPopover(options: PopoverOptions): PopoverApi {
   const groupMember = {
     close(reason: 'group-open') {
       applyClose(reason);
+    },
+    get name() {
+      return options.name?.() || null;
     },
     get triggerElement() {
       return triggerEl;

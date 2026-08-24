@@ -256,8 +256,12 @@ function ControlsHiddenFixture({
   return (
     <ControlsContextProvider
       value={{
-        state: { visible, userActive: visible },
-        stateAttrMap: { visible: 'data-visible', userActive: 'data-user-active' },
+        state: { activePopup: null, visible, userActive: visible },
+        stateAttrMap: {
+          activePopup: 'data-active-popup',
+          visible: 'data-visible',
+          userActive: 'data-user-active',
+        },
       }}
     >
       <MenuRoot defaultOpen onOpenChange={onOpenChange}>
