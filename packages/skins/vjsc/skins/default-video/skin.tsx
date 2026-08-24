@@ -1,5 +1,4 @@
 import * as $ from '@videojs/core/vjsc';
-import { isString } from '@videojs/utils/predicate';
 import { type PropsOf, Slot, type VjscNode } from 'vjsc/components';
 
 import { AirPlayButton } from '../../components/buttons/airplay-button';
@@ -28,7 +27,7 @@ export interface DefaultVideoSkinProps extends Omit<PropsOf<typeof Container>, '
 }
 
 export function DefaultVideoSkin({ children, className, poster, ...props }: DefaultVideoSkinProps = {}) {
-  const isPosterString = isString(poster);
+  const isPosterString = String(poster) === poster;
 
   return (
     <Container className={['media-skin media-skin-video media-theme-default', className]} {...props}>

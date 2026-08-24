@@ -7,9 +7,10 @@ export type ObservedElements = Element | Iterable<Element>;
 
 /** Observe one or more elements for size changes and return a cleanup function. */
 export function observeResize(elements: ObservedElements, callback: ResizeObserverCallback): () => void {
-  if (isUndefined(ResizeObserver)) return noop;
+  const ResizeObserverConstructor = globalThis.ResizeObserver;
+  if (isUndefined(ResizeObserverConstructor)) return noop;
 
-  const observer = new ResizeObserver(callback);
+  const observer = new ResizeObserverConstructor(callback);
   const targets =
     Symbol.iterator in Object(elements)
       ? /* SAFETY: The surrounding typed API establishes the asserted contract at this boundary. */ (elements as Iterable<Element>)
@@ -49,8 +50,9 @@ export function observeElements({ getElements, onChange, root, mutations }: Obse
 
   let mutationObserver: MutationObserver | null = null;
 
-  if (root && mutations !== false && !isUndefined(MutationObserver)) {
-    mutationObserver = new MutationObserver(() => {
+  const MutationObserverConstructor = globalThis.MutationObserver;
+  if (root && mutations !== false && !isUndefined(MutationObserverConstructor)) {
+    mutationObserver = new MutationObserverConstructor(() => {
       observeCurrentElements();
       onChange();
     });

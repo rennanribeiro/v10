@@ -11,6 +11,12 @@ interface BuildRenderChunkMeta {
   readonly magicString?: BuildMagicString | undefined;
 }
 
+interface BuildOutputOptions {
+  readonly dir?: string | undefined;
+  readonly file?: string | undefined;
+  readonly format?: string | undefined;
+}
+
 interface BuildCodeResult {
   code: string | BuildMagicString;
   map?: object | undefined;
@@ -31,7 +37,7 @@ export interface BuildPlugin {
     this: void,
     code: string,
     chunk: { fileName: string },
-    outputOptions?: import('rolldown').OutputOptions,
+    outputOptions?: BuildOutputOptions,
     meta?: BuildRenderChunkMeta
   ) => BuildCodeResult | null;
   writeBundle?: (this: void) => void;

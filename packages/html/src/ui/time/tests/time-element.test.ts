@@ -1,6 +1,6 @@
 import type { AnyPlayerStore, PlayerTarget } from '@videojs/core/dom';
 import { registerI18n, resetI18nRegistry } from '@videojs/core/i18n';
-import { ContextProvider } from '@videojs/element/context';
+import { type Context, ContextProvider } from '@videojs/element/context';
 import type { MediaTimeState } from '@videojs/media';
 import { createStore } from '@videojs/store';
 import { formatTimeAsPhrase } from '@videojs/utils/time';
@@ -67,10 +67,14 @@ function createTimeStore(overrides: Partial<MediaTimeState> = {}): AnyPlayerStor
   });
 }
 
+const optionalPlayerContext: Context<symbol, AnyPlayerStore | undefined> = playerContext;
+
 class TestPlayerProviderElement extends UIElement {
   store: AnyPlayerStore = createTimeStore();
 
-  readonly #provider = new ContextProvider(this, { context: playerContext });
+  readonly #provider = new ContextProvider(this, {
+    context: optionalPlayerContext,
+  });
 
   setStore(store: AnyPlayerStore): void {
     this.store = store;
@@ -78,7 +82,7 @@ class TestPlayerProviderElement extends UIElement {
   }
 
   clearStore(): void {
-    this.replaceWith(...this.childNodes);
+    this.#provider.setValue(undefined);
   }
 
   override connectedCallback(): void {

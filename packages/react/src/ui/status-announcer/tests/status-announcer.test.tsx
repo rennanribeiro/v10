@@ -167,7 +167,7 @@ function createTestStore(initialState: MediaSnapshot = {}) {
     get state() {
       return state;
     },
-    target: null,
+    target: {},
     destroyed: false,
     attach: () => () => {},
     destroy: () => {},
@@ -191,13 +191,13 @@ function createPlayerContextValue(
   store: PlayerContextValue['store'],
   container: HTMLElement = document.createElement('div')
 ): PlayerContextValue {
-  return /* SAFETY: This fixture deliberately supplies the asserted contract for the scenario under test. */ {
+  return {
     store,
     media: null,
     setMedia: vi.fn(),
     container,
     setContainer: vi.fn(),
-  } as PlayerContextValue;
+  };
 }
 
 function renderWithPlayer(
