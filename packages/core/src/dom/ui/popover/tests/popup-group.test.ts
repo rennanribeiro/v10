@@ -1,4 +1,5 @@
 import { describe, expect, it, vi } from 'vitest';
+
 import { createPopupGroup, type PopupGroupMember } from '../popup-group';
 
 function createMember(name: string | null): PopupGroupMember {

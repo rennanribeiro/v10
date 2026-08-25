@@ -121,6 +121,7 @@ describe('ControlsElement', () => {
     const group = createDefinedElement(ControlsGroupElement);
     const trigger = document.createElement('button');
     const popover = createDefinedElement(PopoverElement);
+
     popover.name = 'volume';
 
     group.append(trigger, popover);

@@ -64,6 +64,7 @@ describe('ControlsCore', () => {
 
     it('includes the active popup name', () => {
       const core = new ControlsCore();
+
       core.setMedia(createControlsState());
       core.setActivePopup('volume');
 
