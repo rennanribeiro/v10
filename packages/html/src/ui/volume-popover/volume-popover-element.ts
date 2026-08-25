@@ -1,4 +1,4 @@
-import { VolumePopoverCore, VolumePopoverDataAttrs } from '@videojs/core';
+import { VolumePopoverCore, VolumePopoverStateDataAttrs } from '@videojs/core';
 import { applyStateDataAttrs, selectVolume } from '@videojs/core/dom';
 import type { PropertyValues } from '@videojs/element';
 import type { MediaVolumeState } from '@videojs/media';
@@ -16,21 +16,12 @@ const unavailableVolume: MediaVolumeState = {
   toggleMuted: () => false,
 };
 
-const volumePopoverStateDataAttrs = {
-  availability: VolumePopoverDataAttrs.availability,
-  hidden: VolumePopoverDataAttrs.hidden,
-} as const;
-
 /** A volume-aware popover that keeps its adjacent mute trigger available as a fallback. */
 export class VolumePopoverElement extends PopoverElement {
   static override readonly tagName = 'media-volume-popover';
 
   readonly #core = new VolumePopoverCore();
   readonly #volume = new PlayerController(this, playerContext, selectVolume);
-
-  protected override get triggerInteractionsEnabled(): boolean {
-    return (this.#volume.value ?? unavailableVolume).volumeAvailability === 'available';
-  }
 
   protected override update(changed: PropertyValues): void {
     super.update(changed);
@@ -48,9 +39,12 @@ export class VolumePopoverElement extends PopoverElement {
 
     const state = this.#core.getState();
 
-    applyStateDataAttrs(this, state, volumePopoverStateDataAttrs);
+    applyStateDataAttrs(this, state, VolumePopoverStateDataAttrs);
     this.hidden = state.hidden;
 
-    if (state.hidden) this.close();
+    if (state.hidden) {
+      this.close();
+      this.disconnectTrigger();
+    }
   }
 }
