@@ -129,6 +129,10 @@ export class PopoverElement extends UIElement {
     return this.#currentTrigger;
   }
 
+  protected get triggerInteractionsEnabled(): boolean {
+    return true;
+  }
+
   protected override willUpdate(changed: PropertyValues): void {
     super.willUpdate(changed);
     this.#core.setProps(this);
@@ -154,8 +158,9 @@ export class PopoverElement extends UIElement {
 
     // Discover trigger via commandfor linkage.
     const triggerEl = this.#position.findTrigger();
+    const triggerInteractionsEnabled = this.triggerInteractionsEnabled;
 
-    this.#syncTrigger(triggerEl);
+    this.#syncTrigger(triggerEl, triggerInteractionsEnabled);
 
     // Derive state from core + input.
     const input = this.#popover.input.current;
@@ -177,7 +182,11 @@ export class PopoverElement extends UIElement {
 
     // Apply trigger ARIA to the discovered trigger.
     if (this.#currentTrigger) {
-      applyElementProps(this.#currentTrigger, this.#core.getTriggerAttrs(state, this.id));
+      if (triggerInteractionsEnabled) {
+        applyElementProps(this.#currentTrigger, this.#core.getTriggerAttrs(state, this.id));
+      } else {
+        this.#clearTriggerAttrs(this.#currentTrigger);
+      }
     }
 
     // Skip positioning when closed — no rects to measure.
@@ -198,31 +207,40 @@ export class PopoverElement extends UIElement {
 
   // --- Trigger management ---
 
-  #syncTrigger(triggerEl: HTMLElement | null): void {
-    if (triggerEl === this.#currentTrigger) return;
-
-    this.#position.cleanup();
-    this.#cleanupTrigger();
-    this.#currentTrigger = triggerEl;
-    this.#popover?.setTriggerElement(triggerEl);
-
-    if (triggerEl && this.#popover) {
-      this.#triggerAbort = new AbortController();
-      applyElementProps(triggerEl, this.#popover.triggerProps, { signal: this.#triggerAbort.signal });
+  #syncTrigger(triggerEl: HTMLElement | null, interactionsEnabled: boolean): void {
+    if (triggerEl !== this.#currentTrigger) {
+      this.#position.cleanup();
+      this.#cleanupTrigger();
+      this.#currentTrigger = triggerEl;
     }
-  }
 
-  #cleanupTrigger(): void {
-    if (this.#currentTrigger) {
-      applyElementProps(this.#currentTrigger, {
-        'aria-expanded': undefined,
-        'aria-haspopup': undefined,
-        'aria-controls': undefined,
-      });
-    }
+    const shouldAttach = interactionsEnabled && triggerEl !== null;
+    if (shouldAttach === (this.#triggerAbort !== null)) return;
 
     this.#triggerAbort?.abort();
     this.#triggerAbort = null;
+    this.#popover?.setTriggerElement(shouldAttach ? triggerEl : null);
+
+    if (!shouldAttach || !this.#popover) return;
+
+    this.#triggerAbort = new AbortController();
+    applyElementProps(triggerEl, this.#popover.triggerProps, { signal: this.#triggerAbort.signal });
+  }
+
+  #cleanupTrigger(): void {
+    if (this.#currentTrigger) this.#clearTriggerAttrs(this.#currentTrigger);
+
+    this.#triggerAbort?.abort();
+    this.#triggerAbort = null;
+    this.#popover?.setTriggerElement(null);
     this.#currentTrigger = null;
+  }
+
+  #clearTriggerAttrs(trigger: HTMLElement): void {
+    applyElementProps(trigger, {
+      'aria-expanded': undefined,
+      'aria-haspopup': undefined,
+      'aria-controls': undefined,
+    });
   }
 }

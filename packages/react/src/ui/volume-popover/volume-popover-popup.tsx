@@ -5,6 +5,11 @@ import { forwardRef } from 'react';
 import { PopoverPopup, type PopoverPopupProps } from '../popover/popover-popup';
 import { useVolumePopoverContext } from './context';
 
+const volumePopoverStateDataAttrs = {
+  availability: VolumePopoverDataAttrs.availability,
+  hidden: VolumePopoverDataAttrs.hidden,
+} as const;
+
 export interface VolumePopoverPopupProps extends PopoverPopupProps {}
 
 /** Positioned volume content. Omitted when volume level controls are unavailable. */
@@ -13,7 +18,7 @@ export const VolumePopoverPopup = forwardRef<HTMLDivElement, VolumePopoverPopupP
     const { state } = useVolumePopoverContext();
     if (state.hidden) return null;
 
-    return <PopoverPopup ref={forwardedRef} {...getStateDataAttrs(state, VolumePopoverDataAttrs)} {...props} />;
+    return <PopoverPopup ref={forwardedRef} {...getStateDataAttrs(state, volumePopoverStateDataAttrs)} {...props} />;
   }
 );
 
