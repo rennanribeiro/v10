@@ -3652,6 +3652,7 @@ import { VolumePopover } from '../../components/controls/volume-popover';
 import { VideoSettingsMenu } from '../../components/menus/video-settings-menu';
 import { TimeSlider } from '../../components/sliders/time-slider';
 
+
 import "virtual:vjsc/css/<hash>/base.css";
 import "virtual:vjsc/css/<hash>/controls.css";
 import { Controls, Time, Tooltip } from "@videojs/react";
@@ -3707,8 +3708,11 @@ import { VideoGestures } from '../../components/video-gestures';
 import { VideoHotkeys } from '../../components/video-hotkeys';
 
 import { MinimalVideoControls } from './controls';
+
+import "virtual:vjsc/css/<hash>/base.css";
 import type { ComponentProps, ReactNode } from "react";
 import { cn } from "@videojs/utils/style";
+
 
 
 
@@ -3721,7 +3725,10 @@ export function MinimalVideoSkin({ children, className, poster, ...props }: Mini
   const isPosterString = typeof poster === 'string';
 
   return (
-    <Container className={cn('media-skin media-skin-video-minimal media-theme-minimal', className)} {...props}>
+    <Container
+      className={cn('media-skin media-skin-video-minimal media-theme-minimal', "media-minimal-video-root", className)}
+      {...props}
+    >
       {children}
       <Poster src={isPosterString ? poster : undefined}>{isPosterString ? undefined : poster}</Poster>
       <BufferingIndicator />
@@ -4840,6 +4847,7 @@ import { cn } from "@videojs/utils/style";
 
 
 
+
 export function MinimalVideoControls() {
   return (
     <Controls.Root className={cn('media-controls', "group/controls absolute inset-x-1 bottom-1 z-20 flex flex-wrap items-center gap-x-2 rounded-xl bg-transparent text-white", "text-shadow-[0_1px_0_rgb(0_0_0/0.2)]", "[@media(prefers-reduced-transparency:reduce)]:bg-black contrast-more:bg-black forced-colors:bg-[Canvas]", "[--media-popover-side-offset:--spacing(5)] [--media-tooltip-side-offset:var(--media-popover-side-offset)]", "[--media-popover-boundary-offset:--spacing(2)] [--media-tooltip-boundary-offset:var(--media-popover-boundary-offset)]", "p-1 transition-[filter,opacity,translate]", "duration-[calc(var(--media-controls-transition-duration)/2)] ease-out", "not-data-visible:pointer-events-none not-data-visible:opacity-0", "not-data-visible:duration-(--media-controls-transition-duration)", "motion-safe:not-data-visible:translate-y-full pointer-fine:motion-safe:not-data-visible:blur-sm", "@2xl/media-root:inset-x-2 @2xl/media-root:bottom-2 @2xl/media-root:flex-nowrap", "@2xl/media-root:[--media-popover-side-offset:--spacing(3)]")}>
@@ -4850,7 +4858,7 @@ export function MinimalVideoControls() {
           <VolumePopover side="right" orientation="horizontal" />
         </Controls.Group>
 
-        <Controls.Group className={"@container/media-time-controls -order-1 flex flex-none basis-full flex-row-reverse items-center gap-3 px-1.5 [--media-slider-height:--spacing(5)] @2xl/media-root:order-none @2xl/media-root:min-w-0 @2xl/media-root:flex-1 @2xl/media-root:flex-row @2xl/media-root:[--media-slider-height:--spacing(8)] @2xl/media-root:[mask-position:100%_0] @2xl/media-root:[mask-size:200%_100%] @2xl/media-root:[transition:mask-position_50ms_ease-out] @2xl/media-root:data-[active-popup=volume]:[mask-image:linear-gradient(to_right,transparent_10%,black_25%,black_100%)] @2xl/media-root:data-[active-popup=volume]:[mask-position:0_0]"}>
+        <Controls.Group className={"@container/media-time-controls -order-1 flex flex-none basis-full flex-row-reverse items-center gap-3 px-1.5 [--media-slider-height:--spacing(5)] @2xl/media-root:order-none @2xl/media-root:min-w-0 @2xl/media-root:flex-1 @2xl/media-root:flex-row @2xl/media-root:[--media-slider-height:--spacing(8)] @2xl/media-root:[mask-position:100%_0] @2xl/media-root:[mask-size:200%_100%] @2xl/media-root:[transition:mask-position_50ms_ease-out] group-data-[active-popup=volume]/minimal-video:@2xl/media-root:[mask-image:linear-gradient(to_right,transparent_10%,black_25%,black_100%)] group-data-[active-popup=volume]/minimal-video:@2xl/media-root:[mask-position:0_0]"}>
           <Time.Group className={"flex items-center gap-1"}>
             <Time.Value className={"hidden cursor-pointer rounded-sm tabular-nums outline-2 -outline-offset-2 outline-transparent supports-[corner-shape:squircle]:rounded-2xl supports-[corner-shape:squircle]:[corner-shape:squircle] focus-visible:outline-white focus-visible:outline-offset-2 @2xl/media-root:inline"} type="current" toggle />
             <Time.Separator className={"hidden text-current/60 @2xl/media-root:inline"} />
@@ -4892,6 +4900,7 @@ import { cn } from "@videojs/utils/style";
 
 
 
+
 export interface MinimalVideoSkinProps extends Omit<ComponentProps<typeof Container>, 'children'> {
   children?: ReactNode;
   poster?: string | ComponentProps<typeof Poster>['children'];
@@ -4901,7 +4910,10 @@ export function MinimalVideoSkin({ children, className, poster, ...props }: Mini
   const isPosterString = typeof poster === 'string';
 
   return (
-    <Container className={cn('media-skin media-skin-video-minimal media-theme-minimal', className)} {...props}>
+    <Container
+      className={cn('media-skin media-skin-video-minimal media-theme-minimal', "group/minimal-video", className)}
+      {...props}
+    >
       {children}
       <Poster src={isPosterString ? poster : undefined}>{isPosterString ? undefined : poster}</Poster>
       <BufferingIndicator />
@@ -8218,6 +8230,7 @@ import { VolumePopover } from '../../components/controls/volume-popover';
 import { VideoSettingsMenu } from '../../components/menus/video-settings-menu';
 import { TimeSlider } from '../../components/sliders/time-slider';
 
+
 import "virtual:vjsc/css/<hash>/base.css";
 import "virtual:vjsc/css/<hash>/controls.css";
 import "@videojs/html/ui/controls-backdrop";
@@ -8278,6 +8291,9 @@ import { VideoHotkeys } from '../../components/video-hotkeys';
 
 import { MinimalVideoControls } from './controls';
 
+import "virtual:vjsc/css/<hash>/base.css";
+
+
 export interface MinimalVideoSkinProps extends Omit<PropsOf<typeof Container>, 'children'> {
   children?: VjscNode;
   poster?: string | PropsOf<typeof Poster>['children'];
@@ -8287,7 +8303,10 @@ export function MinimalVideoSkin({ children, className, poster, ...props }: Mini
   const isPosterString = typeof poster === 'string';
 
   return (
-    <Container className={['media-skin media-skin-video-minimal media-theme-minimal', className]} {...props}>
+    <Container
+      className={['media-skin media-skin-video-minimal media-theme-minimal', "media-minimal-video-root", className]}
+      {...props}
+    >
       <slot>{children}</slot>
       <Poster src={isPosterString ? poster : undefined}>{isPosterString ? undefined : poster}</Poster>
       <BufferingIndicator />
@@ -9294,6 +9313,7 @@ import "@videojs/html/ui/controls";
 
 
 
+
 export function MinimalVideoControls() {
   return (
     <media-controls className={['media-controls', "group/controls absolute inset-x-1 bottom-1 z-20 flex flex-wrap items-center gap-x-2 rounded-xl bg-transparent text-white", "text-shadow-[0_1px_0_rgb(0_0_0/0.2)]", "[@media(prefers-reduced-transparency:reduce)]:bg-black contrast-more:bg-black forced-colors:bg-[Canvas]", "[--media-popover-side-offset:--spacing(5)] [--media-tooltip-side-offset:var(--media-popover-side-offset)]", "[--media-popover-boundary-offset:--spacing(2)] [--media-tooltip-boundary-offset:var(--media-popover-boundary-offset)]", "p-1 transition-[filter,opacity,translate]", "duration-[calc(var(--media-controls-transition-duration)/2)] ease-out", "not-data-visible:pointer-events-none not-data-visible:opacity-0", "not-data-visible:duration-(--media-controls-transition-duration)", "motion-safe:not-data-visible:translate-y-full pointer-fine:motion-safe:not-data-visible:blur-sm", "@2xl/media-root:inset-x-2 @2xl/media-root:bottom-2 @2xl/media-root:flex-nowrap", "@2xl/media-root:[--media-popover-side-offset:--spacing(3)]"]}>
@@ -9304,7 +9324,7 @@ export function MinimalVideoControls() {
           <VolumePopover side="right" orientation="horizontal" />
         </media-controls-group>
 
-        <media-controls-group className={"@container/media-time-controls -order-1 flex flex-none basis-full flex-row-reverse items-center gap-3 px-1.5 [--media-slider-height:--spacing(5)] @2xl/media-root:order-none @2xl/media-root:min-w-0 @2xl/media-root:flex-1 @2xl/media-root:flex-row @2xl/media-root:[--media-slider-height:--spacing(8)] @2xl/media-root:[mask-position:100%_0] @2xl/media-root:[mask-size:200%_100%] @2xl/media-root:[transition:mask-position_50ms_ease-out] @2xl/media-root:data-[active-popup=volume]:[mask-image:linear-gradient(to_right,transparent_10%,black_25%,black_100%)] @2xl/media-root:data-[active-popup=volume]:[mask-position:0_0]"}>
+        <media-controls-group className={"@container/media-time-controls -order-1 flex flex-none basis-full flex-row-reverse items-center gap-3 px-1.5 [--media-slider-height:--spacing(5)] @2xl/media-root:order-none @2xl/media-root:min-w-0 @2xl/media-root:flex-1 @2xl/media-root:flex-row @2xl/media-root:[--media-slider-height:--spacing(8)] @2xl/media-root:[mask-position:100%_0] @2xl/media-root:[mask-size:200%_100%] @2xl/media-root:[transition:mask-position_50ms_ease-out] group-data-[active-popup=volume]/minimal-video:@2xl/media-root:[mask-image:linear-gradient(to_right,transparent_10%,black_25%,black_100%)] group-data-[active-popup=volume]/minimal-video:@2xl/media-root:[mask-position:0_0]"}>
           <media-time-group className={"flex items-center gap-1"}>
             <media-time className={"hidden cursor-pointer rounded-sm tabular-nums outline-2 -outline-offset-2 outline-transparent supports-[corner-shape:squircle]:rounded-2xl supports-[corner-shape:squircle]:[corner-shape:squircle] focus-visible:outline-white focus-visible:outline-offset-2 @2xl/media-root:inline"} type="current" toggle />
             <media-time-separator className={"hidden text-current/60 @2xl/media-root:inline"} />
@@ -9342,6 +9362,7 @@ import { VideoHotkeys } from '../../components/video-hotkeys';
 
 import { MinimalVideoControls } from './controls';
 
+
 export interface MinimalVideoSkinProps extends Omit<PropsOf<typeof Container>, 'children'> {
   children?: VjscNode;
   poster?: string | PropsOf<typeof Poster>['children'];
@@ -9351,7 +9372,10 @@ export function MinimalVideoSkin({ children, className, poster, ...props }: Mini
   const isPosterString = typeof poster === 'string';
 
   return (
-    <Container className={['media-skin media-skin-video-minimal media-theme-minimal', className]} {...props}>
+    <Container
+      className={['media-skin media-skin-video-minimal media-theme-minimal', "group/minimal-video", className]}
+      {...props}
+    >
       <slot>{children}</slot>
       <Poster src={isPosterString ? poster : undefined}>{isPosterString ? undefined : poster}</Poster>
       <BufferingIndicator />

@@ -10,6 +10,7 @@ import { VolumePopover } from '../../components/controls/volume-popover';
 import { VideoSettingsMenu } from '../../components/menus/video-settings-menu';
 import { TimeSlider } from '../../components/sliders/time-slider';
 import styles from './controls.styles';
+import skinStyles from './skin.styles';
 
 export function MinimalVideoControls() {
   return (
@@ -21,7 +22,7 @@ export function MinimalVideoControls() {
           <VolumePopover side="right" orientation="horizontal" />
         </$.Controls.Group>
 
-        <$.Controls.Group className={styles.timeSliderGroup}>
+        <$.Controls.Group className={skinStyles.timeSliderGroup}>
           <$.Time.Group className={styles.timeGroup}>
             <$.Time.Value className={styles.currentValue} type="current" toggle />
             <$.Time.Separator className={styles.timeSeparator} />

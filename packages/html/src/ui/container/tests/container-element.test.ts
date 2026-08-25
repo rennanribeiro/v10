@@ -7,6 +7,7 @@ import { afterEach, describe, expect, it, vi } from 'vite-plus/test';
 
 import { MediaI18nProviderElement } from '../../../i18n/provider-element';
 import { playerContext } from '../../../player/context';
+import { PopoverElement } from '../../popover/popover-element';
 import { UIElement } from '../../ui-element';
 import { ContainerElement } from '../container-element';
 
@@ -81,6 +82,25 @@ describe('ContainerElement', () => {
     provider.setControlsVisible(false);
 
     await vi.waitFor(() => expect(container.hasAttribute('data-controls-visible')).toBe(false));
+  });
+
+  it('reflects the active named popup on the container', async () => {
+    const provider = createElement(TestPlayerProviderElement);
+    const container = createElement(ContainerElement);
+    const trigger = document.createElement('button');
+    const popover = createElement(PopoverElement);
+
+    popover.name = 'volume';
+    container.append(trigger, popover);
+    provider.append(container);
+    document.body.append(provider);
+    await Promise.all([container.updateComplete, popover.updateComplete]);
+
+    trigger.click();
+    await vi.waitFor(() => expect(container.getAttribute('data-active-popup')).toBe('volume'));
+
+    trigger.click();
+    await vi.waitFor(() => expect(container.hasAttribute('data-active-popup')).toBe(false));
   });
 
   it('preserves explicit role and aria-label', () => {

@@ -256,9 +256,8 @@ function ControlsHiddenFixture({
   return (
     <ControlsContextProvider
       value={{
-        state: { activePopup: null, visible, userActive: visible },
+        state: { visible, userActive: visible },
         stateAttrMap: {
-          activePopup: 'data-active-popup',
           visible: 'data-visible',
           userActive: 'data-user-active',
         },

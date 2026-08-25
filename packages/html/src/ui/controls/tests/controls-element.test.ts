@@ -6,14 +6,12 @@ import { createStore, flush } from '@videojs/store';
 import { afterEach, describe, expect, it, vi } from 'vite-plus/test';
 
 import { playerContext } from '../../../player/context';
-import { ContainerElement } from '../../container/container-element';
 import { MenuElement } from '../../menu/menu-element';
 import { PopoverElement } from '../../popover/popover-element';
 import { TooltipElement } from '../../tooltip/tooltip-element';
 import { UIElement } from '../../ui-element';
 import { ControlsBackdropElement } from '../controls-backdrop-element';
 import { ControlsElement } from '../controls-element';
-import { ControlsGroupElement } from '../controls-group-element';
 
 function ensureCustomElementDefined(Constructor: CustomElementConstructor & { readonly tagName: string }): void {
   const { tagName } = Constructor;
@@ -112,36 +110,6 @@ describe('ControlsElement', () => {
     await controls.updateComplete;
 
     expect(controls.hasAttribute('data-interactive')).toBe(true);
-  });
-
-  it('reflects a named grouped popover on every controls part', async () => {
-    const provider = document.createElement('test-controls-player-provider') as TestPlayerProviderElement;
-    const container = createDefinedElement(ContainerElement);
-    const controls = createDefinedElement(ControlsElement);
-    const group = createDefinedElement(ControlsGroupElement);
-    const trigger = document.createElement('button');
-    const popover = createDefinedElement(PopoverElement);
-
-    popover.name = 'volume';
-
-    group.append(trigger, popover);
-    controls.append(group);
-    container.append(controls);
-    provider.append(container);
-    document.body.append(provider);
-    await Promise.all([controls.updateComplete, group.updateComplete, popover.updateComplete]);
-
-    trigger.click();
-    await waitForAssertion(() => {
-      expect(controls.getAttribute('data-active-popup')).toBe('volume');
-      expect(group.getAttribute('data-active-popup')).toBe('volume');
-    });
-
-    trigger.click();
-    await waitForAssertion(() => {
-      expect(controls.hasAttribute('data-active-popup')).toBe(false);
-      expect(group.hasAttribute('data-active-popup')).toBe(false);
-    });
   });
 
   it('closes owned popovers, menus, and tooltips when controls hide', async () => {

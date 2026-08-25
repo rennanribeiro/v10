@@ -23,7 +23,7 @@ import {
 import { I18nContext, useTranslator } from '../i18n/context';
 import { useComposedRefs } from '../utils/use-composed-refs';
 import { useContainerAttach, usePlayer } from './context';
-import { PopupGroupProvider } from './popup-group-context';
+import { PopupGroupProvider, usePopupGroupActiveName } from './popup-group-context';
 
 export interface ContainerProps extends HTMLAttributes<HTMLDivElement> {
   children?: ReactNode;
@@ -49,6 +49,7 @@ export const Container = forwardRef<HTMLDivElement, ContainerProps>(function Con
   const [core] = useState(() => new ContainerCore());
 
   const [popupGroup] = useState(() => createPopupGroup());
+  const activePopupName = usePopupGroupActiveName(popupGroup);
 
   const internalRef = useRef<HTMLDivElement>(null);
   const composedRef = useComposedRefs(ref, internalRef);
@@ -76,9 +77,9 @@ export const Container = forwardRef<HTMLDivElement, ContainerProps>(function Con
     dir: dirProp ?? (lang ? getTextDirection(lang) : undefined),
   };
 
-  if (controls) core.setMedia(controls);
-
-  const stateAttrs = controls ? getStateDataAttrs(core.getState(), ContainerDataAttrs) : undefined;
+  core.setMedia(controls ?? null);
+  core.setActivePopupName(activePopupName);
+  const stateAttrs = getStateDataAttrs(core.getState(), ContainerDataAttrs);
 
   return (
     <div

@@ -8,6 +8,14 @@ describe('ContainerCore', () => {
 
     core.setMedia({ controlsVisible } as Parameters<ContainerCore['setMedia']>[0]);
 
-    expect(core.getState()).toEqual({ controlsVisible });
+    expect(core.getState()).toEqual({ activePopupName: null, controlsVisible });
+  });
+
+  it('includes the active popup name without requiring controls state', () => {
+    const core = new ContainerCore();
+
+    core.setActivePopupName('volume');
+
+    expect(core.getState()).toEqual({ activePopupName: 'volume', controlsVisible: false });
   });
 });

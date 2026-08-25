@@ -1,19 +1,28 @@
 import type { MediaControlsState } from '@videojs/media';
 
 export interface ContainerState {
+  /** Name of the grouped popup currently open within the container. */
+  activePopupName: string | null;
+  /** Whether the player controls are currently visible. */
   controlsVisible: boolean;
 }
 
 export class ContainerCore {
+  #activePopupName: string | null = null;
   #media: MediaControlsState | null = null;
 
-  setMedia(media: MediaControlsState): void {
+  setActivePopupName(activePopupName: string | null): void {
+    this.#activePopupName = activePopupName;
+  }
+
+  setMedia(media: MediaControlsState | null): void {
     this.#media = media;
   }
 
   getState(): ContainerState {
     return {
-      controlsVisible: this.#media!.controlsVisible,
+      activePopupName: this.#activePopupName,
+      controlsVisible: this.#media?.controlsVisible ?? false,
     };
   }
 }

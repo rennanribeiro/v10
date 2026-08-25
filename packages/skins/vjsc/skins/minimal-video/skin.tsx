@@ -9,6 +9,7 @@ import { VideoGestures } from '../../components/video-gestures';
 import { VideoHotkeys } from '../../components/video-hotkeys';
 import type { SkinMeta } from '../../meta';
 import { MinimalVideoControls } from './controls';
+import styles from './skin.styles';
 
 export interface MinimalVideoSkinProps extends Omit<PropsOf<typeof Container>, 'children'> {
   children?: VjscNode;
@@ -19,7 +20,10 @@ export function MinimalVideoSkin({ children, className, poster, ...props }: Mini
   const isPosterString = typeof poster === 'string';
 
   return (
-    <Container className={['media-skin media-skin-video-minimal media-theme-minimal', className]} {...props}>
+    <Container
+      className={['media-skin media-skin-video-minimal media-theme-minimal', styles.root, className]}
+      {...props}
+    >
       <Slot>{children}</Slot>
       <Poster src={isPosterString ? poster : undefined}>{isPosterString ? undefined : poster}</Poster>
       <BufferingIndicator />

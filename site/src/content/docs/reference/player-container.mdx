@@ -141,6 +141,18 @@ The container is where user intent enters the player. It listens for physical in
 - **Gestures** — Click-to-play, double-click fullscreen, swipe to seek, and other touch/mouse gestures. Configured via the `Gesture` component.
 - **Keyboard controls** — Spacebar to play/pause, arrow keys to seek, and other keyboard shortcuts scoped to the container. Configured via the `Hotkey` component.
 
+### Popup coordination
+
+The container coordinates root menus, popovers, and tooltips within its boundary. Opening one closes the previously active grouped popup.
+
+Named popovers are reflected on the container through `data-active-popup`. Descendant UI can use that state when its layout needs to respond without inspecting the popup's internal markup:
+
+```css
+.player-surface[data-active-popup="volume"] .timeline {
+  mask-image: linear-gradient(to right, transparent, black 25%);
+}
+```
+
 ## Relationship to skins
 
 A <DocsLink slug="concepts/skins">skin</DocsLink> is a container plus UI controls. When you use a packaged skin, the container is built in — you don't need to add one yourself.

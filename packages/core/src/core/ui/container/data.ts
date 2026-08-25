@@ -2,6 +2,8 @@ import type { StateAttrMap } from '../types';
 import type { ContainerState } from './core';
 
 export const ContainerDataAttrs = {
+  /** Name of the grouped popup currently open within the container. */
+  activePopupName: 'data-active-popup',
   /** Present when player controls are visible. */
   controlsVisible: 'data-controls-visible',
 } as const satisfies StateAttrMap<ContainerState>;

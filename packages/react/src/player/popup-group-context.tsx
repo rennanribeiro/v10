@@ -12,10 +12,9 @@ export function useOptionalPopupGroup(): PopupGroup | undefined {
   return useContext(PopupGroupContext);
 }
 
-export function useActivePopupName(): string | null {
-  const group = useOptionalPopupGroup();
-  const subscribe = useCallback((listener: () => void) => group?.subscribe(listener) ?? (() => {}), [group]);
-  const getSnapshot = useCallback(() => group?.activeName ?? null, [group]);
+export function usePopupGroupActiveName(group: PopupGroup): string | null {
+  const subscribe = useCallback((listener: () => void) => group.subscribe(listener), [group]);
+  const getSnapshot = useCallback(() => group.activeName, [group]);
 
   return useSyncExternalStore(subscribe, getSnapshot, getSnapshot);
 }

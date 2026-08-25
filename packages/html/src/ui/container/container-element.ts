@@ -30,6 +30,7 @@ export class ContainerElement extends UIElement implements MediaContainer {
   #releaseContainer: (() => void) | null = null;
   #disconnect: AbortController | null = null;
   #label: string | null = null;
+  #unsubscribePopupGroup = () => {};
 
   readonly #core = new ContainerCore();
   readonly #controls = new PlayerController(this, playerContext, selectControls);
@@ -48,6 +49,8 @@ export class ContainerElement extends UIElement implements MediaContainer {
     super.connectedCallback();
 
     this.#popupGroupProvider.setValue(this.#popupGroup);
+    this.#unsubscribePopupGroup();
+    this.#unsubscribePopupGroup = this.#popupGroup.subscribe(() => this.requestUpdate());
     this.#register(this.#container.value);
     applyContainerAttrs(this);
     this.#applyLabel();
@@ -61,6 +64,8 @@ export class ContainerElement extends UIElement implements MediaContainer {
     this.#releaseContainer = null;
     this.#disconnect?.abort();
     this.#disconnect = null;
+    this.#unsubscribePopupGroup();
+    this.#unsubscribePopupGroup = () => {};
     super.disconnectedCallback();
   }
 
@@ -68,14 +73,9 @@ export class ContainerElement extends UIElement implements MediaContainer {
     super.update(changed);
     this.#applyLabel();
 
-    const controls = this.#controls.value;
-
-    if (controls) {
-      this.#core.setMedia(controls);
-      applyStateDataAttrs(this, this.#core.getState(), ContainerDataAttrs);
-    } else {
-      this.removeAttribute(ContainerDataAttrs.controlsVisible);
-    }
+    this.#core.setMedia(this.#controls.value ?? null);
+    this.#core.setActivePopupName(this.#popupGroup.activeName);
+    applyStateDataAttrs(this, this.#core.getState(), ContainerDataAttrs);
   }
 
   #register(value: ContainerContextValue | undefined): void {

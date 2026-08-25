@@ -4,7 +4,6 @@ import type { ForwardedRef, ReactNode } from 'react';
 import { forwardRef, useState } from 'react';
 
 import { usePlayer } from '../../player/context';
-import { useActivePopupName } from '../../player/popup-group-context';
 import type { UIComponentProps } from '../../utils/types';
 import { renderElement } from '../../utils/use-render';
 import { ControlsContextProvider } from './context';
@@ -21,7 +20,6 @@ export const ControlsRoot = forwardRef(function ControlsRoot(
   const { render, className, style, children, ...elementProps } = componentProps;
 
   const controls = usePlayer(selectControls);
-  const activePopup = useActivePopupName();
 
   const [core] = useState(() => new ControlsCore());
 
@@ -32,7 +30,6 @@ export const ControlsRoot = forwardRef(function ControlsRoot(
   }
 
   core.setMedia(controls);
-  core.setActivePopup(activePopup);
   const state = core.getState();
 
   return (

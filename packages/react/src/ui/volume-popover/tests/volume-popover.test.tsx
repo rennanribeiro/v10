@@ -4,7 +4,6 @@ import { afterEach, describe, expect, it } from 'vite-plus/test';
 import { VolumePopover } from '..';
 import { Container } from '../../../player/container';
 import { createPlayerWrapper } from '../../../testing/mocks';
-import { Controls } from '../../controls';
 import { MuteButton } from '../../mute-button/mute-button';
 
 const availableVolume = {
@@ -54,20 +53,18 @@ describe('VolumePopover', () => {
 
     render(
       <Wrapper>
-        <Container>
-          <Controls.Root data-testid="controls">
-            <VolumePopover.Root>
-              <VolumePopover.Trigger render={<button type="button">Volume</button>} />
-              <VolumePopover.Popup>Slider</VolumePopover.Popup>
-            </VolumePopover.Root>
-          </Controls.Root>
+        <Container data-testid="container">
+          <VolumePopover.Root>
+            <VolumePopover.Trigger render={<button type="button">Volume</button>} />
+            <VolumePopover.Popup>Slider</VolumePopover.Popup>
+          </VolumePopover.Root>
         </Container>
       </Wrapper>
     );
 
     fireEvent.click(screen.getByRole('button', { name: 'Volume' }));
 
-    await waitFor(() => expect(screen.getByTestId('controls').getAttribute('data-active-popup')).toBe('volume'));
+    await waitFor(() => expect(screen.getByTestId('container').getAttribute('data-active-popup')).toBe('volume'));
   });
 
   it.each(['unavailable', 'unsupported'] as const)(
