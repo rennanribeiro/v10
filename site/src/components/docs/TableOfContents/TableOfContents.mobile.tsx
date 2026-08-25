@@ -13,6 +13,8 @@ interface TableOfContentsMobileProps {
   className?: string;
 }
 
+type RailStripeStyle = React.CSSProperties & Record<'--w' | '--lg-w', string>;
+
 export function TableOfContentsMobile({ headings, activeId, onNavigate, className }: TableOfContentsMobileProps) {
   const triggerRef = useRef<HTMLButtonElement>(null);
   const popupRef = useRef<HTMLDivElement>(null);
@@ -89,13 +91,22 @@ export function TableOfContentsMobile({ headings, activeId, onNavigate, classNam
         <span aria-hidden="true" className="flex flex-col items-start pl-1" style={{ gap: railGeometry.gap }}>
           {headings.map((heading) => {
             const isActive = activeId === heading.slug;
-            const width = heading.depth === 2 ? 12 : heading.depth === 3 ? 8 : 4;
+            const width = heading.depth === 2 ? 10 : heading.depth === 3 ? 8 : 4;
+            const largeWidth = heading.depth === 2 ? 12 : width;
+            const stripeStyle = {
+              '--w': `${width}px`,
+              '--lg-w': `${largeWidth}px`,
+              height: railGeometry.stripeHeight,
+            } satisfies RailStripeStyle;
 
             return (
               <span
                 key={heading.slug}
-                className={isActive ? 'bg-faded-black dark:bg-manila-light block' : 'block bg-current'}
-                style={{ width, height: railGeometry.stripeHeight }}
+                className={clsx(
+                  'block w-(--w) lg:w-(--lg-w)',
+                  isActive ? 'bg-faded-black dark:bg-manila-light' : 'bg-current'
+                )}
+                style={stripeStyle}
               />
             );
           })}
