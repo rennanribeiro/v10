@@ -272,6 +272,21 @@ jobs:
           name: api-diff
           path: /tmp/api-sync
 
+      - name: Configure Codex permissions
+        id: codex-permissions
+        shell: bash
+        run: |
+          codex_home="$RUNNER_TEMP/codex-home"
+          install -d -m 700 "$codex_home"
+          cat > "$codex_home/config.toml" <<'EOF'
+          [permissions.ci_workspace]
+          extends = ":workspace"
+
+          [permissions.ci_workspace.network]
+          enabled = true
+          EOF
+          echo "home=$codex_home" >> "$GITHUB_OUTPUT"
+
       - name: Detect stale docs
         uses: openai/codex-action@v1
         env:
@@ -280,9 +295,9 @@ jobs:
           openai-api-key: ${{ secrets.OPENAI_API_KEY }}
           model: gpt-5.6-terra
           effort: high
-          sandbox: workspace-write
+          codex-home: ${{ steps.codex-permissions.outputs.home }}
+          permission-profile: ci_workspace
           safety-strategy: drop-sudo
-          codex-args: '["--config", "sandbox_workspace_write.network_access=true"]'
           prompt: |
             You are the stale-docs detection agent. Your job: given a pre-computed API diff,
             find documentation that may need updating and open ONE GitHub issue summarizing all findings.

@@ -25,6 +25,21 @@ jobs:
       - name: Checkout trusted code
         uses: actions/checkout@v5
 
+      - name: Configure Codex permissions
+        id: codex-permissions
+        shell: bash
+        run: |
+          codex_home="$RUNNER_TEMP/codex-home"
+          install -d -m 700 "$codex_home"
+          cat > "$codex_home/config.toml" <<'EOF'
+          [permissions.ci_workspace]
+          extends = ":workspace"
+
+          [permissions.ci_workspace.network]
+          enabled = true
+          EOF
+          echo "home=$codex_home" >> "$GITHUB_OUTPUT"
+
       - name: Diagnose E2E failure
         uses: openai/codex-action@v1
         env:
@@ -34,9 +49,9 @@ jobs:
           openai-api-key: ${{ secrets.OPENAI_API_KEY }}
           model: gpt-5.6-terra
           effort: medium
-          sandbox: workspace-write
+          codex-home: ${{ steps.codex-permissions.outputs.home }}
+          permission-profile: ci_workspace
           safety-strategy: drop-sudo
-          codex-args: '["--config", "sandbox_workspace_write.network_access=true"]'
           prompt: |
             You are diagnosing a failed Video.js E2E workflow for a pull request.
 
@@ -107,6 +122,21 @@ jobs:
           fetch-depth: 0
           ref: ${{ github.event.workflow_run.head_sha }}
 
+      - name: Configure Codex permissions
+        id: codex-permissions
+        shell: bash
+        run: |
+          codex_home="$RUNNER_TEMP/codex-home"
+          install -d -m 700 "$codex_home"
+          cat > "$codex_home/config.toml" <<'EOF'
+          [permissions.ci_workspace]
+          extends = ":workspace"
+
+          [permissions.ci_workspace.network]
+          enabled = true
+          EOF
+          echo "home=$codex_home" >> "$GITHUB_OUTPUT"
+
       - name: Diagnose E2E failure
         uses: openai/codex-action@v1
         env:
@@ -115,9 +145,9 @@ jobs:
           openai-api-key: ${{ secrets.OPENAI_API_KEY }}
           model: gpt-5.6-sol
           effort: high
-          sandbox: workspace-write
+          codex-home: ${{ steps.codex-permissions.outputs.home }}
+          permission-profile: ci_workspace
           safety-strategy: drop-sudo
-          codex-args: '["--config", "sandbox_workspace_write.network_access=true"]'
           prompt: |
             You are diagnosing a failed Video.js E2E workflow on main.
 
