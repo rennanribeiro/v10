@@ -13,7 +13,7 @@ export interface RailGeometry {
 
 /** Keep the full heading map visible by reducing gaps first, then stripe height. */
 export function calculateRailGeometry(headingCount: number, availableHeight: number): RailGeometry {
-  const stripeHeight = 2;
+  const stripeHeight = 1;
   const gap = 4;
 
   if (headingCount <= 1) {
