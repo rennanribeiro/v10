@@ -1,0 +1,22 @@
+{
+  "type": "object",
+  "properties": {
+    "summary": { "type": "string" },
+    "updates": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "issueNumber": { "type": "integer" },
+          "completedChecklistItems": { "type": "array", "items": { "type": "string" } },
+          "comment": { "anyOf": [{ "type": "string" }, { "type": "null" }] },
+          "close": { "type": "boolean" }
+        },
+        "required": ["issueNumber", "completedChecklistItems", "comment", "close"],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": ["summary", "updates"],
+  "additionalProperties": false
+}

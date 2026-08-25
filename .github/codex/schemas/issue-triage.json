@@ -1,0 +1,22 @@
+{
+  "type": "object",
+  "properties": {
+    "summary": { "type": "string" },
+    "title": { "anyOf": [{ "type": "string" }, { "type": "null" }] },
+    "labelsToAdd": { "type": "array", "items": { "type": "string" } },
+    "labelsToRemove": { "type": "array", "items": { "type": "string" } },
+    "comment": { "anyOf": [{ "type": "string" }, { "type": "null" }] },
+    "duplicateOf": { "anyOf": [{ "type": "integer" }, { "type": "null" }] },
+    "closeAsDuplicate": { "type": "boolean" }
+  },
+  "required": [
+    "summary",
+    "title",
+    "labelsToAdd",
+    "labelsToRemove",
+    "comment",
+    "duplicateOf",
+    "closeAsDuplicate"
+  ],
+  "additionalProperties": false
+}

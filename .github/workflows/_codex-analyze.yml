@@ -1,0 +1,119 @@
+name: Shared Codex Analysis
+
+on:
+  workflow_call:
+    inputs:
+      allow_bots:
+        required: false
+        type: boolean
+        default: false
+      allow_users:
+        required: false
+        type: string
+        default: ''
+      capture_patch:
+        required: false
+        type: boolean
+        default: false
+      checkout_ref:
+        required: false
+        type: string
+        default: ''
+      effort:
+        required: true
+        type: string
+      fetch_depth:
+        required: false
+        type: number
+        default: 1
+      input_artifact:
+        required: true
+        type: string
+      install_dependencies:
+        required: false
+        type: boolean
+        default: false
+      model:
+        required: true
+        type: string
+      permission_profile:
+        required: false
+        type: string
+        default: ':read-only'
+      prompt_file:
+        required: true
+        type: string
+      schema_file:
+        required: true
+        type: string
+      task:
+        required: true
+        type: string
+    secrets:
+      openai_api_key:
+        required: true
+    outputs:
+      cache_artifact:
+        value: ${{ jobs.analyze.outputs.cache_artifact }}
+      cache_hit:
+        value: ${{ jobs.analyze.outputs.cache_hit }}
+      fingerprint:
+        value: ${{ jobs.analyze.outputs.fingerprint }}
+      result_artifact:
+        value: ${{ jobs.analyze.outputs.result_artifact }}
+
+jobs:
+  analyze:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    permissions:
+      actions: read
+      contents: read
+    outputs:
+      cache_artifact: ${{ steps.codex.outputs.cache_artifact }}
+      cache_hit: ${{ steps.codex.outputs.cache_hit }}
+      fingerprint: ${{ steps.codex.outputs.fingerprint }}
+      result_artifact: ${{ steps.codex.outputs.result_artifact }}
+
+    steps:
+      - name: Checkout trusted code
+        uses: actions/checkout@v5
+        with:
+          fetch-depth: ${{ inputs.fetch_depth }}
+          persist-credentials: false
+          ref: ${{ inputs.checkout_ref }}
+
+      - name: Download staged inputs
+        uses: actions/download-artifact@v4
+        with:
+          name: ${{ inputs.input_artifact }}
+          path: /tmp/codex-input
+
+      - if: inputs.install_dependencies
+        uses: pnpm/action-setup@v4
+
+      - if: inputs.install_dependencies
+        uses: actions/setup-node@v5
+        with:
+          cache: pnpm
+          node-version-file: '.nvmrc'
+
+      - name: Install dependencies before removing network access
+        if: inputs.install_dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run cached Codex analysis
+        id: codex
+        uses: ./.github/actions/codex-analysis
+        with:
+          allow-bots: ${{ inputs.allow_bots }}
+          allow-users: ${{ inputs.allow_users }}
+          capture-patch: ${{ inputs.capture_patch }}
+          effort: ${{ inputs.effort }}
+          input-path: /tmp/codex-input
+          model: ${{ inputs.model }}
+          openai-api-key: ${{ secrets.openai_api_key }}
+          permission-profile: ${{ inputs.permission_profile }}
+          prompt-file: ${{ inputs.prompt_file }}
+          schema-file: ${{ inputs.schema_file }}
+          task: ${{ inputs.task }}

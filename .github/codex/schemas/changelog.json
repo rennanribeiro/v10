@@ -1,0 +1,11 @@
+{
+  "type": "object",
+  "properties": {
+    "status": { "type": "string", "enum": ["changed", "no-change", "blocked"] },
+    "summary": { "type": "string" },
+    "prTitle": { "anyOf": [{ "type": "string" }, { "type": "null" }] },
+    "prBody": { "anyOf": [{ "type": "string" }, { "type": "null" }] }
+  },
+  "required": ["status", "summary", "prTitle", "prBody"],
+  "additionalProperties": false
+}

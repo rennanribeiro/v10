@@ -1,0 +1,29 @@
+{
+  "type": "object",
+  "properties": {
+    "classification": {
+      "type": "string",
+      "enum": ["real regression", "expected change", "inconclusive"]
+    },
+    "confidence": { "type": "string", "enum": ["high", "medium", "low"] },
+    "shortFailure": { "type": "string" },
+    "summary": { "type": "string" },
+    "affectedTests": { "type": "array", "items": { "type": "string" } },
+    "evidence": { "type": "array", "items": { "type": "string" } },
+    "likelyCause": { "type": "string" },
+    "recommendedActions": { "type": "array", "items": { "type": "string" } },
+    "comment": { "type": "string" }
+  },
+  "required": [
+    "classification",
+    "confidence",
+    "shortFailure",
+    "summary",
+    "affectedTests",
+    "evidence",
+    "likelyCause",
+    "recommendedActions",
+    "comment"
+  ],
+  "additionalProperties": false
+}

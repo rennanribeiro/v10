@@ -1,0 +1,26 @@
+{
+  "type": "object",
+  "properties": {
+    "status": { "type": "string", "enum": ["implemented", "blocked", "existing-pr"] },
+    "summary": { "type": "string" },
+    "prTitle": { "anyOf": [{ "type": "string" }, { "type": "null" }] },
+    "prBody": { "anyOf": [{ "type": "string" }, { "type": "null" }] },
+    "commitMessage": { "anyOf": [{ "type": "string" }, { "type": "null" }] },
+    "issueComment": { "type": "string" },
+    "checks": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "command": { "type": "string" },
+          "status": { "type": "string", "enum": ["passed", "failed", "not-run"] },
+          "summary": { "type": "string" }
+        },
+        "required": ["command", "status", "summary"],
+        "additionalProperties": false
+      }
+    }
+  },
+  "required": ["status", "summary", "prTitle", "prBody", "commitMessage", "issueComment", "checks"],
+  "additionalProperties": false
+}

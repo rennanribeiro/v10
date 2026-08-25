@@ -1,0 +1,25 @@
+{
+  "type": "object",
+  "properties": {
+    "stale": { "type": "boolean" },
+    "apiChanges": { "type": "string" },
+    "findings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "confidence": { "type": "string", "enum": ["high", "medium", "low"] },
+          "file": { "type": "string" },
+          "lines": { "type": "string" },
+          "issue": { "type": "string" },
+          "apiChange": { "type": "string" }
+        },
+        "required": ["confidence", "file", "lines", "issue", "apiChange"],
+        "additionalProperties": false
+      }
+    },
+    "recommendedActions": { "type": "array", "items": { "type": "string" } }
+  },
+  "required": ["stale", "apiChanges", "findings", "recommendedActions"],
+  "additionalProperties": false
+}
