@@ -412,6 +412,12 @@ function buildSingleComponentReference(source: ComponentSource, program: OxcProj
   };
 
   if (htmlData) {
+    for (const [name, prop] of Object.entries(result.props)) {
+      if (!htmlData.properties.includes(name)) prop.frameworks = ['react'];
+    }
+  }
+
+  if (htmlData) {
     result.platforms.html = { tagName: htmlData.tagName };
   }
 
@@ -450,6 +456,12 @@ function buildMultiPartReference(
         cssCustomProperties: cssVarsData ? buildCSSVars(cssVarsData) : {},
         platforms: { react: {} },
       };
+
+      if (htmlData) {
+        for (const [name, prop] of Object.entries(partRef.props)) {
+          if (!htmlData.properties.includes(name)) prop.frameworks = ['react'];
+        }
+      }
 
       if (!partRef.description) delete partRef.description;
 

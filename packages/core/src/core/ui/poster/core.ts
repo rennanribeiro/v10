@@ -24,6 +24,7 @@ export interface PosterState {
 
 /** Framework-neutral poster component props. */
 export interface PosterProps {
+  /** Image URL for the React poster. HTML authors set the source on the child image instead. */
   src?: string | undefined;
 }
 

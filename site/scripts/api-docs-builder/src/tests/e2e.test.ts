@@ -171,6 +171,7 @@ describe('Component pipeline (end-to-end)', () => {
       expect(ref.props.onPressedChange).toMatchObject({
         type: 'function',
         description: 'Callback when pressed state changes.',
+        frameworks: ['react'],
       });
       expect(ref.props.onPressedChange!.detailedType).toBeDefined();
 
