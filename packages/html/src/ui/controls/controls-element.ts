@@ -67,7 +67,6 @@ export class ControlsElement extends UIElement {
 
   #syncPopupGroup(): void {
     const popupGroup = this.#popupGroupContext.value;
-
     if (popupGroup === this.#popupGroup) return;
 
     this.#unsubscribePopupGroup();
