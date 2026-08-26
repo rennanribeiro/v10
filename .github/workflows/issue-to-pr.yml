@@ -137,12 +137,3 @@ jobs:
           CODEX_FINGERPRINT: ${{ needs.analyze.outputs.fingerprint }}
           GITHUB_TOKEN: ${{ github.token }}
         run: node .github/scripts/codex-workflow.mjs apply issue-to-pr /tmp/codex-input /tmp/codex-result
-
-      - name: Save validated result cache
-        if: needs.analyze.outputs.cache_hit != 'true'
-        uses: actions/upload-artifact@v4
-        with:
-          name: ${{ needs.analyze.outputs.cache_artifact }}
-          path: /tmp/codex-result/
-          if-no-files-found: error
-          retention-days: 14

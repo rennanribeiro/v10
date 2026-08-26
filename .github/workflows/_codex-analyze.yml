@@ -53,10 +53,6 @@ on:
       openai_api_key:
         required: true
     outputs:
-      cache_artifact:
-        value: ${{ jobs.analyze.outputs.cache_artifact }}
-      cache_hit:
-        value: ${{ jobs.analyze.outputs.cache_hit }}
       fingerprint:
         value: ${{ jobs.analyze.outputs.fingerprint }}
       result_artifact:
@@ -70,10 +66,8 @@ jobs:
       actions: read
       contents: read
     outputs:
-      cache_artifact: ${{ steps.codex.outputs.cache_artifact }}
-      cache_hit: ${{ steps.codex.outputs.cache_hit }}
-      fingerprint: ${{ steps.codex.outputs.fingerprint }}
-      result_artifact: ${{ steps.codex.outputs.result_artifact }}
+      fingerprint: ${{ steps.fingerprint.outputs.fingerprint }}
+      result_artifact: ${{ steps.names.outputs.result_artifact }}
 
     steps:
       - name: Checkout trusted code
@@ -102,18 +96,83 @@ jobs:
         if: inputs.install_dependencies
         run: pnpm install --frozen-lockfile
 
-      - name: Run cached Codex analysis
-        id: codex
-        uses: ./.github/actions/codex-analysis
+      - name: Fingerprint semantic inputs
+        id: fingerprint
+        env:
+          CODEX_EFFORT: ${{ inputs.effort }}
+          CODEX_INPUT_PATH: /tmp/codex-input
+          CODEX_MODEL: ${{ inputs.model }}
+          CODEX_PERMISSION_PROFILE: ${{ inputs.permission_profile }}
+          CODEX_PROMPT_FILE: ${{ inputs.prompt_file }}
+          CODEX_SCHEMA_FILE: ${{ inputs.schema_file }}
+          CODEX_TASK: ${{ inputs.task }}
+        run: |
+          set -euo pipefail
+
+          input_hash="$({ find "$CODEX_INPUT_PATH" -type f -print0 | sort -z | xargs -0 sha256sum; } | sha256sum | cut -d' ' -f1)"
+          repository_sha="$(git rev-parse HEAD)"
+          fingerprint="$(
+            printf '%s\0' \
+              "$CODEX_TASK" \
+              "$CODEX_MODEL" \
+              "$CODEX_EFFORT" \
+              "$CODEX_PERMISSION_PROFILE" \
+              "$repository_sha" \
+              "$input_hash" \
+              "$(sha256sum "$CODEX_PROMPT_FILE" | cut -d' ' -f1)" \
+              "$(sha256sum "$CODEX_SCHEMA_FILE" | cut -d' ' -f1)" \
+              | sha256sum \
+              | cut -d' ' -f1
+          )"
+
+          echo "fingerprint=$fingerprint" >> "$GITHUB_OUTPUT"
+          mkdir -p /tmp/codex-result
+
+      - name: Run Codex
+        uses: openai/codex-action@v1
         with:
           allow-bots: ${{ inputs.allow_bots }}
           allow-users: ${{ inputs.allow_users }}
-          capture-patch: ${{ inputs.capture_patch }}
           effort: ${{ inputs.effort }}
-          input-path: /tmp/codex-input
           model: ${{ inputs.model }}
           openai-api-key: ${{ secrets.openai_api_key }}
+          output-file: /tmp/codex-result/output.json
+          output-schema-file: ${{ inputs.schema_file }}
           permission-profile: ${{ inputs.permission_profile }}
           prompt-file: ${{ inputs.prompt_file }}
-          schema-file: ${{ inputs.schema_file }}
-          task: ${{ inputs.task }}
+          safety-strategy: drop-sudo
+
+      - name: Capture Codex handoff
+        env:
+          CAPTURE_PATCH: ${{ inputs.capture_patch }}
+          CODEX_FINGERPRINT: ${{ steps.fingerprint.outputs.fingerprint }}
+          CODEX_TASK: ${{ inputs.task }}
+        run: |
+          set -euo pipefail
+
+          jq -e . /tmp/codex-result/output.json >/dev/null
+
+          if [ "$CAPTURE_PATCH" = 'true' ]; then
+            git add -A -- .
+            git diff --cached --binary -- . > /tmp/codex-result/changes.patch
+          fi
+
+          jq -n \
+            --arg fingerprint "$CODEX_FINGERPRINT" \
+            --arg task "$CODEX_TASK" \
+            '{version: 1, task: $task, fingerprint: $fingerprint}' \
+            > /tmp/codex-result/manifest.json
+
+      - name: Name handoff artifact
+        id: names
+        env:
+          CODEX_TASK: ${{ inputs.task }}
+        run: echo "result_artifact=codex-result-$CODEX_TASK-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}" >> "$GITHUB_OUTPUT"
+
+      - name: Upload current-run handoff
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ steps.names.outputs.result_artifact }}
+          path: /tmp/codex-result/
+          if-no-files-found: error
+          retention-days: 14

@@ -92,15 +92,6 @@ jobs:
           GITHUB_TOKEN: ${{ github.token }}
         run: node .github/scripts/codex-workflow.mjs apply e2e-pr /tmp/codex-input /tmp/codex-result
 
-      - name: Save validated result cache
-        if: needs.analyze_pr.outputs.cache_hit != 'true'
-        uses: actions/upload-artifact@v4
-        with:
-          name: ${{ needs.analyze_pr.outputs.cache_artifact }}
-          path: /tmp/codex-result/
-          if-no-files-found: error
-          retention-days: 14
-
   prepare_main:
     name: Stage main failure evidence
     if: github.event.workflow_run.conclusion == 'failure' && github.event.workflow_run.event == 'push' && github.event.workflow_run.head_branch == 'main'
@@ -236,12 +227,3 @@ jobs:
           CODEX_FINGERPRINT: ${{ needs.analyze_main.outputs.fingerprint }}
           GITHUB_TOKEN: ${{ github.token }}
         run: node .github/scripts/codex-workflow.mjs apply e2e-main /tmp/codex-input /tmp/codex-result
-
-      - name: Save validated result cache
-        if: needs.analyze_main.outputs.cache_hit != 'true'
-        uses: actions/upload-artifact@v4
-        with:
-          name: ${{ needs.analyze_main.outputs.cache_artifact }}
-          path: /tmp/codex-result/
-          if-no-files-found: error
-          retention-days: 14

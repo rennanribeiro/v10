@@ -32,10 +32,6 @@ function resetDirectory(path) {
   mkdirSync(path, { recursive: true });
 }
 
-function appendOutput(name, value) {
-  writeFileSync(process.env.GITHUB_OUTPUT, `${name}=${value}\n`, { flag: 'a' });
-}
-
 async function request(path, options = {}) {
   const url = path.startsWith('http') ? path : `${apiRoot}${path}`;
   const headers = {
@@ -391,41 +387,6 @@ async function prepare(task, outputDirectory) {
 
   if (!handler) fail(`Unknown prepare task: ${task}`);
   await handler(outputDirectory);
-}
-
-async function restoreCache(outputDirectory) {
-  resetDirectory(outputDirectory);
-
-  const cacheArtifact = process.env.CACHE_ARTIFACT;
-  const fingerprint = process.env.CODEX_FINGERPRINT;
-  const parameters = new URLSearchParams({ name: cacheArtifact, per_page: '100' });
-  const response = await request(`/repos/${owner}/${repo}/actions/artifacts?${parameters}`);
-  const artifact = response.artifacts
-    .filter((candidate) => !candidate.expired && candidate.name === cacheArtifact)
-    .sort((left, right) => Date.parse(right.created_at) - Date.parse(left.created_at))[0];
-
-  if (!artifact) {
-    appendOutput('hit', 'false');
-    return;
-  }
-
-  const archive = await request(artifact.archive_download_url, { format: 'buffer' });
-  const archivePath = '/tmp/codex-cache.zip';
-
-  writeFileSync(archivePath, archive);
-  execFileSync('unzip', ['-q', archivePath, '-d', outputDirectory]);
-
-  const manifestPath = join(outputDirectory, 'manifest.json');
-  const outputPath = join(outputDirectory, 'output.json');
-
-  if (!existsSync(manifestPath) || !existsSync(outputPath)) fail('Cached Codex artifact is incomplete.');
-
-  const manifest = readJson(manifestPath);
-
-  if (manifest.fingerprint !== fingerprint) fail('Cached Codex artifact fingerprint does not match.');
-
-  JSON.parse(readFileSync(outputPath, 'utf8'));
-  appendOutput('hit', 'true');
 }
 
 function resultData(task, inputDirectory, resultDirectory) {
@@ -1041,7 +1002,6 @@ async function main() {
   const [command, taskOrOutput, inputOrResult, maybeResult] = process.argv.slice(2);
 
   if (command === 'prepare') await prepare(taskOrOutput, resolve(inputOrResult));
-  else if (command === 'restore-cache') await restoreCache(resolve(taskOrOutput));
   else if (command === 'verify') await verify(taskOrOutput, resolve(inputOrResult), resolve(maybeResult));
   else if (command === 'apply') await apply(taskOrOutput, resolve(inputOrResult), resolve(maybeResult));
   else fail(`Unknown command: ${command}`);
