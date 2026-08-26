@@ -8,4 +8,4 @@ Classify the failure as:
 - `expected change`: behavior is intentional and tests or snapshots are stale.
 - `inconclusive`: evidence is insufficient, flaky, or infrastructural.
 
-Separate verified facts from inference, identify affected tests, provide concrete debugging actions, and keep the pull-request comment concise. Use a short lower-case failure phrase suitable for a Conventional Commits issue title. Do not overstate confidence.
+Separate verified facts from inference, identify affected tests, and provide concrete debugging actions. The pull-request comment must concisely state the classification and observable failure; trusted code adds the diagnostic issue link and assignment status. Use a short lower-case failure phrase suitable for a Conventional Commits issue title. Do not overstate confidence.

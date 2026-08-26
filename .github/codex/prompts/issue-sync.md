@@ -6,6 +6,7 @@ For staged candidate issues that are clearly related to the merged PR:
 
 - List exact unchecked checklist item text in `completedChecklistItems` only when the PR clearly completes it. Do not rewrite issue bodies.
 - Add one concise comment only when it communicates completed scope, remaining scope, a blocker, or a meaningful mismatch.
+- Check for mismatches between the issue state, checklist, labels, status notes, and the merged result. Explain the mismatch and recommended correction without changing labels or unrelated text.
 - Set `close` only when the PR fully resolves the issue and no unresolved checklist work remains after the selected items are completed.
 - Do not duplicate an equivalent staged comment.
 - Do nothing for speculative relationships or when there is no meaningful update.

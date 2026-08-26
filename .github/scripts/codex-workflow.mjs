@@ -465,8 +465,25 @@ function conventionalTitle(value, fallback) {
     : fallback;
 }
 
+function triageTitlePreservesDescription(currentTitle, proposedTitle) {
+  const prefix = /^(Feature|Bug|Docs|Architecture|Chore|Design):\s*/;
+  const currentDescription = currentTitle.replace(prefix, '');
+  const proposedDescription = proposedTitle.replace(prefix, '');
+
+  return currentDescription.toLocaleLowerCase() === proposedDescription.toLocaleLowerCase();
+}
+
 function marker(kind, fingerprint, suffix = '') {
   return `<!-- codex:${kind}:${fingerprint}${suffix} -->`;
+}
+
+function assignmentFallbackBody(body, author) {
+  const note = `Owner: @${author} (automatic assignment was not permitted).`;
+  const currentBody = body.trim();
+
+  if (body.includes(note)) return body;
+
+  return currentBody ? `${currentBody}\n\n${note}` : note;
 }
 
 async function currentIssue(number) {
@@ -543,6 +560,9 @@ async function applyIssueTriage(data) {
     const title = assertString(output.title, 'title', { max: 256 });
 
     if (!/^(Feature|Bug|Docs|Architecture|Chore|Design): /.test(title)) fail('Triage title has an unsupported prefix.');
+    if (!triageTitlePreservesDescription(context.issue.title, title)) {
+      fail('Triage title may only change the type prefix and description casing.');
+    }
     if (issue.title === context.issue.title || issue.title === title) update.title = title;
   }
 
@@ -787,7 +807,6 @@ async function ensureDiagnosticIssue(data) {
   const pullRequest = data.context.pullRequest;
   const markers = ['<!-- e2e-failure -->', `<!-- trigger-pr:${pullRequest.number} -->`];
   let issue = await findOpenIssueByMarkers(markers);
-  let assigned = true;
 
   if (!issue) {
     issue = await request(`/repos/${owner}/${repo}/issues`, {
@@ -797,7 +816,14 @@ async function ensureDiagnosticIssue(data) {
       },
       method: 'POST',
     });
-    assigned = await assignIssue(issue.number, pullRequest.author);
+  }
+
+  const assigned = await assignIssue(issue.number, pullRequest.author);
+
+  if (!assigned && pullRequest.author) {
+    issue = await updateIssue(issue.number, {
+      body: assignmentFallbackBody(issue.body ?? diagnosticBody(data), pullRequest.author),
+    });
   }
 
   return { assigned, issue };
@@ -872,6 +898,15 @@ CI provides validation for this corrective patch.`;
       assigned = created.assigned;
     } else {
       assigned = await assignIssue(pullRequest.number, context.pullRequest.author);
+    }
+
+    if (!assigned && context.pullRequest.author) {
+      pullRequest = await request(`/repos/${owner}/${repo}/pulls/${pullRequest.number}`, {
+        body: {
+          body: assignmentFallbackBody(pullRequest.body ?? '', context.pullRequest.author),
+        },
+        method: 'PATCH',
+      });
     }
 
     disposition = `Corrective draft PR: ${pullRequest.html_url}.${assigned ? '' : ` Assignment to @${context.pullRequest.author} was not permitted.`}`;
@@ -1021,4 +1056,12 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
   }
 }
 
-export { completeChecklistItems, conventionalTitle, diagnosticTitle, referencedNumbers, usefulSearchTerms };
+export {
+  assignmentFallbackBody,
+  completeChecklistItems,
+  conventionalTitle,
+  diagnosticTitle,
+  referencedNumbers,
+  triageTitlePreservesDescription,
+  usefulSearchTerms,
+};
