@@ -617,6 +617,7 @@ describe('HlsVideoMediaElement', () => {
       class EventfulMedia extends HlsVideoMediaMixin(EventTarget) {}
       const media = new EventfulMedia();
       const changes: Event[] = [];
+
       media.addEventListener('sourcechange', (event: Event) => changes.push(event));
 
       media.source = { src: 'https://example.com/a.m3u8' };
@@ -628,6 +629,7 @@ describe('HlsVideoMediaElement', () => {
 
     it('replaces the source when a bare src is assigned, dropping its licensing', () => {
       const media = new HlsVideoMediaElement();
+
       media.source = { src: 'https://example.com/a.m3u8', drm: { 'com.widevine.alpha': { licenseUrl: 'https://l' } } };
 
       media.src = 'https://example.com/b.m3u8';
@@ -639,6 +641,7 @@ describe('HlsVideoMediaElement', () => {
 
     it('clears the presentation when the source is dropped', () => {
       const media = new HlsVideoMediaElement();
+
       media.source = { src: 'https://example.com/a.m3u8' };
       media.source = null;
 
@@ -649,6 +652,7 @@ describe('HlsVideoMediaElement', () => {
 
     it('keeps playing when only the licensing half of a source changes', () => {
       const media = new HlsVideoMediaElement();
+
       media.source = { src: 'https://example.com/a.m3u8' };
       const before = media.engine.state.presentation.get();
 
