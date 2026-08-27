@@ -12,7 +12,7 @@ import { time as baseTime } from './components/time';
 
 export const container = cn(
   baseContainer,
-  '[&:has(.media-error[data-open])_.media-controls_*]:invisible',
+  '[&:has([role=alertdialog][data-open])_.media-controls_*]:invisible',
   '[--media-default-accent-color:light-dark(oklch(0_0_0),oklch(1_0_0))]',
   '[--media-border-color:oklch(0_0_0/0.1)]',
   '[--media-focus-ring-color:light-dark(oklch(0_0_0),oklch(1_0_0))]',
@@ -84,6 +84,7 @@ export const popup = {
 
 export const dialog = {
   ...baseDialog,
+  popup: 'group/dialog absolute inset-0 z-20 not-data-open:hidden outline-none',
   dialog: cn(
     'absolute inset-0 z-20 flex items-center gap-3 rounded-full px-5 pr-0.5',
     'bg-(--media-surface-background-color) text-(--media-text-color)',

@@ -24,7 +24,7 @@ export const container = (isShadowDOM: boolean) =>
     '[&:has(.media-buffering-indicator[data-visible])_.media-controls-backdrop]:bg-black/35',
     '[&:has(.media-buffering-indicator[data-visible])_.media-controls-backdrop]:opacity-100',
     '[&:has(.media-buffering-indicator[data-visible])_.media-controls-backdrop]:backdrop-blur-sm',
-    '[&:has(.media-error[data-open])_.media-controls]:hidden!',
+    '[&:has([role=alertdialog][data-open])_.media-controls]:hidden!',
     // Inner border ring
     'after:absolute after:pointer-events-none after:rounded-[inherit] after:z-10',
     '[&:fullscreen]:after:hidden',

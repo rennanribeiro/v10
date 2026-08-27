@@ -46,7 +46,7 @@ export function getTemplateHTML() {
         ${renderIcon('spinner', { class: icon })}
       </media-buffering-indicator>
 
-      <media-error-dialog class="${dialog.root}">
+      <media-error-dialog>
         <media-dialog-backdrop class="${dialog.backdrop}"></media-dialog-backdrop>
         <media-dialog-popup class="${dialog.popup}">
           <div class="${dialog.content}">

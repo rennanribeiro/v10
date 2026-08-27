@@ -53,6 +53,12 @@
 
 /* Dialog */
 
+.media-minimal-skin--audio .media-dialog__popup {
+  position: absolute;
+  inset: 0;
+  z-index: 20;
+}
+
 .media-minimal-skin--audio .media-dialog__dialog {
   position: absolute;
   inset: 0;
@@ -70,15 +76,12 @@
 }
 
 .media-minimal-skin--audio .media-dialog__popup[data-starting-style] .media-dialog__dialog,
-.media-minimal-skin--audio .media-dialog__popup[data-ending-style] .media-dialog__dialog,
-.media-minimal-skin--audio media-error-dialog[data-starting-style] .media-dialog__dialog,
-.media-minimal-skin--audio media-error-dialog[data-ending-style] .media-dialog__dialog {
+.media-minimal-skin--audio .media-dialog__popup[data-ending-style] .media-dialog__dialog {
   opacity: 0;
   filter: blur(4px);
   scale: 0.95;
 }
-.media-minimal-skin--audio .media-dialog__popup[data-ending-style] .media-dialog__dialog,
-.media-minimal-skin--audio media-error-dialog[data-ending-style] .media-dialog__dialog {
+.media-minimal-skin--audio .media-dialog__popup[data-ending-style] .media-dialog__dialog {
   transition-delay: 0ms;
 }
 
@@ -87,6 +90,10 @@
   flex: 1;
   gap: calc(var(--media-spacing) * 2);
   align-items: center;
+}
+
+.media-minimal-skin--audio:has([role="alertdialog"][data-open]) .media-controls * {
+  visibility: hidden;
 }
 
 /* Controls */

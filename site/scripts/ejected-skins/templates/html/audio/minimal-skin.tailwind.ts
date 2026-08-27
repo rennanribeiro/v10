@@ -29,7 +29,7 @@ export function getTemplateHTML() {
       <slot></slot>
 
       <media-error-dialog>
-        <media-dialog-popup class="${dialog.root}">
+        <media-dialog-popup class="${dialog.popup}">
         <div class="${dialog.dialog}">
           <div class="${dialog.content}">
             <media-dialog-title class="${dialog.title}"></media-dialog-title>

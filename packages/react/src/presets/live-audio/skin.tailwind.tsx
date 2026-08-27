@@ -111,7 +111,7 @@ export function LiveAudioSkinTailwind(props: LiveAudioSkinProps): ReactNode {
       {children}
 
       <ErrorDialog.Root>
-        <ErrorDialog.Popup className={dialog.root}>
+        <ErrorDialog.Popup className={dialog.popup}>
           <div className={dialog.dialog}>
             <div className={dialog.content}>
               <ErrorDialog.Title className={dialog.title}></ErrorDialog.Title>

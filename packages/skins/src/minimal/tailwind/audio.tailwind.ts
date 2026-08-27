@@ -10,7 +10,7 @@ import { slider as baseSlider } from './components/slider';
 
 export const container = cn(
   baseContainer,
-  '[&:has(.media-error[data-open])_.media-controls_*]:invisible',
+  '[&:has([role=alertdialog][data-open])_.media-controls_*]:invisible',
   '[--media-default-accent-color:light-dark(oklch(0_0_0),oklch(1_0_0))]',
   '[--media-focus-ring-color:light-dark(oklch(0_0_0),oklch(1_0_0))]',
   '[--media-controls-background-color:light-dark(oklch(1_0_0),oklch(0_0_0))]',
@@ -85,6 +85,7 @@ export const slider = {
 
 export const dialog = {
   ...baseDialog,
+  popup: 'group/dialog absolute inset-0 z-20 not-data-open:hidden outline-none',
   dialog: cn(
     'absolute inset-0 z-20 flex items-center gap-4 rounded-full px-5 pr-2',
     'bg-(--media-controls-background-color)',

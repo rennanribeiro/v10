@@ -129,6 +129,7 @@
   gap: calc(var(--media-spacing) * 3);
   width: 100%;
   max-width: calc(var(--media-spacing) * 64);
+  max-height: calc(100% - var(--media-spacing) * 2);
   padding: calc(var(--media-spacing) * 4);
   color: oklch(1 0 0);
   text-shadow: 0 1px 0 oklch(0 0 0 / 0.5);
@@ -139,14 +140,11 @@
   transition-property: opacity, scale;
 
   &[data-starting-style],
-  &[data-ending-style],
-  media-error-dialog[data-starting-style] &,
-  media-error-dialog[data-ending-style] & {
+  &[data-ending-style] {
     opacity: 0;
     scale: 0.95;
   }
-  &[data-ending-style],
-  media-error-dialog[data-ending-style] & {
+  &[data-ending-style] {
     transition-delay: 0ms;
   }
 }
@@ -154,12 +152,18 @@
 .media-minimal-skin--video .media-dialog__content {
   display: flex;
   flex-direction: column;
+  min-height: 0;
   gap: calc(var(--media-spacing) * 2);
   padding: calc(var(--media-spacing) * 1.5) 0;
+  overflow-y: auto;
 }
 
 .media-minimal-skin--video .media-dialog__title {
   font-size: var(--media-font-size-medium);
+}
+
+.media-minimal-skin--video:has([role="alertdialog"][data-open]) .media-controls {
+  display: none;
 }
 
 /* Controls (hide/show behavior) */

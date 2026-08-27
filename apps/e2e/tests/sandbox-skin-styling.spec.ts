@@ -12,6 +12,12 @@ const CASES = [
   { platform: 'react', skin: 'default', styling: 'tailwind' },
   { platform: 'react', skin: 'minimal', styling: 'tailwind' },
 ] as const;
+const HTML_TAILWIND_ERROR_CASES = [
+  { media: 'video', skin: 'default' },
+  { media: 'video', skin: 'minimal' },
+  { media: 'audio', skin: 'default' },
+  { media: 'audio', skin: 'minimal' },
+] as const;
 
 test.use({ trace: 'off' });
 test.describe.configure({ mode: 'serial' });
@@ -69,6 +75,71 @@ for (const { platform, skin, styling } of CASES) {
       fillUsesAccent: true,
       videoBorderRadius: '18px',
     });
+  });
+}
+
+for (const { media, skin } of HTML_TAILWIND_ERROR_CASES) {
+  test(`html ${skin} tailwind ${media} contains the error dialog without changing the closed layout`, async ({
+    page,
+  }) => {
+    const query = new URLSearchParams({
+      styling: 'tailwind',
+      skin,
+      source: 'mp4-1',
+      autoplay: '0',
+      muted: '1',
+      loop: '0',
+      preload: 'metadata',
+    });
+
+    await page.goto(`${SANDBOX_BASE}/html-${media}/?${query}`, { waitUntil: 'domcontentloaded' });
+
+    const root = page.getByRole('group', { name: 'Media player' }).first();
+
+    await expect(root).toBeVisible({ timeout: 15_000 });
+    await root.evaluate((element) => {
+      if (element instanceof HTMLElement) element.style.width = '320px';
+    });
+
+    const popup = root.locator('media-error-dialog media-dialog-popup').first();
+    const initialRootBox = await root.boundingBox();
+    if (!initialRootBox) throw new Error('Expected the media player to have a rendered box.');
+
+    await expect(popup).toBeHidden();
+    await page
+      .locator(media)
+      .first()
+      .evaluate((element) => {
+        Object.defineProperty(element, 'error', {
+          configurable: true,
+          value: { code: 4, message: 'Test media error' },
+        });
+        element.dispatchEvent(new Event('error'));
+      });
+    await expect(popup).toBeVisible({ timeout: 15_000 });
+
+    const contract = await root.evaluate((element, mediaType) => {
+      const popup = element.querySelector<HTMLElement>('[role="alertdialog"]');
+      const controls = element.querySelector<HTMLElement>('.media-controls');
+      if (!popup || !controls) throw new Error('Expected an error dialog and controls.');
+
+      const rootRect = element.getBoundingClientRect();
+      const popupRect = popup.getBoundingClientRect();
+      const controlsStyle = getComputedStyle(controls);
+
+      return {
+        controlsSuppressed:
+          mediaType === 'video'
+            ? controlsStyle.display === 'none'
+            : [...controls.children].every((child) => getComputedStyle(child).visibility === 'hidden'),
+        popupInside: popupRect.top >= rootRect.top && popupRect.bottom <= rootRect.bottom,
+        rootHeight: rootRect.height,
+      };
+    }, media);
+
+    expect(contract.controlsSuppressed).toBe(true);
+    expect(contract.popupInside).toBe(true);
+    expect(Math.abs(contract.rootHeight - initialRootBox.height)).toBeLessThanOrEqual(1);
   });
 }
 
