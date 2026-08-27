@@ -91,6 +91,7 @@ export { DialogDescriptionElement } from './ui/dialog/dialog-description-element
 export { DialogElement } from './ui/dialog/dialog-element';
 export { DialogPopupElement } from './ui/dialog/dialog-popup-element';
 export { DialogTitleElement } from './ui/dialog/dialog-title-element';
+export { ErrorDialogContentElement } from './ui/error-dialog/error-dialog-content-element';
 export { ErrorDialogElement } from './ui/error-dialog/error-dialog-element';
 export { FullscreenButtonElement } from './ui/fullscreen-button/fullscreen-button-element';
 export { GestureElement } from './ui/gesture/gesture-element';

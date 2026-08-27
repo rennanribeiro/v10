@@ -9,6 +9,7 @@ export default defineComponent({
     Root: defineComponent(),
     Backdrop: defineComponent(),
     Popup: defineComponent(),
+    Content: defineComponent(),
     Title: defineComponent(),
     Description: defineComponent(),
     Close: defineComponent(),

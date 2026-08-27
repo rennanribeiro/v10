@@ -34,8 +34,10 @@ import basicUsageHtmlTs from "@/components/docs/demos/error-dialog/html/css/Basi
 <ErrorDialog.Root>
   <ErrorDialog.Backdrop />
   <ErrorDialog.Popup>
-    <ErrorDialog.Title />
-    <ErrorDialog.Description />
+    <ErrorDialog.Content>
+      <ErrorDialog.Title />
+      <ErrorDialog.Description />
+    </ErrorDialog.Content>
     <ErrorDialog.Close />
   </ErrorDialog.Popup>
 </ErrorDialog.Root>
@@ -47,8 +49,10 @@ import basicUsageHtmlTs from "@/components/docs/demos/error-dialog/html/css/Basi
 <media-error-dialog>
   <media-dialog-backdrop></media-dialog-backdrop>
   <media-dialog-popup>
-    <media-dialog-title></media-dialog-title>
-    <media-dialog-description></media-dialog-description>
+    <media-error-dialog-content>
+      <media-dialog-title></media-dialog-title>
+      <media-dialog-description></media-dialog-description>
+    </media-error-dialog-content>
     <media-dialog-close></media-dialog-close>
   </media-dialog-popup>
 </media-error-dialog>
@@ -60,6 +64,8 @@ import basicUsageHtmlTs from "@/components/docs/demos/error-dialog/html/css/Basi
 `ErrorDialog` is a specialized root driven by the player's <DocsLink slug="reference/feature-error">error feature</DocsLink>. It uses alert semantics and reuses the backdrop, popup, title, description, and close parts from <DocsLink slug="reference/dialog">`Dialog`</DocsLink>; it is not nested inside `AlertDialog`. It opens when the attached media reports an error and stays hidden otherwise. Closing it dismisses the current error in the player store.
 
 The title, description, and close label use localized default text. Provide children to any of those parts to replace its default content. Known media error codes use the matching translated message, while custom error messages are shown as written.
+
+Wrap the title and description in `Content`. The part stays out of the tab order when all copy is visible and becomes keyboard-focusable when its content overflows, allowing keyboard users to scroll the complete message.
 
 The included player skins already render an error dialog. Compose this component directly when building a custom skin.
 

@@ -23,6 +23,7 @@ export * from './ui/popover/popover';
 export type { PositioningCSSVars, PositioningOptions } from './ui/popover/popover-positioning';
 export * from './ui/popover/popup-group';
 export * from './ui/popover/popup-positioner';
+export * from './ui/scroll-region';
 export * from './ui/slider';
 export * from './ui/slider-css-vars';
 export * from './ui/slider-focus';

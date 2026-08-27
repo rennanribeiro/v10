@@ -27,10 +27,10 @@ function getTemplateHTML() {
       <media-error-dialog>
         <media-dialog-backdrop class="media-dialog__backdrop"></media-dialog-backdrop>
         <media-dialog-popup class="media-dialog__popup media-surface">
-          <div class="media-dialog__content">
+          <media-error-dialog-content class="media-dialog__content">
             <media-dialog-title class="media-dialog__title"></media-dialog-title>
             <media-dialog-description class="media-dialog__description"></media-dialog-description>
-          </div>
+          </media-error-dialog-content>
           <div class="media-dialog__actions">
             <media-dialog-close class="media-button media-button--primary"></media-dialog-close>
           </div>

@@ -1,5 +1,6 @@
 import { cleanup, render, screen, waitFor } from '@testing-library/react';
 import { registerI18n, resetI18nRegistry } from '@videojs/core/i18n';
+import { type RefCallback } from 'react';
 import { afterEach, describe, expect, it, vi } from 'vite-plus/test';
 
 import { ErrorDialog } from '..';
@@ -12,6 +13,42 @@ afterEach(() => {
 });
 
 describe('ErrorDialog', () => {
+  it.each([
+    { clientHeight: 100, expectedTabIndex: -1, scrollHeight: 100 },
+    { clientHeight: 100, expectedTabIndex: 0, scrollHeight: 200 },
+  ])(
+    'sets content tabIndex to $expectedTabIndex when its visible and scroll heights are $clientHeight and $scrollHeight',
+    ({ clientHeight, expectedTabIndex, scrollHeight }) => {
+      const { Wrapper } = createPlayerWrapper({
+        error: { code: 4, message: 'The media could not be played.' },
+        dismissError: vi.fn(),
+      });
+      const setMetrics: RefCallback<HTMLDivElement> = (element) => {
+        if (!element) return;
+
+        Object.defineProperties(element, {
+          clientHeight: { configurable: true, value: clientHeight },
+          scrollHeight: { configurable: true, value: scrollHeight },
+        });
+      };
+
+      render(
+        <Wrapper>
+          <ErrorDialog.Root>
+            <ErrorDialog.Popup>
+              <ErrorDialog.Content data-testid="content" ref={setMetrics}>
+                <ErrorDialog.Description />
+              </ErrorDialog.Content>
+              <ErrorDialog.Close />
+            </ErrorDialog.Popup>
+          </ErrorDialog.Root>
+        </Wrapper>
+      );
+
+      expect(screen.getByTestId('content').tabIndex).toBe(expectedTabIndex);
+    }
+  );
+
   it('shows translated title, description, and dismiss label when locale is es', () => {
     registerI18n('es', {
       'errors.title': 'Algo salió mal.',

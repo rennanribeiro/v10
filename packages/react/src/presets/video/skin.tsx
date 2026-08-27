@@ -418,10 +418,10 @@ export function VideoSkin(props: VideoSkinProps): ReactNode {
       <ErrorDialog.Root>
         <ErrorDialog.Backdrop className="media-dialog__backdrop" />
         <ErrorDialog.Popup className="media-dialog__popup media-surface">
-          <div className="media-dialog__content">
+          <ErrorDialog.Content className="media-dialog__content">
             <ErrorDialog.Title className="media-dialog__title"></ErrorDialog.Title>
             <ErrorDialog.Description className="media-dialog__description" />
-          </div>
+          </ErrorDialog.Content>
           <div className="media-dialog__actions">
             <ErrorDialog.Close className="media-button media-button--primary"></ErrorDialog.Close>
           </div>

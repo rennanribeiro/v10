@@ -1,5 +1,6 @@
 export { Backdrop, type BackdropProps, Popup, type PopupProps } from '../dialog/index.parts';
 export { ErrorDialogClose as Close, type ErrorDialogCloseProps as CloseProps } from './error-dialog-close';
+export { ErrorDialogContent as Content, type ErrorDialogContentProps as ContentProps } from './error-dialog-content';
 export {
   ErrorDialogDescription as Description,
   type ErrorDialogDescriptionProps as DescriptionProps,

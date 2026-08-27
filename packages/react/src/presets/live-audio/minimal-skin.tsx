@@ -99,10 +99,10 @@ export function MinimalLiveAudioSkin(props: MinimalLiveAudioSkinProps): ReactNod
       <ErrorDialog.Root>
         <ErrorDialog.Popup className="media-dialog__popup">
           <div className="media-dialog__dialog">
-            <div className="media-dialog__content">
+            <ErrorDialog.Content className="media-dialog__content">
               <ErrorDialog.Title className="media-dialog__title"></ErrorDialog.Title>
               <ErrorDialog.Description className="media-dialog__description" />
-            </div>
+            </ErrorDialog.Content>
             <div className="media-dialog__actions">
               <ErrorDialog.Close className="media-button media-button--subtle"></ErrorDialog.Close>
             </div>

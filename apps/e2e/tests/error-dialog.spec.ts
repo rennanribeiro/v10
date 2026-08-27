@@ -36,6 +36,12 @@ test.describe('Error Dialog', () => {
 
     // Error dialog should appear with data-open
     await expect(errorDialog).toHaveAttribute(DATA_ATTRS.open, '', { timeout: 15_000 });
+
+    const content = errorDialog.locator('media-error-dialog-content');
+    const close = errorDialog.locator('media-dialog-close');
+
+    await expect(content).toHaveAttribute('tabindex', '-1');
+    await expect(close).toBeFocused();
   });
 
   test('error dialog can be dismissed', async ({ page }) => {
@@ -81,21 +87,32 @@ test.describe('Error Dialog', () => {
     await expect(outsideButton).toBeFocused();
   });
 
-  test('keeps long error content and the dismiss action inside a narrow player', async ({ page }) => {
+  test('keeps long error content keyboard-accessible inside a narrow player', async ({ page }) => {
     await player.playerRoot.evaluate((element) => {
       if (element instanceof HTMLElement) element.style.width = '320px';
     });
     await triggerError(page, 'A long authored playback error message. '.repeat(120));
 
     const popup = page.getByRole('alertdialog');
-    const content = popup.locator('.media-dialog__content');
+    const content = popup.locator('media-error-dialog-content');
+    const close = popup.locator('media-dialog-close');
 
     await expect(popup).toBeVisible({ timeout: 15_000 });
     await expect(player.controls).toBeHidden();
+    await expect(content).toHaveAttribute('tabindex', '0');
+    await expect(content).toBeFocused();
 
     const scrollRange = await content.evaluate((element) => element.scrollHeight - element.clientHeight);
 
     expect(scrollRange).toBeGreaterThan(0);
+
+    await page.keyboard.press('PageDown');
+
+    await expect.poll(() => content.evaluate((element) => element.scrollTop)).toBeGreaterThan(0);
+
+    await page.keyboard.press('Tab');
+
+    await expect(close).toBeFocused();
 
     const contract = await player.playerRoot.evaluate((root) => {
       const popup = root.querySelector<HTMLElement>('[role="alertdialog"]');

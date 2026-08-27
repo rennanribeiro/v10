@@ -23,6 +23,7 @@ const componentParts: Readonly<Record<string, Readonly<Record<string, string>>>>
     Root: 'ErrorDialog',
     Backdrop: 'DialogBackdrop',
     Popup: 'DialogPopup',
+    Content: 'ErrorDialogContent',
     Title: 'DialogTitle',
     Description: 'DialogDescription',
     Close: 'DialogClose',

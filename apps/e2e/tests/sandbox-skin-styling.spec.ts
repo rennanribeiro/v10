@@ -120,14 +120,16 @@ for (const { media, skin } of HTML_TAILWIND_ERROR_CASES) {
 
     const contract = await root.evaluate((element, mediaType) => {
       const popup = element.querySelector<HTMLElement>('[role="alertdialog"]');
+      const content = popup?.querySelector<HTMLElement>('media-error-dialog-content');
       const controls = element.querySelector<HTMLElement>('.media-controls');
-      if (!popup || !controls) throw new Error('Expected an error dialog and controls.');
+      if (!popup || !content || !controls) throw new Error('Expected an error dialog, content, and controls.');
 
       const rootRect = element.getBoundingClientRect();
       const popupRect = popup.getBoundingClientRect();
       const controlsStyle = getComputedStyle(controls);
 
       return {
+        contentTabIndex: content.tabIndex,
         controlsSuppressed:
           mediaType === 'video'
             ? controlsStyle.display === 'none'
@@ -137,6 +139,7 @@ for (const { media, skin } of HTML_TAILWIND_ERROR_CASES) {
       };
     }, media);
 
+    expect(contract.contentTabIndex).toBe(-1);
     expect(contract.controlsSuppressed).toBe(true);
     expect(contract.popupInside).toBe(true);
     expect(Math.abs(contract.rootHeight - initialRootBox.height)).toBeLessThanOrEqual(1);

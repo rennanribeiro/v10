@@ -8,6 +8,7 @@ import { DialogCloseElement } from '../ui/dialog/dialog-close-element';
 import { DialogDescriptionElement } from '../ui/dialog/dialog-description-element';
 import { DialogPopupElement } from '../ui/dialog/dialog-popup-element';
 import { DialogTitleElement } from '../ui/dialog/dialog-title-element';
+import { ErrorDialogContentElement } from '../ui/error-dialog/error-dialog-content-element';
 import { ErrorDialogElement } from '../ui/error-dialog/error-dialog-element';
 import { MenuCheckboxItemElement } from '../ui/menu/menu-checkbox-item-element';
 import { MenuContentElement } from '../ui/menu/menu-content-element';
@@ -87,6 +88,7 @@ export function defineErrorDialog(): void {
   // Parent first — child elements consume its context.
   safeDefine(ErrorDialogElement);
   defineDialogParts();
+  safeDefine(ErrorDialogContentElement);
 }
 
 export function defineInputIndicators(): void {

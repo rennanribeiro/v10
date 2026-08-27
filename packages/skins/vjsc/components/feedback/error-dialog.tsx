@@ -11,10 +11,10 @@ export function ErrorDialog({ className, ...props }: Props = {}) {
     <$.ErrorDialog.Root className={styles.root}>
       <$.ErrorDialog.Backdrop className={styles.backdrop} />
       <$.ErrorDialog.Popup className={[surfaceStyles.feedback, styles.popup, className]} {...props}>
-        <Box className={styles.content}>
+        <$.ErrorDialog.Content className={styles.content}>
           <$.ErrorDialog.Title className={styles.title} />
           <$.ErrorDialog.Description className={styles.description} />
-        </Box>
+        </$.ErrorDialog.Content>
         <Box className={styles.actions}>
           <$.ErrorDialog.Close className={[buttonStyles.root, styles.close]} />
         </Box>

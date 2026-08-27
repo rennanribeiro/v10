@@ -24,10 +24,10 @@ export function getTemplateHTML() {
       <media-error-dialog>
         <media-dialog-popup class="${dialog.popup}">
         <div class="${dialog.dialog}">
-          <div class="${dialog.content}">
+          <media-error-dialog-content class="${dialog.content}">
             <media-dialog-title class="${dialog.title}"></media-dialog-title>
             <media-dialog-description class="${dialog.description}"></media-dialog-description>
-          </div>
+          </media-error-dialog-content>
           <div class="${dialog.actions}">
             <media-dialog-close class="${cn(button.base, button.subtle)}"></media-dialog-close>
           </div>
