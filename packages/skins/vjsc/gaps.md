@@ -9,16 +9,16 @@ This file tracks observable behavior in `packages/skins/src` that is not yet imp
 - Affected: Default and Minimal skins; HTML and React targets; CSS and Tailwind outputs.
 - Recommendation: Add `:dir(rtl)` layout rules to the current wrapper-free control regions and time groups, then add RTL cases to the VJSC skin matrix before removing this entry.
 
-## Minimal volume tooltip and spacing
-
-- Source: `2e9c1e221` / #2386
-- Gap: VJSC keeps the Minimal volume thumb visible, but it does not show a sticky mute tooltip while the volume popover is open and compact layouts retain the wider trigger-to-slider gap.
-- Affected: Minimal Video skin; HTML and React targets; CSS and Tailwind outputs.
-- Recommendation: Compose a sticky button tooltip around the Minimal volume-popover trigger, use zero side offset with internal horizontal padding, and add VJSC matrix coverage for the tooltip and popover remaining visible together.
-
 ## Deferred anatomy considerations
 
 These selectors currently preserve observable parity. Keep them as known ownership concerns rather than introducing new anatomy solely to remove a diagnostic warning.
+
+### Error dialog control suppression ownership
+
+- Source: #2451 and `packages/skins/vjsc/styles/layout/container.styles.ts`
+- Gap: No observable parity gap is known, but the VJSC Container suppresses controls while an error dialog is open by locating both parts with a structural `:has()` selector.
+- Affected: Default and Minimal video skins; HTML and React targets; CSS and Tailwind outputs.
+- Recommendation: Keep the selector until shared player state can expose error-dialog presence directly on Container or Controls. Then move the visibility rule to the state-owning part and remove the structural relationship.
 
 ### Poster image ownership
 
