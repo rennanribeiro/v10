@@ -121,13 +121,12 @@ const modules = {
 type ModuleKey = keyof typeof modules;
 
 const params = new URLSearchParams(location.search);
-const source = params.get('source') === 'legacy' ? 'legacy' : 'vjsc';
 const framework = params.get('framework') === 'html' ? 'html' : 'react';
 const requestedSkin = params.get('skin');
 const skin: SkinName = isSkinName(requestedSkin) ? requestedSkin : 'default-video';
 const isAudio = skin.endsWith('-audio');
 const isLive = skin.includes('-live-');
-const styleMode = source === 'vjsc' && params.get('style') === 'tailwind' ? 'tailwind' : 'css';
+const styleMode = params.get('style') === 'tailwind' ? 'tailwind' : 'css';
 const captionsMode = params.get('captions') === 'multiple' ? 'multiple' : 'single';
 const key: ModuleKey = `${framework}/${skin}/${styleMode}`;
 const requestedMedia = params.get('media');
@@ -140,9 +139,9 @@ const sourceId = mediaId === 'error' ? null : mediaId;
 const media: SandboxSource = sourceId ? SOURCES[sourceId] : errorSource;
 const poster = sourceId ? getPosterSrc(sourceId) : undefined;
 const storyboard = sourceId ? getStoryboardSrc(sourceId) : undefined;
-const loaded = source === 'vjsc' ? await modules[key]() : null;
+const loaded = await modules[key]();
 
-if (source === 'vjsc' && styleMode === 'tailwind') await import('../vjsc/styles/tailwind.compiler.css');
+if (styleMode === 'tailwind') await import('../vjsc/styles/tailwind.compiler.css');
 
 function App({ Skin }: { Skin: React.ComponentType<React.PropsWithChildren<{ className?: string }>> }) {
   const content = <Skin className="preview-player">{renderReactMedia()}</Skin>;
@@ -171,19 +170,13 @@ const widthControl = createWidthControl();
 root.before(controls, widthControl);
 setPlayerWidth(playerWidth);
 
-if (source === 'legacy') {
-  await renderLegacy(framework, skin);
-} else if (framework === 'react') {
-  if (!loaded) throw new Error(`VJSC module \`${key}\` was not loaded.`);
-
+if (framework === 'react') {
   const Skin = getLoadedSkin(loaded);
   if (!Skin) throw new Error(`React Skin module \`${key}\` did not export a Skin component.`);
 
   // SAFETY: VJSC transforms the selected React target into a React component before the module loads.
   renderReact(<App Skin={Skin as React.ComponentType<React.PropsWithChildren<{ className?: string }>>} />);
 } else {
-  if (!loaded) throw new Error(`VJSC module \`${key}\` was not loaded.`);
-
   const Skin = getLoadedSkin(loaded);
   if (!Skin) throw new Error(`HTML Skin module \`${key}\` did not export a Skin component.`);
 
@@ -207,136 +200,6 @@ if (source === 'legacy') {
       : 'video-player';
 
   root.innerHTML = `<${playerTag}${posterAttribute}>${output}</${playerTag}>`;
-  assignHtmlMediaSource();
-}
-
-async function renderLegacy(framework: 'react' | 'html', skin: SkinName) {
-  const minimal = skin.startsWith('minimal-');
-
-  if (framework === 'react') {
-    if (isAudio) {
-      await (minimal ? import('../src/minimal/css/audio.css') : import('../src/default/css/audio.css'));
-
-      if (isLive && minimal) {
-        const { MinimalLiveAudioSkin } = await import('../../react/src/presets/live-audio/minimal-skin');
-
-        renderReact(
-          <LiveAudioPlayer>
-            <MinimalLiveAudioSkin className="preview-player">{renderReactMedia()}</MinimalLiveAudioSkin>
-          </LiveAudioPlayer>
-        );
-      } else if (isLive) {
-        const { LiveAudioSkin } = await import('../../react/src/presets/live-audio/skin');
-
-        renderReact(
-          <LiveAudioPlayer>
-            <LiveAudioSkin className="preview-player">{renderReactMedia()}</LiveAudioSkin>
-          </LiveAudioPlayer>
-        );
-      } else if (minimal) {
-        const { MinimalAudioSkin } = await import('../../react/src/presets/audio/minimal-skin');
-
-        renderReact(
-          <AudioPlayer>
-            <MinimalAudioSkin className="preview-player">{renderReactMedia()}</MinimalAudioSkin>
-          </AudioPlayer>
-        );
-      } else {
-        const { AudioSkin } = await import('../../react/src/presets/audio/skin');
-
-        renderReact(
-          <AudioPlayer>
-            <AudioSkin className="preview-player">{renderReactMedia()}</AudioSkin>
-          </AudioPlayer>
-        );
-      }
-    } else if (isLive) {
-      await (minimal ? import('../src/minimal/css/video.css') : import('../src/default/css/video.css'));
-
-      if (minimal) {
-        const { MinimalLiveVideoSkin } = await import('../../react/src/presets/live-video/minimal-skin');
-
-        renderReact(
-          <LiveVideoPlayer poster={poster}>
-            <MinimalLiveVideoSkin className="preview-player">{renderReactMedia()}</MinimalLiveVideoSkin>
-          </LiveVideoPlayer>
-        );
-      } else {
-        const { LiveVideoSkin } = await import('../../react/src/presets/live-video/skin');
-
-        renderReact(
-          <LiveVideoPlayer poster={poster}>
-            <LiveVideoSkin className="preview-player">{renderReactMedia()}</LiveVideoSkin>
-          </LiveVideoPlayer>
-        );
-      }
-    } else {
-      await (minimal ? import('../src/minimal/css/video.css') : import('../src/default/css/video.css'));
-
-      if (minimal) {
-        const { MinimalVideoSkin } = await import('../../react/src/presets/video/minimal-skin');
-
-        renderReact(
-          <VideoPlayer poster={poster}>
-            <MinimalVideoSkin className="preview-player">{renderReactMedia()}</MinimalVideoSkin>
-          </VideoPlayer>
-        );
-      } else {
-        const { VideoSkin } = await import('../../react/src/presets/video/skin');
-
-        renderReact(
-          <VideoPlayer poster={poster}>
-            <VideoSkin className="preview-player">{renderReactMedia()}</VideoSkin>
-          </VideoPlayer>
-        );
-      }
-    }
-
-    return;
-  }
-
-  if (isAudio && isLive) await import('../../html/src/define/live-audio/player');
-  else if (isAudio) await import('../../html/src/define/audio/player');
-  else if (isLive) await import('../../html/src/define/live-video/player');
-  else await import('../../html/src/define/video/player');
-
-  await defineHtmlMedia();
-
-  const tag = isAudio
-    ? isLive
-      ? minimal
-        ? 'live-audio-minimal-skin'
-        : 'live-audio-skin'
-      : minimal
-        ? 'audio-minimal-skin'
-        : 'audio-skin'
-    : isLive
-      ? minimal
-        ? 'live-video-minimal-skin'
-        : 'live-video-skin'
-      : minimal
-        ? 'video-minimal-skin'
-        : 'video-skin';
-  const playerTag = isAudio
-    ? isLive
-      ? 'live-audio-player'
-      : 'audio-player'
-    : isLive
-      ? 'live-video-player'
-      : 'video-player';
-  const posterAttribute = !isAudio && poster ? ` poster="${escapeAttribute(poster)}"` : '';
-
-  if (isAudio) {
-    if (isLive && minimal) await import('../../html/src/define/live-audio/minimal-skin');
-    else if (isLive) await import('../../html/src/define/live-audio/skin');
-    else if (minimal) await import('../../html/src/define/audio/minimal-skin');
-    else await import('../../html/src/define/audio/skin');
-  } else if (isLive && minimal) await import('../../html/src/define/live-video/minimal-skin');
-  else if (isLive) await import('../../html/src/define/live-video/skin');
-  else if (minimal) await import('../../html/src/define/video/minimal-skin');
-  else await import('../../html/src/define/video/skin');
-
-  root.innerHTML = `<${playerTag}${posterAttribute}><${tag} class="preview-player">${renderHtmlMedia()}</${tag}></${playerTag}>`;
   assignHtmlMediaSource();
 }
 
@@ -470,10 +333,6 @@ function createPreviewControls() {
   form.className = 'preview-controls';
   form.ariaLabel = 'Skin preview options';
   form.append(
-    createSelect('source', 'Source', source, [
-      ['vjsc', 'VJSC'],
-      ['legacy', 'Legacy'],
-    ]),
     createSelect('framework', 'Framework', framework, [
       ['react', 'React'],
       ['html', 'HTML'],
@@ -488,16 +347,10 @@ function createPreviewControls() {
       ['default-audio', 'Default Audio'],
       ['minimal-audio', 'Minimal Audio'],
     ]),
-    createSelect(
-      'style',
-      'Styling',
-      styleMode,
-      [
-        ['css', 'CSS'],
-        ['tailwind', 'Tailwind'],
-      ],
-      source === 'legacy'
-    ),
+    createSelect('style', 'Styling', styleMode, [
+      ['css', 'CSS'],
+      ['tailwind', 'Tailwind'],
+    ]),
     createSelect(
       'media',
       'Media',
@@ -516,8 +369,6 @@ function createPreviewControls() {
     const next = new URLSearchParams(location.search);
 
     next.set(event.target.name, event.target.value);
-
-    if (event.target.name === 'source' && event.target.value === 'legacy') next.set('style', 'css');
 
     location.search = next.toString();
   });
@@ -593,7 +444,6 @@ function createCopyButton() {
     const details = [
       'Video.js skins preview',
       `URL: ${location.href}`,
-      `source=${source}`,
       `framework=${framework}`,
       `skin=${skin}`,
       `style=${styleMode}`,
@@ -621,8 +471,7 @@ function createSelect(
   name: string,
   labelText: string,
   value: string,
-  options: readonly (readonly [value: string, label: string])[],
-  disabled = false
+  options: readonly (readonly [value: string, label: string])[]
 ) {
   const label = document.createElement('label');
   const text = document.createElement('span');
@@ -631,7 +480,6 @@ function createSelect(
   label.className = `preview-control preview-control-${name}`;
   text.textContent = labelText;
   select.name = name;
-  select.disabled = disabled;
   select.append(
     ...options.map(([optionValue, optionLabel]) => new Option(optionLabel, optionValue, false, optionValue === value))
   );

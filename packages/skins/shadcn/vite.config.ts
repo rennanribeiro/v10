@@ -41,12 +41,11 @@ export const shadcnPackConfig: PackUserConfig = {
   platform: 'browser',
   format: 'es',
   alias: {
-    '@videojs/skins/registry': registryUtils,
     '@videojs/utils/style': registryUtils,
   },
   deps: {
     neverBundle: true,
-    alwaysBundle: ['@videojs/skins/registry', '@videojs/utils/style'],
+    alwaysBundle: ['@videojs/utils/style'],
     onlyBundle: false,
   },
   plugins: [
