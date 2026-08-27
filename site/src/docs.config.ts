@@ -43,6 +43,7 @@ export const sidebar: Sidebar = [
       { slug: 'concepts/browser-support' },
       { slug: 'concepts/typescript' },
       { slug: 'concepts/bundlers' },
+      { slug: 'concepts/cdn', frameworks: ['html'] },
     ],
   },
   {
