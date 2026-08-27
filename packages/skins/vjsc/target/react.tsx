@@ -1,7 +1,12 @@
 /** @jsxImportSource vjsc/target */
 
 import type coreSchema from '@videojs/core/vjsc';
-import { type ComponentTarget, defineComponentTarget, type TemplateTargetDefinition } from 'vjsc/target';
+import {
+  canMergeHostProps,
+  type ComponentTarget,
+  defineComponentTarget,
+  type TemplateTargetDefinition,
+} from 'vjsc/target';
 import { Host } from 'vjsc/target/jsx-runtime';
 
 import { reactComponentTransform } from './react-transform.ts';
@@ -51,6 +56,14 @@ export const reactComponentTarget: ComponentTarget<CoreSchema> = defineComponent
       });
     },
     components: {
+      Menu: {
+        Trigger: ({ props, children }) =>
+          canMergeHostProps(children) ? (
+            <target.Menu.Trigger render={children} {...props} />
+          ) : (
+            <target.Menu.Trigger {...props}>{children}</target.Menu.Trigger>
+          ),
+      },
       Controls: {
         Root: ({ children }) => <target.Controls.Root>{children}</target.Controls.Root>,
       },

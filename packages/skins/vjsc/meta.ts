@@ -30,6 +30,16 @@ export const skinStyles = {
     theme: 'minimal',
     variant: 'minimal',
   },
+  'default-audio': {
+    scope: 'media-skin-audio',
+    theme: 'default',
+    variant: 'default-audio',
+  },
+  'minimal-audio': {
+    scope: 'media-skin-audio-minimal',
+    theme: 'minimal',
+    variant: 'minimal-audio',
+  },
 } as const satisfies Record<string, SkinMeta['style']>;
 
 export type SkinName = keyof typeof skinStyles;

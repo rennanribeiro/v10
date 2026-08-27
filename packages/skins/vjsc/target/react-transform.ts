@@ -15,7 +15,7 @@ import type { ComponentTargetTransform, ComponentTargetTransformContext } from '
 const optionMenus = [
   { component: 'QualityMenu', binding: 'quality', hook: 'useQualityOptions' },
   { component: 'AudioTrackMenu', binding: 'audioTrack', hook: 'useAudioTrackOptions' },
-  { component: 'PlaybackRateMenu', binding: 'playbackRate', hook: 'usePlaybackRateOptions' },
+  { component: 'PlaybackRateSubmenu', binding: 'playbackRate', hook: 'usePlaybackRateOptions' },
   { component: 'CaptionsMenu', binding: 'captions', hook: 'useCaptionsOptions' },
 ] as const;
 
@@ -52,7 +52,28 @@ function transformReactComponent(
   const menu = optionMenus.find((candidate) => candidate.component === name);
   if (menu) return transformOptionMenu(context, imports, body, menu);
 
+  if (name === 'PlaybackRateMenu') return transformPlaybackRateMenu(context, imports, body);
+
   return name === 'VideoSettingsMenu' ? transformVideoSettingsMenu(context, imports, body) : false;
+}
+
+/** Hide the standalone rate menu when unsupported and disable its trigger while unavailable. */
+function transformPlaybackRateMenu(
+  context: ComponentTargetTransformContext,
+  imports: ModuleImports,
+  body: BlockBody
+): true {
+  const hook = imports.reference({ from: '@videojs/react', name: 'usePlaybackRateOptions' });
+
+  prependBlockBody(context.magicString, body, `const playbackRate = ${hook}();\nif (!playbackRate) return null;`);
+
+  const trigger = findJsxElement(body, '$.Menu.Trigger');
+
+  if (trigger && !findJsxAttribute(trigger, 'disabled')) {
+    context.magicString.appendLeft(trigger.openingElement.end - 1, ' disabled={playbackRate.state.disabled}');
+  }
+
+  return true;
 }
 
 /**

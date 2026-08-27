@@ -5,7 +5,7 @@ import { type SourceProps, type TargetOutput, type TargetReplacement, TARGET_REP
 
 export const SOURCE_PROPS = Symbol('vjsc/source-props');
 export const SOURCE_PROP = Symbol('vjsc/source-prop');
-export const SOURCE_CHILDREN = Symbol('vjsc/source-children');
+export const SOURCE_CHILDREN = Symbol.for('vjsc/source-children');
 
 export interface SourcePropsToken {
   readonly [SOURCE_PROPS]: true;
@@ -130,6 +130,11 @@ export function isSourceChildrenToken(value: unknown): value is SourceChildrenTo
   return Boolean(
     value && typeof value === 'object' && (value as Partial<SourceChildrenToken>)[SOURCE_CHILDREN] === true
   );
+}
+
+/** Whether source children contain one JSX element whose opening tag can receive generated props. */
+export function canMergeHostProps(value: TargetOutput): boolean {
+  return isSourceChildrenToken(value) && value.rootOpeningEnd !== undefined;
 }
 
 export function createTargetReplacement(
