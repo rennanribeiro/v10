@@ -4,7 +4,7 @@
 
 > **⚠️ Beta** Experimental adoption in real projects.
 
-The Video.js 10 CLI. Read documentation from your terminal and generate installation snippets tailored to your setup (framework, preset, skin, media engine, package manager).
+The Video.js 10 CLI. Read documentation from your terminal, inspect canonical UI source, and add an editable skin or component to your project.
 
 ## Install
 
@@ -24,6 +24,28 @@ videojs --help
 > Scripts below use `videojs` for brevity — substitute `npx @videojs/cli` if you don't install globally.
 
 ## Examples
+
+List and inspect source-owned UI without changing your project:
+
+```bash
+videojs list skin
+videojs view skin video --framework react --style css
+```
+
+Add a complete editable skin. The CLI detects React or HTML and CSS or Tailwind from the project when those options are omitted:
+
+```bash
+videojs add skin video
+```
+
+Preview the complete change before writing:
+
+```bash
+videojs add skin video --dry-run
+videojs add skin video --diff
+```
+
+Existing source files are never replaced unless `--overwrite` is explicit. Use `--path` to select an installation directory and `--json` for a machine-readable plan.
 
 Read a doc page:
 

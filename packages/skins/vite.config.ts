@@ -42,6 +42,12 @@ export default defineConfig({
         input: [...cachedTaskInputs, '!dist/registry', '!dist/registry/**'],
         output: ['dist/registry/**'],
       },
+      'build:eject': {
+        command: 'node --import tsx scripts/build-eject-catalog.ts',
+        dependsOn: workspaceTaskDependencies(),
+        input: [...cachedTaskInputs, '!dist/eject', '!dist/eject/**'],
+        output: ['dist/eject/**'],
+      },
       'test:ci': packageTestTask('pnpm run test:types && vp test run'),
     },
   },

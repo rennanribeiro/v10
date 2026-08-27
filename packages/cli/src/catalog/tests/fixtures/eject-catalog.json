@@ -1,0 +1,65 @@
+{
+  "version": 1,
+  "sources": {
+    "react-entry": "import './styles/skin.css';\nexport function VideoSkin() { return null; }\n",
+    "react-style": ".media-skin { display: block; }\n",
+    "html-entry": "<media-container class=\"media-skin\"></media-container>\n",
+    "html-elements": "import '@videojs/html/ui/container';\n",
+    "empty": "\n"
+  },
+  "items": [
+    {
+      "kind": "skin",
+      "name": "video",
+      "title": "Default Video Skin",
+      "description": "Fixture React video skin.",
+      "framework": "react",
+      "style": "css",
+      "context": "default-video",
+      "entry": "skins/default-video/skin.tsx",
+      "stylesheet": "styles/skin.css",
+      "files": [
+        { "path": "skins/default-video/skin.tsx", "sources": ["react-entry"] },
+        { "path": "styles/skin.css", "sources": ["react-style"] }
+      ],
+      "dependencies": ["@videojs/react", "react"],
+      "devDependencies": []
+    },
+    {
+      "kind": "skin",
+      "name": "video",
+      "title": "Default Video Skin",
+      "description": "Fixture HTML video skin.",
+      "framework": "html",
+      "style": "css",
+      "context": "default-video",
+      "entry": "video.html",
+      "stylesheet": "styles/skin.css",
+      "setup": "video.register.ts",
+      "files": [
+        { "path": "video.html", "sources": ["html-entry"] },
+        { "path": "video.register.ts", "sources": ["html-elements", "empty"] },
+        { "path": "styles/skin.css", "sources": ["react-style"] }
+      ],
+      "dependencies": ["@videojs/html"],
+      "devDependencies": []
+    },
+    {
+      "kind": "component",
+      "name": "play-button",
+      "title": "Play Button",
+      "description": "Fixture play button.",
+      "framework": "react",
+      "style": "css",
+      "context": "default-video",
+      "entry": "components/buttons/play-button.tsx",
+      "stylesheet": "styles/skin.css",
+      "files": [
+        { "path": "components/buttons/play-button.tsx", "sources": ["react-entry"] },
+        { "path": "styles/skin.css", "sources": ["react-style"] }
+      ],
+      "dependencies": ["@videojs/react", "react"],
+      "devDependencies": []
+    }
+  ]
+}

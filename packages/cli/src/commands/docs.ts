@@ -24,14 +24,14 @@ import {
 import { replaceMarker, stripOmitMarkers } from '../utils/replace.js';
 
 interface ParsedFlags {
-  framework?: string;
-  list?: boolean;
-  help?: boolean;
-  preset?: string;
-  skin?: string;
-  media?: string;
-  'source-url'?: string;
-  'install-method'?: string;
+  framework?: string | undefined;
+  list?: boolean | undefined;
+  help?: boolean | undefined;
+  preset?: string | undefined;
+  skin?: string | undefined;
+  media?: string | undefined;
+  'source-url'?: string | undefined;
+  'install-method'?: string | undefined;
 }
 
 function printVersionHeader(): void {
@@ -67,26 +67,24 @@ function mapPresetToUseCase(preset: string): UseCase {
   return result;
 }
 
+// SAFETY: RENDERER_LABELS is the owner-derived complete Record<Renderer, string>.
 const ALL_RENDERERS = Object.keys(RENDERER_LABELS) as Renderer[];
 
 function validateMedia(media: string): Renderer {
-  if (!ALL_RENDERERS.includes(media as Renderer)) {
-    console.error(`Invalid media type: "${media}". Valid options: ${ALL_RENDERERS.join(', ')}`);
-    process.exit(1);
-  }
+  for (const renderer of ALL_RENDERERS) if (renderer === media) return renderer;
 
-  return media as Renderer;
+  console.error(`Invalid media type: "${media}". Valid options: ${ALL_RENDERERS.join(', ')}`);
+  process.exit(1);
 }
 
 function validateInstallMethod(method: string, framework: Framework): InstallMethod {
-  const valid = framework === 'html' ? ['cdn', 'npm', 'pnpm', 'yarn', 'bun'] : ['npm', 'pnpm', 'yarn', 'bun'];
+  const valid: readonly InstallMethod[] =
+    framework === 'html' ? ['cdn', 'npm', 'pnpm', 'yarn', 'bun'] : ['npm', 'pnpm', 'yarn', 'bun'];
 
-  if (!valid.includes(method)) {
-    console.error(`Invalid install method: "${method}". Valid options: ${valid.join(', ')}`);
-    process.exit(1);
-  }
+  for (const installMethod of valid) if (installMethod === method) return installMethod;
 
-  return method as InstallMethod;
+  console.error(`Invalid install method: "${method}". Valid options: ${valid.join(', ')}`);
+  process.exit(1);
 }
 
 function buildPartialFlags(flags: ParsedFlags, framework: Framework): PartialInstallFlags {

@@ -10,6 +10,8 @@ import { cachedTaskInputs } from '../../build/task.ts';
 const __dirname = dirname(fileURLToPath(import.meta.url));
 const pkg = JSON.parse(readFileSync(resolve(__dirname, 'package.json'), 'utf-8'));
 const siteSrcDir = resolve(__dirname, '../../site/src');
+const ejectCatalog = resolve(__dirname, '../skins/dist/eject/catalog.json');
+const ejectCatalogFixture = resolve(__dirname, 'src/catalog/tests/fixtures/eject-catalog.json');
 const siteAliases = {
   '@/utils/installation/codegen': resolve(siteSrcDir, 'utils/installation/codegen.ts'),
   '@/utils/installation/types': resolve(siteSrcDir, 'utils/installation/types.ts'),
@@ -24,16 +26,16 @@ export default defineConfig({
     tasks: {
       build: {
         command: 'node --import tsx ../../site/scripts/copy-package-docs.ts cli && vp pack',
-        dependsOn: ['site#build'],
+        dependsOn: ['site#build', '@videojs/skins#build:eject'],
         input: cachedTaskInputs,
         output: ['dist/**', 'docs/**'],
       },
       'test:ci': {
-        command: 'pnpm test',
+        command: 'pnpm test && vp pack && pnpm test:source-output',
         cache: false,
-        // CLI tests use a committed CDN-manifest fixture; only the private
-        // anti-slop plugin's Utils import needs a built workspace package.
-        dependsOn: ['@videojs/utils#build'],
+        // Unit tests use committed catalog/CDN fixtures. The source-output integration
+        // pass packs the real generated catalog, then builds all supported clean fixtures.
+        dependsOn: ['@videojs/utils#build', '@videojs/skins#build:eject'],
       },
     },
   },
@@ -51,6 +53,7 @@ export default defineConfig({
       // build dependency), so they resolve a committed fixture that mirrors the
       // manifest's shape and contents instead of forcing a CDN build.
       '@/content/cdn-media.json': resolve(__dirname, 'src/utils/tests/fixtures/cdn-media.json'),
+      '@/content/eject-catalog.json': ejectCatalogFixture,
     },
   },
   pack: {
@@ -67,6 +70,7 @@ export default defineConfig({
     alias: {
       ...siteAliases,
       '@/content/cdn-media.json': resolve(siteSrcDir, 'content/cdn-media.json'),
+      '@/content/eject-catalog.json': ejectCatalog,
     },
   },
 });

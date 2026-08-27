@@ -122,3 +122,9 @@ declare module '@/content/cdn-media.json' {
 
   export default entries;
 }
+
+declare module '@/content/eject-catalog.json' {
+  const catalog: unknown;
+
+  export default catalog;
+}
