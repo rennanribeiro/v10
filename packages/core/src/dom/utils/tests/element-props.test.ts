@@ -15,4 +15,14 @@ describe('applyElementProps', () => {
 
     expect(order).toEqual(['parent', 'child']);
   });
+
+  it('applies pointer capture event handlers', () => {
+    const element = document.createElement('div');
+    let called = false;
+
+    applyElementProps(element, { onLostPointerCapture: () => (called = true) });
+    element.dispatchEvent(new PointerEvent('lostpointercapture'));
+
+    expect(called).toBe(true);
+  });
 });
