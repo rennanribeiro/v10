@@ -1,11 +1,11 @@
 # Docs triage execution plan (delete before merge)
 
-Session: docs-feedback triage with Dave (dcepulis@mux.com), 2026-08-26/27.
+Session: docs-feedback triage with Darius (dcepulis@mux.com), 2026-08-26/27.
 Notion tracker: Video.js Feedback DB, data source `collection://3bc97a7f-89d0-8096-9329-000bf8f5a286`, Docs view.
 Triage is COMPLETE: 17 Fixed, 2 Won't Fix, 15 open with direction baked into each item's Description.
 This file drives the execution phase only.
 
-## Delivery model (per Dave)
+## Delivery model (per Darius)
 
 - TRUE STACKED PRs: each branch based on the previous one, one logical change per PR,
   Claude manages rebases as main moves ("each change is one ripple that you manage").
@@ -33,7 +33,7 @@ This file drives the execution phase only.
                                         recommend the bridge pattern (it's a workaround).
 7. poster hierarchy                  — encode in add-a-poster-and-loading-placeholder.mdx and link
                                         from relevant places; fix contradicting prose in vjs8 guide
-                                        (~line 108) + Plyr guide (~line 80). Dave's hierarchy:
+                                        (~line 108) + Plyr guide (~line 80). Darius's hierarchy:
                                         (1) media should provide a poster
                                         (2) skins: set poster on the provider
                                         (3) skins + more control (framework component, <picture>):
