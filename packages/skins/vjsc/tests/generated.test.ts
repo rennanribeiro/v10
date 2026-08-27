@@ -84,6 +84,8 @@ describe('generated VJSC source', () => {
     expect(output).toContain('from "@videojs/html/icons/minimal"');
 
     const htmlPlayButton = generatedSection(output, 'html/default-video/css/components/buttons/play-button.tsx');
+    const reactLiveButton = generatedSection(output, 'react/default-video/tailwind/components/buttons/live-button.tsx');
+    const htmlLiveButton = generatedSection(output, 'html/minimal-video/css/components/buttons/live-button.tsx');
     const reactPlaybackRateMenu = generatedSection(
       output,
       'react/default-audio/css/components/menus/playback-rate-menu.tsx'
@@ -99,6 +101,10 @@ describe('generated VJSC source', () => {
     expect(htmlPlayButton).toContain('playIcon');
     expect(htmlPlayButton).toContain('restartIcon');
     expect(htmlPlayButton).not.toContain('seekIcon');
+    expect(reactLiveButton).toContain('LiveButton as LiveButtonPrimitive');
+    expect(reactLiveButton).toContain('data-live-edge:before:bg-[oklch(0.65_0.22_27)]');
+    expect(htmlLiveButton).toContain('import "@videojs/html/ui/live-button";');
+    expect(htmlLiveButton).toContain('<media-live-button');
     expect(reactPlaybackRateMenu).toContain('const playbackRate = usePlaybackRateOptions();');
     expect(reactPlaybackRateMenu).toContain('disabled={playbackRate.state.disabled}');
     expect(reactPlaybackRateMenu).toContain('<Menu.Trigger render={<PlaybackRateButton');
