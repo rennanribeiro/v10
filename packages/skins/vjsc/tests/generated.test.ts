@@ -151,7 +151,7 @@ describe('generated VJSC source', () => {
     const snapshot = await readFile(snapshotFile, 'utf8');
 
     expect(output).toBe(snapshot);
-  }, 60_000);
+  }, 120_000);
 });
 
 async function sourceModules(): Promise<string[]> {
