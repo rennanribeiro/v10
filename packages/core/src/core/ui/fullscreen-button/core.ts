@@ -64,6 +64,10 @@ export class FullscreenButtonCore {
     };
   }
 
+  shouldFocusContainer(detail?: number): boolean {
+    return Boolean(detail);
+  }
+
   setMedia(media: MediaFullscreenState): void {
     this.#media = media;
   }

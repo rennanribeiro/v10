@@ -131,10 +131,14 @@ for (const entry of PAGES as readonly PageEntry[]) {
 
       await expect(player.volumeSlider).toBeVisible();
       await player.volumeSliderThumb.focus();
-      await page.keyboard.press('End');
-      await expect.poll(() => getMediaValue(page, 'volume')).toBe(1);
-      await page.keyboard.press('ArrowDown');
-      await expect.poll(() => getMediaValue(page, 'volume')).toBeLessThan(1);
+      await page.keyboard.press('Home');
+      await expect.poll(() => getMediaValue(page, 'volume')).toBe(0);
+      await expect(player.volumeSliderThumb).toHaveAttribute('aria-valuenow', '0');
+      const timeBeforeVolume = await getMediaValue(page, 'currentTime');
+
+      await page.keyboard.press('ArrowRight');
+      await expect.poll(() => getMediaValue(page, 'currentTime')).toBeCloseTo(timeBeforeVolume);
+      await expect.poll(() => getMediaValue(page, 'volume')).toBeCloseTo(0.05);
 
       if (isAudio) {
         await player.seekTo(50);
@@ -161,6 +165,18 @@ for (const entry of PAGES as readonly PageEntry[]) {
         await page.keyboard.press('Space');
         await expect(player.fullscreenButton).not.toHaveAttribute(DATA_ATTRS.fullscreen);
       }
+    });
+
+    test('keeps handled arrow keys inside the player', async ({ page }) => {
+      await page.evaluate(() => {
+        document.body.style.height = '200vh';
+        window.scrollTo(0, 100);
+      });
+      await player.playerRoot.focus();
+      const scrollBefore = await page.evaluate(() => window.scrollY);
+
+      await page.keyboard.press('ArrowDown');
+      await expect.poll(() => page.evaluate(() => window.scrollY)).toBe(scrollBefore);
     });
 
     if (isAudio) {
@@ -199,6 +215,16 @@ for (const entry of PAGES as readonly PageEntry[]) {
         await expect(player.muteButton).toBeFocused();
       });
     } else {
+      test('keeps fullscreen after pointer activation followed by Space', async ({ page }) => {
+        await player.fullscreenButton.click();
+        await expect(player.fullscreenButton).toHaveAttribute(DATA_ATTRS.fullscreen, '');
+        await expect(player.playerRoot).toBeFocused();
+
+        await page.keyboard.press('Space');
+        await expect(player.fullscreenButton).toHaveAttribute(DATA_ATTRS.fullscreen, '');
+        await expect(player.playButton).not.toHaveAttribute(DATA_ATTRS.paused);
+      });
+
       test('operates captions with Enter and Space when a track is available', async ({ page }) => {
         await page.evaluate(() => {
           const video = document.querySelector('video');

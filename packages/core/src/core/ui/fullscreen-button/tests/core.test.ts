@@ -141,6 +141,20 @@ describe('FullscreenButtonCore', () => {
     });
   });
 
+  describe('shouldFocusContainer', () => {
+    it('returns true for pointer activation', () => {
+      const core = new FullscreenButtonCore();
+
+      expect(core.shouldFocusContainer(1)).toBe(true);
+    });
+
+    it('returns false for keyboard activation', () => {
+      const core = new FullscreenButtonCore();
+
+      expect(core.shouldFocusContainer(0)).toBe(false);
+    });
+  });
+
   describe('toggle', () => {
     it('calls requestFullscreen when not fullscreen', async () => {
       const core = new FullscreenButtonCore();

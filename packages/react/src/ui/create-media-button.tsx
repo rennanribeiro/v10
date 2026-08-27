@@ -7,7 +7,7 @@ import type { ForwardedRef, ForwardRefExoticComponent, RefAttributes } from 'rea
 import { forwardRef, useLayoutEffect, useState } from 'react';
 
 import { useTranslator } from '../i18n/context';
-import { usePlayer } from '../player/context';
+import { useContainer, usePlayer } from '../player/context';
 import type { renderElement as renderElementFn } from '../utils/use-render';
 import { renderElement } from '../utils/use-render';
 import { useButton } from './hooks/use-button';
@@ -26,6 +26,8 @@ interface MediaButtonConfig<Core extends Required<MediaButtonComponent>> {
   tooltipLabel?: (core: Core, state: InferComponentState<Core>) => string | undefined;
   /** Returns `false` to render `null` (e.g., when the underlying feature is unsupported). */
   isSupported?: (state: InferComponentState<Core>) => boolean;
+  /** Whether activation should move focus back to the player container. */
+  shouldFocusContainer?: (core: Core, detail?: number) => boolean;
 }
 
 type LabelParams = Record<string, string | number>;
@@ -54,6 +56,7 @@ export function createMediaButton<Core extends Required<MediaButtonComponent>, P
     hotkeyValue,
     tooltipLabel,
     isSupported,
+    shouldFocusContainer,
   } = config;
 
   // Props that exist in the core's defaultProps are routed to setProps; the rest go to the DOM element.
@@ -81,6 +84,7 @@ export function createMediaButton<Core extends Required<MediaButtonComponent>, P
     const setTooltipContent = tooltipCtx?.setContent;
 
     const feature = usePlayer(selector);
+    const container = useContainer();
     const shortcut = useHotkeyShortcut(hotkeyAction, hotkeyValue?.(coreProps));
     const translator = useTranslator();
 
@@ -97,7 +101,9 @@ export function createMediaButton<Core extends Required<MediaButtonComponent>, P
       // `useButton` invokes `onActivate` synchronously from click/keyup
       // handlers, so any rejection here would be unhandled. Log in dev for
       // visibility but absorb the failure at this UI boundary.
-      onActivate: () => {
+      onActivate: (event) => {
+        if (shouldFocusContainer?.(core, event.detail)) container?.focus({ preventScroll: true });
+
         Promise.resolve(action(core, feature!)).catch((error) => {
           if (__DEV__) console.error(`[${displayName}]`, error);
         });
