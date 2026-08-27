@@ -3,6 +3,7 @@
 
 import type coreSchema from '@videojs/core/vjsc';
 import {
+  canMergeHostProps,
   type ComponentTarget,
   type ComponentTargetHelpers,
   defineComponentTarget,
@@ -177,9 +178,15 @@ export const htmlComponentTarget: ComponentTarget<CoreSchema> = defineComponentT
         if (popup) {
           return [
             trigger.replaceWith(
-              <Button commandfor={controlledId} {...trigger.props}>
-                {trigger.children}
-              </Button>
+              canMergeHostProps(trigger.children) ? (
+                <Host commandfor={controlledId} {...trigger.props}>
+                  {trigger.children}
+                </Host>
+              ) : (
+                <Button commandfor={controlledId} {...trigger.props}>
+                  {trigger.children}
+                </Button>
+              )
             ),
             popup.replaceWith(
               <target.Menu.Popup id={controlledId} {...props.merge(popup.props)}>
