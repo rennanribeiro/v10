@@ -62,6 +62,22 @@ export const sidebar: Sidebar = [
     ],
   },
   {
+    sidebarLabel: 'Skins',
+    llmsDescription:
+      'Packaged player skins, including previews, supported targets, usage, behavior, and customization.',
+    contents: [
+      { slug: 'skins/default-video' },
+      { slug: 'skins/minimal-video' },
+      { slug: 'skins/default-audio' },
+      { slug: 'skins/minimal-audio' },
+      { slug: 'skins/default-live-video' },
+      { slug: 'skins/minimal-live-video' },
+      { slug: 'skins/default-live-audio' },
+      { slug: 'skins/minimal-live-audio' },
+      { slug: 'skins/background-video' },
+    ],
+  },
+  {
     sidebarLabel: 'How to',
     llmsDescription:
       "Task-oriented guides that each answer one goal in the reader's words. Some cover custom player UI; others configure a preset, skin, media component, or integration. Guides lead with the recommended path, then the constraints and variations needed to apply it.",
