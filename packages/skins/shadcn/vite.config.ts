@@ -20,7 +20,16 @@ const registryPaths = {
   import: '@/components/videojs',
 } as const;
 const publishedSkins = ['default-video', 'minimal-video'] as const;
-const unpublishedItems = new Set(['audio-play-button', 'audio-time-slider', 'live-button', 'playback-rate-menu']);
+const unpublishedItems = new Set([
+  'audio-play-button',
+  'audio-time-slider',
+  'captions-menu',
+  'live-button',
+  'live-playback-hotkeys',
+  'live-video-gestures',
+  'live-video-hotkeys',
+  'playback-rate-menu',
+]);
 
 export const shadcnPackConfig: PackUserConfig = {
   ...baseConfig,

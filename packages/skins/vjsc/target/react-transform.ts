@@ -16,7 +16,7 @@ const optionMenus = [
   { component: 'QualityMenu', binding: 'quality', hook: 'useQualityOptions' },
   { component: 'AudioTrackMenu', binding: 'audioTrack', hook: 'useAudioTrackOptions' },
   { component: 'PlaybackRateSubmenu', binding: 'playbackRate', hook: 'usePlaybackRateOptions' },
-  { component: 'CaptionsMenu', binding: 'captions', hook: 'useCaptionsOptions' },
+  { component: 'CaptionsSubmenu', binding: 'captions', hook: 'useCaptionsOptions' },
 ] as const;
 
 /** Add React player bindings and availability gates to skin menus. */
@@ -54,7 +54,53 @@ function transformReactComponent(
 
   if (name === 'PlaybackRateMenu') return transformPlaybackRateMenu(context, imports, body);
 
+  if (name === 'CaptionsMenu') return transformCaptionsMenu(context, imports, body);
+
   return name === 'VideoSettingsMenu' ? transformVideoSettingsMenu(context, imports, body) : false;
+}
+
+/**
+ * Use a direct captions toggle until multiple tracks make the menu useful.
+ *
+ * ```diff
+ * - <Menu.Root><ButtonTooltip><Menu.Trigger><CaptionsButton /></Menu.Trigger></ButtonTooltip>...</Menu.Root>
+ * + captions.showMenu ? <Menu.Root>...</Menu.Root> : <ButtonTooltip><CaptionsButton /></ButtonTooltip>
+ * ```
+ */
+function transformCaptionsMenu(
+  context: ComponentTargetTransformContext,
+  imports: ModuleImports,
+  body: BlockBody
+): true {
+  const hook = imports.reference({ from: '@videojs/react', name: 'useCaptionsOptions' });
+
+  prependBlockBody(
+    context.magicString,
+    body,
+    `const captions = ${hook}();\nif (!captions || captions.hidden) return null;`
+  );
+
+  const menu = findJsxElement(body, '$.Menu.Root');
+  const tooltip = menu && findJsxElement(menu, 'ButtonTooltip');
+  const trigger = tooltip && findJsxElement(tooltip, '$.Menu.Trigger');
+  if (!menu || !tooltip || !trigger || !trigger.closingElement) return true;
+
+  const disabled: SourceEdit = {
+    start: trigger.openingElement.end - 1,
+    end: trigger.openingElement.end - 1,
+    content: ' disabled={captions.disabled}',
+  };
+  const triggerChildren = context.code.slice(trigger.openingElement.end, trigger.closingElement.start);
+  const fallback = renderSourceRange(
+    createSourceText(context.code, [{ start: trigger.start, end: trigger.end, content: triggerChildren }]),
+    tooltip.start,
+    tooltip.end
+  ).value;
+  const menuSource = renderSourceRange(createSourceText(context.code, [disabled]), menu.start, menu.end).value;
+
+  context.magicString.overwrite(menu.start, menu.end, `captions.showMenu ? ${menuSource} : ${fallback}`);
+
+  return true;
 }
 
 /** Hide the standalone rate menu when unsupported and disable its trigger while unavailable. */

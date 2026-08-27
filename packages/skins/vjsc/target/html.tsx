@@ -7,6 +7,7 @@ import {
   type ComponentTarget,
   type ComponentTargetHelpers,
   defineComponentTarget,
+  isSourceComponent,
   type TemplateTargetDefinition,
 } from 'vjsc/target';
 import { Host } from 'vjsc/target/jsx-runtime';
@@ -169,10 +170,12 @@ export const htmlComponentTarget: ComponentTarget<CoreSchema> = defineComponentT
         const controlledId = id(popup ? 'popup' : 'content');
 
         if (popup) {
+          const menuFor = isSourceComponent(trigger.children, 'CaptionsButton') ? controlledId : undefined;
+
           return [
             trigger.replaceWith(
               canMergeHostProps(trigger.children) ? (
-                <Host commandfor={controlledId} {...trigger.props}>
+                <Host commandfor={controlledId} menuFor={menuFor} {...trigger.props}>
                   {trigger.children}
                 </Host>
               ) : (

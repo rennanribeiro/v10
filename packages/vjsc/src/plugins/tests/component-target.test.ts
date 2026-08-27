@@ -2,7 +2,7 @@ import { type Plugin, rolldown } from 'rolldown';
 import { describe, expect, it } from 'vite-plus/test';
 
 import { defineComponent, defineSchema } from '../../components/definition';
-import { canMergeHostProps } from '../../target';
+import { canMergeHostProps, isSourceComponent } from '../../target';
 import { defineComponentTarget } from '../../target/definition';
 import { jsx } from '../../target/jsx-runtime';
 import { readComponentSource } from '../component-meta';
@@ -103,7 +103,14 @@ const htmlTarget = defineComponentTarget<typeof schema>()(({ target, element }) 
         const content = parts.Content.one();
 
         return [
-          trigger.replaceWith(jsx(Button, { commandfor: contentId, ...trigger.props, children: trigger.children })),
+          trigger.replaceWith(
+            jsx(Button, {
+              commandfor: contentId,
+              'data-play-button': isSourceComponent(trigger.children, 'PlayButton') ? true : undefined,
+              ...trigger.props,
+              children: trigger.children,
+            })
+          ),
           content.replaceWith(
             jsx(target.Menu.Content, { id: contentId, ...content.props, children: content.children })
           ),
@@ -275,6 +282,24 @@ describe('componentTargetPlugin', () => {
 
     expect(source).toContain('<Menu.Trigger render={<PlayButton />} />');
     expect(source).toContain('<Menu.Trigger>Open</Menu.Trigger>');
+  });
+
+  it('identifies the canonical component rendered as the sole child of a source part', async () => {
+    const source = await transform(
+      `
+        import * as $ from '@fixture/components';
+        export const menu = (
+          <$.Menu.Root>
+            <$.Menu.Trigger><$.PlayButton /></$.Menu.Trigger>
+            <$.Menu.Content>Options</$.Menu.Content>
+          </$.Menu.Root>
+        );
+      `,
+      { targets: [htmlTarget] }
+    );
+
+    expect(source).toContain('<button commandfor="__vjsc-id-');
+    expect(source).toContain('data-play-button><svg');
   });
 
   it('keeps nested component roots out of the parent part collection', async () => {

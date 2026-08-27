@@ -459,11 +459,16 @@ function createSourceParts(
       }
 
       const source = createSourceText(code, descendants.get(node) ?? []);
+      const rootChild = singleJsxElementChild(node);
+      const rootChildPath = rootChild && canonicalPath(rootChild.openingElement.name, bindings);
       const children = createSourceChildren(
         source,
         node.openingElement,
         node.closingElement?.start ?? node.openingElement.end,
-        singleJsxElementChild(node)?.openingElement
+        rootChild?.openingElement,
+        rootChildPath && rootChildPath.target === rootPath.target
+          ? { component: rootChildPath.component, part: rootChildPath.part }
+          : undefined
       );
 
       group!.values.push({

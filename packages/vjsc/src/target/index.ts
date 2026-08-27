@@ -1,3 +1,3 @@
 export { htmlAttributeName } from './attributes';
 export * from './definition';
-export { canMergeHostProps } from './source';
+export { canMergeHostProps, isSourceComponent } from './source';

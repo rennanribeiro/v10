@@ -24,6 +24,8 @@ const frameworks = ['react', 'html'] as const;
 const skinContracts = {
   'default-video': { exportName: 'DefaultVideoSkin', className: 'media-skin-video' },
   'minimal-video': { exportName: 'MinimalVideoSkin', className: 'media-skin-video-minimal' },
+  'default-live-video': { exportName: 'DefaultLiveVideoSkin', className: 'media-skin-live-video' },
+  'minimal-live-video': { exportName: 'MinimalLiveVideoSkin', className: 'media-skin-live-video-minimal' },
   'default-audio': { exportName: 'DefaultAudioSkin', className: 'media-skin-audio' },
   'minimal-audio': { exportName: 'MinimalAudioSkin', className: 'media-skin-audio-minimal' },
 } as const;

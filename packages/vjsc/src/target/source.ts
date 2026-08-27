@@ -27,6 +27,8 @@ export interface SourceChildrenToken {
   readonly value: string;
   /** Opening-tag offset when the children contain exactly one JSX element. */
   readonly rootOpeningEnd?: number | undefined;
+  /** Canonical component path when the sole child belongs to the active component target. */
+  readonly rootComponent?: { readonly component: string; readonly part: string | null } | undefined;
 }
 
 export function singleJsxElementChild(node: JSXElement): JSXElement | undefined {
@@ -104,7 +106,8 @@ export function createSourceChildren(
   source: string | SourceText,
   opening: JSXOpeningElement,
   closingStart: number,
-  rootOpening?: JSXOpeningElement
+  rootOpening?: JSXOpeningElement,
+  rootComponent?: SourceChildrenToken['rootComponent']
 ): SourceChildrenToken {
   const normalized = normalizeSourceText(source);
   const rendered = renderSourceRange(normalized, opening.end, closingStart);
@@ -114,7 +117,8 @@ export function createSourceChildren(
     [SOURCE_CHILDREN]: true,
     source: normalized,
     value: rendered.value,
-    ...(rootOpeningEnd !== undefined ? { rootOpeningEnd } : {}),
+    rootOpeningEnd,
+    rootComponent,
   };
 }
 
@@ -135,6 +139,13 @@ export function isSourceChildrenToken(value: unknown): value is SourceChildrenTo
 /** Whether source children contain one JSX element whose opening tag can receive generated props. */
 export function canMergeHostProps(value: TargetOutput): boolean {
   return isSourceChildrenToken(value) && value.rootOpeningEnd !== undefined;
+}
+
+/** Whether source children contain exactly one component with the requested canonical path. */
+export function isSourceComponent(value: TargetOutput, component: string, part: string | null = null): boolean {
+  return (
+    isSourceChildrenToken(value) && value.rootComponent?.component === component && value.rootComponent.part === part
+  );
 }
 
 export function createTargetReplacement(
