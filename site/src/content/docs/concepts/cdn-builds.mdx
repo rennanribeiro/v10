@@ -1,0 +1,69 @@
+---
+title: CDN builds
+description: How Video.js packages presets, media elements, shared modules, and styles for direct browser use
+---
+
+import Aside from '@/components/Aside.astro';
+import DocsLink from '@/components/docs/DocsLink.astro';
+
+`@videojs/html` publishes two layouts from the same source. Package-manager imports expose small modules for a bundler to combine. The CDN layout is a browser-ready ES module graph organized around complete players and media elements.
+
+## Entry files start the module graph
+
+A CDN URL points to an **entry file**. For example, the default video entry registers `<video-player>`, `<video-skin>`, and the UI elements used by that skin:
+
+```html
+<script type="module" src="{{VJS10_HTML_CDN_BASE}}/video.js"></script>
+```
+
+The entry can import shared chunks beside it. The browser follows those imports, downloads each module once, and reuses it when another entry needs the same module. This keeps combinations such as a player preset and an HLS media element from downloading duplicate framework code.
+
+<Aside type="caution" title="Pin one version">
+Use the same exact `@videojs/html` version for every CDN URL on a page. Entry files share version-specific chunks and module state, including the internationalization registry.
+</Aside>
+
+## The layout follows player composition
+
+The first path segment describes the role of an entry:
+
+| Path | What it provides |
+| --- | --- |
+| `video.js`, `audio.js`, `live-video.js`, `live-audio.js` | A player, the default skin, and the UI that skin uses |
+| `*-minimal.js` | The same player with its minimal skin and UI |
+| `*-player.js` | A player without a skin or UI registrations |
+| `background.js` | The background player, skin, and media element |
+| `media/<name>.js` | One additional media element, such as `<hls-video>` or `<mux-video>` |
+| `locales/<tag>.js` | One locale registered as a side effect |
+| `i18n.js` | Internationalization functions for a custom module |
+| `*.css` | Optional copies of preset styles for pre-upgrade or declarative shadow DOM rendering |
+
+Most players therefore start with one preset entry. A source that needs a custom media element adds one media entry:
+
+```html
+<script type="module" src="{{VJS10_HTML_CDN_BASE}}/video.js"></script>
+<script type="module" src="{{VJS10_HTML_CDN_BASE}}/media/hls-video.js"></script>
+
+<video-player>
+  <video-skin>
+    <hls-video src="https://example.com/video.m3u8"></hls-video>
+  </video-skin>
+</video-player>
+```
+
+The <DocsLink slug="how-to/installation">installation builder</DocsLink> chooses this combination from the player, skin, and media source you select.
+
+## CDN entries and package imports have different boundaries
+
+A package import can register one HTML component:
+
+```ts
+import '@videojs/html/ui/play-button';
+```
+
+The CDN does not publish a matching `ui/play-button.js` entry. Its preset entries register the set of UI elements used by a complete skin. Use the package-manager layout with a bundler when you want component-level imports or a custom feature bundle. Use the CDN layout when its preset- and media-level boundaries fit your player.
+
+## Treat the version directory as one unit
+
+CDN JavaScript entries inline their templates and styles, so a running player does not need a stylesheet link. The separate CSS files cover styles that must apply before a custom element upgrades or inside declarative shadow DOM.
+
+Because entries depend on sibling chunks, copying one JavaScript file is not enough to host it elsewhere. Mirror the whole `cdn/` directory without changing its structure. See <DocsLink slug="how-to/self-host-the-player">Self-host the player</DocsLink> for bundling, release archives, and CDN mirroring.

@@ -3,6 +3,7 @@ import type { BundledLanguage } from 'shiki';
 
 import ServerCode from '@/components/Code/ServerCode.astro';
 import CodeFrame from '@/components/typography/CodeFrame.astro';
+import DocsLink from '../DocsLink.astro';
 import FrameworkCase from '../FrameworkCase.astro';
 
 interface Props {
@@ -35,3 +36,10 @@ const imports: Array<{ code: string; framework: 'react' | 'html'; lang: BundledL
     </FrameworkCase>
   ))
 }
+
+<FrameworkCase frameworks={['html']}>
+  <p>
+    CDN presets register the UI elements their skins use; individual UI components do not have CDN entry files. See
+    <DocsLink slug="concepts/cdn-builds"> CDN builds</DocsLink>.
+  </p>
+</FrameworkCase>

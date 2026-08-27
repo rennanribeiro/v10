@@ -53,6 +53,7 @@ export const sidebar: Sidebar = [
       { slug: 'concepts/features' },
       { slug: 'concepts/skins' },
       { slug: 'concepts/presets' },
+      { slug: 'concepts/cdn-builds', frameworks: ['html'] },
       { slug: 'concepts/ui-components' },
       { slug: 'concepts/accessibility' },
       { slug: 'concepts/media-sources' },
