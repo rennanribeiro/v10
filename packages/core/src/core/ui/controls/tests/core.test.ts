@@ -5,6 +5,12 @@ import { ControlsCore } from '../core';
 
 describe('ControlsCore', () => {
   describe('getState', () => {
+    it('stays visible when the player does not have controls visibility state', () => {
+      const core = new ControlsCore();
+
+      expect(core.getState()).toEqual({ visible: true, userActive: true });
+    });
+
     it('returns visible: true when controlsVisible is true', () => {
       const core = new ControlsCore();
       const media = createControlsState({ controlsVisible: true });

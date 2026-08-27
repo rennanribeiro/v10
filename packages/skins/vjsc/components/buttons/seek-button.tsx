@@ -14,7 +14,9 @@ export function SeekButton({ className, seconds = 10, ...props }: Props<CoreProp
     <ButtonTooltip side="top">
       <$.SeekButton $render={Button} className={[styles.root, className]} seconds={seconds} {...props}>
         <SeekIcon className={[buttonStyles.icon, seconds < 0 && styles.backwardIcon]} />
-        <Text className={styles.label}>{Math.abs(seconds)}</Text>
+        <Text className={[styles.label, seconds < 0 ? styles.backwardLabel : styles.forwardLabel]}>
+          {Math.abs(seconds)}
+        </Text>
       </$.SeekButton>
     </ButtonTooltip>
   );

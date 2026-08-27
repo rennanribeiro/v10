@@ -1,5 +1,5 @@
 import { ControlsCore, ControlsDataAttrs } from '@videojs/core';
-import { logMissingFeature, selectControls } from '@videojs/core/dom';
+import { selectControls } from '@videojs/core/dom';
 import type { ReactNode } from 'react';
 import { useState } from 'react';
 
@@ -15,13 +15,7 @@ export function ControlsRoot({ children }: ControlsRootProps): ReactNode {
   const controls = usePlayer(selectControls);
   const [core] = useState(() => new ControlsCore());
 
-  if (!controls) {
-    if (__DEV__) logMissingFeature('Controls.Root', 'controls');
-
-    return null;
-  }
-
-  core.setMedia(controls);
+  core.setMedia(controls ?? null);
   const state = core.getState();
 
   return (

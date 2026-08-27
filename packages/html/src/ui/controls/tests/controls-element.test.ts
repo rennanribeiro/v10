@@ -101,6 +101,19 @@ afterEach(() => {
 });
 
 describe('ControlsElement', () => {
+  it('keeps controls visible without a controls visibility feature', async () => {
+    const controls = createDefinedElement(ControlsElement);
+    const content = createDefinedElement(ControlsContentElement);
+
+    controls.append(content);
+    document.body.append(controls);
+
+    await controls.updateComplete;
+
+    expect(content.hasAttribute('data-visible')).toBe(true);
+    expect(content.hasAttribute('data-user-active')).toBe(true);
+  });
+
   it('keeps interactivity on the content rather than the context host', async () => {
     const provider = document.createElement('test-controls-player-provider') as TestPlayerProviderElement;
     const controls = createDefinedElement(ControlsElement);

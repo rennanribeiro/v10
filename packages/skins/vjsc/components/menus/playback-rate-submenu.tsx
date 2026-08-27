@@ -7,9 +7,9 @@ import { PlaybackRateRadioGroup } from './radio-group';
 import { RadioItem } from './radio-item';
 import { Submenu } from './submenu';
 
-export interface PlaybackRateMenuProps extends Omit<PropsOf<typeof Submenu>, 'children' | 'icon' | 'label'> {}
+export interface PlaybackRateSubmenuProps extends Omit<PropsOf<typeof Submenu>, 'children' | 'icon' | 'label'> {}
 
-export function PlaybackRateMenu(props: PlaybackRateMenuProps = {}) {
+export function PlaybackRateSubmenu(props: PlaybackRateSubmenuProps = {}) {
   return (
     <Submenu
       icon={<SpeedIcon className={styles.triggerItemIcon} />}
