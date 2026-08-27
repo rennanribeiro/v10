@@ -12,6 +12,9 @@ const pkg = JSON.parse(readFileSync(resolve(__dirname, 'package.json'), 'utf-8')
 const siteSrcDir = resolve(__dirname, '../../site/src');
 const ejectCatalog = resolve(__dirname, '../skins/dist/eject/catalog.json');
 const ejectCatalogFixture = resolve(__dirname, 'src/catalog/tests/fixtures/eject-catalog.json');
+const cdnMediaFixture = resolve(__dirname, 'src/utils/tests/fixtures/cdn-media.json');
+const packCdnMedia =
+  process.env.VIDEOJS_CLI_CDN_FIXTURE === '1' ? cdnMediaFixture : resolve(siteSrcDir, 'content/cdn-media.json');
 const siteAliases = {
   '@/utils/installation/codegen': resolve(siteSrcDir, 'utils/installation/codegen.ts'),
   '@/utils/installation/types': resolve(siteSrcDir, 'utils/installation/types.ts'),
@@ -31,7 +34,7 @@ export default defineConfig({
         output: ['dist/**', 'docs/**'],
       },
       'test:ci': {
-        command: 'pnpm test && vp pack && pnpm test:source-output',
+        command: 'pnpm test && VIDEOJS_CLI_CDN_FIXTURE=1 vp pack && pnpm test:source-output',
         cache: false,
         // Unit tests use committed catalog/CDN fixtures. The source-output integration
         // pass packs the real generated catalog, then builds all supported clean fixtures.
@@ -52,7 +55,7 @@ export default defineConfig({
       // by Vite+ pack. CLI tests are intentionally hermetic (`test` has no task-runner
       // build dependency), so they resolve a committed fixture that mirrors the
       // manifest's shape and contents instead of forcing a CDN build.
-      '@/content/cdn-media.json': resolve(__dirname, 'src/utils/tests/fixtures/cdn-media.json'),
+      '@/content/cdn-media.json': cdnMediaFixture,
       '@/content/eject-catalog.json': ejectCatalogFixture,
     },
   },
@@ -69,7 +72,9 @@ export default defineConfig({
     },
     alias: {
       ...siteAliases,
-      '@/content/cdn-media.json': resolve(siteSrcDir, 'content/cdn-media.json'),
+      // The source-output CI task runs before the site manifest exists and opts
+      // into its committed mirror. Release builds continue to bundle the generated manifest.
+      '@/content/cdn-media.json': packCdnMedia,
       '@/content/eject-catalog.json': ejectCatalog,
     },
   },
