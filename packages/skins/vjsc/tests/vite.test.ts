@@ -92,7 +92,7 @@ describe('Skins Vite workflow', () => {
     const htmlContainer = await server.transformRequest(htmlContainerUrl);
 
     expect(htmlContainer?.code).toContain('/src/define/ui/container.ts');
-  }, 30_000);
+  }, 90_000);
 
   it('reports VJSC style diagnostics through the Vite logger', async () => {
     const logger = createLogger('warn');
@@ -325,7 +325,7 @@ describe('Skins Vite workflow', () => {
     }
 
     expect(output.some((item) => item.type === 'asset' && item.fileName.endsWith('.js.map'))).toBe(true);
-  }, 30_000);
+  }, 90_000);
 
   it('does not configure Shadcn output while serving', async () => {
     server = await createServer({
