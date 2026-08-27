@@ -112,7 +112,7 @@ Hashed chunk names change between releases, so re-copy the directory whenever yo
 
 ## Stylesheets
 
-Every bundle inlines its own CSS and applies it when the custom element upgrades, so a mirrored copy renders correctly with no extra `<link>`. Alongside the bundles, `cdn/` publishes those styles as separate files for the one thing a script cannot do: style the page before that upgrade happens.
+The skin bundles inline their CSS and apply it when the custom elements upgrade, so a mirrored copy renders correctly with no extra `<link>`. Alongside the bundles, `cdn/` publishes those styles as separate files for the one thing a script cannot do: style the page before that upgrade happens.
 
 `global.css` holds the light-DOM rules — `display: contents` on `<video-player>`, and the box the media and poster stretch to fill. Link it ahead of the bundle and the player reserves its space on first paint instead of on upgrade:
 
