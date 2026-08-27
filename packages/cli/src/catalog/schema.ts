@@ -20,6 +20,8 @@ export interface CatalogItem {
   readonly entry: string;
   readonly stylesheet: string;
   readonly setup?: string | undefined;
+  readonly contentMarker?: string | undefined;
+  readonly posterMarker?: string | undefined;
   readonly files: readonly CatalogFile[];
   readonly dependencies: readonly string[];
   readonly devDependencies: readonly string[];
@@ -76,12 +78,31 @@ function parseItem(value: unknown, index: number, sources: Readonly<Record<strin
   }
 
   let setup: string | undefined;
+  let contentMarker: string | undefined;
+  let posterMarker: string | undefined;
 
   if (framework === 'html') {
-    if (!isSafeRelativePath(value.setup)) throw new Error(`Catalog item ${index} is invalid.`);
+    if (
+      !isSafeRelativePath(value.setup) ||
+      (kind === 'skin' ? !isString(value.contentMarker) : value.contentMarker !== undefined)
+    ) {
+      throw new Error(`Catalog item ${index} is invalid.`);
+    }
 
     setup = value.setup;
-  } else if (value.setup !== undefined) {
+
+    if (kind === 'skin') {
+      if (!isString(value.contentMarker)) throw new Error(`Catalog item ${index} is invalid.`);
+
+      contentMarker = value.contentMarker;
+    }
+
+    if (value.posterMarker !== undefined) {
+      if (kind !== 'skin' || !isString(value.posterMarker)) throw new Error(`Catalog item ${index} is invalid.`);
+
+      posterMarker = value.posterMarker;
+    }
+  } else if (value.setup !== undefined || value.contentMarker !== undefined || value.posterMarker !== undefined) {
     throw new Error(`Catalog item ${index} is invalid.`);
   }
 
@@ -127,6 +148,8 @@ function parseItem(value: unknown, index: number, sources: Readonly<Record<strin
     entry: value.entry,
     stylesheet: value.stylesheet,
     setup,
+    contentMarker,
+    posterMarker,
     files: parsedFiles,
     dependencies: value.dependencies,
     devDependencies: value.devDependencies,

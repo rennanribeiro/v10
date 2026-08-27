@@ -151,12 +151,13 @@ function dependencyVersion(name: string): string {
 function htmlInstructions(cwd: string, root: string, item: ResolvedCatalogItem): string[] {
   if (!item.setup) throw new Error(`HTML catalog item ${item.name} has no setup module.`);
 
+  const usage = item.contentMarker
+    ? `Place your media at the marked comment in \`${relative(cwd, resolve(root, item.entry))}\``
+    : `Use the markup in \`${relative(cwd, resolve(root, item.entry))}\``;
+
   return [
     `Import \`${relative(cwd, resolve(root, item.setup))}\` once.`,
-    `Use the markup in \`${relative(cwd, resolve(root, item.entry))}\` and load \`${relative(
-      cwd,
-      resolve(root, item.stylesheet)
-    )}\`.`,
+    `${usage} and load \`${relative(cwd, resolve(root, item.stylesheet))}\`.`,
   ];
 }
 

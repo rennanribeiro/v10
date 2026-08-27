@@ -45,6 +45,8 @@ describe('parseCatalog', () => {
             entry: 'video.html',
             stylesheet: 'video.html',
             setup: 'video.html',
+            contentMarker: '<!-- Add your media element here. -->',
+            posterMarker: '<!-- Replace the fallback image below to customize the poster. -->',
             files: [{ path: 'video.html', sources: ['missing'] }],
             dependencies: [],
             devDependencies: [],

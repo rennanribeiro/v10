@@ -29,6 +29,8 @@ interface CatalogItem {
   readonly entry: string;
   readonly stylesheet: string;
   readonly setup?: string | undefined;
+  readonly contentMarker?: string | undefined;
+  readonly posterMarker?: string | undefined;
   readonly files: readonly CatalogFile[];
   readonly dependencies: readonly string[];
   readonly devDependencies: readonly string[];
@@ -79,6 +81,8 @@ const artifactExportNames = {
 } as const satisfies Readonly<Record<string, string>>;
 const scriptExtensions = ['.tsx', '.ts', '.jsx', '.js'] as const;
 const virtualCssPattern = /\bimport\s+["'](virtual:vjsc\/css\/[^"']+)["'];?\s*/g;
+const htmlContentMarker = '<!-- Add your media element here. -->';
+const htmlPosterMarker = '<!-- Replace the fallback image below to customize the poster. -->';
 
 const captured = new Map<string, string>();
 const capture: Plugin = {
@@ -272,6 +276,11 @@ async function buildItem(
     entry: entryPath(plan),
     stylesheet: stylesheetPath(plan),
     setup: plan.framework === 'html' ? setupPath(plan) : undefined,
+    contentMarker: plan.framework === 'html' && plan.meta.type === 'skin' ? htmlContentMarker : undefined,
+    posterMarker:
+      plan.framework === 'html' && plan.meta.type === 'skin' && plan.skin.includes('video')
+        ? htmlPosterMarker
+        : undefined,
     files,
     dependencies: [...dependencies].sort(),
     devDependencies: [...devDependencies].sort(),
@@ -361,7 +370,8 @@ async function htmlFiles(
   // SAFETY: VJSC artifact metadata owns this exact named function export, verified above.
   const render = exported as (props: Record<string, never>) => { toString(): string };
 
-  const rendered = String(render({}));
+  const original = String(render({}));
+  const rendered = plan.meta.type === 'skin' ? lightDomHtml(original, plan.skin.includes('video')) : original;
   const files = [
     catalogFile(entryPath(plan), `${formatHtml(rendered)}\n`, contents),
     catalogFile(setupPath(plan), htmlRegistration(closure.values()), contents),
@@ -639,6 +649,16 @@ function normalizeSource(source: string): string {
 
 function formatHtml(html: string): string {
   return html.replace(/></g, '>\n<');
+}
+
+function lightDomHtml(html: string, hasPoster: boolean): string {
+  const content = html.replace(/<slot>\s*<\/slot>/, htmlContentMarker);
+  if (content === html) throw new Error('HTML skin output has no default media slot.');
+
+  const output = content.replace(/<slot name="poster">([\s\S]*?)<\/slot>/, `${htmlPosterMarker}$1`);
+  if (hasPoster && output === content) throw new Error('HTML video skin output has no poster slot.');
+
+  return output;
 }
 
 function parseArtifactMeta(value: Partial<ArtifactMeta> | undefined): ArtifactMeta | undefined {

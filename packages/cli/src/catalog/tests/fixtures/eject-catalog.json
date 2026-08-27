@@ -3,7 +3,7 @@
   "sources": {
     "react-entry": "import './styles/skin.css';\nexport function VideoSkin() { return null; }\n",
     "react-style": ".media-skin { display: block; }\n",
-    "html-entry": "<media-container class=\"media-skin\"></media-container>\n",
+    "html-entry": "<media-container class=\"media-skin\"><!-- Add your media element here. --><media-poster><!-- Replace the fallback image below to customize the poster. --><img alt=\"\"></img></media-poster></media-container>\n",
     "html-elements": "import '@videojs/html/ui/container';\n",
     "empty": "\n"
   },
@@ -36,6 +36,8 @@
       "entry": "video.html",
       "stylesheet": "styles/skin.css",
       "setup": "video.register.ts",
+      "contentMarker": "<!-- Add your media element here. -->",
+      "posterMarker": "<!-- Replace the fallback image below to customize the poster. -->",
       "files": [
         { "path": "video.html", "sources": ["html-entry"] },
         { "path": "video.register.ts", "sources": ["html-elements", "empty"] },
