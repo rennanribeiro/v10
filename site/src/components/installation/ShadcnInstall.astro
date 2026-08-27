@@ -1,0 +1,16 @@
+---
+import { isValidFramework } from '@/types/docs';
+import type { ShadcnCatalogItem } from '@/utils/installation/shadcn';
+import registry from '../../../../packages/skins/dist/registry/r/registry.json';
+import ShadcnInstallCommand from './ShadcnInstallCommand';
+
+const framework = Astro.params.framework;
+if (!isValidFramework(framework)) throw new Error(`Unsupported framework: ${framework ?? 'missing'}.`);
+
+const registryItems: readonly ShadcnCatalogItem[] = registry.items;
+const catalog = registryItems.filter(
+  (item) => item.meta?.public === true && (item.meta.role === 'player' || item.meta.role === 'media')
+).map(({ name, meta }) => ({ name, meta }));
+---
+
+<ShadcnInstallCommand client:idle {catalog} {framework} />

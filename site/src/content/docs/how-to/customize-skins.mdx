@@ -3,8 +3,10 @@ title: Customize skins
 description: Learn the public customization surface for packaged and source-owned Video.js skins
 ---
 
-import FrameworkCase from '@/components/docs/FrameworkCase.astro';
 import DocsLink from '@/components/docs/DocsLink.astro';
+import DocsLinkCard from '@/components/docs/DocsLinkCard.astro';
+import FrameworkCase from '@/components/docs/FrameworkCase.astro';
+import ShadcnCommand from '@/components/docs/ShadcnCommand.astro';
 
 Video.js v10 comes with Default and Minimal skins. Start with their public CSS custom properties. When you need to change controls, layout, or interactions, install the closest skin's source into your project and make it your own.
 
@@ -94,27 +96,46 @@ For anything deeper, install the source instead of reaching into the packaged sk
 
 ## Install an editable skin
 
-The hosted Video.js registry installs a complete skin and its dependencies into your project. The generated files are ordinary app code, so their markup, class names, and styles are yours to change.
+The hosted Video.js registry installs a complete skin and its dependencies into your project. The generated files are ordinary app code, so their markup, class names, and styles are yours to change. <DocsLink slug="how-to/install-from-shadcn">Configure the `@videojs` registry namespace</DocsLink> first.
 
 <FrameworkCase frameworks={["html"]}>
 
-```bash
-pnpm dlx shadcn@latest add https://shadcn.videojs.org/r/html-video.json
-```
+### Tailwind
+
+<ShadcnCommand action="add @videojs/html-video-skin" />
+
+### Vanilla CSS
+
+<ShadcnCommand action="add @videojs/html-video-skin-css" />
 
 </FrameworkCase>
 
 <FrameworkCase frameworks={["react"]}>
 
-```bash
-pnpm dlx shadcn@latest add https://shadcn.videojs.org/r/react-video.json
-```
+### Tailwind
+
+<ShadcnCommand action="add @videojs/react-video-skin" />
+
+### Vanilla CSS
+
+<ShadcnCommand action="add @videojs/react-video-skin-css" />
 
 </FrameworkCase>
 
-Append `-minimal` to install the Minimal variant, for example `react-video-minimal.json`. Audio and live presets follow the same naming pattern. See the individual [skin guides](../skins/default-video) for the exact packaged and source-owned options.
+Insert `-minimal` before `-css` to install the Minimal variant, for example `@videojs/react-video-skin-minimal-css`. Audio and live presets follow the same naming pattern.
+
+- <DocsLink slug="skins/default-video">Default video skin</DocsLink>
+- <DocsLink slug="skins/minimal-video">Minimal video skin</DocsLink>
+- <DocsLink slug="skins/default-audio">Default audio skin</DocsLink>
+- <DocsLink slug="skins/minimal-audio">Minimal audio skin</DocsLink>
+- <DocsLink slug="skins/default-live-video">Default live video skin</DocsLink>
+- <DocsLink slug="skins/minimal-live-video">Minimal live video skin</DocsLink>
+- <DocsLink slug="skins/default-live-audio">Default live audio skin</DocsLink>
+- <DocsLink slug="skins/minimal-live-audio">Minimal live audio skin</DocsLink>
 
 If none of the provided skins is a useful starting point, build a custom UI from the player, container, and individual <DocsLink slug="concepts/ui-components">UI components</DocsLink> instead.
+
+<DocsLinkCard slug="how-to/install-from-shadcn">Install editable Video.js source with Shadcn</DocsLinkCard>
 
 ## Related guides
 

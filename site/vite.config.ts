@@ -64,7 +64,7 @@ const config: ViteUserConfig = {
         // them for cross-task cache reuse.
         command:
           "SHLVL=0 XPC_SERVICE_NAME=0 npm_lifecycle_event=vite-plus npm_lifecycle_script='astro build' astro build",
-        dependsOn: ['api-docs:generate', 'cdn-manifest'],
+        dependsOn: ['api-docs:generate', 'cdn-manifest', '@videojs/skins#build:shadcn'],
         // Astro regenerates and consumes collection schemas during one build.
         // They are tool-managed state rather than stable inputs or outputs.
         input: [...cachedTaskInputs, '!.astro/**', '!.netlify/**'],
@@ -82,12 +82,12 @@ const config: ViteUserConfig = {
       dev: {
         command: 'NETLIFY_DEV=1 astro dev',
         cache: false,
-        dependsOn: ['api-docs:generate', 'cdn-manifest'],
+        dependsOn: ['api-docs:generate', 'cdn-manifest', '@videojs/skins#build:shadcn'],
       },
       'test:ci': {
         command: 'pnpm test',
         cache: false,
-        dependsOn: workspaceTaskDependencies(),
+        dependsOn: [...workspaceTaskDependencies(), '@videojs/skins#build:shadcn'],
       },
     },
   },

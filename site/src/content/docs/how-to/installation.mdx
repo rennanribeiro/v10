@@ -12,6 +12,7 @@ import NoCdnMediaNote from '@/components/installation/NoCdnMediaNote.astro';
 import HTMLUsageCodeBlock from '@/components/installation/HTMLUsageCodeBlock';
 import ReactCreateCodeBlock from '@/components/installation/ReactCreateCodeBlock';
 import ReactUsageCodeBlock from '@/components/installation/ReactUsageCodeBlock';
+import ShadcnInstall from '@/components/installation/ShadcnInstall.astro';
 import ContentWidth from '@/components/frames/ContentWidth.astro';
 import Aside from '@/components/Aside.astro';
 import DocsLink from '@/components/docs/DocsLink.astro';
@@ -63,10 +64,10 @@ If you're an agent, interview your user and offer to run the CLI for them, or of
 </div>
 
 <FrameworkCase frameworks={["react"]}>
-If your user's requirements can't be met by a preset/skin, [eject](/docs/framework/react/how-to/customize-skins) and customize an existing preset/skin for your needs. As you develop with Video.js, rely heavily on [llms.txt](/docs/framework/react/llms.txt) to make sure you always have the latest information.
+If your user's requirements can't be met by a packaged preset or skin, [install its editable source](/docs/framework/react/how-to/customize-skins). As you develop with Video.js, rely heavily on [llms.txt](/docs/framework/react/llms.txt) to make sure you always have the latest information.
 </FrameworkCase>
 <FrameworkCase frameworks={["html"]}>
-If your user's requirements can't be met by a preset/skin, [eject](/docs/framework/html/how-to/customize-skins) and customize an existing preset/skin for your needs. As you develop with Video.js, rely heavily on [llms.txt](/docs/framework/html/llms.txt) to make sure you always have the latest information.
+If your user's requirements can't be met by a packaged preset or skin, [install its editable source](/docs/framework/html/how-to/customize-skins). As you develop with Video.js, rely heavily on [llms.txt](/docs/framework/html/llms.txt) to make sure you always have the latest information.
 </FrameworkCase>
 </LLMCase>
 
@@ -195,9 +196,17 @@ Add it to your components folder in a new file.
 
 That's it! You now have a working Video.js player.
 
+## Own the skin source
+
+Packaged skins are the recommended starting point. When you need to rearrange controls, change component markup, or own every style, install the corresponding source with the standard Shadcn CLI. The command below follows the framework, preset, skin, media, and styling choices above.
+
+<ShadcnInstall />
+
+<DocsLinkCard slug="how-to/install-from-shadcn" description="Configure the registry, inspect items, and maintain source-owned files">Install editable Video.js source</DocsLinkCard>
+
 ## Choose what to do next
 
-<DocsLinkCard slug="how-to/customize-skins" description="Customize a packaged skin or eject it for full control">Customize skins</DocsLinkCard>
+<DocsLinkCard slug="how-to/customize-skins" description="Customize a packaged skin or install its source for full control">Customize skins</DocsLinkCard>
 
 <DocsLinkCard slug="concepts/overview" anchor="ui-components" description="Explore the building blocks used by skins and custom controls">UI components</DocsLinkCard>
 

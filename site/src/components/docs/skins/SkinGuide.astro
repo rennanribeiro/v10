@@ -2,6 +2,7 @@
 import ServerCode from '@/components/Code/ServerCode.astro';
 import Aside from '@/components/Aside.astro';
 import DocsLink from '@/components/docs/DocsLink.astro';
+import ShadcnCommand from '@/components/docs/ShadcnCommand.astro';
 import MinimalFrame from '@/components/frames/Minimal.astro';
 import { Tab, TabsList, TabsPanel, TabsRoot } from '@/components/Tabs.tsx';
 import SkinPreview from './SkinPreview';
@@ -75,6 +76,7 @@ const usage = definition.preset === 'background'
   : framework === 'react'
     ? reactUsage
     : htmlUsage;
+const registrySkinItem = `${framework}-${definition.preset}-skin${definition.variant === 'minimal' ? '-minimal' : ''}`;
 ---
 
 <p>{definition.when}</p>
@@ -123,7 +125,21 @@ const usage = definition.preset === 'background'
     <Aside type="note" title="Background stays packaged">
       Background is a small, control-free preset with separate React and HTML implementations rather than a VJSC-generated control skin.
     </Aside>
-  ) : null
+  ) : (
+    <>
+      <h2 id="own-the-source">Own the source</h2>
+      <p>
+        Install this skin from the Video.js registry when you need to rearrange controls, change component markup, or own every style. The installed files become application code; Video.js does not merge future package updates into them.
+      </p>
+      <h3 id="install-tailwind-source">Tailwind</h3>
+      <ShadcnCommand action={`add @videojs/${registrySkinItem}`} />
+      <h3 id="install-css-source">Vanilla CSS</h3>
+      <ShadcnCommand action={`add @videojs/${registrySkinItem}-css`} />
+      <p>
+        This installs the skin only, without choosing a Player or media implementation. See <DocsLink slug="how-to/install-from-shadcn">Install editable Video.js source with Shadcn</DocsLink> for registry setup, complete Player blocks, media items, and update guidance.
+      </p>
+    </>
+  )
 }
 
 <h2 id="behavior-and-api">Behavior and API</h2>

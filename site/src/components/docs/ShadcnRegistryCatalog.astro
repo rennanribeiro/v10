@@ -1,0 +1,139 @@
+---
+import MarkdownCode from '@/components/typography/MarkdownCode.astro';
+import Table from '@/components/typography/Table.astro';
+import Tbody from '@/components/typography/Tbody.astro';
+import Td from '@/components/typography/Td.astro';
+import Th from '@/components/typography/Th.astro';
+import Thead from '@/components/typography/Thead.astro';
+import Tr from '@/components/typography/Tr.astro';
+import registry from '../../../../packages/skins/dist/registry/r/registry.json';
+
+interface RegistryItem {
+  name: string;
+  title: string;
+  meta?: {
+    role?: string;
+    framework?: string;
+    styling?: string;
+    preset?: string;
+    variant?: string;
+    public?: boolean;
+  };
+}
+
+const registryItems: readonly RegistryItem[] = registry.items;
+const publicItems = registryItems.filter((item) => item.meta?.public === true);
+const itemByName = new Map(publicItems.map((item) => [item.name, item] as const));
+const playerRows = publicItems.filter(
+  (item) => item.meta?.role === 'player' && item.meta.framework === 'react' && item.meta.styling === 'tailwind'
+);
+const skinRows = publicItems.filter(
+  (item) => item.meta?.role === 'skin' && item.meta.framework === 'react' && item.meta.styling === 'tailwind'
+);
+const mediaRows = publicItems.filter((item) => item.meta?.role === 'media' && item.meta.framework === 'react');
+const componentRows = publicItems.filter(
+  (item) => item.meta?.role === 'component' && item.meta.variant === 'default'
+);
+
+function url(name: string): string {
+  return `https://shadcn.videojs.org/r/${name}.json`;
+}
+
+function counterpart(item: RegistryItem, framework: 'html' | 'react', styling?: 'css' | 'tailwind') {
+  return publicItems.find(
+    (candidate) =>
+      candidate.meta?.role === item.meta?.role &&
+      candidate.meta?.framework === framework &&
+      candidate.meta?.preset === item.meta?.preset &&
+      candidate.meta?.variant === item.meta?.variant &&
+      (styling === undefined || candidate.meta?.styling === styling)
+  );
+}
+
+function label(item: RegistryItem): string {
+  return `${item.meta?.preset?.replaceAll('-', ' ') ?? item.title} · ${item.meta?.variant ?? 'default'}`;
+}
+---
+
+<h3 id="player-blocks">Player blocks</h3>
+
+<p>Each Player block includes the selected skin and accepts a media component as its child.</p>
+
+<Table>
+  <Thead><Tr><Th>Preset</Th><Th>React + Tailwind</Th><Th>React + CSS</Th><Th>HTML + Tailwind</Th><Th>HTML + CSS</Th></Tr></Thead>
+  <Tbody>
+    {playerRows.map((item) => {
+      const reactCss = counterpart(item, 'react', 'css');
+      const htmlTailwind = counterpart(item, 'html', 'tailwind');
+      const htmlCss = counterpart(item, 'html', 'css');
+
+      return <Tr>
+        <Td class="capitalize">{label(item)}</Td>
+        <Td><a href={url(item.name)}><MarkdownCode>{item.name}</MarkdownCode></a></Td>
+        <Td>{reactCss ? <a href={url(reactCss.name)}><MarkdownCode>{reactCss.name}</MarkdownCode></a> : null}</Td>
+        <Td>{htmlTailwind ? <a href={url(htmlTailwind.name)}><MarkdownCode>{htmlTailwind.name}</MarkdownCode></a> : null}</Td>
+        <Td>{htmlCss ? <a href={url(htmlCss.name)}><MarkdownCode>{htmlCss.name}</MarkdownCode></a> : null}</Td>
+      </Tr>;
+    })}
+  </Tbody>
+</Table>
+
+<h3 id="skin-blocks">Skin-only blocks</h3>
+
+<p>Skin-only blocks provide the same UI without choosing a Player or media implementation.</p>
+
+<Table>
+  <Thead><Tr><Th>Skin</Th><Th>React + Tailwind</Th><Th>React + CSS</Th><Th>HTML + Tailwind</Th><Th>HTML + CSS</Th></Tr></Thead>
+  <Tbody>
+    {skinRows.map((item) => {
+      const reactCss = counterpart(item, 'react', 'css');
+      const htmlTailwind = counterpart(item, 'html', 'tailwind');
+      const htmlCss = counterpart(item, 'html', 'css');
+
+      return <Tr>
+        <Td class="capitalize">{label(item)}</Td>
+        <Td><a href={url(item.name)}><MarkdownCode>{item.name}</MarkdownCode></a></Td>
+        <Td>{reactCss ? <a href={url(reactCss.name)}><MarkdownCode>{reactCss.name}</MarkdownCode></a> : null}</Td>
+        <Td>{htmlTailwind ? <a href={url(htmlTailwind.name)}><MarkdownCode>{htmlTailwind.name}</MarkdownCode></a> : null}</Td>
+        <Td>{htmlCss ? <a href={url(htmlCss.name)}><MarkdownCode>{htmlCss.name}</MarkdownCode></a> : null}</Td>
+      </Tr>;
+    })}
+  </Tbody>
+</Table>
+
+<h3 id="media-items">Media items</h3>
+
+<Table>
+  <Thead><Tr><Th>Media</Th><Th>React</Th><Th>HTML</Th></Tr></Thead>
+  <Tbody>
+    {mediaRows.map((item) => {
+      const baseName = item.name.replace(/^react-/, '');
+      const html = itemByName.get(`html-${baseName}`);
+
+      return <Tr>
+        <Td>{item.title.replace(/ Media$/, '')}</Td>
+        <Td><a href={url(item.name)}><MarkdownCode>{item.name}</MarkdownCode></a></Td>
+        <Td>{html ? <a href={url(html.name)}><MarkdownCode>{html.name}</MarkdownCode></a> : null}</Td>
+      </Tr>;
+    })}
+  </Tbody>
+</Table>
+
+<h3 id="react-component-items">React component items</h3>
+
+<p>Individual styled components are available for React with Tailwind. Minimal appears only where it differs.</p>
+
+<Table>
+  <Thead><Tr><Th>Component</Th><Th>Default</Th><Th>Minimal</Th></Tr></Thead>
+  <Tbody>
+    {componentRows.map((item) => {
+      const minimal = itemByName.get(`${item.name}-minimal`);
+
+      return <Tr>
+        <Td>{item.title}</Td>
+        <Td><a href={url(item.name)}><MarkdownCode>{item.name}</MarkdownCode></a></Td>
+        <Td>{minimal ? <a href={url(minimal.name)}><MarkdownCode>{minimal.name}</MarkdownCode></a> : null}</Td>
+      </Tr>;
+    })}
+  </Tbody>
+</Table>

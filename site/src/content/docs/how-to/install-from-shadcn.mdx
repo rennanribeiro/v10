@@ -1,0 +1,139 @@
+---
+title: Install editable Video.js source with Shadcn
+description: Add editable React or HTML players, skins, media, and components from the hosted Video.js registry
+---
+
+import Aside from '@/components/Aside.astro';
+import DocsLinkCard from '@/components/docs/DocsLinkCard.astro';
+import ShadcnCommand from '@/components/docs/ShadcnCommand.astro';
+import ShadcnRegistryCatalog from '@/components/docs/ShadcnRegistryCatalog.astro';
+
+Use the hosted Video.js registry when your application should own editable player or skin source. It supports React and HTML, Tailwind CSS 4 and vanilla CSS, complete Player blocks, skin-only blocks, media facades, and individual styled React components.
+
+<Aside type="note">
+Packaged skins remain the recommended starting point. Registry files become application code, so choose this path when you need to rearrange controls, change markup, or own every style.
+</Aside>
+
+## Prepare the project
+
+Initialize Shadcn if the project does not have a `components.json` file:
+
+<ShadcnCommand action="init" />
+
+Configure the `@videojs` namespace once. Quote the argument so your shell does not interpret the braces:
+
+<ShadcnCommand action={`registry add '@videojs=https://shadcn.videojs.org/r/{name}.json'`} />
+
+Shadcn uses the aliases in `components.json` to place files. With the common `@/components` alias, Video.js source is installed under `components/videojs/`. Items add their package and registry dependencies automatically.
+
+## Choose what to install
+
+### Player block
+
+A Player block is the usual starting point. It combines a typed Player component with the selected skin, exposes the package Player props interface, and accepts media as children. It does not choose a media implementation.
+
+Install a Default on-demand React video Player and HLS.js media facade:
+
+<ShadcnCommand action="add @videojs/react-video @videojs/react-hlsjs-video" />
+
+```tsx title="Player.tsx"
+import { HlsJsVideo } from '@/components/videojs/media/hlsjs-video';
+import { Video } from '@/components/videojs/players/video';
+
+export function Player() {
+  return (
+    <Video>
+      <HlsJsVideo src="https://example.com/video.m3u8" />
+    </Video>
+  );
+}
+```
+
+Names follow `@videojs/<framework>-<preset>[-minimal][-css]`. Default and Tailwind are intentionally omitted from names. For example:
+
+- `@videojs/html-live-audio`
+- `@videojs/react-live-video-minimal`
+- `@videojs/react-audio-css`
+- `@videojs/html-video-minimal-css`
+
+### Skin-only block
+
+Install a skin without choosing a Player or media implementation when an existing composition already owns those boundaries:
+
+<ShadcnCommand action="add @videojs/react-video-skin-minimal-css" />
+
+Skin names insert `-skin` after the preset: `@videojs/<framework>-<preset>-skin[-minimal][-css]`.
+
+### Media item
+
+Install media separately when you are composing your own Player or adding a non-native playback implementation later:
+
+<ShadcnCommand action="add @videojs/html-hlsjs-video" />
+
+Media items are typed facades over their framework package exports. Native Video and Audio primitives already come with the framework package, so they do not need separate registry items.
+
+### React component
+
+Individual styled component items are available for React with Tailwind:
+
+<ShadcnCommand action="add @videojs/react-play-button" />
+
+```tsx
+import { PlayButton } from '@/components/videojs/ui/play-button';
+```
+
+Use `-minimal` where the Minimal skin has a distinct component treatment. Shared component and style dependencies are installed once through registry dependencies.
+
+## Include the generated styles
+
+Tailwind items install `components/videojs/styles/tailwind.css`. Import it from your application stylesheet instead of a separate bare Tailwind import; it imports Tailwind and scans the installed Video.js source:
+
+```css title="src/index.css"
+@import "./components/videojs/styles/tailwind.css";
+```
+
+Vanilla CSS skin files import their generated stylesheet directly. No Tailwind setup is required for CSS items.
+
+## Find and inspect items
+
+The standard Shadcn commands work with the configured namespace:
+
+```bash
+pnpm dlx shadcn@latest search @videojs --query volume
+pnpm dlx shadcn@latest view @videojs/react-volume-popover
+pnpm dlx shadcn@latest add @videojs/react-volume-popover --dry-run
+pnpm dlx shadcn@latest add @videojs/react-volume-popover --diff
+```
+
+You can also use a hosted item URL directly without configuring the namespace:
+
+```bash
+pnpm dlx shadcn@latest add https://shadcn.videojs.org/r/react-video.json
+```
+
+## Update owned source
+
+Installed files belong to your application. Video.js does not merge package releases into them. Inspect a newer item and its diff before replacing local changes:
+
+```bash
+pnpm dlx shadcn@latest view @videojs/react-play-button
+pnpm dlx shadcn@latest add @videojs/react-play-button --dry-run
+pnpm dlx shadcn@latest add @videojs/react-play-button --diff
+pnpm dlx shadcn@latest add @videojs/react-play-button --overwrite
+```
+
+Repeated and overlapping installs resolve the same dependency graph and file targets. Never pass `--overwrite` without reviewing the diff.
+
+## Registry catalog
+
+The links below open the exact hosted JSON Shadcn consumes. Install any item with `shadcn add @videojs/<name>`.
+
+<ShadcnRegistryCatalog />
+
+## Related guides
+
+<DocsLinkCard slug="how-to/customize-skins">Own and customize a skin</DocsLinkCard>
+
+<DocsLinkCard slug="concepts/skins">Understand packaged and source-owned skins</DocsLinkCard>
+
+<DocsLinkCard slug="concepts/ui-components">Explore UI components</DocsLinkCard>
