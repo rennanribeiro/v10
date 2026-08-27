@@ -6,6 +6,7 @@ import type { MediaReference } from '@/types/media-reference';
 import { resolveReferenceSlug } from '@/utils/api-reference-overrides';
 import { createMediaReferenceModel } from '@/utils/mediaReferenceModel';
 import HtmlMediaReference from './HtmlMediaReference.astro';
+import MediaApiStabilityNotice from './MediaApiStabilityNotice.astro';
 import ReactMediaReference from './ReactMediaReference.astro';
 
 interface Props {
@@ -38,6 +39,7 @@ for (const engine of model.engines) {
 
 <ContentWidth>
   <H2 id={model.heading.id}>{model.heading.text}</H2>
+  <MediaApiStabilityNotice />
   {
     framework === "html" ? (
       <HtmlMediaReference

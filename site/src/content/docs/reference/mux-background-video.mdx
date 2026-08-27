@@ -6,6 +6,7 @@ description: Mux-specific name for the HLS background video component
 ---
 
 import DocsLink from '@/components/docs/DocsLink.astro';
+import MediaApiStabilityNotice from '@/components/docs/api-reference/MediaApiStabilityNotice.astro';
 import FrameworkCase from '@/components/docs/FrameworkCase.astro';
 
 MuxBackgroundVideo is the Mux-specific name for <DocsLink slug="reference/hls-background-video">HlsBackgroundVideo</DocsLink>. The two names use the same implementation and API.
@@ -51,5 +52,7 @@ Pass a complete Mux HLS URL through `src`. This component does not take a playba
 MuxBackgroundVideo does not create a poster or preview thumbnails, and it does not send analytics data. Keep the poster in your page and add analytics separately when you need them.
 
 ## API
+
+<MediaApiStabilityNotice />
 
 The source, error, fixed playback behavior, and CSS custom properties are identical to <DocsLink slug="reference/hls-background-video">HlsBackgroundVideo</DocsLink>.

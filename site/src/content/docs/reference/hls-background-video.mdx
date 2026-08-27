@@ -6,6 +6,7 @@ description: HLS background video without controls, audio, captions, or adaptive
 ---
 
 import DocsLink from '@/components/docs/DocsLink.astro';
+import MediaApiStabilityNotice from '@/components/docs/api-reference/MediaApiStabilityNotice.astro';
 import FrameworkCase from '@/components/docs/FrameworkCase.astro';
 
 HlsBackgroundVideo plays an HLS source through the SPF background engine. It is fixed to muted, autoplaying, inline, looped playback and omits controls, audio, text, DRM, and adaptive rendition switching.
@@ -52,6 +53,8 @@ import '@videojs/html/media/hls-background-video';
 There is no `source` object, `preload` mode, or opt-out for muted, autoplay, and loop. Assigning a new `src` restarts playback from scratch.
 
 ## API
+
+<MediaApiStabilityNotice />
 
 | Member | Platform | Description |
 | --- | --- | --- |

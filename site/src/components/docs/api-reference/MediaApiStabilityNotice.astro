@@ -1,0 +1,12 @@
+---
+import Aside from '@/components/Aside.astro';
+
+const interfaceName = Astro.params.framework === 'react' ? 'props' : 'attributes';
+---
+
+<Aside type="caution" title="Unstable declarative API">
+  <p>
+    Playback behavior may be stable, but this component's declarative API is not. Its {interfaceName} and how they
+    configure the media may change before the API becomes stable.
+  </p>
+</Aside>
