@@ -1,0 +1,19 @@
+---
+import BetaPill from '@/components/BetaPill';
+import type { DocStability } from '@/types/docs';
+
+type Props = {
+  stability: DocStability;
+};
+
+const { stability } = Astro.props;
+const labels = {
+  beta: 'Beta',
+} satisfies Record<DocStability, string>;
+---
+
+<BetaPill
+  compact
+  label={labels[stability]}
+  className="h-5 shrink-0 px-2 sm:h-5 sm:px-2"
+/>

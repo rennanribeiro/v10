@@ -3,7 +3,7 @@ import { z } from 'astro/zod';
 import { defineCollection, reference } from 'astro:content';
 
 import { ComponentReferenceSchema } from './types/component-reference';
-import { SUPPORTED_FRAMEWORKS } from './types/docs';
+import { DOC_STABILITIES, SUPPORTED_FRAMEWORKS } from './types/docs';
 import { FeatureReferenceSchema } from './types/feature-reference';
 import { MediaReferenceSchema } from './types/media-reference';
 import { PresetReferenceSchema } from './types/preset-reference';
@@ -92,6 +92,7 @@ const docs = defineCollection({
     description: z.string(),
     updatedDate: z.coerce.date().optional(),
     ogTitle: z.string().optional(),
+    stability: z.enum(DOC_STABILITIES).optional(),
     frameworkTitle: z.partialRecord(z.enum(SUPPORTED_FRAMEWORKS as [string, ...string[]]), z.string()).optional(),
   }),
 });

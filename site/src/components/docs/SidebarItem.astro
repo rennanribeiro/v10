@@ -2,19 +2,22 @@
 import GithubSlugger from 'github-slugger';
 import { ArrowUpRight } from 'lucide-react';
 import DropdownIcon from '@/assets/icons/dropdown-arrow.svg?react';
-import type { SidebarItem as SidebarItemType, SupportedFramework } from '@/types/docs';
+import ApiStabilityBadge from '@/components/docs/ApiStabilityBadge.astro';
+import type { DocStability, SidebarItem as SidebarItemType, SupportedFramework } from '@/types/docs';
 import { isLink, isSection } from '@/types/docs';
 
 type Props = {
   item: SidebarItemType;
   framework: SupportedFramework;
   docTitles: Map<string, string>;
+  docStabilities: Map<string, DocStability | undefined>;
   depth?: number;
 };
 
-const { item, framework, docTitles, depth = 0 } = Astro.props;
+const { item, framework, docTitles, docStabilities, depth = 0 } = Astro.props;
 const currentPath = Astro.url.pathname;
 const slugger = new GithubSlugger();
+const stability = !isSection(item) && !isLink(item) ? docStabilities.get(item.slug) : undefined;
 
 // Helper to check if this item or any of its children contains the active path
 function containsActivePath(item: SidebarItemType): boolean {
@@ -93,6 +96,7 @@ function getGroupRotate(depth: number) {
             item={contentItem}
             framework={framework}
             docTitles={docTitles}
+            docStabilities={docStabilities}
             depth={depth + 1}
           />
         ))}
@@ -128,7 +132,10 @@ function getGroupRotate(depth: number) {
       href={`/docs/framework/${framework}/${item.slug}`}
     >
       {item.devOnly ? "[Dev only] " : ""}
-      {item.sidebarLabel || docTitles.get(item.slug) || item.slug}
+      <span class="min-w-0 flex-1">
+        {item.sidebarLabel || docTitles.get(item.slug) || item.slug}
+      </span>
+      {stability && <ApiStabilityBadge stability={stability} />}
     </a>
   )
 }
