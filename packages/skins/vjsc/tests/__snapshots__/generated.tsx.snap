@@ -216,6 +216,28 @@ export function FullscreenButton({ className, ...props }: FullscreenButtonProps 
   );
 }
 
+// ===== react/default-video/css/components/buttons/live-button.tsx =====
+/** @jsxImportSource react */
+
+
+
+
+
+
+import { Button } from './button';
+import "virtual:vjsc/css/<hash>/base.css";
+import "virtual:vjsc/css/<hash>/buttons.css";
+import { LiveButton as LiveButtonPrimitive } from "@videojs/react";
+import { cn, resolveClassName } from "@videojs/utils/style";
+
+
+
+
+export interface LiveButtonProps extends Omit<LiveButtonPrimitive.Props, "children"> {}
+export function LiveButton({ className, ...props }: LiveButtonProps = {}) {
+  return <LiveButtonPrimitive render={<Button />} className={state => cn("media-live-button", resolveClassName(className, state))} {...props} />;
+}
+
 // ===== react/default-video/css/components/buttons/mute-button.tsx =====
 /** @jsxImportSource react */
 
@@ -1655,6 +1677,25 @@ export function FullscreenButton({ className, ...props }: FullscreenButtonProps 
   );
 }
 
+// ===== react/default-video/tailwind/components/buttons/live-button.tsx =====
+/** @jsxImportSource react */
+
+
+
+
+
+
+import { Button } from './button';
+import { LiveButton as LiveButtonPrimitive } from "@videojs/react";
+import { cn, resolveClassName } from "@videojs/utils/style";
+
+
+
+export interface LiveButtonProps extends Omit<LiveButtonPrimitive.Props, "children"> {}
+export function LiveButton({ className, ...props }: LiveButtonProps = {}) {
+  return <LiveButtonPrimitive render={<Button />} className={state => cn("inline-flex! w-auto! items-center gap-1.5 px-3 py-2", "text-media-sm leading-none font-semibold tracking-wider uppercase", "before:inline-block before:size-2 before:shrink-0 before:rounded-[99px]", "before:bg-current/40 before:transition-[background-color] before:duration-150 before:ease-out", "data-live-edge:before:bg-[oklch(0.65_0.22_27)]", resolveClassName(className, state))} {...props} />;
+}
+
 // ===== react/default-video/tailwind/components/buttons/mute-button.tsx =====
 /** @jsxImportSource react */
 
@@ -3013,6 +3054,28 @@ export function FullscreenButton({ className, ...props }: FullscreenButtonProps 
       </FullscreenButtonPrimitive>
     </ButtonTooltip>
   );
+}
+
+// ===== react/minimal-video/css/components/buttons/live-button.tsx =====
+/** @jsxImportSource react */
+
+
+
+
+
+
+import { Button } from './button';
+import "virtual:vjsc/css/<hash>/base.css";
+import "virtual:vjsc/css/<hash>/buttons.css";
+import { LiveButton as LiveButtonPrimitive } from "@videojs/react";
+import { cn, resolveClassName } from "@videojs/utils/style";
+
+
+
+
+export interface LiveButtonProps extends Omit<LiveButtonPrimitive.Props, "children"> {}
+export function LiveButton({ className, ...props }: LiveButtonProps = {}) {
+  return <LiveButtonPrimitive render={<Button />} className={state => cn("media-live-button", resolveClassName(className, state))} {...props} />;
 }
 
 // ===== react/minimal-video/css/components/buttons/mute-button.tsx =====
@@ -4452,6 +4515,25 @@ export function FullscreenButton({ className, ...props }: FullscreenButtonProps 
   );
 }
 
+// ===== react/minimal-video/tailwind/components/buttons/live-button.tsx =====
+/** @jsxImportSource react */
+
+
+
+
+
+
+import { Button } from './button';
+import { LiveButton as LiveButtonPrimitive } from "@videojs/react";
+import { cn, resolveClassName } from "@videojs/utils/style";
+
+
+
+export interface LiveButtonProps extends Omit<LiveButtonPrimitive.Props, "children"> {}
+export function LiveButton({ className, ...props }: LiveButtonProps = {}) {
+  return <LiveButtonPrimitive render={<Button />} className={state => cn("inline-flex! w-auto! items-center gap-1.5 px-3 py-2", "text-media-sm leading-none font-semibold tracking-wider uppercase", "before:inline-block before:size-2 before:shrink-0 before:rounded-[99px]", "before:bg-current/40 before:transition-[background-color] before:duration-150 before:ease-out", "data-live-edge:before:bg-[oklch(0.65_0.22_27)]", resolveClassName(className, state))} {...props} />;
+}
+
 // ===== react/minimal-video/tailwind/components/buttons/mute-button.tsx =====
 /** @jsxImportSource react */
 
@@ -5813,6 +5895,28 @@ export function FullscreenButton({ className, ...props }: FullscreenButtonProps 
       </FullscreenButtonPrimitive>
     </ButtonTooltip>
   );
+}
+
+// ===== react/default-audio/css/components/buttons/live-button.tsx =====
+/** @jsxImportSource react */
+
+
+
+
+
+
+import { Button } from './button';
+import "virtual:vjsc/css/<hash>/base.css";
+import "virtual:vjsc/css/<hash>/buttons.css";
+import { LiveButton as LiveButtonPrimitive } from "@videojs/react";
+import { cn, resolveClassName } from "@videojs/utils/style";
+
+
+
+
+export interface LiveButtonProps extends Omit<LiveButtonPrimitive.Props, "children"> {}
+export function LiveButton({ className, ...props }: LiveButtonProps = {}) {
+  return <LiveButtonPrimitive render={<Button />} className={state => cn("media-live-button", resolveClassName(className, state))} {...props} />;
 }
 
 // ===== react/default-audio/css/components/buttons/mute-button.tsx =====
@@ -7234,6 +7338,25 @@ export function FullscreenButton({ className, ...props }: FullscreenButtonProps 
   );
 }
 
+// ===== react/default-audio/tailwind/components/buttons/live-button.tsx =====
+/** @jsxImportSource react */
+
+
+
+
+
+
+import { Button } from './button';
+import { LiveButton as LiveButtonPrimitive } from "@videojs/react";
+import { cn, resolveClassName } from "@videojs/utils/style";
+
+
+
+export interface LiveButtonProps extends Omit<LiveButtonPrimitive.Props, "children"> {}
+export function LiveButton({ className, ...props }: LiveButtonProps = {}) {
+  return <LiveButtonPrimitive render={<Button />} className={state => cn("inline-flex! w-auto! items-center gap-1.5 px-3 py-2", "text-media-sm leading-none font-semibold tracking-wider uppercase", "before:inline-block before:size-2 before:shrink-0 before:rounded-[99px]", "before:bg-current/40 before:transition-[background-color] before:duration-150 before:ease-out", "data-live-edge:before:bg-[oklch(0.65_0.22_27)]", resolveClassName(className, state))} {...props} />;
+}
+
 // ===== react/default-audio/tailwind/components/buttons/mute-button.tsx =====
 /** @jsxImportSource react */
 
@@ -8572,6 +8695,28 @@ export function FullscreenButton({ className, ...props }: FullscreenButtonProps 
       </FullscreenButtonPrimitive>
     </ButtonTooltip>
   );
+}
+
+// ===== react/minimal-audio/css/components/buttons/live-button.tsx =====
+/** @jsxImportSource react */
+
+
+
+
+
+
+import { Button } from './button';
+import "virtual:vjsc/css/<hash>/base.css";
+import "virtual:vjsc/css/<hash>/buttons.css";
+import { LiveButton as LiveButtonPrimitive } from "@videojs/react";
+import { cn, resolveClassName } from "@videojs/utils/style";
+
+
+
+
+export interface LiveButtonProps extends Omit<LiveButtonPrimitive.Props, "children"> {}
+export function LiveButton({ className, ...props }: LiveButtonProps = {}) {
+  return <LiveButtonPrimitive render={<Button />} className={state => cn("media-live-button", resolveClassName(className, state))} {...props} />;
 }
 
 // ===== react/minimal-audio/css/components/buttons/mute-button.tsx =====
@@ -9995,6 +10140,25 @@ export function FullscreenButton({ className, ...props }: FullscreenButtonProps 
   );
 }
 
+// ===== react/minimal-audio/tailwind/components/buttons/live-button.tsx =====
+/** @jsxImportSource react */
+
+
+
+
+
+
+import { Button } from './button';
+import { LiveButton as LiveButtonPrimitive } from "@videojs/react";
+import { cn, resolveClassName } from "@videojs/utils/style";
+
+
+
+export interface LiveButtonProps extends Omit<LiveButtonPrimitive.Props, "children"> {}
+export function LiveButton({ className, ...props }: LiveButtonProps = {}) {
+  return <LiveButtonPrimitive render={<Button />} className={state => cn("inline-flex! w-auto! items-center gap-1.5 px-3 py-2", "text-media-sm leading-none font-semibold tracking-wider uppercase", "before:inline-block before:size-2 before:shrink-0 before:rounded-[99px]", "before:bg-current/40 before:transition-[background-color] before:duration-150 before:ease-out", "data-live-edge:before:bg-[oklch(0.65_0.22_27)]", resolveClassName(className, state))} {...props} />;
+}
+
 // ===== react/minimal-audio/tailwind/components/buttons/mute-button.tsx =====
 /** @jsxImportSource react */
 
@@ -11306,6 +11470,25 @@ export function FullscreenButton({ className, ...props }: Props<CoreProps> = {})
       </media-fullscreen-button>
     </ButtonTooltip>
   );
+}
+
+// ===== html/default-video/css/components/buttons/live-button.tsx =====
+/** @jsxImportSource vjsc/html-runtime */
+import type { LiveButtonProps as CoreProps } from '@videojs/core';
+
+import type { Props } from 'vjsc/components';
+
+
+
+import { Button } from './button';
+import "virtual:vjsc/css/<hash>/base.css";
+import "virtual:vjsc/css/<hash>/buttons.css";
+import "@videojs/html/ui/live-button";
+
+
+
+export function LiveButton({ className, ...props }: Props<CoreProps> = {}) {
+  return <media-live-button className={[Button, ["media-live-button", className]]} {...props} />;
 }
 
 // ===== html/default-video/css/components/buttons/mute-button.tsx =====
@@ -12655,6 +12838,22 @@ export function FullscreenButton({ className, ...props }: Props<CoreProps> = {})
   );
 }
 
+// ===== html/default-video/tailwind/components/buttons/live-button.tsx =====
+/** @jsxImportSource vjsc/html-runtime */
+import type { LiveButtonProps as CoreProps } from '@videojs/core';
+
+import type { Props } from 'vjsc/components';
+
+
+
+import { Button } from './button';
+import "@videojs/html/ui/live-button";
+
+
+export function LiveButton({ className, ...props }: Props<CoreProps> = {}) {
+  return <media-live-button className={[Button, ["inline-flex! w-auto! items-center gap-1.5 px-3 py-2", "text-media-sm leading-none font-semibold tracking-wider uppercase", "before:inline-block before:size-2 before:shrink-0 before:rounded-[99px]", "before:bg-current/40 before:transition-[background-color] before:duration-150 before:ease-out", "data-live-edge:before:bg-[oklch(0.65_0.22_27)]", className]]} {...props} />;
+}
+
 // ===== html/default-video/tailwind/components/buttons/mute-button.tsx =====
 /** @jsxImportSource vjsc/html-runtime */
 import type { MuteButtonProps as CoreProps } from '@videojs/core';
@@ -13925,6 +14124,25 @@ export function FullscreenButton({ className, ...props }: Props<CoreProps> = {})
       </media-fullscreen-button>
     </ButtonTooltip>
   );
+}
+
+// ===== html/minimal-video/css/components/buttons/live-button.tsx =====
+/** @jsxImportSource vjsc/html-runtime */
+import type { LiveButtonProps as CoreProps } from '@videojs/core';
+
+import type { Props } from 'vjsc/components';
+
+
+
+import { Button } from './button';
+import "virtual:vjsc/css/<hash>/base.css";
+import "virtual:vjsc/css/<hash>/buttons.css";
+import "@videojs/html/ui/live-button";
+
+
+
+export function LiveButton({ className, ...props }: Props<CoreProps> = {}) {
+  return <media-live-button className={[Button, ["media-live-button", className]]} {...props} />;
 }
 
 // ===== html/minimal-video/css/components/buttons/mute-button.tsx =====
@@ -15294,6 +15512,22 @@ export function FullscreenButton({ className, ...props }: Props<CoreProps> = {})
   );
 }
 
+// ===== html/minimal-video/tailwind/components/buttons/live-button.tsx =====
+/** @jsxImportSource vjsc/html-runtime */
+import type { LiveButtonProps as CoreProps } from '@videojs/core';
+
+import type { Props } from 'vjsc/components';
+
+
+
+import { Button } from './button';
+import "@videojs/html/ui/live-button";
+
+
+export function LiveButton({ className, ...props }: Props<CoreProps> = {}) {
+  return <media-live-button className={[Button, ["inline-flex! w-auto! items-center gap-1.5 px-3 py-2", "text-media-sm leading-none font-semibold tracking-wider uppercase", "before:inline-block before:size-2 before:shrink-0 before:rounded-[99px]", "before:bg-current/40 before:transition-[background-color] before:duration-150 before:ease-out", "data-live-edge:before:bg-[oklch(0.65_0.22_27)]", className]]} {...props} />;
+}
+
 // ===== html/minimal-video/tailwind/components/buttons/mute-button.tsx =====
 /** @jsxImportSource vjsc/html-runtime */
 import type { MuteButtonProps as CoreProps } from '@videojs/core';
@@ -16581,6 +16815,25 @@ export function FullscreenButton({ className, ...props }: Props<CoreProps> = {})
       </media-fullscreen-button>
     </ButtonTooltip>
   );
+}
+
+// ===== html/default-audio/css/components/buttons/live-button.tsx =====
+/** @jsxImportSource vjsc/html-runtime */
+import type { LiveButtonProps as CoreProps } from '@videojs/core';
+
+import type { Props } from 'vjsc/components';
+
+
+
+import { Button } from './button';
+import "virtual:vjsc/css/<hash>/base.css";
+import "virtual:vjsc/css/<hash>/buttons.css";
+import "@videojs/html/ui/live-button";
+
+
+
+export function LiveButton({ className, ...props }: Props<CoreProps> = {}) {
+  return <media-live-button className={[Button, ["media-live-button", className]]} {...props} />;
 }
 
 // ===== html/default-audio/css/components/buttons/mute-button.tsx =====
@@ -17909,6 +18162,22 @@ export function FullscreenButton({ className, ...props }: Props<CoreProps> = {})
   );
 }
 
+// ===== html/default-audio/tailwind/components/buttons/live-button.tsx =====
+/** @jsxImportSource vjsc/html-runtime */
+import type { LiveButtonProps as CoreProps } from '@videojs/core';
+
+import type { Props } from 'vjsc/components';
+
+
+
+import { Button } from './button';
+import "@videojs/html/ui/live-button";
+
+
+export function LiveButton({ className, ...props }: Props<CoreProps> = {}) {
+  return <media-live-button className={[Button, ["inline-flex! w-auto! items-center gap-1.5 px-3 py-2", "text-media-sm leading-none font-semibold tracking-wider uppercase", "before:inline-block before:size-2 before:shrink-0 before:rounded-[99px]", "before:bg-current/40 before:transition-[background-color] before:duration-150 before:ease-out", "data-live-edge:before:bg-[oklch(0.65_0.22_27)]", className]]} {...props} />;
+}
+
 // ===== html/default-audio/tailwind/components/buttons/mute-button.tsx =====
 /** @jsxImportSource vjsc/html-runtime */
 import type { MuteButtonProps as CoreProps } from '@videojs/core';
@@ -19158,6 +19427,25 @@ export function FullscreenButton({ className, ...props }: Props<CoreProps> = {})
       </media-fullscreen-button>
     </ButtonTooltip>
   );
+}
+
+// ===== html/minimal-audio/css/components/buttons/live-button.tsx =====
+/** @jsxImportSource vjsc/html-runtime */
+import type { LiveButtonProps as CoreProps } from '@videojs/core';
+
+import type { Props } from 'vjsc/components';
+
+
+
+import { Button } from './button';
+import "virtual:vjsc/css/<hash>/base.css";
+import "virtual:vjsc/css/<hash>/buttons.css";
+import "@videojs/html/ui/live-button";
+
+
+
+export function LiveButton({ className, ...props }: Props<CoreProps> = {}) {
+  return <media-live-button className={[Button, ["media-live-button", className]]} {...props} />;
 }
 
 // ===== html/minimal-audio/css/components/buttons/mute-button.tsx =====
@@ -20508,6 +20796,22 @@ export function FullscreenButton({ className, ...props }: Props<CoreProps> = {})
       </media-fullscreen-button>
     </ButtonTooltip>
   );
+}
+
+// ===== html/minimal-audio/tailwind/components/buttons/live-button.tsx =====
+/** @jsxImportSource vjsc/html-runtime */
+import type { LiveButtonProps as CoreProps } from '@videojs/core';
+
+import type { Props } from 'vjsc/components';
+
+
+
+import { Button } from './button';
+import "@videojs/html/ui/live-button";
+
+
+export function LiveButton({ className, ...props }: Props<CoreProps> = {}) {
+  return <media-live-button className={[Button, ["inline-flex! w-auto! items-center gap-1.5 px-3 py-2", "text-media-sm leading-none font-semibold tracking-wider uppercase", "before:inline-block before:size-2 before:shrink-0 before:rounded-[99px]", "before:bg-current/40 before:transition-[background-color] before:duration-150 before:ease-out", "data-live-edge:before:bg-[oklch(0.65_0.22_27)]", className]]} {...props} />;
 }
 
 // ===== html/minimal-audio/tailwind/components/buttons/mute-button.tsx =====
