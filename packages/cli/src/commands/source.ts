@@ -4,6 +4,7 @@ import { createPatch } from 'diff';
 import { catalogItems, resolveCatalogItem } from '../catalog/index.js';
 import type { CatalogFramework, CatalogKind, CatalogStyle } from '../catalog/schema.js';
 import { applyChangeSet, type ChangeSet, planAdd } from '../eject/change-set.js';
+import { planEject } from '../eject/plan.js';
 import { detectProject } from '../eject/project.js';
 
 export interface SourceCommandOptions {
@@ -96,6 +97,57 @@ export async function handleAdd(kindValue: string, name: string, options: Source
 
   await applyChangeSet(changeSet);
   console.log(`\nAdded ${item.kind} ${item.name}.`);
+
+  for (const instruction of changeSet.instructions) console.log(`- ${instruction}`);
+}
+
+export async function handleEject(kindValue: string, name: string, options: SourceCommandOptions): Promise<void> {
+  const project = await detectProject(options.cwd ?? process.cwd());
+  const selection = await resolveSelection(options, project.framework, project.style);
+  const item = resolveCatalogItem(parseKind(kindValue), name, selection.framework, selection.style);
+  const path =
+    options.diff === true || options.diff === undefined ? (options.path ?? project.defaultPath) : options.diff;
+  const plan = await planEject({ project, item, path, overwrite: Boolean(options.overwrite) });
+
+  if (options.json) {
+    console.log(
+      JSON.stringify({ ...serializableChangeSet(plan.changeSet), alreadyEjected: plan.alreadyEjected }, null, 2)
+    );
+    return;
+  }
+
+  if (plan.alreadyEjected) {
+    console.log(`${item.kind} ${item.name} is already source-owned.`);
+    return;
+  }
+
+  const { changeSet } = plan;
+
+  printPlan(changeSet);
+
+  if (options.diff) {
+    printDiff(changeSet);
+    return;
+  }
+
+  if (options.dryRun) return;
+
+  if (changeSet.conflicts.length > 0) {
+    throw new Error(
+      `Existing files differ:\n${changeSet.conflicts.map((file) => `- ${file.relativePath}`).join('\n')}\n` +
+        'Recommendation: review with --diff, choose another --path, or pass --overwrite.'
+    );
+  }
+
+  if (!options.yes) {
+    if (!process.stdin.isTTY) throw new Error('Confirmation is required. Recommendation: rerun with --yes.');
+
+    const approved = await confirm({ message: `Write ${changedFiles(changeSet).length} files?` });
+    if (isCancel(approved) || !approved) return;
+  }
+
+  await applyChangeSet(changeSet);
+  console.log(`\nEjected ${item.kind} ${item.name}.`);
 
   for (const instruction of changeSet.instructions) console.log(`- ${instruction}`);
 }

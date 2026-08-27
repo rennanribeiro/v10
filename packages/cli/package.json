@@ -26,8 +26,12 @@
   },
   "dependencies": {
     "@clack/prompts": "^0.10.1",
+    "@oxc-project/types": "0.146.0",
     "commander": "^15.0.0",
-    "diff": "^8.0.4"
+    "diff": "^8.0.4",
+    "magic-string": "^1.2.2",
+    "oxc-parser": "0.146.0",
+    "oxc-walker": "^1.1.1"
   },
   "devDependencies": {
     "@tailwindcss/vite": "^4.3.3",

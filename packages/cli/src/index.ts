@@ -2,7 +2,7 @@ import { Command, Option } from 'commander';
 
 import { handleConfig } from './commands/config.js';
 import { handleDocs } from './commands/docs.js';
-import { handleAdd, handleList, type SourceCommandOptions, handleView } from './commands/source.js';
+import { handleAdd, handleEject, handleList, type SourceCommandOptions, handleView } from './commands/source.js';
 
 const program = new Command();
 
@@ -74,6 +74,11 @@ addSourceOptions(
   program.command('add <kind> <name>').description('Add editable Video.js UI source to a project.'),
   true
 ).action(async (kind: string, name: string, options: SourceCommandOptions) => handleAdd(kind, name, options));
+
+addSourceOptions(
+  program.command('eject <kind> <name>').description('Replace a packaged skin with editable local source.'),
+  true
+).action(async (kind: string, name: string, options: SourceCommandOptions) => handleEject(kind, name, options));
 
 try {
   await program.parseAsync();

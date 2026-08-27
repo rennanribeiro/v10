@@ -226,12 +226,24 @@ importers:
       '@clack/prompts':
         specifier: ^0.10.1
         version: 0.10.1
+      '@oxc-project/types':
+        specifier: 0.146.0
+        version: 0.146.0
       commander:
         specifier: ^15.0.0
         version: 15.0.0
       diff:
         specifier: ^8.0.4
         version: 8.0.4
+      magic-string:
+        specifier: ^1.2.2
+        version: 1.2.2
+      oxc-parser:
+        specifier: 0.146.0
+        version: 0.146.0
+      oxc-walker:
+        specifier: ^1.1.1
+        version: 1.1.1(@oxc-project/types@0.146.0)(oxc-parser@0.146.0)(rolldown@1.2.5)
     devDependencies:
       '@tailwindcss/vite':
         specifier: ^4.3.3

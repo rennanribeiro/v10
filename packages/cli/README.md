@@ -47,6 +47,14 @@ videojs add skin video --diff
 
 Existing source files are never replaced unless `--overwrite` is explicit. Use `--path` to select an installation directory and `--json` for a machine-readable plan.
 
+Replace a recognized packaged skin import and static usage with the equivalent owned source:
+
+```bash
+videojs eject skin video
+```
+
+Eject only applies narrow, verified replacements. Unsupported or ambiguous source is left untouched with manual next steps.
+
 Read a doc page:
 
 ```bash

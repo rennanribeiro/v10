@@ -10,6 +10,15 @@ import { build, type InlineConfig, type PluginOption } from 'vite';
 type Framework = 'html' | 'react';
 type Style = 'css' | 'tailwind';
 
+interface PackagedSkinContract {
+  readonly packageSource: string;
+  readonly exportName: string;
+  readonly playerExport: string;
+  readonly stylesheet: string;
+  readonly registration: string;
+  readonly tag: string;
+}
+
 const execute = promisify(execFile);
 const cli = resolve(import.meta.dirname, '../dist/index.mjs');
 const skins = [
@@ -23,6 +32,28 @@ const skins = [
   'minimal-live-audio',
 ] as const;
 const components = ['play-button', 'mute-button'] as const;
+const packagedSkins = {
+  video: packagedSkin('video', 'VideoSkin', 'VideoPlayer', 'skin', 'video-skin'),
+  'minimal-video': packagedSkin('video', 'MinimalVideoSkin', 'VideoPlayer', 'minimal-skin', 'video-minimal-skin'),
+  audio: packagedSkin('audio', 'AudioSkin', 'AudioPlayer', 'skin', 'audio-skin'),
+  'minimal-audio': packagedSkin('audio', 'MinimalAudioSkin', 'AudioPlayer', 'minimal-skin', 'audio-minimal-skin'),
+  'live-video': packagedSkin('live-video', 'LiveVideoSkin', 'LiveVideoPlayer', 'skin', 'live-video-skin'),
+  'minimal-live-video': packagedSkin(
+    'live-video',
+    'MinimalLiveVideoSkin',
+    'LiveVideoPlayer',
+    'minimal-skin',
+    'live-video-minimal-skin'
+  ),
+  'live-audio': packagedSkin('live-audio', 'LiveAudioSkin', 'LiveAudioPlayer', 'skin', 'live-audio-skin'),
+  'minimal-live-audio': packagedSkin(
+    'live-audio',
+    'MinimalLiveAudioSkin',
+    'LiveAudioPlayer',
+    'minimal-skin',
+    'live-audio-minimal-skin'
+  ),
+} as const satisfies Readonly<Record<(typeof skins)[number], PackagedSkinContract>>;
 
 for (const framework of ['react', 'html'] as const) {
   for (const style of ['css', 'tailwind'] as const) await verifyFixture(framework, style);
@@ -41,6 +72,8 @@ async function verifyFixture(framework: Framework, style: Style): Promise<void> 
     for (const component of components) {
       await installItem(root, framework, style, 'component', component, 'src/videojs/components');
     }
+
+    await verifyPackagedReplacement(root, framework, style);
 
     await validateOwnedSource(root);
     await buildFixture(root, framework, style);
@@ -71,6 +104,7 @@ async function installItem(
 }
 
 interface ChangeSetResult {
+  readonly alreadyEjected?: boolean | undefined;
   readonly files: readonly { readonly path: string; readonly status: string }[];
 }
 
@@ -159,6 +193,13 @@ async function writeReactEntry(root: string): Promise<string> {
     imports.push(`void Component${index};`);
   }
 
+  const ejected = await walkFiles(resolve(root, 'src/packaged-skins'));
+
+  for (const [index, path] of ejected.entries()) {
+    imports.push(`import * as Ejected${index} from ${JSON.stringify(relativeImport(root, path))};`);
+    imports.push(`void Ejected${index};`);
+  }
+
   const entry = resolve(root, 'source-output.ts');
 
   await writeFile(entry, `${imports.join('\n')}\n`);
@@ -166,8 +207,8 @@ async function writeReactEntry(root: string): Promise<string> {
 }
 
 async function writeHtmlEntry(root: string, style: Style): Promise<string> {
-  const markup: string[] = [];
-  const imports: string[] = [];
+  const markup = [await readFile(resolve(root, 'src/packaged-skins.html'), 'utf8')];
+  const imports = [`import ${JSON.stringify(relativeImport(root, resolve(root, 'src/packaged-skins.ts')))};`];
 
   for (const skin of skins) {
     const directory = resolve(root, 'src/videojs', skin);
@@ -219,6 +260,93 @@ async function linkTailwind(root: string): Promise<void> {
 
   await mkdir(modules);
   await symlink(resolve(import.meta.dirname, '../node_modules/tailwindcss'), resolve(modules, 'tailwindcss'), 'dir');
+}
+
+async function verifyPackagedReplacement(root: string, framework: Framework, style: Style): Promise<void> {
+  if (framework === 'react') await writePackagedReactUsage(root, style);
+  else await writePackagedHtmlUsage(root, style);
+
+  for (const skin of skins) {
+    const path = `src/ejected/${skin}`;
+    const args = [
+      'eject',
+      'skin',
+      skin,
+      '--cwd',
+      root,
+      '--framework',
+      framework,
+      '--style',
+      style,
+      '--path',
+      path,
+      '--yes',
+    ];
+
+    await execute(process.execPath, [cli, ...args], { maxBuffer: 50 * 1024 * 1024 });
+
+    const replay = await execute(process.execPath, [cli, ...args, '--json'], { maxBuffer: 50 * 1024 * 1024 });
+    const result: ChangeSetResult = JSON.parse(replay.stdout);
+
+    if (!result.alreadyEjected || result.files.length > 0) {
+      throw new Error(`${framework}/${style}/skin/${skin} eject is not idempotent.`);
+    }
+  }
+}
+
+async function writePackagedReactUsage(root: string, style: Style): Promise<void> {
+  const directory = resolve(root, 'src/packaged-skins');
+
+  await mkdir(directory, { recursive: true });
+
+  for (const skin of skins) {
+    const contract = packagedSkins[skin];
+    const exportName = `${contract.exportName}${style === 'tailwind' ? 'Tailwind' : ''}`;
+    const stylesheet = style === 'css' ? `import ${JSON.stringify(contract.stylesheet)};\n` : '';
+    const source =
+      `import { ${contract.playerExport}, ${exportName} as Skin } from ${JSON.stringify(contract.packageSource)};\n` +
+      `${stylesheet}export const player = <Skin data-fixture=${JSON.stringify(skin)}><${contract.playerExport} /></Skin>;\n`;
+
+    await writeFile(resolve(directory, `${skin}.tsx`), source);
+  }
+}
+
+async function writePackagedHtmlUsage(root: string, style: Style): Promise<void> {
+  const imports: string[] = [];
+  const markup: string[] = [];
+
+  for (const skin of skins) {
+    const contract = packagedSkins[skin];
+    const registration = `${contract.registration}${style === 'tailwind' ? '.tailwind' : ''}`;
+    const tag = `${contract.tag}${style === 'tailwind' ? '-tailwind' : ''}`;
+    const media = skin.includes('video') ? '<media-video></media-video>' : '<media-audio></media-audio>';
+    const poster = skin.includes('video') ? `<img slot="poster" src="${skin}.jpg">` : '';
+
+    imports.push(`import ${JSON.stringify(registration)};`);
+    markup.push(`<${tag} class="fixture-${skin}" data-fixture="${skin}">${media}${poster}</${tag}>`);
+  }
+
+  await writeFile(resolve(root, 'src/packaged-skins.ts'), `${imports.join('\n')}\n`);
+  await writeFile(resolve(root, 'src/packaged-skins.html'), `${markup.join('\n')}\n`);
+}
+
+function packagedSkin(
+  preset: string,
+  exportName: string,
+  playerExport: string,
+  entry: string,
+  tag: string
+): PackagedSkinContract {
+  const packageSource = `@videojs/react/${preset}`;
+
+  return {
+    packageSource,
+    exportName,
+    playerExport,
+    stylesheet: `${packageSource}/${entry}.css`,
+    registration: `@videojs/html/${preset}/${entry}`,
+    tag,
+  };
 }
 
 function importSpecifiers(source: string): string[] {
