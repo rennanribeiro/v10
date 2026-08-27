@@ -1,5 +1,5 @@
 ---
-import BetaPill from '@/components/BetaPill';
+import Pill from '@/components/Pill';
 import type { DocStability } from '@/types/docs';
 
 type Props = {
@@ -12,8 +12,9 @@ const labels = {
 } satisfies Record<DocStability, string>;
 ---
 
-<BetaPill
-  compact
-  label={labels[stability]}
-  className="h-5 shrink-0 px-2 sm:h-5 sm:px-2"
-/>
+<Pill
+  size="compact"
+  className="h-5 shrink-0 px-2 font-display-compact uppercase sm:h-5 sm:px-2"
+>
+  {labels[stability]}
+</Pill>
