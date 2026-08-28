@@ -114,8 +114,6 @@ export const MediaReadyState = {
   HAVE_ENOUGH_DATA: 4,
 } as const;
 
-export type MediaReadyStateValue = (typeof MediaReadyState)[keyof typeof MediaReadyState];
-
 export interface MediaSourceEvents {
   loadstart: EventLike;
   emptied: EventLike;
@@ -133,7 +131,7 @@ export type CanPlayTypeResult = '' | 'maybe' | 'probably';
 export interface MediaSourceCapability {
   src: string;
   readonly currentSrc: string;
-  readonly readyState: MediaReadyStateValue | number;
+  readonly readyState: number;
   preload: MediaPreloadType;
   crossOrigin: string | null;
   load(): Promise<void> | void;
