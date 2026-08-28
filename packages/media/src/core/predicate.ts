@@ -24,12 +24,21 @@ export function hasMetadata(media: MediaSourceCapability): boolean {
   return media.readyState >= 1;
 }
 
+/*
+ * A media declares a capability by carrying its members, so these ask whether the member is there rather than what it
+ * currently holds. A value is state — `paused` is `true` before playback, `error` is `null` without one — and reading
+ * state as support made any media that had not started look incapable.
+ *
+ * Two things are still read as values rather than presence: the `EMPTY_*` constants, which a media returns to say it
+ * has none of something it could otherwise report, and `contentData`, whose contract gives `undefined` that meaning.
+ */
+
 export function isMediaPauseCapable(value: unknown): value is MediaPauseCapability {
   if (!isObject(value)) return false;
 
   const media = value as Record<string, unknown>;
 
-  return !isUndefined(media.paused) && !isUndefined(media.ended) && isFunction(media.pause);
+  return 'paused' in media && 'ended' in media && isFunction(media.pause);
 }
 
 export function isMediaSeekCapable(value: unknown): value is MediaSeekCapability {
@@ -37,7 +46,7 @@ export function isMediaSeekCapable(value: unknown): value is MediaSeekCapability
 
   const media = value as Record<string, unknown>;
 
-  return !isUndefined(media.currentTime) && !isUndefined(media.duration) && !isUndefined(media.seeking);
+  return 'currentTime' in media && 'duration' in media && 'seeking' in media;
 }
 
 export function isMediaSourceCapable(value: unknown): value is MediaSourceCapability {
@@ -45,12 +54,7 @@ export function isMediaSourceCapable(value: unknown): value is MediaSourceCapabi
 
   const media = value as Record<string, unknown>;
 
-  return (
-    !isUndefined(media.src) &&
-    !isUndefined(media.currentSrc) &&
-    !isUndefined(media.readyState) &&
-    isFunction(media.load)
-  );
+  return 'src' in media && 'currentSrc' in media && 'readyState' in media && isFunction(media.load);
 }
 
 export function isMediaVolumeCapable(value: unknown): value is MediaVolumeCapability {
@@ -58,7 +62,7 @@ export function isMediaVolumeCapable(value: unknown): value is MediaVolumeCapabi
 
   const media = value as Record<string, unknown>;
 
-  return !isUndefined(media.volume) && !isUndefined(media.muted);
+  return 'volume' in media && 'muted' in media;
 }
 
 /**
@@ -70,7 +74,7 @@ export function isMediaMutedCapable(value: unknown): value is Pick<MediaVolumeCa
 
   const media = value as Record<string, unknown>;
 
-  return !isUndefined(media.muted);
+  return 'muted' in media;
 }
 
 export function isMediaPlaybackRateCapable(value: unknown): value is MediaPlaybackRateCapability {
@@ -78,7 +82,7 @@ export function isMediaPlaybackRateCapable(value: unknown): value is MediaPlayba
 
   const media = value as Record<string, unknown>;
 
-  return !isUndefined(media.playbackRate);
+  return 'playbackRate' in media;
 }
 
 /**
@@ -99,9 +103,9 @@ export function isMediaBufferCapable(value: unknown): value is MediaBufferCapabi
   const media = value as Record<string, unknown>;
 
   return (
-    !isUndefined(media.buffered) &&
+    'buffered' in media &&
     media.buffered !== EMPTY_TIME_RANGES &&
-    !isUndefined(media.seekable) &&
+    'seekable' in media &&
     media.seekable !== EMPTY_TIME_RANGES
   );
 }
@@ -111,7 +115,7 @@ export function isMediaErrorCapable(value: unknown): value is MediaErrorCapabili
 
   const media = value as Record<string, unknown>;
 
-  return !isUndefined(media.error);
+  return 'error' in media;
 }
 
 export function isMediaTextTrackCapable(value: unknown): value is MediaTextTrackCapability {
@@ -119,7 +123,7 @@ export function isMediaTextTrackCapable(value: unknown): value is MediaTextTrack
 
   const media = value as Record<string, unknown>;
 
-  return !isUndefined(media.textTracks) && media.textTracks !== EMPTY_TEXT_TRACKS;
+  return 'textTracks' in media && media.textTracks !== EMPTY_TEXT_TRACKS;
 }
 
 export function isMediaVideoRenditionCapable(value: unknown): value is MediaVideoRenditionCapability {
@@ -127,7 +131,7 @@ export function isMediaVideoRenditionCapable(value: unknown): value is MediaVide
 
   const media = value as Record<string, unknown>;
 
-  return !isUndefined(media.videoRenditions);
+  return 'videoRenditions' in media;
 }
 
 export function isMediaAudioTrackCapable(value: unknown): value is MediaAudioTrackCapability {
@@ -135,7 +139,7 @@ export function isMediaAudioTrackCapable(value: unknown): value is MediaAudioTra
 
   const media = value as Record<string, unknown>;
 
-  return !isUndefined(media.audioTracks);
+  return 'audioTracks' in media;
 }
 
 export function isMediaVideoDimensionsCapable(value: unknown): value is MediaVideoDimensionsCapability {
@@ -143,7 +147,7 @@ export function isMediaVideoDimensionsCapable(value: unknown): value is MediaVid
 
   const media = value as Record<string, unknown>;
 
-  return !isUndefined(media.videoWidth) && !isUndefined(media.videoHeight);
+  return 'videoWidth' in media && 'videoHeight' in media;
 }
 
 export function isMediaRemotePlaybackCapable(value: unknown): value is MediaRemotePlaybackCapability {
@@ -159,9 +163,14 @@ export function isMediaStreamTypeCapable(value: unknown): value is MediaStreamTy
 
   const media = value as Record<string, unknown>;
 
-  return !isUndefined(media.streamType);
+  return 'streamType' in media;
 }
 
+/**
+ * The exception to the rule above: `undefined` is a value {@link MediaContentDataCapability} gives meaning to, not an
+ * absent member. A host composing the capability always carries `contentData`, and reports `undefined` for a media that
+ * does not report metadata, so presence answers a question nobody asked.
+ */
 export function isMediaContentDataCapable(value: unknown): value is MediaContentDataCapability {
   if (!isObject(value)) return false;
 
@@ -173,7 +182,7 @@ export function isMediaLiveCapable(value: unknown): value is MediaLiveCapability
 
   const media = value as Record<string, unknown>;
 
-  return !isUndefined(media.liveEdgeStart) && !isUndefined(media.targetLiveWindow);
+  return 'liveEdgeStart' in media && 'targetLiveWindow' in media;
 }
 
 /** Framework-agnostic `NodeList`-like shape returned by `querySelectorAll`. */

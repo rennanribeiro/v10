@@ -4,9 +4,51 @@ import { EMPTY_REMOTE, EMPTY_TEXT_TRACKS, EMPTY_TIME_RANGES } from '../constants
 import {
   isMediaBufferCapable,
   isMediaContentDataCapable,
+  isMediaErrorCapable,
+  isMediaMutedCapable,
+  isMediaPauseCapable,
   isMediaRemotePlaybackCapable,
+  isMediaSeekCapable,
   isMediaTextTrackCapable,
+  isMediaVolumeCapable,
 } from '../predicate';
+
+describe('capability presence', () => {
+  it('reads a declared member rather than the value it currently holds', () => {
+    // A media that has not loaded holds initial values, which a value check
+    // used to read as unsupported.
+    expect(isMediaSeekCapable({ currentTime: undefined, duration: undefined, seeking: undefined })).toBe(true);
+    expect(isMediaVolumeCapable({ volume: undefined, muted: undefined })).toBe(true);
+    expect(isMediaErrorCapable({ error: undefined })).toBe(true);
+  });
+
+  it('is false for a media that does not declare the member', () => {
+    expect(isMediaSeekCapable({ currentTime: 0, duration: 0 })).toBe(false);
+    expect(isMediaVolumeCapable({ muted: false })).toBe(false);
+    expect(isMediaErrorCapable({})).toBe(false);
+  });
+
+  it('still separates a mute from a volume level', () => {
+    // An embed can take a mute command while offering no way to set a level.
+    expect(isMediaMutedCapable({ muted: false })).toBe(true);
+    expect(isMediaVolumeCapable({ muted: false })).toBe(false);
+  });
+
+  it('follows the prototype, where a composed host carries its members', () => {
+    class PauseMedia {
+      get paused() {
+        return true;
+      }
+      get ended() {
+        return false;
+      }
+      pause() {}
+    }
+
+    expect(isMediaPauseCapable(new PauseMedia())).toBe(true);
+    expect(isMediaPauseCapable(new (class {})())).toBe(false);
+  });
+});
 
 describe('isMediaContentDataCapable', () => {
   it('uses undefined as the unsupported sentinel', () => {
