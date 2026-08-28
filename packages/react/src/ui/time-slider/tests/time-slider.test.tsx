@@ -490,6 +490,21 @@ describe('TimeSlider compound', () => {
 
     expect(output?.textContent).toBeTruthy();
   });
+
+  it('formats values using the seekable end when duration is unknown', () => {
+    mockTimeState.duration = 0;
+    mockBufferState.seekable = [[0, 3700]];
+    const { Wrapper } = createPlayerWrapper();
+    const { container } = render(
+      <Wrapper>
+        <TimeSliderRoot>
+          <SliderValue data-testid="value" />
+        </TimeSliderRoot>
+      </Wrapper>
+    );
+
+    expect(container.querySelector('[data-testid="value"]')?.textContent).toBe('0:00:30');
+  });
 });
 
 describe('TimeSliderRoot pauseOnDrag', () => {

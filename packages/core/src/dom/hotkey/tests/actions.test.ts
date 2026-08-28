@@ -291,6 +291,22 @@ describe('seekToPercent', () => {
     expect(seek).toHaveBeenCalledWith(60);
   });
 
+  it('uses the seekable end when duration is unknown', () => {
+    const seek = vi.fn();
+    const store = mockStore({
+      currentTime: 0,
+      duration: 0,
+      seeking: false,
+      seek,
+      buffered: [],
+      seekable: [[10, 120]],
+    });
+
+    resolveHotkeyAction('seekToPercent')!({ store, value: 50, key: '' });
+
+    expect(seek).toHaveBeenCalledWith(60);
+  });
+
   it('no-ops for non-digit key without value', () => {
     const seek = vi.fn();
     const store = mockStore({ currentTime: 0, duration: 200, seeking: false, seek });

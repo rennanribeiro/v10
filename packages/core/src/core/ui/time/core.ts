@@ -1,4 +1,4 @@
-import { hasTimeRange, type MediaBufferState, type MediaTimeState } from '@videojs/media';
+import { getTimeRangeEnd, hasTimeRange, type MediaBufferState, type MediaTimeState } from '@videojs/media';
 import { defaults } from '@videojs/utils/object';
 import { formatTime, formatTimeAsPhrase, secondsToIsoDuration } from '@videojs/utils/time';
 import type { NonNullableObject } from '@videojs/utils/types';
@@ -97,15 +97,16 @@ export class TimeCore {
 
   #getSeconds(): number {
     const media = this.#media!;
+    const duration = getTimeRangeEnd(media);
     const { type } = this.#props;
 
     switch (type) {
       case 'current':
         return media.currentTime;
       case 'duration':
-        return media.duration;
+        return duration;
       case 'remaining':
-        return media.currentTime - media.duration;
+        return media.currentTime - duration;
       default:
         return 0;
     }
@@ -114,9 +115,10 @@ export class TimeCore {
   #getText(): string {
     const media = this.#media!;
     const seconds = this.#getSeconds();
+    const duration = getTimeRangeEnd(media);
     const options = this.#formatLocale === undefined ? undefined : { locale: this.#formatLocale };
 
-    return formatTime(Math.abs(seconds), media.duration, options);
+    return formatTime(Math.abs(seconds), duration, options);
   }
 
   #getPhrase(): string {

@@ -65,6 +65,18 @@ describe('TimeCore', () => {
       expect(core.getState().disabled).toBe(false);
     });
 
+    it('uses the seekable end when duration is unknown', () => {
+      const duration = new TimeCore({ type: 'duration' });
+      const remaining = new TimeCore({ type: 'remaining' });
+      const media = createMediaState({ currentTime: 30, duration: 0, seekable: [[10, 120]] });
+
+      duration.setMedia(media);
+      remaining.setMedia(media);
+
+      expect(duration.getState()).toMatchObject({ seconds: 120, text: '2:00' });
+      expect(remaining.getState()).toMatchObject({ seconds: -90, text: '1:30' });
+    });
+
     it('returns current time state', () => {
       const core = new TimeCore({ type: 'current' });
 
@@ -215,9 +227,9 @@ describe('TimeCore', () => {
 
     it.each([
       ['current', { currentTime: 0 }, 'Show remaining time, 0 seconds elapsed.'],
-      ['duration', { duration: 0 }, 'Show remaining time, 0 seconds duration.'],
+      ['duration', { duration: 0 }, 'Show remaining time, 5 minutes duration.'],
       ['remaining', { currentTime: 300 }, 'Show duration, 0 seconds remaining.'],
-    ] as const)('includes zero in the %s toggle label', (type, media, expected) => {
+    ] as const)('includes the resolved time in the %s toggle label', (type, media, expected) => {
       const core = new TimeCore({ type, toggle: true });
 
       core.setMedia(createMediaState({ ...media, seekable: [[0, 300]] }));
