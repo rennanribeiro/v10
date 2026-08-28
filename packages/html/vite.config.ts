@@ -296,7 +296,7 @@ export default defineConfig({
     tasks: {
       build: {
         command: 'vp pack --filter package',
-        dependsOn: workspaceTaskDependencies(),
+        dependsOn: [...workspaceTaskDependencies(), '@videojs/skins#prepare:shadcn'],
         // CDN sources are consumed only by build:cdn. Pack config discovery
         // observes their parent directory even when filtering to `package`, so
         // keep the independent npm package build free of that generated tree.
