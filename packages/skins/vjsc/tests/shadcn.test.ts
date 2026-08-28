@@ -71,10 +71,10 @@ describe('Skins Shadcn registry', () => {
     );
     expect(items.some((item) => item.name === 'react-button-tooltip')).toBe(false);
     expect(playSource).toContain('export interface PlayButtonProps');
-    expect(playSource).toContain('<PlayButtonPrimitive render={<Button />} className=');
+    expect(playSource).toMatch(/<PlayButtonPrimitive\s+render=\{<Button \/>\}\s+className=/);
     expect(buttonSource).toContain('export interface ButtonProps');
     expect(buttonSource).toContain('grid min-h-0');
-    expect(playSource).toContain(`from "@/components/videojs/utils"`);
+    expect(playSource).toContain(`from '@/components/videojs/utils'`);
     expect(playSource).not.toContain('const meta');
     expect(playSource).not.toContain('jsx-runtime');
     expect(playButton.dependencies).toEqual(['@videojs/react@10.0.0-beta.32', 'react']);
@@ -119,11 +119,11 @@ describe('Skins Shadcn registry', () => {
     expect(items.some((item) => item.name === 'react-playback-hotkeys-minimal')).toBe(false);
     expect(container.dependencies).toEqual(['@videojs/react@10.0.0-beta.32', 'react']);
     expect(container.registryDependencies).toEqual(['@videojs/react-utils', '@videojs/tailwind-styles']);
-    expect(posterSource).toContain('<PosterPrimitive render={children}');
+    expect(posterSource).toMatch(/<PosterPrimitive\s+render=\{children\}/);
     expect(posterSource).not.toContain('@videojs/core/vjsc');
     expect(qualityMenuSource).not.toContain('useQualityOptions');
     expect(submenuSource).toContain('<Menu.Value');
-    expect(submenuSource).toContain('<Menu.Content keepMounted');
+    expect(submenuSource).toMatch(/<Menu\.Content\s+keepMounted/);
     expect(videoSettingsMenuSource).not.toContain('const hasSettings =');
     expect(volumePopoverSource).toContain('VolumePopoverPrimitive.Root');
     expect(volumePopoverSource).toContain('VolumePopoverPrimitive.Trigger');

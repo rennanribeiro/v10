@@ -34,13 +34,19 @@ export default defineConfig({
         input: cachedTaskInputs,
         output: ['dist/**', '!dist/registry', '!dist/registry/**'],
       },
-      'build:shadcn': {
+      'prepare:shadcn': {
         command: 'vp -C shadcn pack',
         dependsOn: workspaceTaskDependencies(),
         // The registry plugin compares files in its output directory before
         // rewriting them; those reads must not turn outputs into inputs.
         input: [...cachedTaskInputs, '!dist/registry', '!dist/registry/**'],
-        output: ['dist/registry/**'],
+        output: ['dist/registry/source/**'],
+      },
+      'build:shadcn': {
+        command: 'rimraf dist/registry/r && shadcn build dist/registry/source/registry.json --output dist/registry/r',
+        dependsOn: ['prepare:shadcn'],
+        input: ['dist/registry/source/**'],
+        output: ['dist/registry/r/**'],
       },
       'test:ci': packageTestTask('pnpm run test:types && vp test run'),
     },
