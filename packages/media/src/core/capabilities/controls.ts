@@ -5,7 +5,7 @@ import type { MediaControlsCapability } from '../types';
 export const controlsCapability = defineMediaCapability<MediaControlsCapability>()({
   name: 'controls',
   events: [],
-  attributes: {
+  reflects: {
     controls: { type: Boolean },
   },
   props: {

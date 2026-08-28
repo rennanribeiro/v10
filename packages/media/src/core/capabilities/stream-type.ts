@@ -11,7 +11,7 @@ import { type MediaStreamTypeCapability, MediaStreamTypes } from '../types';
 export const streamTypeCapability = defineMediaCapability<MediaStreamTypeCapability>()({
   name: 'stream-type',
   events: ['streamtypechange'],
-  attributes: {
+  reflects: {
     streamType: { type: String, attribute: 'stream-type', empty: 'unknown' },
   },
   props: {

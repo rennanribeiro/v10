@@ -5,7 +5,7 @@ import type { MediaAutoplayCapability } from '../types';
 export const autoplayCapability = defineMediaCapability<MediaAutoplayCapability>()({
   name: 'autoplay',
   events: [],
-  attributes: {
+  reflects: {
     autoplay: { type: Boolean },
   },
   props: {

@@ -10,7 +10,7 @@ import type { MediaDisablePictureInPictureCapability } from '../types';
 export const pictureInPictureCapability = defineMediaCapability<MediaDisablePictureInPictureCapability>()({
   name: 'picture-in-picture',
   events: ['enterpictureinpicture', 'leavepictureinpicture'],
-  attributes: {
+  reflects: {
     disablePictureInPicture: { type: Boolean },
   },
   props: {

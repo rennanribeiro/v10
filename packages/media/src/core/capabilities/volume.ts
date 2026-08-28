@@ -12,7 +12,7 @@ import type { MediaVolumeCapability } from '../types';
 export const volumeCapability = defineMediaCapability<MediaVolumeCapability>()({
   name: 'volume',
   events: ['volumechange'],
-  attributes: {
+  reflects: {
     defaultMuted: { type: Boolean, attribute: 'muted' },
   },
   props: {

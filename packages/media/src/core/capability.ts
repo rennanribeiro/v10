@@ -38,12 +38,16 @@ export interface MediaCapabilityMethod<Method extends AnyFunction> {
 }
 
 /**
- * How a property is reflected as an external attribute.
+ * How a property is mirrored by an external attribute.
+ *
+ * Named for the HTML relationship it describes: the `playsInline` property reflects the `playsinline` attribute. The
+ * attribute name is the lowercased property name unless `attribute` says otherwise, which is why a reflection is keyed
+ * by the property it belongs to rather than by the attribute.
  *
  * Attributes are a platform concern rather than a media one; HTML adapters turn these into content attributes on the
  * custom element wrapping the media.
  */
-export interface MediaCapabilityAttribute {
+export interface MediaAttributeReflection {
   readonly type: typeof Boolean | typeof Number | typeof String;
   /** Attribute name, when it is not the lowercased property name. */
   readonly attribute?: string;
@@ -68,7 +72,8 @@ export interface MediaCapabilityDescriptor<Api extends object = object> {
   readonly events: readonly string[];
   readonly props: { readonly [K in PropKeys<Api>]-?: MediaCapabilityProp<Api[K]> };
   readonly methods?: { readonly [K in MethodKeys<Api>]-?: MediaCapabilityMethod<Extract<Api[K], AnyFunction>> };
-  readonly attributes?: Readonly<Record<string, MediaCapabilityAttribute>>;
+  /** Properties an external attribute mirrors, keyed by property name. */
+  readonly reflects?: Readonly<Record<string, MediaAttributeReflection>>;
   /** Phantom marker carrying the capability's contract to whoever composes it. Never set at runtime. */
   readonly api?: Api;
 }
@@ -123,9 +128,9 @@ export function getMediaCapabilityEvents(source: MediaCapabilitySource): string[
   return [...getMediaCapabilities(source).values()].flatMap((capability) => [...capability.events]);
 }
 
-/** Every attribute the composed capabilities of a media reflect, keyed by the property each drives. */
-export function getMediaCapabilityAttributes(source: MediaCapabilitySource): Record<string, MediaCapabilityAttribute> {
-  return Object.assign({}, ...[...getMediaCapabilities(source).values()].map((capability) => capability.attributes));
+/** Every reflection the composed capabilities of a media declare, keyed by property name. */
+export function getMediaCapabilityReflections(source: MediaCapabilitySource): Record<string, MediaAttributeReflection> {
+  return Object.assign({}, ...[...getMediaCapabilities(source).values()].map((capability) => capability.reflects));
 }
 
 const EMPTY_CAPABILITIES: MediaCapabilityManifest['capabilities'] = new Map();

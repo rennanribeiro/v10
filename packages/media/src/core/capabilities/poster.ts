@@ -5,7 +5,7 @@ import type { MediaPosterCapability } from '../types';
 export const posterCapability = defineMediaCapability<MediaPosterCapability>()({
   name: 'poster',
   events: [],
-  attributes: {
+  reflects: {
     poster: { type: String, empty: '' },
   },
   props: {

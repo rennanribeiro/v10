@@ -5,7 +5,7 @@ import type { MediaSeekCapability } from '../types';
 export const seekCapability = defineMediaCapability<MediaSeekCapability>()({
   name: 'seek',
   events: ['timeupdate', 'durationchange', 'seeking', 'seeked', 'loadedmetadata'],
-  attributes: {
+  reflects: {
     loop: { type: Boolean },
   },
   props: {

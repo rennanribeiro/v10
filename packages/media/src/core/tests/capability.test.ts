@@ -3,8 +3,8 @@ import { describe, expect, it } from 'vite-plus/test';
 import {
   defineMediaCapability,
   getMediaCapabilities,
-  getMediaCapabilityAttributes,
   getMediaCapabilityEvents,
+  getMediaCapabilityReflections,
   type MediaCapabilityDescriptor,
   type MediaCapabilityManifest,
   supportsMediaCapability,
@@ -13,7 +13,7 @@ import {
 const volumeCapability = defineMediaCapability<{ volume: number; muted: boolean }>()({
   name: 'volume',
   events: ['volumechange'],
-  attributes: { muted: { type: Boolean } },
+  reflects: { muted: { type: Boolean } },
   props: { volume: { fallback: 1 }, muted: { fallback: false } },
 });
 
@@ -69,8 +69,8 @@ describe('getMediaCapabilityEvents', () => {
   });
 });
 
-describe('getMediaCapabilityAttributes', () => {
-  it('collects the attributes of every composed capability', () => {
-    expect(getMediaCapabilityAttributes(ComposedMedia)).toEqual({ muted: { type: Boolean } });
+describe('getMediaCapabilityReflections', () => {
+  it('collects the reflections of every composed capability', () => {
+    expect(getMediaCapabilityReflections(ComposedMedia)).toEqual({ muted: { type: Boolean } });
   });
 });

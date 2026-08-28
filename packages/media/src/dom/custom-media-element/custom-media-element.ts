@@ -3,7 +3,7 @@ import { omit, pick } from '@videojs/utils/object';
 import { kebabCase } from '@videojs/utils/string';
 import type { Constructor } from '@videojs/utils/types';
 
-import { getMediaCapabilityAttributes } from '../../core/capability';
+import { getMediaCapabilityReflections } from '../../core/capability';
 
 /** CSS custom property names for video elements. */
 export const VideoCSSVars = {
@@ -121,21 +121,21 @@ function propertyValueFor(attrValue: string | null, current: unknown, config?: P
   return attrValue ?? (config && 'empty' in config ? config.empty : '');
 }
 
-/** Attributes the element itself owns: they drive the element or the target tag, never a media capability. */
-const elementAttributes: PropertyConfigs = {
+/** Properties the element itself reflects: they drive the element or the target tag, never a media capability. */
+const elementReflections: PropertyConfigs = {
   autoPictureInPicture: { type: Boolean },
   controlsList: { type: String },
   loading: { type: String },
 };
 
 /**
- * The standard HTML media attributes, reflected for a media that declares no capabilities.
+ * The standard HTML media properties, reflected for a media that declares no capabilities.
  *
- * A media composed from capabilities says which attributes it can honor, and the element reflects only those. One that
+ * A media composed from capabilities says which properties it can honor, and the element reflects only those. One that
  * says nothing — a third-party media, or an embed the player only drives through its own API — gets the full set,
  * because there is nothing to narrow it by.
  */
-const undeclaredMediaAttributes: PropertyConfigs = {
+const undeclaredMediaReflections: PropertyConfigs = {
   autoplay: { type: Boolean },
   controls: { type: Boolean },
   crossOrigin: { type: String, empty: null },
@@ -180,14 +180,14 @@ export function CustomMediaElement<T extends Constructor<MediaHost>>(
   // there is no `<track>` / `<source>` syncing.
   const syncTargetAttributes = tag !== 'iframe';
   const mediaHostAttrToProp = new Map<string, string>();
-  const declaredAttributes = getMediaCapabilityAttributes(MediaHost);
-  const mediaAttributes = Object.keys(declaredAttributes).length ? declaredAttributes : undeclaredMediaAttributes;
+  const declared = getMediaCapabilityReflections(MediaHost);
+  const mediaReflections = Object.keys(declared).length ? declared : undeclaredMediaReflections;
   let isDefined = false;
 
   class CustomMedia extends (globalThis.HTMLElement ?? class {}) {
     static getTemplateHTML = tag.endsWith('video') ? getVideoTemplateHTML : getCommonTemplateHTML(tag);
     static shadowRootOptions: ShadowRootInit = { mode: 'open' };
-    static properties: PropertyConfigs = { ...elementAttributes, ...mediaAttributes };
+    static properties: PropertyConfigs = { ...elementReflections, ...mediaReflections };
 
     static get observedAttributes() {
       // `this` resolves to the subclass, which may override `properties`.
