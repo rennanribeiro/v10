@@ -16,6 +16,7 @@ export function VolumePopover({
   ...props
 }: Props<
   CoreProps & {
+    className?: string | undefined;
     orientation?: CoreVolumeSliderProps['orientation'];
     showTooltip?: boolean;
   }

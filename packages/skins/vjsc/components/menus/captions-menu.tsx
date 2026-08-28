@@ -12,7 +12,7 @@ import { ButtonTooltip } from '../buttons/button-tooltip';
 import { CaptionsRadioGroup } from './radio-group';
 import { RadioItem } from './radio-item';
 
-export function CaptionsMenu({ className, ...props }: Props<MenuProps> = {}) {
+export function CaptionsMenu({ className, ...props }: Props<MenuProps> & { className?: string | undefined } = {}) {
   return (
     <$.Menu.Root side="top" align="center" boundary="viewport" {...props}>
       <ButtonTooltip side="top">

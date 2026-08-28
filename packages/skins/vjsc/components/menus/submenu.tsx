@@ -14,6 +14,7 @@ export function Submenu({
 }: PropsWithChildren<MenuProps> & {
   icon: VjscNode;
   label: VjscNode;
+  className?: string | undefined;
 }) {
   return (
     <$.Menu.Root {...props}>

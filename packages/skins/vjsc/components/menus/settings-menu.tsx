@@ -8,7 +8,11 @@ import buttonStyles from '../../styles/buttons/button.styles';
 import styles from '../../styles/menus/menu.styles';
 import { ButtonTooltip } from '../buttons/button-tooltip';
 
-export function SettingsMenu({ children, className, ...props }: PropsWithChildren<MenuProps>) {
+export function SettingsMenu({
+  children,
+  className,
+  ...props
+}: PropsWithChildren<MenuProps> & { className?: string | undefined }) {
   return (
     <$.Menu.Root side="top" align="center" {...props}>
       <ButtonTooltip label={<Text token={settingsText.key}>{settingsText.text}</Text>} side="top">
