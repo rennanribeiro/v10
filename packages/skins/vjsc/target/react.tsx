@@ -9,8 +9,6 @@ import {
 } from 'vjsc/target';
 import { Host } from 'vjsc/target/jsx-runtime';
 
-import { reactComponentTransform } from './react-transform.ts';
-
 type CoreSchema = typeof coreSchema;
 
 export const reactComponentTarget: ComponentTarget<CoreSchema> = defineComponentTarget<CoreSchema>()(({
@@ -146,7 +144,6 @@ export const reactComponentTarget: ComponentTarget<CoreSchema> = defineComponent
       VjscNode: { from: 'react', name: 'ReactNode' },
       VjscElement: { from: 'react', name: 'ReactElement' },
     },
-    transforms: [reactComponentTransform],
     jsx: { importSource: 'react', attributes: 'react' },
   };
 });

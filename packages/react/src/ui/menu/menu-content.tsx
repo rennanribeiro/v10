@@ -9,11 +9,14 @@ import { renderElement } from '../../utils/use-render';
 import { useMenuContext, useMenuPopupContext } from './context';
 import { callKeyDownHandler, preventMenuKeyDefault } from './menu-keyboard';
 
-export interface MenuContentProps extends UIComponentProps<'div', MenuState> {}
+export interface MenuContentProps extends UIComponentProps<'div', MenuState> {
+  /** Keep nested content mounted, hidden, and inert while closed. */
+  keepMounted?: boolean;
+}
 
 /** Accessible item and focus scope for exactly one root or nested menu page. */
 export const MenuContent = forwardRef<HTMLDivElement, MenuContentProps>(function MenuContent(
-  { render, className, style, onKeyDown, onBlur, ...elementProps },
+  { render, className, style, onKeyDown, onBlur, keepMounted = false, ...elementProps },
   forwardedRef
 ) {
   const { core, menu, parent, state, contentId } = useMenuContext();
@@ -82,7 +85,8 @@ export const MenuContent = forwardRef<HTMLDivElement, MenuContentProps>(function
     [isSubmenu, menu, onKeyDown]
   );
 
-  if (isSubmenu && !isActive && state.status !== 'ending') return null;
+  const inactive = isSubmenu && !isActive && state.status !== 'ending';
+  if (inactive && !keepMounted) return null;
 
   const contentNode = renderElement(
     'div',
@@ -103,6 +107,7 @@ export const MenuContent = forwardRef<HTMLDivElement, MenuContentProps>(function
           },
         },
         elementProps,
+        { hidden: inactive, inert: inactive || undefined },
       ],
     }
   );

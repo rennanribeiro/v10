@@ -9,13 +9,11 @@ export function Submenu({
   children,
   icon,
   label,
-  selectedLabel,
   className,
   ...props
 }: PropsWithChildren<MenuProps> & {
   icon: VjscNode;
   label: VjscNode;
-  selectedLabel: VjscNode;
 }) {
   return (
     <$.Menu.Root {...props}>
@@ -23,11 +21,11 @@ export function Submenu({
         {icon}
         {label}
         <Text className={styles.hint}>
-          {selectedLabel}
+          <$.Menu.Value className={styles.hintLabel} data-part="value" />
           <MenuChevron />
         </Text>
       </$.Menu.Trigger>
-      <$.Menu.Content className={[styles.content, className]}>
+      <$.Menu.Content keepMounted className={[styles.content, className]}>
         <$.Menu.Item className={styles.backItem}>
           <MenuChevron back />
           {label}

@@ -5,6 +5,7 @@ import type { ReactElement } from 'react';
 import { Fragment, forwardRef } from 'react';
 
 import type { HTMLProps, UIComponentProps } from '../../utils/types';
+import { useMenuOptionState } from '../menu/context';
 import { MenuRadioGroup } from '../menu/menu-radio-group';
 import type { MenuRadioItemProps } from '../menu/menu-radio-item';
 import {
@@ -59,6 +60,13 @@ export const PlaybackRateRadioGroup = forwardRef<HTMLDivElement, PlaybackRateRad
       ...elementProps
     } = componentProps;
     const playbackRate = usePlaybackRateOptions({ label, formatRate, disabled });
+
+    useMenuOptionState({
+      value: playbackRate?.selectedLabel ?? '',
+      disabled: playbackRate?.disabled ?? true,
+      availability: playbackRate?.state.availability ?? 'unsupported',
+    });
+
     if (!playbackRate) return null;
 
     const { state, value, options, setValue } = playbackRate;

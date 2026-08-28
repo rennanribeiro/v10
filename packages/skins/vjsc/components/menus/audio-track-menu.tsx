@@ -7,17 +7,13 @@ import { AudioTrackRadioGroup } from './radio-group';
 import { RadioItem } from './radio-item';
 import { Submenu } from './submenu';
 
-export interface AudioTrackMenuProps extends Omit<
-  PropsOf<typeof Submenu>,
-  'children' | 'icon' | 'label' | 'selectedLabel'
-> {}
+export interface AudioTrackMenuProps extends Omit<PropsOf<typeof Submenu>, 'children' | 'icon' | 'label'> {}
 
 export function AudioTrackMenu(props: AudioTrackMenuProps = {}) {
   return (
     <Submenu
       icon={<SpeechIcon className={styles.triggerItemIcon} />}
       label={<Text token={audioText.key}>{audioText.text}</Text>}
-      selectedLabel={<Text className={styles.hintLabel} data-part="hint" />}
       {...props}
     >
       <AudioTrackRadioGroup>

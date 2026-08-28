@@ -7,17 +7,13 @@ import { QualityRadioGroup } from './radio-group';
 import { RadioItem } from './radio-item';
 import { Submenu } from './submenu';
 
-export interface QualityMenuProps extends Omit<
-  PropsOf<typeof Submenu>,
-  'children' | 'icon' | 'label' | 'selectedLabel'
-> {}
+export interface QualityMenuProps extends Omit<PropsOf<typeof Submenu>, 'children' | 'icon' | 'label'> {}
 
 export function QualityMenu(props: QualityMenuProps = {}) {
   return (
     <Submenu
       icon={<SwitchesIcon className={styles.triggerItemIcon} />}
       label={<Text token={qualityText.key}>{qualityText.text}</Text>}
-      selectedLabel={<Text className={styles.hintLabel} data-part="hint" />}
       {...props}
     >
       <QualityRadioGroup>

@@ -39,6 +39,7 @@ describe('Skins Shadcn registry', () => {
     const qualityMenuSource = videoSettingsMenu.files.find((file) =>
       file.target?.endsWith('/quality-menu.tsx')
     )?.content;
+    const submenuSource = videoSettingsMenu.files.find((file) => file.target?.endsWith('/submenu.tsx'))?.content;
     const videoSettingsMenuSource = videoSettingsMenu.files.find((file) =>
       file.target?.endsWith('/video-settings-menu.tsx')
     )?.content;
@@ -82,11 +83,10 @@ describe('Skins Shadcn registry', () => {
     expect(container.registryDependencies).toEqual(['@videojs/styles', '@videojs/utils']);
     expect(posterSource).toContain('<PosterPrimitive render={children}');
     expect(posterSource).not.toContain('@videojs/core/vjsc');
-    expect(qualityMenuSource).toContain('useQualityOptions');
-    expect(qualityMenuSource).toContain(`quality?.selectedLabel`);
-    expect(qualityMenuSource).toContain('available &&');
-    expect(videoSettingsMenuSource).toContain('const hasSettings =');
-    expect(videoSettingsMenuSource).toContain('hasSettings &&');
+    expect(qualityMenuSource).not.toContain('useQualityOptions');
+    expect(submenuSource).toContain('<Menu.Value');
+    expect(submenuSource).toContain('<Menu.Content keepMounted');
+    expect(videoSettingsMenuSource).not.toContain('const hasSettings =');
     expect(volumePopoverSource).toContain('VolumePopoverPrimitive.Root');
     expect(volumePopoverSource).toContain('VolumePopoverPrimitive.Trigger');
     expect(volumePopoverSource).not.toContain('usePlayer');

@@ -10,6 +10,7 @@ import {
   type AudioTrackOptionsProps,
   useAudioTrackOptions,
 } from '../audio-track/use-audio-track-options';
+import { useMenuOptionState } from '../menu/context';
 import { MenuRadioGroup } from '../menu/menu-radio-group';
 import type { MenuRadioItemProps } from '../menu/menu-radio-item';
 
@@ -59,6 +60,13 @@ export const AudioTrackRadioGroup = forwardRef<HTMLDivElement, AudioTrackRadioGr
       ...elementProps
     } = componentProps;
     const audioTrack = useAudioTrackOptions({ label, formatTrack, disabled });
+
+    useMenuOptionState({
+      value: audioTrack?.selectedLabel ?? '',
+      disabled: audioTrack?.disabled ?? true,
+      availability: audioTrack?.state.availability ?? 'unsupported',
+    });
+
     if (!audioTrack) return null;
 
     const { state, value, options, setValue } = audioTrack;

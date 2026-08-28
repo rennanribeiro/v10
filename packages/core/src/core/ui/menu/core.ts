@@ -26,6 +26,25 @@ export interface MenuTriggerProps {
   disabled?: boolean | undefined;
 }
 
+export interface MenuPopupProps {
+  /** Keep the popup mounted while closed. */
+  keepMounted?: boolean | undefined;
+}
+
+export interface MenuContentProps {
+  /** Keep nested content mounted while closed. */
+  keepMounted?: boolean | undefined;
+}
+
+export interface MenuOptionState {
+  /** Selected value displayed by `Menu.Value`. */
+  value: string;
+  /** Whether the menu trigger should be disabled. */
+  disabled: boolean;
+  /** Whether the menu has a meaningful option available. */
+  availability: 'available' | 'unavailable' | 'unsupported';
+}
+
 export interface MenuItemProps {
   disabled?: boolean | undefined;
 }
@@ -33,6 +52,26 @@ export interface MenuItemProps {
 export interface MenuItemIndicatorProps {
   checked?: boolean | undefined;
   forceMount?: boolean | undefined;
+}
+
+/** Combines direct and nested option-menu state for a parent trigger. */
+export function resolveMenuOptionState(states: Iterable<MenuOptionState>): MenuOptionState | null {
+  const options = [...states];
+  if (options.length === 0) return null;
+
+  const available = options.filter((state) => state.availability === 'available');
+  const availability =
+    available.length > 0
+      ? 'available'
+      : options.every((state) => state.availability === 'unsupported')
+        ? 'unsupported'
+        : 'unavailable';
+
+  return {
+    value: options.length === 1 ? options[0]!.value : '',
+    disabled: available.length === 0 || available.every((state) => state.disabled),
+    availability,
+  };
 }
 
 /** Runtime input derived by framework adapters and `createTransition`. */

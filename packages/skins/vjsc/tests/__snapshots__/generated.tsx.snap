@@ -667,7 +667,6 @@ import { RadioItem } from './radio-item';
 import { Submenu } from './submenu';
 import "virtual:vjsc/css/<hash>/base.css";
 import "virtual:vjsc/css/<hash>/menus.css";
-import { useAudioTrackOptions } from "@videojs/react";
 import type { ComponentProps } from "react";
 import { Text as TextPrimitive } from "@videojs/react";
 import { SpeechIcon as SpeechIconPrimitive } from "@videojs/react/icons";
@@ -676,21 +675,13 @@ import { SpeechIcon as SpeechIconPrimitive } from "@videojs/react/icons";
 
 
 
-
-export interface AudioTrackMenuProps extends Omit<
-  ComponentProps<typeof Submenu>,
-  'children' | 'icon' | 'label' | 'selectedLabel'
-> {}
+export interface AudioTrackMenuProps extends Omit<ComponentProps<typeof Submenu>, 'children' | 'icon' | 'label'> {}
 
 export function AudioTrackMenu(props: AudioTrackMenuProps = {}) {
-const audioTrack = useAudioTrackOptions();
-const available = audioTrack?.state.availability === 'available';
-
   return (
-    available && <Submenu
+    <Submenu
       icon={<SpeechIconPrimitive className={"media-menu-trigger-item-icon"} />}
       label={<TextPrimitive token={audioText.key}>{audioText.text}</TextPrimitive>}
-      selectedLabel={<span className={"media-menu-hint-label"} data-part="hint">{audioTrack?.selectedLabel}</span>}
       {...props}
     >
       <AudioTrackRadioGroup renderItem={(props, item) => (<RadioItem {...props}>
@@ -714,7 +705,6 @@ import { RadioItem } from './radio-item';
 import { Submenu } from './submenu';
 import "virtual:vjsc/css/<hash>/base.css";
 import "virtual:vjsc/css/<hash>/menus.css";
-import { useCaptionsOptions } from "@videojs/react";
 import type { ComponentProps } from "react";
 import { Text as TextPrimitive } from "@videojs/react";
 import { CaptionsOffIcon as CaptionsOffIconPrimitive } from "@videojs/react/icons";
@@ -723,21 +713,13 @@ import { CaptionsOffIcon as CaptionsOffIconPrimitive } from "@videojs/react/icon
 
 
 
-
-export interface CaptionsMenuProps extends Omit<
-  ComponentProps<typeof Submenu>,
-  'children' | 'icon' | 'label' | 'selectedLabel'
-> {}
+export interface CaptionsMenuProps extends Omit<ComponentProps<typeof Submenu>, 'children' | 'icon' | 'label'> {}
 
 export function CaptionsMenu(props: CaptionsMenuProps = {}) {
-const captions = useCaptionsOptions();
-const available = captions?.state.availability === 'available';
-
   return (
-    available && <Submenu
+    <Submenu
       icon={<CaptionsOffIconPrimitive className={"media-menu-trigger-item-icon"} />}
       label={<TextPrimitive token={captionsText.key}>{captionsText.text}</TextPrimitive>}
-      selectedLabel={<span className={"media-menu-hint-label"} data-part="hint">{captions?.selectedLabel}</span>}
       {...props}
     >
       <CaptionsRadioGroup renderItem={(props, item) => (<RadioItem {...props}>
@@ -784,7 +766,6 @@ import { RadioItem } from './radio-item';
 import { Submenu } from './submenu';
 import "virtual:vjsc/css/<hash>/base.css";
 import "virtual:vjsc/css/<hash>/menus.css";
-import { usePlaybackRateOptions } from "@videojs/react";
 import type { ComponentProps } from "react";
 import { Text as TextPrimitive } from "@videojs/react";
 import { SpeedIcon as SpeedIconPrimitive } from "@videojs/react/icons";
@@ -793,21 +774,13 @@ import { SpeedIcon as SpeedIconPrimitive } from "@videojs/react/icons";
 
 
 
-
-export interface PlaybackRateMenuProps extends Omit<
-  ComponentProps<typeof Submenu>,
-  'children' | 'icon' | 'label' | 'selectedLabel'
-> {}
+export interface PlaybackRateMenuProps extends Omit<ComponentProps<typeof Submenu>, 'children' | 'icon' | 'label'> {}
 
 export function PlaybackRateMenu(props: PlaybackRateMenuProps = {}) {
-const playbackRate = usePlaybackRateOptions();
-const available = playbackRate?.state.availability === 'available';
-
   return (
-    available && <Submenu
+    <Submenu
       icon={<SpeedIconPrimitive className={"media-menu-trigger-item-icon"} />}
       label={<TextPrimitive token={speedText.key}>{speedText.text}</TextPrimitive>}
-      selectedLabel={<span className={"media-menu-hint-label"} data-part="hint">{playbackRate?.selectedLabel}</span>}
       {...props}
     >
       <PlaybackRateRadioGroup renderItem={(props, item) => (<RadioItem {...props}>
@@ -831,7 +804,6 @@ import { RadioItem } from './radio-item';
 import { Submenu } from './submenu';
 import "virtual:vjsc/css/<hash>/base.css";
 import "virtual:vjsc/css/<hash>/menus.css";
-import { useQualityOptions } from "@videojs/react";
 import type { ComponentProps } from "react";
 import { Text as TextPrimitive } from "@videojs/react";
 import { SwitchesIcon as SwitchesIconPrimitive } from "@videojs/react/icons";
@@ -840,21 +812,13 @@ import { SwitchesIcon as SwitchesIconPrimitive } from "@videojs/react/icons";
 
 
 
-
-export interface QualityMenuProps extends Omit<
-  ComponentProps<typeof Submenu>,
-  'children' | 'icon' | 'label' | 'selectedLabel'
-> {}
+export interface QualityMenuProps extends Omit<ComponentProps<typeof Submenu>, 'children' | 'icon' | 'label'> {}
 
 export function QualityMenu(props: QualityMenuProps = {}) {
-const quality = useQualityOptions();
-const available = quality?.state.availability === 'available';
-
   return (
-    available && <Submenu
+    <Submenu
       icon={<SwitchesIconPrimitive className={"media-menu-trigger-item-icon"} />}
       label={<TextPrimitive token={qualityText.key}>{qualityText.text}</TextPrimitive>}
-      selectedLabel={<span className={"media-menu-hint-label"} data-part="hint">{quality?.selectedLabel}</span>}
       {...props}
     >
       <QualityRadioGroup renderItem={(props, item) => (<RadioItem {...props}>
@@ -975,7 +939,10 @@ export function SettingsMenu({ children, className, ...props }: SettingsMenuProp
           </TextPrimitive>
         </Menu.Trigger>
       </ButtonTooltip>
-      <Menu.Popup className={state => cn("media-popup", "media-popup-safe-area", "media-surface", "media-menu-popup", resolveClassName(className, state))}>
+      <Menu.Popup
+        keepMounted
+        className={state => cn("media-popup", "media-popup-safe-area", "media-surface", "media-menu-popup", resolveClassName(className, state))}
+      >
         <Menu.Content className={"media-menu-content"}>{children}</Menu.Content>
       </Menu.Popup>
     </Menu.Root>
@@ -1003,13 +970,11 @@ import { cn, resolveClassName } from "@videojs/utils/style";
 export interface SubmenuProps extends Menu.Root.RootProps {
 icon: ReactNode;
   label: ReactNode;
-  selectedLabel: ReactNode;
 }
 export function Submenu({
   children,
   icon,
   label,
-  selectedLabel,
   className,
   ...props
 }: SubmenuProps) {
@@ -1019,11 +984,11 @@ export function Submenu({
         {icon}
         {label}
         <span className={"media-menu-hint"}>
-          {selectedLabel}
+          <Menu.Value className={"media-menu-hint-label"} data-part="value" />
           <MenuChevron />
         </span>
       </Menu.Trigger>
-      <Menu.Content className={state => cn("media-menu-content", resolveClassName(className, state))}>
+      <Menu.Content keepMounted className={state => cn("media-menu-content", resolveClassName(className, state))}>
         <Menu.Item className={"media-menu-back-item"}>
           <MenuChevron back />
           {label}
@@ -1045,22 +1010,14 @@ import { CaptionsMenu } from './captions-menu';
 import { PlaybackRateMenu } from './playback-rate-menu';
 import { QualityMenu } from './quality-menu';
 import { SettingsMenu } from './settings-menu';
-import { useQualityOptions, useAudioTrackOptions, usePlaybackRateOptions, useCaptionsOptions } from "@videojs/react";
 import type { ComponentProps } from "react";
-
 
 
 export interface VideoSettingsMenuProps extends Omit<ComponentProps<typeof SettingsMenu>, 'children'> {}
 
 export function VideoSettingsMenu(props: VideoSettingsMenuProps = {}) {
-const quality = useQualityOptions();
-const audioTrack = useAudioTrackOptions();
-const playbackRate = usePlaybackRateOptions();
-const captions = useCaptionsOptions();
-const hasSettings = quality?.state.availability === 'available' || audioTrack?.state.availability === 'available' || playbackRate?.state.availability === 'available' || captions?.state.availability === 'available';
-
   return (
-    hasSettings && <SettingsMenu {...props}>
+    <SettingsMenu {...props}>
       <QualityMenu />
       <AudioTrackMenu />
       <PlaybackRateMenu />
@@ -1957,7 +1914,6 @@ import { audioText } from '@videojs/core/i18n/text/menu';
 import { AudioTrackRadioGroup } from './radio-group';
 import { RadioItem } from './radio-item';
 import { Submenu } from './submenu';
-import { useAudioTrackOptions } from "@videojs/react";
 import type { ComponentProps } from "react";
 import { Text as TextPrimitive } from "@videojs/react";
 import { SpeechIcon as SpeechIconPrimitive } from "@videojs/react/icons";
@@ -1965,21 +1921,13 @@ import { SpeechIcon as SpeechIconPrimitive } from "@videojs/react/icons";
 
 
 
-
-export interface AudioTrackMenuProps extends Omit<
-  ComponentProps<typeof Submenu>,
-  'children' | 'icon' | 'label' | 'selectedLabel'
-> {}
+export interface AudioTrackMenuProps extends Omit<ComponentProps<typeof Submenu>, 'children' | 'icon' | 'label'> {}
 
 export function AudioTrackMenu(props: AudioTrackMenuProps = {}) {
-const audioTrack = useAudioTrackOptions();
-const available = audioTrack?.state.availability === 'available';
-
   return (
-    available && <Submenu
+    <Submenu
       icon={<SpeechIconPrimitive className={"size-media-icon shrink-0 drop-shadow-[0_1px_0_var(--media-shadow-current-color)] group-hover/menu-trigger-item:text-inherit group-data-highlighted/menu-trigger-item:text-inherit text-current/65"} />}
       label={<TextPrimitive token={audioText.key}>{audioText.text}</TextPrimitive>}
-      selectedLabel={<span className={"max-w-24 overflow-hidden text-ellipsis whitespace-nowrap"} data-part="hint">{audioTrack?.selectedLabel}</span>}
       {...props}
     >
       <AudioTrackRadioGroup renderItem={(props, item) => (<RadioItem {...props}>
@@ -2001,7 +1949,6 @@ import { captionsText } from '@videojs/core/i18n/text/menu';
 import { CaptionsRadioGroup } from './radio-group';
 import { RadioItem } from './radio-item';
 import { Submenu } from './submenu';
-import { useCaptionsOptions } from "@videojs/react";
 import type { ComponentProps } from "react";
 import { Text as TextPrimitive } from "@videojs/react";
 import { CaptionsOffIcon as CaptionsOffIconPrimitive } from "@videojs/react/icons";
@@ -2009,21 +1956,13 @@ import { CaptionsOffIcon as CaptionsOffIconPrimitive } from "@videojs/react/icon
 
 
 
-
-export interface CaptionsMenuProps extends Omit<
-  ComponentProps<typeof Submenu>,
-  'children' | 'icon' | 'label' | 'selectedLabel'
-> {}
+export interface CaptionsMenuProps extends Omit<ComponentProps<typeof Submenu>, 'children' | 'icon' | 'label'> {}
 
 export function CaptionsMenu(props: CaptionsMenuProps = {}) {
-const captions = useCaptionsOptions();
-const available = captions?.state.availability === 'available';
-
   return (
-    available && <Submenu
+    <Submenu
       icon={<CaptionsOffIconPrimitive className={"size-media-icon shrink-0 drop-shadow-[0_1px_0_var(--media-shadow-current-color)] group-hover/menu-trigger-item:text-inherit group-data-highlighted/menu-trigger-item:text-inherit text-current/65"} />}
       label={<TextPrimitive token={captionsText.key}>{captionsText.text}</TextPrimitive>}
-      selectedLabel={<span className={"max-w-24 overflow-hidden text-ellipsis whitespace-nowrap"} data-part="hint">{captions?.selectedLabel}</span>}
       {...props}
     >
       <CaptionsRadioGroup renderItem={(props, item) => (<RadioItem {...props}>
@@ -2065,7 +2004,6 @@ import { speedText } from '@videojs/core/i18n/text/menu';
 import { PlaybackRateRadioGroup } from './radio-group';
 import { RadioItem } from './radio-item';
 import { Submenu } from './submenu';
-import { usePlaybackRateOptions } from "@videojs/react";
 import type { ComponentProps } from "react";
 import { Text as TextPrimitive } from "@videojs/react";
 import { SpeedIcon as SpeedIconPrimitive } from "@videojs/react/icons";
@@ -2073,21 +2011,13 @@ import { SpeedIcon as SpeedIconPrimitive } from "@videojs/react/icons";
 
 
 
-
-export interface PlaybackRateMenuProps extends Omit<
-  ComponentProps<typeof Submenu>,
-  'children' | 'icon' | 'label' | 'selectedLabel'
-> {}
+export interface PlaybackRateMenuProps extends Omit<ComponentProps<typeof Submenu>, 'children' | 'icon' | 'label'> {}
 
 export function PlaybackRateMenu(props: PlaybackRateMenuProps = {}) {
-const playbackRate = usePlaybackRateOptions();
-const available = playbackRate?.state.availability === 'available';
-
   return (
-    available && <Submenu
+    <Submenu
       icon={<SpeedIconPrimitive className={"size-media-icon shrink-0 drop-shadow-[0_1px_0_var(--media-shadow-current-color)] group-hover/menu-trigger-item:text-inherit group-data-highlighted/menu-trigger-item:text-inherit text-current/65"} />}
       label={<TextPrimitive token={speedText.key}>{speedText.text}</TextPrimitive>}
-      selectedLabel={<span className={"max-w-24 overflow-hidden text-ellipsis whitespace-nowrap"} data-part="hint">{playbackRate?.selectedLabel}</span>}
       {...props}
     >
       <PlaybackRateRadioGroup renderItem={(props, item) => (<RadioItem {...props}>
@@ -2109,7 +2039,6 @@ import { qualityText } from '@videojs/core/i18n/text/menu';
 import { QualityRadioGroup } from './radio-group';
 import { RadioItem } from './radio-item';
 import { Submenu } from './submenu';
-import { useQualityOptions } from "@videojs/react";
 import type { ComponentProps } from "react";
 import { Text as TextPrimitive } from "@videojs/react";
 import { SwitchesIcon as SwitchesIconPrimitive } from "@videojs/react/icons";
@@ -2117,21 +2046,13 @@ import { SwitchesIcon as SwitchesIconPrimitive } from "@videojs/react/icons";
 
 
 
-
-export interface QualityMenuProps extends Omit<
-  ComponentProps<typeof Submenu>,
-  'children' | 'icon' | 'label' | 'selectedLabel'
-> {}
+export interface QualityMenuProps extends Omit<ComponentProps<typeof Submenu>, 'children' | 'icon' | 'label'> {}
 
 export function QualityMenu(props: QualityMenuProps = {}) {
-const quality = useQualityOptions();
-const available = quality?.state.availability === 'available';
-
   return (
-    available && <Submenu
+    <Submenu
       icon={<SwitchesIconPrimitive className={"size-media-icon shrink-0 drop-shadow-[0_1px_0_var(--media-shadow-current-color)] group-hover/menu-trigger-item:text-inherit group-data-highlighted/menu-trigger-item:text-inherit text-current/65"} />}
       label={<TextPrimitive token={qualityText.key}>{qualityText.text}</TextPrimitive>}
-      selectedLabel={<span className={"max-w-24 overflow-hidden text-ellipsis whitespace-nowrap"} data-part="hint">{quality?.selectedLabel}</span>}
       {...props}
     >
       <QualityRadioGroup renderItem={(props, item) => (<RadioItem {...props}>
@@ -2240,7 +2161,10 @@ export function SettingsMenu({ children, className, ...props }: SettingsMenuProp
           </TextPrimitive>
         </Menu.Trigger>
       </ButtonTooltip>
-      <Menu.Popup className={state => cn("m-0 overflow-visible border-0 text-inherit", "data-starting-style:opacity-0 data-starting-style:[transform:translate(var(--media-popup-translate-x-distance,0),var(--media-popup-translate-y-distance,0))_scale(.95)]", "data-ending-style:opacity-0 data-ending-style:blur-xs data-ending-style:[transform:scale(.95)]", "data-[side=top]:origin-bottom data-[side=bottom]:origin-top data-[side=left]:origin-right data-[side=right]:origin-left", "data-[side=top]:[--media-popup-translate-y-distance:var(--media-popup-translate-distance)]", "data-[side=bottom]:[--media-popup-translate-y-distance:calc(var(--media-popup-translate-distance)*-1)]", "data-[side=left]:[--media-popup-translate-x-distance:var(--media-popup-translate-distance)]", "data-[side=right]:[--media-popup-translate-x-distance:calc(var(--media-popup-translate-distance)*-1)]", "before:pointer-events-auto before:absolute", "data-[side=top]:before:inset-x-0 data-[side=top]:before:top-full", "data-[side=bottom]:before:inset-x-0 data-[side=bottom]:before:bottom-full", "data-[side=left]:before:inset-y-0 data-[side=left]:before:left-full", "data-[side=right]:before:inset-y-0 data-[side=right]:before:right-full", "[--media-popup-translate-distance:calc(var(--media-scale-unit,16px)*0.5)]", "data-starting-style:blur-xs", "data-[side=top]:before:h-(--media-popover-side-offset) data-[side=bottom]:before:h-(--media-popover-side-offset)", "data-[side=left]:before:w-(--media-popover-side-offset) data-[side=right]:before:w-(--media-popover-side-offset)", "text-white backdrop-blur-lg backdrop-saturate-150", "after:pointer-events-none after:absolute after:inset-0 after:z-10 after:rounded-[inherit]", "after:shadow-[inset_0_1px_0_0_rgb(255_255_255/0.1),inset_0_0_0_1px_rgb(255_255_255/0.05)]", "[@media(prefers-reduced-transparency:reduce)]:bg-black [@media(prefers-reduced-transparency:reduce)]:ring-1 [@media(prefers-reduced-transparency:reduce)]:ring-transparent", "[@media(prefers-reduced-transparency:reduce)]:backdrop-filter-none", "[@media(prefers-reduced-transparency:reduce)]:after:shadow-[inset_0_1px_0_0_rgb(255_255_255/0.25),inset_0_0_0_1px_rgb(255_255_255/0.125)]", "contrast-more:bg-black contrast-more:ring-1 contrast-more:ring-transparent contrast-more:backdrop-filter-none", "contrast-more:after:shadow-[inset_0_1px_0_0_rgb(255_255_255/0.25),inset_0_0_0_1px_rgb(255_255_255/0.125)]", "forced-colors:bg-[Canvas] forced-colors:ring-1 forced-colors:ring-[CanvasText]", "forced-colors:after:shadow-[inset_0_1px_0_0_CanvasText,inset_0_0_0_1px_CanvasText]", "shadow-sm shadow-black/15 ring-1 ring-black/10", "[@media(prefers-reduced-transparency:reduce)]:shadow-sm [@media(prefers-reduced-transparency:reduce)]:shadow-black/15", "contrast-more:shadow-sm contrast-more:shadow-black/15", "forced-colors:shadow-sm forced-colors:shadow-black/15", "bg-white/10", "m-0 min-w-44 max-w-(--media-menu-available-width) overflow-hidden! border-0 p-1", "max-h-[min(var(--media-menu-available-height,--spacing(56)),--spacing(56))] overscroll-none", "h-(--media-menu-height) w-(--media-menu-width)", "[--media-menu-transition-duration:250ms] motion-reduce:[--media-menu-transition-duration:0ms]", "[transition-property:opacity,filter,transform,scale,width,height]", "[transition-duration:100ms,100ms,100ms,100ms,250ms,250ms] ease-out", "data-starting-style:[transition-duration:100ms] data-starting-style:[transition-property:opacity,filter,transform,scale]", "data-ending-style:[transition-duration:100ms] data-ending-style:[transition-property:opacity,filter,transform,scale]", "motion-reduce:[transition-duration:0ms]", "rounded-[--spacing(3)] [--media-menu-item-border-radius:--spacing(2)]", resolveClassName(className, state))}>
+      <Menu.Popup
+        keepMounted
+        className={state => cn("m-0 overflow-visible border-0 text-inherit", "data-starting-style:opacity-0 data-starting-style:[transform:translate(var(--media-popup-translate-x-distance,0),var(--media-popup-translate-y-distance,0))_scale(.95)]", "data-ending-style:opacity-0 data-ending-style:blur-xs data-ending-style:[transform:scale(.95)]", "data-[side=top]:origin-bottom data-[side=bottom]:origin-top data-[side=left]:origin-right data-[side=right]:origin-left", "data-[side=top]:[--media-popup-translate-y-distance:var(--media-popup-translate-distance)]", "data-[side=bottom]:[--media-popup-translate-y-distance:calc(var(--media-popup-translate-distance)*-1)]", "data-[side=left]:[--media-popup-translate-x-distance:var(--media-popup-translate-distance)]", "data-[side=right]:[--media-popup-translate-x-distance:calc(var(--media-popup-translate-distance)*-1)]", "before:pointer-events-auto before:absolute", "data-[side=top]:before:inset-x-0 data-[side=top]:before:top-full", "data-[side=bottom]:before:inset-x-0 data-[side=bottom]:before:bottom-full", "data-[side=left]:before:inset-y-0 data-[side=left]:before:left-full", "data-[side=right]:before:inset-y-0 data-[side=right]:before:right-full", "[--media-popup-translate-distance:calc(var(--media-scale-unit,16px)*0.5)]", "data-starting-style:blur-xs", "data-[side=top]:before:h-(--media-popover-side-offset) data-[side=bottom]:before:h-(--media-popover-side-offset)", "data-[side=left]:before:w-(--media-popover-side-offset) data-[side=right]:before:w-(--media-popover-side-offset)", "text-white backdrop-blur-lg backdrop-saturate-150", "after:pointer-events-none after:absolute after:inset-0 after:z-10 after:rounded-[inherit]", "after:shadow-[inset_0_1px_0_0_rgb(255_255_255/0.1),inset_0_0_0_1px_rgb(255_255_255/0.05)]", "[@media(prefers-reduced-transparency:reduce)]:bg-black [@media(prefers-reduced-transparency:reduce)]:ring-1 [@media(prefers-reduced-transparency:reduce)]:ring-transparent", "[@media(prefers-reduced-transparency:reduce)]:backdrop-filter-none", "[@media(prefers-reduced-transparency:reduce)]:after:shadow-[inset_0_1px_0_0_rgb(255_255_255/0.25),inset_0_0_0_1px_rgb(255_255_255/0.125)]", "contrast-more:bg-black contrast-more:ring-1 contrast-more:ring-transparent contrast-more:backdrop-filter-none", "contrast-more:after:shadow-[inset_0_1px_0_0_rgb(255_255_255/0.25),inset_0_0_0_1px_rgb(255_255_255/0.125)]", "forced-colors:bg-[Canvas] forced-colors:ring-1 forced-colors:ring-[CanvasText]", "forced-colors:after:shadow-[inset_0_1px_0_0_CanvasText,inset_0_0_0_1px_CanvasText]", "shadow-sm shadow-black/15 ring-1 ring-black/10", "[@media(prefers-reduced-transparency:reduce)]:shadow-sm [@media(prefers-reduced-transparency:reduce)]:shadow-black/15", "contrast-more:shadow-sm contrast-more:shadow-black/15", "forced-colors:shadow-sm forced-colors:shadow-black/15", "bg-white/10", "m-0 min-w-44 max-w-(--media-menu-available-width) overflow-hidden! border-0 p-1", "max-h-[min(var(--media-menu-available-height,--spacing(56)),--spacing(56))] overscroll-none", "h-(--media-menu-height) w-(--media-menu-width)", "[--media-menu-transition-duration:250ms] motion-reduce:[--media-menu-transition-duration:0ms]", "[transition-property:opacity,filter,transform,scale,width,height]", "[transition-duration:100ms,100ms,100ms,100ms,250ms,250ms] ease-out", "data-starting-style:[transition-duration:100ms] data-starting-style:[transition-property:opacity,filter,transform,scale]", "data-ending-style:[transition-duration:100ms] data-ending-style:[transition-property:opacity,filter,transform,scale]", "motion-reduce:[transition-duration:0ms]", "rounded-[--spacing(3)] [--media-menu-item-border-radius:--spacing(2)]", resolveClassName(className, state))}
+      >
         <Menu.Content className={"[anchor-scope:--media-menu-item-highlight-anchor] supports-[top:anchor(top)]:before:absolute supports-[top:anchor(top)]:before:[position-anchor:--media-menu-item-highlight-anchor] supports-[top:anchor(top)]:before:[inset:anchor(inside)] supports-[top:anchor(top)]:before:[overflow-anchor:none] supports-[top:anchor(top)]:before:pointer-events-none supports-[top:anchor(top)]:before:rounded-(--media-menu-item-border-radius) supports-[top:anchor(top)]:before:bg-media-control-hover supports-[top:anchor(top)]:before:transition-[inset] supports-[top:anchor(top)]:before:duration-100 supports-[top:anchor(top)]:before:[transition-timing-function:ease-in-out] supports-[top:anchor(top)]:has-data-[highlighted=]:before:duration-0 absolute max-h-[inherit] overflow-auto overscroll-none outline-none not-data-submenu:flex not-data-submenu:flex-col not-data-submenu:gap-0.5 transition-[translate,filter] duration-(--media-menu-transition-duration) ease-out not-data-submenu:inset-x-1 not-data-submenu:top-1 not-data-submenu:[--media-menu-parent-translate:-100%] not-data-submenu:[&:dir(rtl)]:[--media-menu-parent-translate:100%] not-data-submenu:data-[child-open]:[translate:var(--media-menu-parent-translate)_0] not-data-submenu:data-[child-open]:blur-sm not-data-submenu:data-[child-open]:before:hidden data-submenu:inset-x-0 data-submenu:top-0 data-submenu:z-10 data-submenu:[max-height:inherit] data-submenu:p-1 data-submenu:[--media-submenu-translate:100%] data-submenu:[&:dir(rtl)]:[--media-submenu-translate:-100%] data-submenu:data-starting-style:pointer-events-none data-submenu:data-ending-style:pointer-events-none data-submenu:data-starting-style:overflow-hidden data-submenu:data-ending-style:overflow-hidden data-submenu:data-starting-style:[translate:var(--media-submenu-translate)_0] data-submenu:data-ending-style:[translate:var(--media-submenu-translate)_0] data-submenu:data-starting-style:blur-sm data-submenu:data-ending-style:blur-sm"}>{children}</Menu.Content>
       </Menu.Popup>
     </Menu.Root>
@@ -2265,13 +2189,11 @@ import { cn, resolveClassName } from "@videojs/utils/style";
 export interface SubmenuProps extends Menu.Root.RootProps {
 icon: ReactNode;
   label: ReactNode;
-  selectedLabel: ReactNode;
 }
 export function Submenu({
   children,
   icon,
   label,
-  selectedLabel,
   className,
   ...props
 }: SubmenuProps) {
@@ -2281,11 +2203,11 @@ export function Submenu({
         {icon}
         {label}
         <span className={"ms-auto inline-flex min-w-0 items-center gap-1 ps-2 text-current/65"}>
-          {selectedLabel}
+          <Menu.Value className={"max-w-24 overflow-hidden text-ellipsis whitespace-nowrap"} data-part="value" />
           <MenuChevron />
         </span>
       </Menu.Trigger>
-      <Menu.Content className={state => cn("[anchor-scope:--media-menu-item-highlight-anchor]", "supports-[top:anchor(top)]:before:absolute", "supports-[top:anchor(top)]:before:[position-anchor:--media-menu-item-highlight-anchor]", "supports-[top:anchor(top)]:before:[inset:anchor(inside)]", "supports-[top:anchor(top)]:before:[overflow-anchor:none]", "supports-[top:anchor(top)]:before:pointer-events-none", "supports-[top:anchor(top)]:before:rounded-(--media-menu-item-border-radius)", "supports-[top:anchor(top)]:before:bg-media-control-hover", "supports-[top:anchor(top)]:before:transition-[inset] supports-[top:anchor(top)]:before:duration-100 supports-[top:anchor(top)]:before:[transition-timing-function:ease-in-out]", "supports-[top:anchor(top)]:has-data-[highlighted=]:before:duration-0", "absolute max-h-[inherit] overflow-auto overscroll-none outline-none", "not-data-submenu:flex not-data-submenu:flex-col not-data-submenu:gap-0.5", "transition-[translate,filter] duration-(--media-menu-transition-duration) ease-out", "not-data-submenu:inset-x-1 not-data-submenu:top-1", "not-data-submenu:[--media-menu-parent-translate:-100%]", "not-data-submenu:[&:dir(rtl)]:[--media-menu-parent-translate:100%]", "not-data-submenu:data-[child-open]:[translate:var(--media-menu-parent-translate)_0]", "not-data-submenu:data-[child-open]:blur-sm", "not-data-submenu:data-[child-open]:before:hidden", "data-submenu:inset-x-0 data-submenu:top-0 data-submenu:z-10 data-submenu:[max-height:inherit] data-submenu:p-1", "data-submenu:[--media-submenu-translate:100%] data-submenu:[&:dir(rtl)]:[--media-submenu-translate:-100%]", "data-submenu:data-starting-style:pointer-events-none data-submenu:data-ending-style:pointer-events-none", "data-submenu:data-starting-style:overflow-hidden data-submenu:data-ending-style:overflow-hidden", "data-submenu:data-starting-style:[translate:var(--media-submenu-translate)_0]", "data-submenu:data-ending-style:[translate:var(--media-submenu-translate)_0]", "data-submenu:data-starting-style:blur-sm data-submenu:data-ending-style:blur-sm", resolveClassName(className, state))}>
+      <Menu.Content keepMounted className={state => cn("[anchor-scope:--media-menu-item-highlight-anchor]", "supports-[top:anchor(top)]:before:absolute", "supports-[top:anchor(top)]:before:[position-anchor:--media-menu-item-highlight-anchor]", "supports-[top:anchor(top)]:before:[inset:anchor(inside)]", "supports-[top:anchor(top)]:before:[overflow-anchor:none]", "supports-[top:anchor(top)]:before:pointer-events-none", "supports-[top:anchor(top)]:before:rounded-(--media-menu-item-border-radius)", "supports-[top:anchor(top)]:before:bg-media-control-hover", "supports-[top:anchor(top)]:before:transition-[inset] supports-[top:anchor(top)]:before:duration-100 supports-[top:anchor(top)]:before:[transition-timing-function:ease-in-out]", "supports-[top:anchor(top)]:has-data-[highlighted=]:before:duration-0", "absolute max-h-[inherit] overflow-auto overscroll-none outline-none", "not-data-submenu:flex not-data-submenu:flex-col not-data-submenu:gap-0.5", "transition-[translate,filter] duration-(--media-menu-transition-duration) ease-out", "not-data-submenu:inset-x-1 not-data-submenu:top-1", "not-data-submenu:[--media-menu-parent-translate:-100%]", "not-data-submenu:[&:dir(rtl)]:[--media-menu-parent-translate:100%]", "not-data-submenu:data-[child-open]:[translate:var(--media-menu-parent-translate)_0]", "not-data-submenu:data-[child-open]:blur-sm", "not-data-submenu:data-[child-open]:before:hidden", "data-submenu:inset-x-0 data-submenu:top-0 data-submenu:z-10 data-submenu:[max-height:inherit] data-submenu:p-1", "data-submenu:[--media-submenu-translate:100%] data-submenu:[&:dir(rtl)]:[--media-submenu-translate:-100%]", "data-submenu:data-starting-style:pointer-events-none data-submenu:data-ending-style:pointer-events-none", "data-submenu:data-starting-style:overflow-hidden data-submenu:data-ending-style:overflow-hidden", "data-submenu:data-starting-style:[translate:var(--media-submenu-translate)_0]", "data-submenu:data-ending-style:[translate:var(--media-submenu-translate)_0]", "data-submenu:data-starting-style:blur-sm data-submenu:data-ending-style:blur-sm", resolveClassName(className, state))}>
         <Menu.Item className={"group/menu-back-item relative flex cursor-pointer select-none items-center gap-1.5 rounded-(--media-menu-item-border-radius) px-2 py-1.5 text-start whitespace-nowrap outline-2 -outline-offset-2 outline-transparent hover:bg-media-control-hover hover:text-media-accent-text data-highlighted:bg-media-control-hover data-highlighted:text-media-accent-text focus-visible:outline-white focus-visible:outline-offset-2 text-shadow-[0_1px_0_var(--media-shadow-current-color)] transition-[background-color,color] duration-100 [transition-timing-function:ease-in-out] motion-reduce:duration-50 supports-[top:anchor(top)]:duration-50 supports-[top:anchor(top)]:hover:duration-200 supports-[top:anchor(top)]:data-highlighted:duration-200 mb-0.5 w-full"}>
           <MenuChevron back />
           {label}
@@ -2307,22 +2229,14 @@ import { CaptionsMenu } from './captions-menu';
 import { PlaybackRateMenu } from './playback-rate-menu';
 import { QualityMenu } from './quality-menu';
 import { SettingsMenu } from './settings-menu';
-import { useQualityOptions, useAudioTrackOptions, usePlaybackRateOptions, useCaptionsOptions } from "@videojs/react";
 import type { ComponentProps } from "react";
-
 
 
 export interface VideoSettingsMenuProps extends Omit<ComponentProps<typeof SettingsMenu>, 'children'> {}
 
 export function VideoSettingsMenu(props: VideoSettingsMenuProps = {}) {
-const quality = useQualityOptions();
-const audioTrack = useAudioTrackOptions();
-const playbackRate = usePlaybackRateOptions();
-const captions = useCaptionsOptions();
-const hasSettings = quality?.state.availability === 'available' || audioTrack?.state.availability === 'available' || playbackRate?.state.availability === 'available' || captions?.state.availability === 'available';
-
   return (
-    hasSettings && <SettingsMenu {...props}>
+    <SettingsMenu {...props}>
       <QualityMenu />
       <AudioTrackMenu />
       <PlaybackRateMenu />
@@ -3270,7 +3184,6 @@ import { RadioItem } from './radio-item';
 import { Submenu } from './submenu';
 import "virtual:vjsc/css/<hash>/base.css";
 import "virtual:vjsc/css/<hash>/menus.css";
-import { useAudioTrackOptions } from "@videojs/react";
 import type { ComponentProps } from "react";
 import { Text as TextPrimitive } from "@videojs/react";
 import { SpeechIcon as SpeechIconPrimitive } from "@videojs/react/icons/minimal";
@@ -3279,21 +3192,13 @@ import { SpeechIcon as SpeechIconPrimitive } from "@videojs/react/icons/minimal"
 
 
 
-
-export interface AudioTrackMenuProps extends Omit<
-  ComponentProps<typeof Submenu>,
-  'children' | 'icon' | 'label' | 'selectedLabel'
-> {}
+export interface AudioTrackMenuProps extends Omit<ComponentProps<typeof Submenu>, 'children' | 'icon' | 'label'> {}
 
 export function AudioTrackMenu(props: AudioTrackMenuProps = {}) {
-const audioTrack = useAudioTrackOptions();
-const available = audioTrack?.state.availability === 'available';
-
   return (
-    available && <Submenu
+    <Submenu
       icon={<SpeechIconPrimitive className={"media-menu-trigger-item-icon"} />}
       label={<TextPrimitive token={audioText.key}>{audioText.text}</TextPrimitive>}
-      selectedLabel={<span className={"media-menu-hint-label"} data-part="hint">{audioTrack?.selectedLabel}</span>}
       {...props}
     >
       <AudioTrackRadioGroup renderItem={(props, item) => (<RadioItem {...props}>
@@ -3317,7 +3222,6 @@ import { RadioItem } from './radio-item';
 import { Submenu } from './submenu';
 import "virtual:vjsc/css/<hash>/base.css";
 import "virtual:vjsc/css/<hash>/menus.css";
-import { useCaptionsOptions } from "@videojs/react";
 import type { ComponentProps } from "react";
 import { Text as TextPrimitive } from "@videojs/react";
 import { CaptionsOffIcon as CaptionsOffIconPrimitive } from "@videojs/react/icons/minimal";
@@ -3326,21 +3230,13 @@ import { CaptionsOffIcon as CaptionsOffIconPrimitive } from "@videojs/react/icon
 
 
 
-
-export interface CaptionsMenuProps extends Omit<
-  ComponentProps<typeof Submenu>,
-  'children' | 'icon' | 'label' | 'selectedLabel'
-> {}
+export interface CaptionsMenuProps extends Omit<ComponentProps<typeof Submenu>, 'children' | 'icon' | 'label'> {}
 
 export function CaptionsMenu(props: CaptionsMenuProps = {}) {
-const captions = useCaptionsOptions();
-const available = captions?.state.availability === 'available';
-
   return (
-    available && <Submenu
+    <Submenu
       icon={<CaptionsOffIconPrimitive className={"media-menu-trigger-item-icon"} />}
       label={<TextPrimitive token={captionsText.key}>{captionsText.text}</TextPrimitive>}
-      selectedLabel={<span className={"media-menu-hint-label"} data-part="hint">{captions?.selectedLabel}</span>}
       {...props}
     >
       <CaptionsRadioGroup renderItem={(props, item) => (<RadioItem {...props}>
@@ -3387,7 +3283,6 @@ import { RadioItem } from './radio-item';
 import { Submenu } from './submenu';
 import "virtual:vjsc/css/<hash>/base.css";
 import "virtual:vjsc/css/<hash>/menus.css";
-import { usePlaybackRateOptions } from "@videojs/react";
 import type { ComponentProps } from "react";
 import { Text as TextPrimitive } from "@videojs/react";
 import { SpeedIcon as SpeedIconPrimitive } from "@videojs/react/icons/minimal";
@@ -3396,21 +3291,13 @@ import { SpeedIcon as SpeedIconPrimitive } from "@videojs/react/icons/minimal";
 
 
 
-
-export interface PlaybackRateMenuProps extends Omit<
-  ComponentProps<typeof Submenu>,
-  'children' | 'icon' | 'label' | 'selectedLabel'
-> {}
+export interface PlaybackRateMenuProps extends Omit<ComponentProps<typeof Submenu>, 'children' | 'icon' | 'label'> {}
 
 export function PlaybackRateMenu(props: PlaybackRateMenuProps = {}) {
-const playbackRate = usePlaybackRateOptions();
-const available = playbackRate?.state.availability === 'available';
-
   return (
-    available && <Submenu
+    <Submenu
       icon={<SpeedIconPrimitive className={"media-menu-trigger-item-icon"} />}
       label={<TextPrimitive token={speedText.key}>{speedText.text}</TextPrimitive>}
-      selectedLabel={<span className={"media-menu-hint-label"} data-part="hint">{playbackRate?.selectedLabel}</span>}
       {...props}
     >
       <PlaybackRateRadioGroup renderItem={(props, item) => (<RadioItem {...props}>
@@ -3434,7 +3321,6 @@ import { RadioItem } from './radio-item';
 import { Submenu } from './submenu';
 import "virtual:vjsc/css/<hash>/base.css";
 import "virtual:vjsc/css/<hash>/menus.css";
-import { useQualityOptions } from "@videojs/react";
 import type { ComponentProps } from "react";
 import { Text as TextPrimitive } from "@videojs/react";
 import { SwitchesIcon as SwitchesIconPrimitive } from "@videojs/react/icons/minimal";
@@ -3443,21 +3329,13 @@ import { SwitchesIcon as SwitchesIconPrimitive } from "@videojs/react/icons/mini
 
 
 
-
-export interface QualityMenuProps extends Omit<
-  ComponentProps<typeof Submenu>,
-  'children' | 'icon' | 'label' | 'selectedLabel'
-> {}
+export interface QualityMenuProps extends Omit<ComponentProps<typeof Submenu>, 'children' | 'icon' | 'label'> {}
 
 export function QualityMenu(props: QualityMenuProps = {}) {
-const quality = useQualityOptions();
-const available = quality?.state.availability === 'available';
-
   return (
-    available && <Submenu
+    <Submenu
       icon={<SwitchesIconPrimitive className={"media-menu-trigger-item-icon"} />}
       label={<TextPrimitive token={qualityText.key}>{qualityText.text}</TextPrimitive>}
-      selectedLabel={<span className={"media-menu-hint-label"} data-part="hint">{quality?.selectedLabel}</span>}
       {...props}
     >
       <QualityRadioGroup renderItem={(props, item) => (<RadioItem {...props}>
@@ -3578,7 +3456,10 @@ export function SettingsMenu({ children, className, ...props }: SettingsMenuProp
           </TextPrimitive>
         </Menu.Trigger>
       </ButtonTooltip>
-      <Menu.Popup className={state => cn("media-popup", "media-popup-safe-area", "media-surface", "media-menu-popup", resolveClassName(className, state))}>
+      <Menu.Popup
+        keepMounted
+        className={state => cn("media-popup", "media-popup-safe-area", "media-surface", "media-menu-popup", resolveClassName(className, state))}
+      >
         <Menu.Content className={"media-menu-content"}>{children}</Menu.Content>
       </Menu.Popup>
     </Menu.Root>
@@ -3606,13 +3487,11 @@ import { cn, resolveClassName } from "@videojs/utils/style";
 export interface SubmenuProps extends Menu.Root.RootProps {
 icon: ReactNode;
   label: ReactNode;
-  selectedLabel: ReactNode;
 }
 export function Submenu({
   children,
   icon,
   label,
-  selectedLabel,
   className,
   ...props
 }: SubmenuProps) {
@@ -3622,11 +3501,11 @@ export function Submenu({
         {icon}
         {label}
         <span className={"media-menu-hint"}>
-          {selectedLabel}
+          <Menu.Value className={"media-menu-hint-label"} data-part="value" />
           <MenuChevron />
         </span>
       </Menu.Trigger>
-      <Menu.Content className={state => cn("media-menu-content", resolveClassName(className, state))}>
+      <Menu.Content keepMounted className={state => cn("media-menu-content", resolveClassName(className, state))}>
         <Menu.Item className={"media-menu-back-item"}>
           <MenuChevron back />
           {label}
@@ -3648,22 +3527,14 @@ import { CaptionsMenu } from './captions-menu';
 import { PlaybackRateMenu } from './playback-rate-menu';
 import { QualityMenu } from './quality-menu';
 import { SettingsMenu } from './settings-menu';
-import { useQualityOptions, useAudioTrackOptions, usePlaybackRateOptions, useCaptionsOptions } from "@videojs/react";
 import type { ComponentProps } from "react";
-
 
 
 export interface VideoSettingsMenuProps extends Omit<ComponentProps<typeof SettingsMenu>, 'children'> {}
 
 export function VideoSettingsMenu(props: VideoSettingsMenuProps = {}) {
-const quality = useQualityOptions();
-const audioTrack = useAudioTrackOptions();
-const playbackRate = usePlaybackRateOptions();
-const captions = useCaptionsOptions();
-const hasSettings = quality?.state.availability === 'available' || audioTrack?.state.availability === 'available' || playbackRate?.state.availability === 'available' || captions?.state.availability === 'available';
-
   return (
-    hasSettings && <SettingsMenu {...props}>
+    <SettingsMenu {...props}>
       <QualityMenu />
       <AudioTrackMenu />
       <PlaybackRateMenu />
@@ -4561,7 +4432,6 @@ import { audioText } from '@videojs/core/i18n/text/menu';
 import { AudioTrackRadioGroup } from './radio-group';
 import { RadioItem } from './radio-item';
 import { Submenu } from './submenu';
-import { useAudioTrackOptions } from "@videojs/react";
 import type { ComponentProps } from "react";
 import { Text as TextPrimitive } from "@videojs/react";
 import { SpeechIcon as SpeechIconPrimitive } from "@videojs/react/icons/minimal";
@@ -4569,21 +4439,13 @@ import { SpeechIcon as SpeechIconPrimitive } from "@videojs/react/icons/minimal"
 
 
 
-
-export interface AudioTrackMenuProps extends Omit<
-  ComponentProps<typeof Submenu>,
-  'children' | 'icon' | 'label' | 'selectedLabel'
-> {}
+export interface AudioTrackMenuProps extends Omit<ComponentProps<typeof Submenu>, 'children' | 'icon' | 'label'> {}
 
 export function AudioTrackMenu(props: AudioTrackMenuProps = {}) {
-const audioTrack = useAudioTrackOptions();
-const available = audioTrack?.state.availability === 'available';
-
   return (
-    available && <Submenu
+    <Submenu
       icon={<SpeechIconPrimitive className={"size-media-icon shrink-0 drop-shadow-[0_1px_0_var(--media-shadow-current-color)] group-hover/menu-trigger-item:text-inherit group-data-highlighted/menu-trigger-item:text-inherit text-current/50"} />}
       label={<TextPrimitive token={audioText.key}>{audioText.text}</TextPrimitive>}
-      selectedLabel={<span className={"max-w-24 overflow-hidden text-ellipsis whitespace-nowrap"} data-part="hint">{audioTrack?.selectedLabel}</span>}
       {...props}
     >
       <AudioTrackRadioGroup renderItem={(props, item) => (<RadioItem {...props}>
@@ -4605,7 +4467,6 @@ import { captionsText } from '@videojs/core/i18n/text/menu';
 import { CaptionsRadioGroup } from './radio-group';
 import { RadioItem } from './radio-item';
 import { Submenu } from './submenu';
-import { useCaptionsOptions } from "@videojs/react";
 import type { ComponentProps } from "react";
 import { Text as TextPrimitive } from "@videojs/react";
 import { CaptionsOffIcon as CaptionsOffIconPrimitive } from "@videojs/react/icons/minimal";
@@ -4613,21 +4474,13 @@ import { CaptionsOffIcon as CaptionsOffIconPrimitive } from "@videojs/react/icon
 
 
 
-
-export interface CaptionsMenuProps extends Omit<
-  ComponentProps<typeof Submenu>,
-  'children' | 'icon' | 'label' | 'selectedLabel'
-> {}
+export interface CaptionsMenuProps extends Omit<ComponentProps<typeof Submenu>, 'children' | 'icon' | 'label'> {}
 
 export function CaptionsMenu(props: CaptionsMenuProps = {}) {
-const captions = useCaptionsOptions();
-const available = captions?.state.availability === 'available';
-
   return (
-    available && <Submenu
+    <Submenu
       icon={<CaptionsOffIconPrimitive className={"size-media-icon shrink-0 drop-shadow-[0_1px_0_var(--media-shadow-current-color)] group-hover/menu-trigger-item:text-inherit group-data-highlighted/menu-trigger-item:text-inherit text-current/50"} />}
       label={<TextPrimitive token={captionsText.key}>{captionsText.text}</TextPrimitive>}
-      selectedLabel={<span className={"max-w-24 overflow-hidden text-ellipsis whitespace-nowrap"} data-part="hint">{captions?.selectedLabel}</span>}
       {...props}
     >
       <CaptionsRadioGroup renderItem={(props, item) => (<RadioItem {...props}>
@@ -4669,7 +4522,6 @@ import { speedText } from '@videojs/core/i18n/text/menu';
 import { PlaybackRateRadioGroup } from './radio-group';
 import { RadioItem } from './radio-item';
 import { Submenu } from './submenu';
-import { usePlaybackRateOptions } from "@videojs/react";
 import type { ComponentProps } from "react";
 import { Text as TextPrimitive } from "@videojs/react";
 import { SpeedIcon as SpeedIconPrimitive } from "@videojs/react/icons/minimal";
@@ -4677,21 +4529,13 @@ import { SpeedIcon as SpeedIconPrimitive } from "@videojs/react/icons/minimal";
 
 
 
-
-export interface PlaybackRateMenuProps extends Omit<
-  ComponentProps<typeof Submenu>,
-  'children' | 'icon' | 'label' | 'selectedLabel'
-> {}
+export interface PlaybackRateMenuProps extends Omit<ComponentProps<typeof Submenu>, 'children' | 'icon' | 'label'> {}
 
 export function PlaybackRateMenu(props: PlaybackRateMenuProps = {}) {
-const playbackRate = usePlaybackRateOptions();
-const available = playbackRate?.state.availability === 'available';
-
   return (
-    available && <Submenu
+    <Submenu
       icon={<SpeedIconPrimitive className={"size-media-icon shrink-0 drop-shadow-[0_1px_0_var(--media-shadow-current-color)] group-hover/menu-trigger-item:text-inherit group-data-highlighted/menu-trigger-item:text-inherit text-current/50"} />}
       label={<TextPrimitive token={speedText.key}>{speedText.text}</TextPrimitive>}
-      selectedLabel={<span className={"max-w-24 overflow-hidden text-ellipsis whitespace-nowrap"} data-part="hint">{playbackRate?.selectedLabel}</span>}
       {...props}
     >
       <PlaybackRateRadioGroup renderItem={(props, item) => (<RadioItem {...props}>
@@ -4713,7 +4557,6 @@ import { qualityText } from '@videojs/core/i18n/text/menu';
 import { QualityRadioGroup } from './radio-group';
 import { RadioItem } from './radio-item';
 import { Submenu } from './submenu';
-import { useQualityOptions } from "@videojs/react";
 import type { ComponentProps } from "react";
 import { Text as TextPrimitive } from "@videojs/react";
 import { SwitchesIcon as SwitchesIconPrimitive } from "@videojs/react/icons/minimal";
@@ -4721,21 +4564,13 @@ import { SwitchesIcon as SwitchesIconPrimitive } from "@videojs/react/icons/mini
 
 
 
-
-export interface QualityMenuProps extends Omit<
-  ComponentProps<typeof Submenu>,
-  'children' | 'icon' | 'label' | 'selectedLabel'
-> {}
+export interface QualityMenuProps extends Omit<ComponentProps<typeof Submenu>, 'children' | 'icon' | 'label'> {}
 
 export function QualityMenu(props: QualityMenuProps = {}) {
-const quality = useQualityOptions();
-const available = quality?.state.availability === 'available';
-
   return (
-    available && <Submenu
+    <Submenu
       icon={<SwitchesIconPrimitive className={"size-media-icon shrink-0 drop-shadow-[0_1px_0_var(--media-shadow-current-color)] group-hover/menu-trigger-item:text-inherit group-data-highlighted/menu-trigger-item:text-inherit text-current/50"} />}
       label={<TextPrimitive token={qualityText.key}>{qualityText.text}</TextPrimitive>}
-      selectedLabel={<span className={"max-w-24 overflow-hidden text-ellipsis whitespace-nowrap"} data-part="hint">{quality?.selectedLabel}</span>}
       {...props}
     >
       <QualityRadioGroup renderItem={(props, item) => (<RadioItem {...props}>
@@ -4844,7 +4679,10 @@ export function SettingsMenu({ children, className, ...props }: SettingsMenuProp
           </TextPrimitive>
         </Menu.Trigger>
       </ButtonTooltip>
-      <Menu.Popup className={state => cn("m-0 overflow-visible border-0 text-inherit", "data-starting-style:opacity-0 data-starting-style:[transform:translate(var(--media-popup-translate-x-distance,0),var(--media-popup-translate-y-distance,0))_scale(.95)]", "data-ending-style:opacity-0 data-ending-style:blur-xs data-ending-style:[transform:scale(.95)]", "data-[side=top]:origin-bottom data-[side=bottom]:origin-top data-[side=left]:origin-right data-[side=right]:origin-left", "data-[side=top]:[--media-popup-translate-y-distance:var(--media-popup-translate-distance)]", "data-[side=bottom]:[--media-popup-translate-y-distance:calc(var(--media-popup-translate-distance)*-1)]", "data-[side=left]:[--media-popup-translate-x-distance:var(--media-popup-translate-distance)]", "data-[side=right]:[--media-popup-translate-x-distance:calc(var(--media-popup-translate-distance)*-1)]", "before:pointer-events-auto before:absolute", "data-[side=top]:before:inset-x-0 data-[side=top]:before:top-full", "data-[side=bottom]:before:inset-x-0 data-[side=bottom]:before:bottom-full", "data-[side=left]:before:inset-y-0 data-[side=left]:before:left-full", "data-[side=right]:before:inset-y-0 data-[side=right]:before:right-full", "[--media-popup-translate-distance:--spacing(2)]", "data-[side=top]:before:h-(--media-popover-side-offset) data-[side=bottom]:before:h-(--media-popover-side-offset)", "data-[side=left]:before:w-(--media-popover-side-offset) data-[side=right]:before:w-(--media-popover-side-offset)", "text-white backdrop-blur-lg backdrop-saturate-150", "after:pointer-events-none after:absolute after:inset-0 after:z-10 after:rounded-[inherit]", "after:shadow-[inset_0_1px_0_0_rgb(255_255_255/0.1),inset_0_0_0_1px_rgb(255_255_255/0.05)]", "[@media(prefers-reduced-transparency:reduce)]:bg-black [@media(prefers-reduced-transparency:reduce)]:ring-1 [@media(prefers-reduced-transparency:reduce)]:ring-transparent", "[@media(prefers-reduced-transparency:reduce)]:backdrop-filter-none", "[@media(prefers-reduced-transparency:reduce)]:after:shadow-[inset_0_1px_0_0_rgb(255_255_255/0.25),inset_0_0_0_1px_rgb(255_255_255/0.125)]", "contrast-more:bg-black contrast-more:ring-1 contrast-more:ring-transparent contrast-more:backdrop-filter-none", "contrast-more:after:shadow-[inset_0_1px_0_0_rgb(255_255_255/0.25),inset_0_0_0_1px_rgb(255_255_255/0.125)]", "forced-colors:bg-[Canvas] forced-colors:ring-1 forced-colors:ring-[CanvasText]", "forced-colors:after:shadow-[inset_0_1px_0_0_CanvasText,inset_0_0_0_1px_CanvasText]", "shadow-sm shadow-black/20 ring-1 ring-white/10", "[@media(prefers-reduced-transparency:reduce)]:shadow-sm [@media(prefers-reduced-transparency:reduce)]:shadow-black/20", "contrast-more:shadow-sm contrast-more:shadow-black/20", "forced-colors:shadow-sm forced-colors:shadow-black/20", "bg-black/50", "m-0 min-w-44 max-w-(--media-menu-available-width) overflow-hidden! border-0 p-1", "max-h-[min(var(--media-menu-available-height,--spacing(56)),--spacing(56))] overscroll-none", "h-(--media-menu-height) w-(--media-menu-width)", "[--media-menu-transition-duration:250ms] motion-reduce:[--media-menu-transition-duration:0ms]", "[transition-property:opacity,filter,transform,scale,width,height]", "[transition-duration:100ms,100ms,100ms,100ms,250ms,250ms] ease-out", "data-starting-style:[transition-duration:100ms] data-starting-style:[transition-property:opacity,filter,transform,scale]", "data-ending-style:[transition-duration:100ms] data-ending-style:[transition-property:opacity,filter,transform,scale]", "motion-reduce:[transition-duration:0ms]", "rounded-[--spacing(2.5)] [--media-menu-item-border-radius:--spacing(1.5)]", resolveClassName(className, state))}>
+      <Menu.Popup
+        keepMounted
+        className={state => cn("m-0 overflow-visible border-0 text-inherit", "data-starting-style:opacity-0 data-starting-style:[transform:translate(var(--media-popup-translate-x-distance,0),var(--media-popup-translate-y-distance,0))_scale(.95)]", "data-ending-style:opacity-0 data-ending-style:blur-xs data-ending-style:[transform:scale(.95)]", "data-[side=top]:origin-bottom data-[side=bottom]:origin-top data-[side=left]:origin-right data-[side=right]:origin-left", "data-[side=top]:[--media-popup-translate-y-distance:var(--media-popup-translate-distance)]", "data-[side=bottom]:[--media-popup-translate-y-distance:calc(var(--media-popup-translate-distance)*-1)]", "data-[side=left]:[--media-popup-translate-x-distance:var(--media-popup-translate-distance)]", "data-[side=right]:[--media-popup-translate-x-distance:calc(var(--media-popup-translate-distance)*-1)]", "before:pointer-events-auto before:absolute", "data-[side=top]:before:inset-x-0 data-[side=top]:before:top-full", "data-[side=bottom]:before:inset-x-0 data-[side=bottom]:before:bottom-full", "data-[side=left]:before:inset-y-0 data-[side=left]:before:left-full", "data-[side=right]:before:inset-y-0 data-[side=right]:before:right-full", "[--media-popup-translate-distance:--spacing(2)]", "data-[side=top]:before:h-(--media-popover-side-offset) data-[side=bottom]:before:h-(--media-popover-side-offset)", "data-[side=left]:before:w-(--media-popover-side-offset) data-[side=right]:before:w-(--media-popover-side-offset)", "text-white backdrop-blur-lg backdrop-saturate-150", "after:pointer-events-none after:absolute after:inset-0 after:z-10 after:rounded-[inherit]", "after:shadow-[inset_0_1px_0_0_rgb(255_255_255/0.1),inset_0_0_0_1px_rgb(255_255_255/0.05)]", "[@media(prefers-reduced-transparency:reduce)]:bg-black [@media(prefers-reduced-transparency:reduce)]:ring-1 [@media(prefers-reduced-transparency:reduce)]:ring-transparent", "[@media(prefers-reduced-transparency:reduce)]:backdrop-filter-none", "[@media(prefers-reduced-transparency:reduce)]:after:shadow-[inset_0_1px_0_0_rgb(255_255_255/0.25),inset_0_0_0_1px_rgb(255_255_255/0.125)]", "contrast-more:bg-black contrast-more:ring-1 contrast-more:ring-transparent contrast-more:backdrop-filter-none", "contrast-more:after:shadow-[inset_0_1px_0_0_rgb(255_255_255/0.25),inset_0_0_0_1px_rgb(255_255_255/0.125)]", "forced-colors:bg-[Canvas] forced-colors:ring-1 forced-colors:ring-[CanvasText]", "forced-colors:after:shadow-[inset_0_1px_0_0_CanvasText,inset_0_0_0_1px_CanvasText]", "shadow-sm shadow-black/20 ring-1 ring-white/10", "[@media(prefers-reduced-transparency:reduce)]:shadow-sm [@media(prefers-reduced-transparency:reduce)]:shadow-black/20", "contrast-more:shadow-sm contrast-more:shadow-black/20", "forced-colors:shadow-sm forced-colors:shadow-black/20", "bg-black/50", "m-0 min-w-44 max-w-(--media-menu-available-width) overflow-hidden! border-0 p-1", "max-h-[min(var(--media-menu-available-height,--spacing(56)),--spacing(56))] overscroll-none", "h-(--media-menu-height) w-(--media-menu-width)", "[--media-menu-transition-duration:250ms] motion-reduce:[--media-menu-transition-duration:0ms]", "[transition-property:opacity,filter,transform,scale,width,height]", "[transition-duration:100ms,100ms,100ms,100ms,250ms,250ms] ease-out", "data-starting-style:[transition-duration:100ms] data-starting-style:[transition-property:opacity,filter,transform,scale]", "data-ending-style:[transition-duration:100ms] data-ending-style:[transition-property:opacity,filter,transform,scale]", "motion-reduce:[transition-duration:0ms]", "rounded-[--spacing(2.5)] [--media-menu-item-border-radius:--spacing(1.5)]", resolveClassName(className, state))}
+      >
         <Menu.Content className={"[anchor-scope:--media-menu-item-highlight-anchor] supports-[top:anchor(top)]:before:absolute supports-[top:anchor(top)]:before:[position-anchor:--media-menu-item-highlight-anchor] supports-[top:anchor(top)]:before:[inset:anchor(inside)] supports-[top:anchor(top)]:before:[overflow-anchor:none] supports-[top:anchor(top)]:before:pointer-events-none supports-[top:anchor(top)]:before:rounded-(--media-menu-item-border-radius) supports-[top:anchor(top)]:before:bg-media-control-hover supports-[top:anchor(top)]:before:transition-[inset] supports-[top:anchor(top)]:before:duration-100 supports-[top:anchor(top)]:before:[transition-timing-function:ease-in-out] supports-[top:anchor(top)]:has-data-[highlighted=]:before:duration-0 absolute max-h-[inherit] overflow-auto overscroll-none outline-none not-data-submenu:flex not-data-submenu:flex-col not-data-submenu:gap-0.5 transition-[translate,filter] duration-(--media-menu-transition-duration) ease-out not-data-submenu:inset-x-1 not-data-submenu:top-1 not-data-submenu:[--media-menu-parent-translate:-100%] not-data-submenu:[&:dir(rtl)]:[--media-menu-parent-translate:100%] not-data-submenu:data-[child-open]:[translate:var(--media-menu-parent-translate)_0] not-data-submenu:data-[child-open]:blur-sm not-data-submenu:data-[child-open]:before:hidden data-submenu:inset-x-0 data-submenu:top-0 data-submenu:z-10 data-submenu:[max-height:inherit] data-submenu:p-1 data-submenu:[--media-submenu-translate:100%] data-submenu:[&:dir(rtl)]:[--media-submenu-translate:-100%] data-submenu:data-starting-style:pointer-events-none data-submenu:data-ending-style:pointer-events-none data-submenu:data-starting-style:overflow-hidden data-submenu:data-ending-style:overflow-hidden data-submenu:data-starting-style:[translate:var(--media-submenu-translate)_0] data-submenu:data-ending-style:[translate:var(--media-submenu-translate)_0] data-submenu:data-starting-style:blur-sm data-submenu:data-ending-style:blur-sm"}>{children}</Menu.Content>
       </Menu.Popup>
     </Menu.Root>
@@ -4869,13 +4707,11 @@ import { cn, resolveClassName } from "@videojs/utils/style";
 export interface SubmenuProps extends Menu.Root.RootProps {
 icon: ReactNode;
   label: ReactNode;
-  selectedLabel: ReactNode;
 }
 export function Submenu({
   children,
   icon,
   label,
-  selectedLabel,
   className,
   ...props
 }: SubmenuProps) {
@@ -4885,11 +4721,11 @@ export function Submenu({
         {icon}
         {label}
         <span className={"ms-auto inline-flex min-w-0 items-center gap-1 ps-2 text-current/65"}>
-          {selectedLabel}
+          <Menu.Value className={"max-w-24 overflow-hidden text-ellipsis whitespace-nowrap"} data-part="value" />
           <MenuChevron />
         </span>
       </Menu.Trigger>
-      <Menu.Content className={state => cn("[anchor-scope:--media-menu-item-highlight-anchor]", "supports-[top:anchor(top)]:before:absolute", "supports-[top:anchor(top)]:before:[position-anchor:--media-menu-item-highlight-anchor]", "supports-[top:anchor(top)]:before:[inset:anchor(inside)]", "supports-[top:anchor(top)]:before:[overflow-anchor:none]", "supports-[top:anchor(top)]:before:pointer-events-none", "supports-[top:anchor(top)]:before:rounded-(--media-menu-item-border-radius)", "supports-[top:anchor(top)]:before:bg-media-control-hover", "supports-[top:anchor(top)]:before:transition-[inset] supports-[top:anchor(top)]:before:duration-100 supports-[top:anchor(top)]:before:[transition-timing-function:ease-in-out]", "supports-[top:anchor(top)]:has-data-[highlighted=]:before:duration-0", "absolute max-h-[inherit] overflow-auto overscroll-none outline-none", "not-data-submenu:flex not-data-submenu:flex-col not-data-submenu:gap-0.5", "transition-[translate,filter] duration-(--media-menu-transition-duration) ease-out", "not-data-submenu:inset-x-1 not-data-submenu:top-1", "not-data-submenu:[--media-menu-parent-translate:-100%]", "not-data-submenu:[&:dir(rtl)]:[--media-menu-parent-translate:100%]", "not-data-submenu:data-[child-open]:[translate:var(--media-menu-parent-translate)_0]", "not-data-submenu:data-[child-open]:blur-sm", "not-data-submenu:data-[child-open]:before:hidden", "data-submenu:inset-x-0 data-submenu:top-0 data-submenu:z-10 data-submenu:[max-height:inherit] data-submenu:p-1", "data-submenu:[--media-submenu-translate:100%] data-submenu:[&:dir(rtl)]:[--media-submenu-translate:-100%]", "data-submenu:data-starting-style:pointer-events-none data-submenu:data-ending-style:pointer-events-none", "data-submenu:data-starting-style:overflow-hidden data-submenu:data-ending-style:overflow-hidden", "data-submenu:data-starting-style:[translate:var(--media-submenu-translate)_0]", "data-submenu:data-ending-style:[translate:var(--media-submenu-translate)_0]", "data-submenu:data-starting-style:blur-sm data-submenu:data-ending-style:blur-sm", resolveClassName(className, state))}>
+      <Menu.Content keepMounted className={state => cn("[anchor-scope:--media-menu-item-highlight-anchor]", "supports-[top:anchor(top)]:before:absolute", "supports-[top:anchor(top)]:before:[position-anchor:--media-menu-item-highlight-anchor]", "supports-[top:anchor(top)]:before:[inset:anchor(inside)]", "supports-[top:anchor(top)]:before:[overflow-anchor:none]", "supports-[top:anchor(top)]:before:pointer-events-none", "supports-[top:anchor(top)]:before:rounded-(--media-menu-item-border-radius)", "supports-[top:anchor(top)]:before:bg-media-control-hover", "supports-[top:anchor(top)]:before:transition-[inset] supports-[top:anchor(top)]:before:duration-100 supports-[top:anchor(top)]:before:[transition-timing-function:ease-in-out]", "supports-[top:anchor(top)]:has-data-[highlighted=]:before:duration-0", "absolute max-h-[inherit] overflow-auto overscroll-none outline-none", "not-data-submenu:flex not-data-submenu:flex-col not-data-submenu:gap-0.5", "transition-[translate,filter] duration-(--media-menu-transition-duration) ease-out", "not-data-submenu:inset-x-1 not-data-submenu:top-1", "not-data-submenu:[--media-menu-parent-translate:-100%]", "not-data-submenu:[&:dir(rtl)]:[--media-menu-parent-translate:100%]", "not-data-submenu:data-[child-open]:[translate:var(--media-menu-parent-translate)_0]", "not-data-submenu:data-[child-open]:blur-sm", "not-data-submenu:data-[child-open]:before:hidden", "data-submenu:inset-x-0 data-submenu:top-0 data-submenu:z-10 data-submenu:[max-height:inherit] data-submenu:p-1", "data-submenu:[--media-submenu-translate:100%] data-submenu:[&:dir(rtl)]:[--media-submenu-translate:-100%]", "data-submenu:data-starting-style:pointer-events-none data-submenu:data-ending-style:pointer-events-none", "data-submenu:data-starting-style:overflow-hidden data-submenu:data-ending-style:overflow-hidden", "data-submenu:data-starting-style:[translate:var(--media-submenu-translate)_0]", "data-submenu:data-ending-style:[translate:var(--media-submenu-translate)_0]", "data-submenu:data-starting-style:blur-sm data-submenu:data-ending-style:blur-sm", resolveClassName(className, state))}>
         <Menu.Item className={"group/menu-back-item relative flex cursor-pointer select-none items-center gap-1.5 rounded-(--media-menu-item-border-radius) px-2 py-1.5 text-start whitespace-nowrap outline-2 -outline-offset-2 outline-transparent hover:bg-media-control-hover hover:text-media-accent-text data-highlighted:bg-media-control-hover data-highlighted:text-media-accent-text focus-visible:outline-white focus-visible:outline-offset-2 text-shadow-[0_1px_0_var(--media-shadow-current-color)] transition-[background-color,color] duration-100 [transition-timing-function:ease-in-out] motion-reduce:duration-50 supports-[top:anchor(top)]:duration-50 supports-[top:anchor(top)]:hover:duration-200 supports-[top:anchor(top)]:data-highlighted:duration-200 mb-0.5 w-full"}>
           <MenuChevron back />
           {label}
@@ -4911,22 +4747,14 @@ import { CaptionsMenu } from './captions-menu';
 import { PlaybackRateMenu } from './playback-rate-menu';
 import { QualityMenu } from './quality-menu';
 import { SettingsMenu } from './settings-menu';
-import { useQualityOptions, useAudioTrackOptions, usePlaybackRateOptions, useCaptionsOptions } from "@videojs/react";
 import type { ComponentProps } from "react";
-
 
 
 export interface VideoSettingsMenuProps extends Omit<ComponentProps<typeof SettingsMenu>, 'children'> {}
 
 export function VideoSettingsMenu(props: VideoSettingsMenuProps = {}) {
-const quality = useQualityOptions();
-const audioTrack = useAudioTrackOptions();
-const playbackRate = usePlaybackRateOptions();
-const captions = useCaptionsOptions();
-const hasSettings = quality?.state.availability === 'available' || audioTrack?.state.availability === 'available' || playbackRate?.state.availability === 'available' || captions?.state.availability === 'available';
-
   return (
-    hasSettings && <SettingsMenu {...props}>
+    <SettingsMenu {...props}>
       <QualityMenu />
       <AudioTrackMenu />
       <PlaybackRateMenu />
@@ -5837,17 +5665,13 @@ registerIcons("default", { "speech": speechIcon });
 
 
 
-export interface AudioTrackMenuProps extends Omit<
-  PropsOf<typeof Submenu>,
-  'children' | 'icon' | 'label' | 'selectedLabel'
-> {}
+export interface AudioTrackMenuProps extends Omit<PropsOf<typeof Submenu>, 'children' | 'icon' | 'label'> {}
 
 export function AudioTrackMenu(props: AudioTrackMenuProps = {}) {
   return (
     <Submenu
       icon={<media-icon name="speech" class={"media-menu-trigger-item-icon"} />}
       label={<media-text token={audioText.key}>{audioText.text}</media-text>}
-      selectedLabel={<span class={"media-menu-hint-label"} data-part="hint" />}
       {...props}
     >
       <AudioTrackRadioGroup>
@@ -5880,17 +5704,13 @@ registerIcons("default", { "captions-off": captionsOffIcon });
 
 
 
-export interface CaptionsMenuProps extends Omit<
-  PropsOf<typeof Submenu>,
-  'children' | 'icon' | 'label' | 'selectedLabel'
-> {}
+export interface CaptionsMenuProps extends Omit<PropsOf<typeof Submenu>, 'children' | 'icon' | 'label'> {}
 
 export function CaptionsMenu(props: CaptionsMenuProps = {}) {
   return (
     <Submenu
       icon={<media-icon name="captions-off" class={"media-menu-trigger-item-icon"} />}
       label={<media-text token={captionsText.key}>{captionsText.text}</media-text>}
-      selectedLabel={<span class={"media-menu-hint-label"} data-part="hint" />}
       {...props}
     >
       <CaptionsRadioGroup>
@@ -5940,17 +5760,13 @@ registerIcons("default", { "speed": speedIcon });
 
 
 
-export interface PlaybackRateMenuProps extends Omit<
-  PropsOf<typeof Submenu>,
-  'children' | 'icon' | 'label' | 'selectedLabel'
-> {}
+export interface PlaybackRateMenuProps extends Omit<PropsOf<typeof Submenu>, 'children' | 'icon' | 'label'> {}
 
 export function PlaybackRateMenu(props: PlaybackRateMenuProps = {}) {
   return (
     <Submenu
       icon={<media-icon name="speed" class={"media-menu-trigger-item-icon"} />}
       label={<media-text token={speedText.key}>{speedText.text}</media-text>}
-      selectedLabel={<span class={"media-menu-hint-label"} data-part="hint" />}
       {...props}
     >
       <PlaybackRateRadioGroup>
@@ -5983,17 +5799,13 @@ registerIcons("default", { "switches": switchesIcon });
 
 
 
-export interface QualityMenuProps extends Omit<
-  PropsOf<typeof Submenu>,
-  'children' | 'icon' | 'label' | 'selectedLabel'
-> {}
+export interface QualityMenuProps extends Omit<PropsOf<typeof Submenu>, 'children' | 'icon' | 'label'> {}
 
 export function QualityMenu(props: QualityMenuProps = {}) {
   return (
     <Submenu
       icon={<media-icon name="switches" class={"media-menu-trigger-item-icon"} />}
       label={<media-text token={qualityText.key}>{qualityText.text}</media-text>}
-      selectedLabel={<span class={"media-menu-hint-label"} data-part="hint" />}
       {...props}
     >
       <QualityRadioGroup>
@@ -6138,23 +5950,21 @@ export function Submenu({
   children,
   icon,
   label,
-  selectedLabel,
   className,
   ...props
 }: PropsWithChildren<MenuProps> & {
   icon: VjscNode;
   label: VjscNode;
-  selectedLabel: VjscNode;
 }) {
   return (
-    <Scope prefix="<module>-fz"><><media-menu-item commandfor="__vjsc-id-<module>-fz-content" class={"media-menu-trigger-item"}>
+    <Scope prefix="<module>-er"><><media-menu-item commandfor="__vjsc-id-<module>-er-content" class={"media-menu-trigger-item"}>
         {icon}
         {label}
         <span class={"media-menu-hint"}>
-          {selectedLabel}
+          <span className={"media-menu-hint-label"} data-part="value" />
           <MenuChevron />
         </span>
-      </media-menu-item><media-menu-content id="__vjsc-id-<module>-fz-content" class={["media-menu-content", className]}>
+      </media-menu-item><media-menu-content id="__vjsc-id-<module>-er-content" class={["media-menu-content", className]}>
         <media-menu-item className={"media-menu-back-item"}>
           <MenuChevron back />
           {label}
@@ -7016,17 +6826,13 @@ import "@videojs/html/i18n";
 registerIcons("default", { "speech": speechIcon });
 
 
-export interface AudioTrackMenuProps extends Omit<
-  PropsOf<typeof Submenu>,
-  'children' | 'icon' | 'label' | 'selectedLabel'
-> {}
+export interface AudioTrackMenuProps extends Omit<PropsOf<typeof Submenu>, 'children' | 'icon' | 'label'> {}
 
 export function AudioTrackMenu(props: AudioTrackMenuProps = {}) {
   return (
     <Submenu
       icon={<media-icon name="speech" class={"size-media-icon shrink-0 drop-shadow-[0_1px_0_var(--media-shadow-current-color)] group-hover/menu-trigger-item:text-inherit group-data-highlighted/menu-trigger-item:text-inherit text-current/65"} />}
       label={<media-text token={audioText.key}>{audioText.text}</media-text>}
-      selectedLabel={<span class={"max-w-24 overflow-hidden text-ellipsis whitespace-nowrap"} data-part="hint" />}
       {...props}
     >
       <AudioTrackRadioGroup>
@@ -7056,17 +6862,13 @@ import "@videojs/html/i18n";
 registerIcons("default", { "captions-off": captionsOffIcon });
 
 
-export interface CaptionsMenuProps extends Omit<
-  PropsOf<typeof Submenu>,
-  'children' | 'icon' | 'label' | 'selectedLabel'
-> {}
+export interface CaptionsMenuProps extends Omit<PropsOf<typeof Submenu>, 'children' | 'icon' | 'label'> {}
 
 export function CaptionsMenu(props: CaptionsMenuProps = {}) {
   return (
     <Submenu
       icon={<media-icon name="captions-off" class={"size-media-icon shrink-0 drop-shadow-[0_1px_0_var(--media-shadow-current-color)] group-hover/menu-trigger-item:text-inherit group-data-highlighted/menu-trigger-item:text-inherit text-current/65"} />}
       label={<media-text token={captionsText.key}>{captionsText.text}</media-text>}
-      selectedLabel={<span class={"max-w-24 overflow-hidden text-ellipsis whitespace-nowrap"} data-part="hint" />}
       {...props}
     >
       <CaptionsRadioGroup>
@@ -7110,17 +6912,13 @@ import "@videojs/html/i18n";
 registerIcons("default", { "speed": speedIcon });
 
 
-export interface PlaybackRateMenuProps extends Omit<
-  PropsOf<typeof Submenu>,
-  'children' | 'icon' | 'label' | 'selectedLabel'
-> {}
+export interface PlaybackRateMenuProps extends Omit<PropsOf<typeof Submenu>, 'children' | 'icon' | 'label'> {}
 
 export function PlaybackRateMenu(props: PlaybackRateMenuProps = {}) {
   return (
     <Submenu
       icon={<media-icon name="speed" class={"size-media-icon shrink-0 drop-shadow-[0_1px_0_var(--media-shadow-current-color)] group-hover/menu-trigger-item:text-inherit group-data-highlighted/menu-trigger-item:text-inherit text-current/65"} />}
       label={<media-text token={speedText.key}>{speedText.text}</media-text>}
-      selectedLabel={<span class={"max-w-24 overflow-hidden text-ellipsis whitespace-nowrap"} data-part="hint" />}
       {...props}
     >
       <PlaybackRateRadioGroup>
@@ -7150,17 +6948,13 @@ import "@videojs/html/i18n";
 registerIcons("default", { "switches": switchesIcon });
 
 
-export interface QualityMenuProps extends Omit<
-  PropsOf<typeof Submenu>,
-  'children' | 'icon' | 'label' | 'selectedLabel'
-> {}
+export interface QualityMenuProps extends Omit<PropsOf<typeof Submenu>, 'children' | 'icon' | 'label'> {}
 
 export function QualityMenu(props: QualityMenuProps = {}) {
   return (
     <Submenu
       icon={<media-icon name="switches" class={"size-media-icon shrink-0 drop-shadow-[0_1px_0_var(--media-shadow-current-color)] group-hover/menu-trigger-item:text-inherit group-data-highlighted/menu-trigger-item:text-inherit text-current/65"} />}
       label={<media-text token={qualityText.key}>{qualityText.text}</media-text>}
-      selectedLabel={<span class={"max-w-24 overflow-hidden text-ellipsis whitespace-nowrap"} data-part="hint" />}
       {...props}
     >
       <QualityRadioGroup>
@@ -7290,23 +7084,21 @@ export function Submenu({
   children,
   icon,
   label,
-  selectedLabel,
   className,
   ...props
 }: PropsWithChildren<MenuProps> & {
   icon: VjscNode;
   label: VjscNode;
-  selectedLabel: VjscNode;
 }) {
   return (
-    <Scope prefix="<module>-d7"><><media-menu-item commandfor="__vjsc-id-<module>-d7-content" class={"group/menu-trigger-item relative flex cursor-pointer select-none items-center gap-1.5 rounded-(--media-menu-item-border-radius) px-2 py-1.5 text-start whitespace-nowrap outline-2 -outline-offset-2 outline-transparent hover:bg-media-control-hover hover:text-media-accent-text data-highlighted:bg-media-control-hover data-highlighted:text-media-accent-text focus-visible:outline-white focus-visible:outline-offset-2 text-shadow-[0_1px_0_var(--media-shadow-current-color)] transition-[background-color,color] duration-100 [transition-timing-function:ease-in-out] motion-reduce:duration-50 supports-[top:anchor(top)]:duration-50 supports-[top:anchor(top)]:hover:duration-200 supports-[top:anchor(top)]:data-highlighted:duration-200 justify-between tabular-nums text-inherit data-[availability=unavailable]:hidden data-[availability=unsupported]:hidden aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 supports-[top:anchor(top)]:data-highlighted:[anchor-name:--media-menu-item-highlight-anchor] supports-[top:anchor(top)]:data-highlighted:bg-transparent"}>
+    <Scope prefix="<module>-bz"><><media-menu-item commandfor="__vjsc-id-<module>-bz-content" class={"group/menu-trigger-item relative flex cursor-pointer select-none items-center gap-1.5 rounded-(--media-menu-item-border-radius) px-2 py-1.5 text-start whitespace-nowrap outline-2 -outline-offset-2 outline-transparent hover:bg-media-control-hover hover:text-media-accent-text data-highlighted:bg-media-control-hover data-highlighted:text-media-accent-text focus-visible:outline-white focus-visible:outline-offset-2 text-shadow-[0_1px_0_var(--media-shadow-current-color)] transition-[background-color,color] duration-100 [transition-timing-function:ease-in-out] motion-reduce:duration-50 supports-[top:anchor(top)]:duration-50 supports-[top:anchor(top)]:hover:duration-200 supports-[top:anchor(top)]:data-highlighted:duration-200 justify-between tabular-nums text-inherit data-[availability=unavailable]:hidden data-[availability=unsupported]:hidden aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 supports-[top:anchor(top)]:data-highlighted:[anchor-name:--media-menu-item-highlight-anchor] supports-[top:anchor(top)]:data-highlighted:bg-transparent"}>
         {icon}
         {label}
         <span class={"ms-auto inline-flex min-w-0 items-center gap-1 ps-2 text-current/65"}>
-          {selectedLabel}
+          <span className={"max-w-24 overflow-hidden text-ellipsis whitespace-nowrap"} data-part="value" />
           <MenuChevron />
         </span>
-      </media-menu-item><media-menu-content id="__vjsc-id-<module>-d7-content" class={["[anchor-scope:--media-menu-item-highlight-anchor]", "supports-[top:anchor(top)]:before:absolute", "supports-[top:anchor(top)]:before:[position-anchor:--media-menu-item-highlight-anchor]", "supports-[top:anchor(top)]:before:[inset:anchor(inside)]", "supports-[top:anchor(top)]:before:[overflow-anchor:none]", "supports-[top:anchor(top)]:before:pointer-events-none", "supports-[top:anchor(top)]:before:rounded-(--media-menu-item-border-radius)", "supports-[top:anchor(top)]:before:bg-media-control-hover", "supports-[top:anchor(top)]:before:transition-[inset] supports-[top:anchor(top)]:before:duration-100 supports-[top:anchor(top)]:before:[transition-timing-function:ease-in-out]", "supports-[top:anchor(top)]:has-data-[highlighted=]:before:duration-0", "absolute max-h-[inherit] overflow-auto overscroll-none outline-none", "not-data-submenu:flex not-data-submenu:flex-col not-data-submenu:gap-0.5", "transition-[translate,filter] duration-(--media-menu-transition-duration) ease-out", "not-data-submenu:inset-x-1 not-data-submenu:top-1", "not-data-submenu:[--media-menu-parent-translate:-100%]", "not-data-submenu:[&:dir(rtl)]:[--media-menu-parent-translate:100%]", "not-data-submenu:data-[child-open]:[translate:var(--media-menu-parent-translate)_0]", "not-data-submenu:data-[child-open]:blur-sm", "not-data-submenu:data-[child-open]:before:hidden", "data-submenu:inset-x-0 data-submenu:top-0 data-submenu:z-10 data-submenu:[max-height:inherit] data-submenu:p-1", "data-submenu:[--media-submenu-translate:100%] data-submenu:[&:dir(rtl)]:[--media-submenu-translate:-100%]", "data-submenu:data-starting-style:pointer-events-none data-submenu:data-ending-style:pointer-events-none", "data-submenu:data-starting-style:overflow-hidden data-submenu:data-ending-style:overflow-hidden", "data-submenu:data-starting-style:[translate:var(--media-submenu-translate)_0]", "data-submenu:data-ending-style:[translate:var(--media-submenu-translate)_0]", "data-submenu:data-starting-style:blur-sm data-submenu:data-ending-style:blur-sm", className]}>
+      </media-menu-item><media-menu-content id="__vjsc-id-<module>-bz-content" class={["[anchor-scope:--media-menu-item-highlight-anchor]", "supports-[top:anchor(top)]:before:absolute", "supports-[top:anchor(top)]:before:[position-anchor:--media-menu-item-highlight-anchor]", "supports-[top:anchor(top)]:before:[inset:anchor(inside)]", "supports-[top:anchor(top)]:before:[overflow-anchor:none]", "supports-[top:anchor(top)]:before:pointer-events-none", "supports-[top:anchor(top)]:before:rounded-(--media-menu-item-border-radius)", "supports-[top:anchor(top)]:before:bg-media-control-hover", "supports-[top:anchor(top)]:before:transition-[inset] supports-[top:anchor(top)]:before:duration-100 supports-[top:anchor(top)]:before:[transition-timing-function:ease-in-out]", "supports-[top:anchor(top)]:has-data-[highlighted=]:before:duration-0", "absolute max-h-[inherit] overflow-auto overscroll-none outline-none", "not-data-submenu:flex not-data-submenu:flex-col not-data-submenu:gap-0.5", "transition-[translate,filter] duration-(--media-menu-transition-duration) ease-out", "not-data-submenu:inset-x-1 not-data-submenu:top-1", "not-data-submenu:[--media-menu-parent-translate:-100%]", "not-data-submenu:[&:dir(rtl)]:[--media-menu-parent-translate:100%]", "not-data-submenu:data-[child-open]:[translate:var(--media-menu-parent-translate)_0]", "not-data-submenu:data-[child-open]:blur-sm", "not-data-submenu:data-[child-open]:before:hidden", "data-submenu:inset-x-0 data-submenu:top-0 data-submenu:z-10 data-submenu:[max-height:inherit] data-submenu:p-1", "data-submenu:[--media-submenu-translate:100%] data-submenu:[&:dir(rtl)]:[--media-submenu-translate:-100%]", "data-submenu:data-starting-style:pointer-events-none data-submenu:data-ending-style:pointer-events-none", "data-submenu:data-starting-style:overflow-hidden data-submenu:data-ending-style:overflow-hidden", "data-submenu:data-starting-style:[translate:var(--media-submenu-translate)_0]", "data-submenu:data-ending-style:[translate:var(--media-submenu-translate)_0]", "data-submenu:data-starting-style:blur-sm data-submenu:data-ending-style:blur-sm", className]}>
         <media-menu-item className={"group/menu-back-item relative flex cursor-pointer select-none items-center gap-1.5 rounded-(--media-menu-item-border-radius) px-2 py-1.5 text-start whitespace-nowrap outline-2 -outline-offset-2 outline-transparent hover:bg-media-control-hover hover:text-media-accent-text data-highlighted:bg-media-control-hover data-highlighted:text-media-accent-text focus-visible:outline-white focus-visible:outline-offset-2 text-shadow-[0_1px_0_var(--media-shadow-current-color)] transition-[background-color,color] duration-100 [transition-timing-function:ease-in-out] motion-reduce:duration-50 supports-[top:anchor(top)]:duration-50 supports-[top:anchor(top)]:hover:duration-200 supports-[top:anchor(top)]:data-highlighted:duration-200 mb-0.5 w-full"}>
           <MenuChevron back />
           {label}
@@ -8233,17 +8025,13 @@ registerIcons("minimal", { "speech": speechIcon });
 
 
 
-export interface AudioTrackMenuProps extends Omit<
-  PropsOf<typeof Submenu>,
-  'children' | 'icon' | 'label' | 'selectedLabel'
-> {}
+export interface AudioTrackMenuProps extends Omit<PropsOf<typeof Submenu>, 'children' | 'icon' | 'label'> {}
 
 export function AudioTrackMenu(props: AudioTrackMenuProps = {}) {
   return (
     <Submenu
       icon={<media-icon family="minimal" name="speech" class={"media-menu-trigger-item-icon"} />}
       label={<media-text token={audioText.key}>{audioText.text}</media-text>}
-      selectedLabel={<span class={"media-menu-hint-label"} data-part="hint" />}
       {...props}
     >
       <AudioTrackRadioGroup>
@@ -8277,17 +8065,13 @@ registerIcons("minimal", { "captions-off": captionsOffIcon });
 
 
 
-export interface CaptionsMenuProps extends Omit<
-  PropsOf<typeof Submenu>,
-  'children' | 'icon' | 'label' | 'selectedLabel'
-> {}
+export interface CaptionsMenuProps extends Omit<PropsOf<typeof Submenu>, 'children' | 'icon' | 'label'> {}
 
 export function CaptionsMenu(props: CaptionsMenuProps = {}) {
   return (
     <Submenu
       icon={<media-icon family="minimal" name="captions-off" class={"media-menu-trigger-item-icon"} />}
       label={<media-text token={captionsText.key}>{captionsText.text}</media-text>}
-      selectedLabel={<span class={"media-menu-hint-label"} data-part="hint" />}
       {...props}
     >
       <CaptionsRadioGroup>
@@ -8339,17 +8123,13 @@ registerIcons("minimal", { "speed": speedIcon });
 
 
 
-export interface PlaybackRateMenuProps extends Omit<
-  PropsOf<typeof Submenu>,
-  'children' | 'icon' | 'label' | 'selectedLabel'
-> {}
+export interface PlaybackRateMenuProps extends Omit<PropsOf<typeof Submenu>, 'children' | 'icon' | 'label'> {}
 
 export function PlaybackRateMenu(props: PlaybackRateMenuProps = {}) {
   return (
     <Submenu
       icon={<media-icon family="minimal" name="speed" class={"media-menu-trigger-item-icon"} />}
       label={<media-text token={speedText.key}>{speedText.text}</media-text>}
-      selectedLabel={<span class={"media-menu-hint-label"} data-part="hint" />}
       {...props}
     >
       <PlaybackRateRadioGroup>
@@ -8383,17 +8163,13 @@ registerIcons("minimal", { "switches": switchesIcon });
 
 
 
-export interface QualityMenuProps extends Omit<
-  PropsOf<typeof Submenu>,
-  'children' | 'icon' | 'label' | 'selectedLabel'
-> {}
+export interface QualityMenuProps extends Omit<PropsOf<typeof Submenu>, 'children' | 'icon' | 'label'> {}
 
 export function QualityMenu(props: QualityMenuProps = {}) {
   return (
     <Submenu
       icon={<media-icon family="minimal" name="switches" class={"media-menu-trigger-item-icon"} />}
       label={<media-text token={qualityText.key}>{qualityText.text}</media-text>}
-      selectedLabel={<span class={"media-menu-hint-label"} data-part="hint" />}
       {...props}
     >
       <QualityRadioGroup>
@@ -8540,23 +8316,21 @@ export function Submenu({
   children,
   icon,
   label,
-  selectedLabel,
   className,
   ...props
 }: PropsWithChildren<MenuProps> & {
   icon: VjscNode;
   label: VjscNode;
-  selectedLabel: VjscNode;
 }) {
   return (
-    <Scope prefix="<module>-fz"><><media-menu-item commandfor="__vjsc-id-<module>-fz-content" class={"media-menu-trigger-item"}>
+    <Scope prefix="<module>-er"><><media-menu-item commandfor="__vjsc-id-<module>-er-content" class={"media-menu-trigger-item"}>
         {icon}
         {label}
         <span class={"media-menu-hint"}>
-          {selectedLabel}
+          <span className={"media-menu-hint-label"} data-part="value" />
           <MenuChevron />
         </span>
-      </media-menu-item><media-menu-content id="__vjsc-id-<module>-fz-content" class={["media-menu-content", className]}>
+      </media-menu-item><media-menu-content id="__vjsc-id-<module>-er-content" class={["media-menu-content", className]}>
         <media-menu-item className={"media-menu-back-item"}>
           <MenuChevron back />
           {label}
@@ -9435,17 +9209,13 @@ import "@videojs/html/i18n";
 registerIcons("minimal", { "speech": speechIcon });
 
 
-export interface AudioTrackMenuProps extends Omit<
-  PropsOf<typeof Submenu>,
-  'children' | 'icon' | 'label' | 'selectedLabel'
-> {}
+export interface AudioTrackMenuProps extends Omit<PropsOf<typeof Submenu>, 'children' | 'icon' | 'label'> {}
 
 export function AudioTrackMenu(props: AudioTrackMenuProps = {}) {
   return (
     <Submenu
       icon={<media-icon family="minimal" name="speech" class={"size-media-icon shrink-0 drop-shadow-[0_1px_0_var(--media-shadow-current-color)] group-hover/menu-trigger-item:text-inherit group-data-highlighted/menu-trigger-item:text-inherit text-current/50"} />}
       label={<media-text token={audioText.key}>{audioText.text}</media-text>}
-      selectedLabel={<span class={"max-w-24 overflow-hidden text-ellipsis whitespace-nowrap"} data-part="hint" />}
       {...props}
     >
       <AudioTrackRadioGroup>
@@ -9476,17 +9246,13 @@ import "@videojs/html/i18n";
 registerIcons("minimal", { "captions-off": captionsOffIcon });
 
 
-export interface CaptionsMenuProps extends Omit<
-  PropsOf<typeof Submenu>,
-  'children' | 'icon' | 'label' | 'selectedLabel'
-> {}
+export interface CaptionsMenuProps extends Omit<PropsOf<typeof Submenu>, 'children' | 'icon' | 'label'> {}
 
 export function CaptionsMenu(props: CaptionsMenuProps = {}) {
   return (
     <Submenu
       icon={<media-icon family="minimal" name="captions-off" class={"size-media-icon shrink-0 drop-shadow-[0_1px_0_var(--media-shadow-current-color)] group-hover/menu-trigger-item:text-inherit group-data-highlighted/menu-trigger-item:text-inherit text-current/50"} />}
       label={<media-text token={captionsText.key}>{captionsText.text}</media-text>}
-      selectedLabel={<span class={"max-w-24 overflow-hidden text-ellipsis whitespace-nowrap"} data-part="hint" />}
       {...props}
     >
       <CaptionsRadioGroup>
@@ -9532,17 +9298,13 @@ import "@videojs/html/i18n";
 registerIcons("minimal", { "speed": speedIcon });
 
 
-export interface PlaybackRateMenuProps extends Omit<
-  PropsOf<typeof Submenu>,
-  'children' | 'icon' | 'label' | 'selectedLabel'
-> {}
+export interface PlaybackRateMenuProps extends Omit<PropsOf<typeof Submenu>, 'children' | 'icon' | 'label'> {}
 
 export function PlaybackRateMenu(props: PlaybackRateMenuProps = {}) {
   return (
     <Submenu
       icon={<media-icon family="minimal" name="speed" class={"size-media-icon shrink-0 drop-shadow-[0_1px_0_var(--media-shadow-current-color)] group-hover/menu-trigger-item:text-inherit group-data-highlighted/menu-trigger-item:text-inherit text-current/50"} />}
       label={<media-text token={speedText.key}>{speedText.text}</media-text>}
-      selectedLabel={<span class={"max-w-24 overflow-hidden text-ellipsis whitespace-nowrap"} data-part="hint" />}
       {...props}
     >
       <PlaybackRateRadioGroup>
@@ -9573,17 +9335,13 @@ import "@videojs/html/i18n";
 registerIcons("minimal", { "switches": switchesIcon });
 
 
-export interface QualityMenuProps extends Omit<
-  PropsOf<typeof Submenu>,
-  'children' | 'icon' | 'label' | 'selectedLabel'
-> {}
+export interface QualityMenuProps extends Omit<PropsOf<typeof Submenu>, 'children' | 'icon' | 'label'> {}
 
 export function QualityMenu(props: QualityMenuProps = {}) {
   return (
     <Submenu
       icon={<media-icon family="minimal" name="switches" class={"size-media-icon shrink-0 drop-shadow-[0_1px_0_var(--media-shadow-current-color)] group-hover/menu-trigger-item:text-inherit group-data-highlighted/menu-trigger-item:text-inherit text-current/50"} />}
       label={<media-text token={qualityText.key}>{qualityText.text}</media-text>}
-      selectedLabel={<span class={"max-w-24 overflow-hidden text-ellipsis whitespace-nowrap"} data-part="hint" />}
       {...props}
     >
       <QualityRadioGroup>
@@ -9715,23 +9473,21 @@ export function Submenu({
   children,
   icon,
   label,
-  selectedLabel,
   className,
   ...props
 }: PropsWithChildren<MenuProps> & {
   icon: VjscNode;
   label: VjscNode;
-  selectedLabel: VjscNode;
 }) {
   return (
-    <Scope prefix="<module>-d7"><><media-menu-item commandfor="__vjsc-id-<module>-d7-content" class={"group/menu-trigger-item relative flex cursor-pointer select-none items-center gap-1.5 rounded-(--media-menu-item-border-radius) px-2 py-1.5 text-start whitespace-nowrap outline-2 -outline-offset-2 outline-transparent hover:bg-media-control-hover hover:text-media-accent-text data-highlighted:bg-media-control-hover data-highlighted:text-media-accent-text focus-visible:outline-white focus-visible:outline-offset-2 text-shadow-[0_1px_0_var(--media-shadow-current-color)] transition-[background-color,color] duration-100 [transition-timing-function:ease-in-out] motion-reduce:duration-50 supports-[top:anchor(top)]:duration-50 supports-[top:anchor(top)]:hover:duration-200 supports-[top:anchor(top)]:data-highlighted:duration-200 justify-between tabular-nums text-inherit data-[availability=unavailable]:hidden data-[availability=unsupported]:hidden aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 supports-[top:anchor(top)]:data-highlighted:[anchor-name:--media-menu-item-highlight-anchor] supports-[top:anchor(top)]:data-highlighted:bg-transparent"}>
+    <Scope prefix="<module>-bz"><><media-menu-item commandfor="__vjsc-id-<module>-bz-content" class={"group/menu-trigger-item relative flex cursor-pointer select-none items-center gap-1.5 rounded-(--media-menu-item-border-radius) px-2 py-1.5 text-start whitespace-nowrap outline-2 -outline-offset-2 outline-transparent hover:bg-media-control-hover hover:text-media-accent-text data-highlighted:bg-media-control-hover data-highlighted:text-media-accent-text focus-visible:outline-white focus-visible:outline-offset-2 text-shadow-[0_1px_0_var(--media-shadow-current-color)] transition-[background-color,color] duration-100 [transition-timing-function:ease-in-out] motion-reduce:duration-50 supports-[top:anchor(top)]:duration-50 supports-[top:anchor(top)]:hover:duration-200 supports-[top:anchor(top)]:data-highlighted:duration-200 justify-between tabular-nums text-inherit data-[availability=unavailable]:hidden data-[availability=unsupported]:hidden aria-disabled:pointer-events-none aria-disabled:cursor-not-allowed aria-disabled:opacity-50 supports-[top:anchor(top)]:data-highlighted:[anchor-name:--media-menu-item-highlight-anchor] supports-[top:anchor(top)]:data-highlighted:bg-transparent"}>
         {icon}
         {label}
         <span class={"ms-auto inline-flex min-w-0 items-center gap-1 ps-2 text-current/65"}>
-          {selectedLabel}
+          <span className={"max-w-24 overflow-hidden text-ellipsis whitespace-nowrap"} data-part="value" />
           <MenuChevron />
         </span>
-      </media-menu-item><media-menu-content id="__vjsc-id-<module>-d7-content" class={["[anchor-scope:--media-menu-item-highlight-anchor]", "supports-[top:anchor(top)]:before:absolute", "supports-[top:anchor(top)]:before:[position-anchor:--media-menu-item-highlight-anchor]", "supports-[top:anchor(top)]:before:[inset:anchor(inside)]", "supports-[top:anchor(top)]:before:[overflow-anchor:none]", "supports-[top:anchor(top)]:before:pointer-events-none", "supports-[top:anchor(top)]:before:rounded-(--media-menu-item-border-radius)", "supports-[top:anchor(top)]:before:bg-media-control-hover", "supports-[top:anchor(top)]:before:transition-[inset] supports-[top:anchor(top)]:before:duration-100 supports-[top:anchor(top)]:before:[transition-timing-function:ease-in-out]", "supports-[top:anchor(top)]:has-data-[highlighted=]:before:duration-0", "absolute max-h-[inherit] overflow-auto overscroll-none outline-none", "not-data-submenu:flex not-data-submenu:flex-col not-data-submenu:gap-0.5", "transition-[translate,filter] duration-(--media-menu-transition-duration) ease-out", "not-data-submenu:inset-x-1 not-data-submenu:top-1", "not-data-submenu:[--media-menu-parent-translate:-100%]", "not-data-submenu:[&:dir(rtl)]:[--media-menu-parent-translate:100%]", "not-data-submenu:data-[child-open]:[translate:var(--media-menu-parent-translate)_0]", "not-data-submenu:data-[child-open]:blur-sm", "not-data-submenu:data-[child-open]:before:hidden", "data-submenu:inset-x-0 data-submenu:top-0 data-submenu:z-10 data-submenu:[max-height:inherit] data-submenu:p-1", "data-submenu:[--media-submenu-translate:100%] data-submenu:[&:dir(rtl)]:[--media-submenu-translate:-100%]", "data-submenu:data-starting-style:pointer-events-none data-submenu:data-ending-style:pointer-events-none", "data-submenu:data-starting-style:overflow-hidden data-submenu:data-ending-style:overflow-hidden", "data-submenu:data-starting-style:[translate:var(--media-submenu-translate)_0]", "data-submenu:data-ending-style:[translate:var(--media-submenu-translate)_0]", "data-submenu:data-starting-style:blur-sm data-submenu:data-ending-style:blur-sm", className]}>
+      </media-menu-item><media-menu-content id="__vjsc-id-<module>-bz-content" class={["[anchor-scope:--media-menu-item-highlight-anchor]", "supports-[top:anchor(top)]:before:absolute", "supports-[top:anchor(top)]:before:[position-anchor:--media-menu-item-highlight-anchor]", "supports-[top:anchor(top)]:before:[inset:anchor(inside)]", "supports-[top:anchor(top)]:before:[overflow-anchor:none]", "supports-[top:anchor(top)]:before:pointer-events-none", "supports-[top:anchor(top)]:before:rounded-(--media-menu-item-border-radius)", "supports-[top:anchor(top)]:before:bg-media-control-hover", "supports-[top:anchor(top)]:before:transition-[inset] supports-[top:anchor(top)]:before:duration-100 supports-[top:anchor(top)]:before:[transition-timing-function:ease-in-out]", "supports-[top:anchor(top)]:has-data-[highlighted=]:before:duration-0", "absolute max-h-[inherit] overflow-auto overscroll-none outline-none", "not-data-submenu:flex not-data-submenu:flex-col not-data-submenu:gap-0.5", "transition-[translate,filter] duration-(--media-menu-transition-duration) ease-out", "not-data-submenu:inset-x-1 not-data-submenu:top-1", "not-data-submenu:[--media-menu-parent-translate:-100%]", "not-data-submenu:[&:dir(rtl)]:[--media-menu-parent-translate:100%]", "not-data-submenu:data-[child-open]:[translate:var(--media-menu-parent-translate)_0]", "not-data-submenu:data-[child-open]:blur-sm", "not-data-submenu:data-[child-open]:before:hidden", "data-submenu:inset-x-0 data-submenu:top-0 data-submenu:z-10 data-submenu:[max-height:inherit] data-submenu:p-1", "data-submenu:[--media-submenu-translate:100%] data-submenu:[&:dir(rtl)]:[--media-submenu-translate:-100%]", "data-submenu:data-starting-style:pointer-events-none data-submenu:data-ending-style:pointer-events-none", "data-submenu:data-starting-style:overflow-hidden data-submenu:data-ending-style:overflow-hidden", "data-submenu:data-starting-style:[translate:var(--media-submenu-translate)_0]", "data-submenu:data-ending-style:[translate:var(--media-submenu-translate)_0]", "data-submenu:data-starting-style:blur-sm data-submenu:data-ending-style:blur-sm", className]}>
         <media-menu-item className={"group/menu-back-item relative flex cursor-pointer select-none items-center gap-1.5 rounded-(--media-menu-item-border-radius) px-2 py-1.5 text-start whitespace-nowrap outline-2 -outline-offset-2 outline-transparent hover:bg-media-control-hover hover:text-media-accent-text data-highlighted:bg-media-control-hover data-highlighted:text-media-accent-text focus-visible:outline-white focus-visible:outline-offset-2 text-shadow-[0_1px_0_var(--media-shadow-current-color)] transition-[background-color,color] duration-100 [transition-timing-function:ease-in-out] motion-reduce:duration-50 supports-[top:anchor(top)]:duration-50 supports-[top:anchor(top)]:hover:duration-200 supports-[top:anchor(top)]:data-highlighted:duration-200 mb-0.5 w-full"}>
           <MenuChevron back />
           {label}

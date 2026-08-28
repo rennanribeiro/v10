@@ -16,3 +16,4 @@ export { MenuRadioItem as RadioItem, type MenuRadioItemProps as RadioItemProps }
 export { MenuRoot as Root, type MenuRootProps as RootProps } from './menu-root';
 export { MenuSeparator as Separator, type MenuSeparatorProps as SeparatorProps } from './menu-separator';
 export { MenuTrigger as Trigger, type MenuTriggerProps as TriggerProps } from './menu-trigger';
+export { MenuValue as Value, type MenuValueProps as ValueProps } from './menu-value';

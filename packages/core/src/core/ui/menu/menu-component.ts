@@ -1,6 +1,13 @@
 import { defineComponent } from 'vjsc/components';
 
-import type { MenuItemIndicatorProps, MenuItemProps, MenuProps, MenuTriggerProps } from './core';
+import type {
+  MenuContentProps,
+  MenuItemIndicatorProps,
+  MenuItemProps,
+  MenuPopupProps,
+  MenuProps,
+  MenuTriggerProps,
+} from './core';
 import { MenuDataAttrs } from './data';
 
 export default defineComponent({
@@ -9,8 +16,9 @@ export default defineComponent({
   parts: {
     Root: defineComponent<MenuProps>(),
     Trigger: defineComponent<MenuTriggerProps>(),
-    Popup: defineComponent(),
-    Content: defineComponent(),
+    Popup: defineComponent<MenuPopupProps>(),
+    Content: defineComponent<MenuContentProps>(),
+    Value: defineComponent(),
     Group: defineComponent(),
     GroupLabel: defineComponent(),
     Item: defineComponent<MenuItemProps>(),

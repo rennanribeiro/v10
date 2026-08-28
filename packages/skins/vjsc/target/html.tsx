@@ -165,6 +165,8 @@ export const htmlComponentTarget: ComponentTarget<CoreSchema> = defineComponentT
       SliderTrack: Div,
     },
     resolve: ({ component, part }) => {
+      if (component === 'Menu' && part === 'Value') return Span;
+
       const name = part ? componentParts[component]?.[part] : component === 'Container' ? 'MediaContainer' : component;
 
       return name ? htmlElementTarget(name, element) : undefined;
@@ -189,7 +191,7 @@ export const htmlComponentTarget: ComponentTarget<CoreSchema> = defineComponentT
               )
             ),
             popup.replaceWith(
-              <target.Menu.Popup id={controlledId} {...props.merge(popup.props)}>
+              <target.Menu.Popup id={controlledId} {...props.merge(popup.props.omit('keepMounted'))}>
                 {popup.children}
               </target.Menu.Popup>
             ),
@@ -205,7 +207,7 @@ export const htmlComponentTarget: ComponentTarget<CoreSchema> = defineComponentT
             </target.Menu.Item>
           ),
           content.replaceWith(
-            <target.Menu.Content id={controlledId} {...content.props}>
+            <target.Menu.Content id={controlledId} {...content.props.omit('keepMounted')}>
               {content.children}
             </target.Menu.Content>
           ),

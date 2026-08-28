@@ -1,4 +1,11 @@
-import { MenuCore, type MenuInput, MenuPopupDataAttrs, POPUP_HOST_ATTR } from '@videojs/core';
+import {
+  MenuCore,
+  type MenuInput,
+  type MenuOptionState,
+  MenuPopupDataAttrs,
+  POPUP_HOST_ATTR,
+  resolveMenuOptionState,
+} from '@videojs/core';
 import {
   applyElementProps,
   applyStateDataAttrs,
@@ -68,6 +75,8 @@ export class MenuElement extends UIElement {
   #triggerAbort: AbortController | null = null;
   #currentTrigger: HTMLElement | null = null;
   #releaseControlsLock: (() => void) | null = null;
+  readonly #optionStates = new Map<symbol, MenuOptionState>();
+  #optionState: MenuOptionState | null = null;
 
   get menu(): MenuApi | null {
     return this.#menu;
@@ -174,6 +183,7 @@ export class MenuElement extends UIElement {
 
     if (this.#currentTrigger) {
       applyElementProps(this.#currentTrigger, this.#core.getTriggerAttrs(state, this.#menu.contentElement?.id));
+      this.#syncOptionState(this.#currentTrigger);
     }
 
     if (!state.open) {
@@ -201,7 +211,7 @@ export class MenuElement extends UIElement {
       menu: this.#menu,
       popup: this.#popup,
       state,
-      setTriggerState: () => {},
+      setOptionState: this.#setOptionState,
     });
   }
 
@@ -225,7 +235,32 @@ export class MenuElement extends UIElement {
     if (triggerElement && this.#menu) {
       this.#triggerAbort = new AbortController();
       applyElementProps(triggerElement, this.#menu.triggerProps, { signal: this.#triggerAbort.signal });
+      this.#syncOptionState(triggerElement);
     }
+  }
+
+  #setOptionState = (source: symbol, optionState: MenuOptionState | null): void => {
+    const previous = this.#optionStates.get(source);
+    if (optionState && isSameOptionState(previous, optionState)) return;
+
+    if (!optionState && !previous) return;
+
+    if (optionState) this.#optionStates.set(source, optionState);
+    else this.#optionStates.delete(source);
+
+    this.#optionState = resolveMenuOptionState(this.#optionStates.values());
+    this.#syncOptionState(this.#currentTrigger);
+  };
+
+  #syncOptionState(trigger: HTMLElement | null): void {
+    if (!trigger) return;
+
+    applyElementProps(trigger, {
+      'data-availability': this.#optionState?.availability,
+    });
+    const value = trigger.querySelector<HTMLElement>('[data-part~="value"], [data-part~="hint"]');
+
+    if (value && value.textContent !== this.#optionState?.value) value.textContent = this.#optionState?.value ?? '';
   }
 
   #cleanupTrigger(): void {
@@ -234,11 +269,19 @@ export class MenuElement extends UIElement {
         'aria-expanded': undefined,
         'aria-haspopup': undefined,
         'aria-controls': undefined,
+        'data-availability': undefined,
       });
+      const value = this.#currentTrigger.querySelector<HTMLElement>('[data-part~="value"], [data-part~="hint"]');
+
+      if (value?.textContent) value.textContent = '';
     }
 
     this.#triggerAbort?.abort();
     this.#triggerAbort = null;
     this.#currentTrigger = null;
   }
+}
+
+function isSameOptionState(a: MenuOptionState | undefined, b: MenuOptionState): boolean {
+  return a?.value === b.value && a.disabled === b.disabled && a.availability === b.availability;
 }

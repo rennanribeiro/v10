@@ -7,17 +7,13 @@ import { CaptionsRadioGroup } from './radio-group';
 import { RadioItem } from './radio-item';
 import { Submenu } from './submenu';
 
-export interface CaptionsMenuProps extends Omit<
-  PropsOf<typeof Submenu>,
-  'children' | 'icon' | 'label' | 'selectedLabel'
-> {}
+export interface CaptionsMenuProps extends Omit<PropsOf<typeof Submenu>, 'children' | 'icon' | 'label'> {}
 
 export function CaptionsMenu(props: CaptionsMenuProps = {}) {
   return (
     <Submenu
       icon={<CaptionsOffIcon className={styles.triggerItemIcon} />}
       label={<Text token={captionsText.key}>{captionsText.text}</Text>}
-      selectedLabel={<Text className={styles.hintLabel} data-part="hint" />}
       {...props}
     >
       <CaptionsRadioGroup>

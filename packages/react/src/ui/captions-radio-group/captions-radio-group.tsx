@@ -5,6 +5,7 @@ import type { ReactElement } from 'react';
 import { Fragment, forwardRef } from 'react';
 
 import type { HTMLProps, UIComponentProps } from '../../utils/types';
+import { useMenuOptionState } from '../menu/context';
 import { MenuRadioGroup } from '../menu/menu-radio-group';
 import type { MenuRadioItemProps } from '../menu/menu-radio-item';
 import { type CaptionsOption, type CaptionsOptionsProps, useCaptionsOptions } from './use-captions-options';
@@ -55,6 +56,13 @@ export const CaptionsRadioGroup = forwardRef<HTMLDivElement, CaptionsRadioGroupP
       ...elementProps
     } = componentProps;
     const captions = useCaptionsOptions({ label, formatTrack, disabled });
+
+    useMenuOptionState({
+      value: captions?.selectedLabel ?? '',
+      disabled: captions?.disabled ?? true,
+      availability: captions?.state.availability ?? 'unsupported',
+    });
+
     if (!captions) return null;
 
     const { state, value, options, setValue } = captions;

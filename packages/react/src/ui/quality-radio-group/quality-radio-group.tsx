@@ -5,6 +5,7 @@ import type { ReactElement } from 'react';
 import { Fragment, forwardRef } from 'react';
 
 import type { HTMLProps, UIComponentProps } from '../../utils/types';
+import { useMenuOptionState } from '../menu/context';
 import { MenuRadioGroup } from '../menu/menu-radio-group';
 import type { MenuRadioItemProps } from '../menu/menu-radio-item';
 import { type QualityOption, type QualityOptionsProps, useQualityOptions } from '../quality/use-quality-options';
@@ -56,6 +57,13 @@ export const QualityRadioGroup = forwardRef<HTMLDivElement, QualityRadioGroupPro
       ...elementProps
     } = componentProps;
     const quality = useQualityOptions({ label, formatRendition, disabled });
+
+    useMenuOptionState({
+      value: quality?.selectedLabel ?? '',
+      disabled: quality?.disabled ?? true,
+      availability: quality?.state.availability ?? 'unsupported',
+    });
+
     if (!quality) return null;
 
     const { state, value, options, setValue } = quality;
