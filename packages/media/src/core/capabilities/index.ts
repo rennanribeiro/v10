@@ -16,6 +16,5 @@ export * from './seek';
 export * from './source';
 export * from './stream-type';
 export * from './text-track';
-export * from './title';
 export * from './video-dimensions';
 export * from './volume';

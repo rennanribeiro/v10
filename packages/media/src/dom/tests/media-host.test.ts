@@ -104,11 +104,11 @@ describe('HTMLMediaElementHost', () => {
       expect(host.contentData).toBeUndefined();
     });
 
-    it('reads content data independently from the legacy title property', () => {
+    it('reads content data independently from the media element title', () => {
       const host = new HTMLAudioElementHost();
       const audio = document.createElement('audio');
 
-      audio.title = 'Legacy title';
+      audio.title = 'Element tooltip';
       host.attach(audio);
 
       expect(host.contentData).toBeUndefined();
@@ -116,7 +116,8 @@ describe('HTMLMediaElementHost', () => {
       addMediaComponent(host, new ContentDataOverride());
 
       expect(host.contentData).toEqual({ title: 'Component title' });
-      expect(host.title).toBe('Legacy title');
+      // An element's `title` is its tooltip, never content metadata.
+      expect(audio.title).toBe('Element tooltip');
     });
 
     it('writes setter values to the override when it owns the property', () => {

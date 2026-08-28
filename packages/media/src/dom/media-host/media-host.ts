@@ -16,7 +16,6 @@ import {
   sourceCapability,
   streamTypeCapability,
   textTrackCapability,
-  titleCapability,
   volumeCapability,
 } from '../../core/capabilities';
 import type { EventLike, MediaFull } from '../../core/types';
@@ -56,7 +55,6 @@ export const htmlMediaElementCapabilities = [
   remotePlaybackCapability,
   controlsCapability,
   autoplayCapability,
-  titleCapability,
 ] as const;
 
 const HTMLMediaElementHostBase = createMediaHost(htmlMediaElementCapabilities);
