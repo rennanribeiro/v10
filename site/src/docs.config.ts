@@ -99,8 +99,24 @@ export const sidebar: Sidebar = [
   {
     sidebarLabel: 'API Reference',
     llmsDescription:
-      'Reference for every public export, grouped by what it is: UI components, media components, player features, and utilities.',
+      'Reference for every public export, grouped by what it is: skins, UI components, media components, player features, and utilities.',
     contents: [
+      {
+        sidebarLabel: 'Skins',
+        defaultOpen: false,
+        llmsDescription: 'API reference for the packaged skins each preset ships.',
+        contents: [
+          { slug: 'reference/video-skin' },
+          { slug: 'reference/video-minimal-skin' },
+          { slug: 'reference/audio-skin' },
+          { slug: 'reference/audio-minimal-skin' },
+          { slug: 'reference/live-video-skin' },
+          { slug: 'reference/live-video-minimal-skin' },
+          { slug: 'reference/live-audio-skin' },
+          { slug: 'reference/live-audio-minimal-skin' },
+          { slug: 'reference/background-video-skin' },
+        ],
+      },
       {
         sidebarLabel: 'UI Components',
         defaultOpen: false,

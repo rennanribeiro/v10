@@ -1,0 +1,44 @@
+---
+title: LiveAudioSkin
+frameworkTitle:
+  html: live-audio-skin
+description: The live audio preset's default skin, which swaps time controls for a Live button
+---
+
+import DocsLink from '@/components/docs/DocsLink.astro';
+import FrameworkCase from '@/components/docs/FrameworkCase.astro';
+import SkinImports from '@/components/docs/api-reference/SkinImports.astro';
+
+The default skin of the live audio preset: the audio layout with the time slider and time displays swapped for a Live button. <DocsLink slug="reference/live-audio-minimal-skin">MinimalLiveAudioSkin</DocsLink> is the same preset's other variant. See <DocsLink slug="concepts/skins">Skins</DocsLink> for how packaged skins work and <DocsLink slug="concepts/presets">Presets</DocsLink> for what the live audio preset ships.
+
+## Import
+
+<SkinImports preset="live-audio" react="LiveAudioSkin" />
+
+## Usage
+
+The skin nests between the player and the media element and renders its controls around the media it wraps.
+
+<FrameworkCase frameworks={["react"]}>
+```tsx
+<LiveAudioPlayer>
+  <LiveAudioSkin>
+    <Audio src="live.m3u8" />
+  </LiveAudioSkin>
+</LiveAudioPlayer>
+```
+</FrameworkCase>
+
+<FrameworkCase frameworks={["html"]}>
+```html
+<live-audio-player>
+  <live-audio-skin>
+    <audio src="live.m3u8"></audio>
+  </live-audio-skin>
+</live-audio-player>
+```
+</FrameworkCase>
+
+## Styling
+
+Packaged skins style themselves and expose four CSS custom properties: `--media-accent-color`, `--media-accent-text-color`, `--media-border-radius`, and `--media-scale-unit`. Everything else inside the skin is private and may change between releases. <DocsLink slug="how-to/customize-skins">Customize skins</DocsLink> covers the properties and the ejection path when you need deeper changes.

@@ -1,0 +1,54 @@
+---
+import type { BundledLanguage } from 'shiki';
+
+import ServerCode from '@/components/Code/ServerCode.astro';
+import CodeFrame from '@/components/typography/CodeFrame.astro';
+import MarkdownCode from '@/components/typography/MarkdownCode.astro';
+import P from '@/components/typography/P.astro';
+import DocsLink from '../DocsLink.astro';
+import FrameworkCase from '../FrameworkCase.astro';
+
+interface Props {
+  /** Preset subpath the skin ships from: `video`, `audio`, `live-video`, `live-audio`, or `background`. */
+  preset: string;
+  /** Named export from `@videojs/react/<preset>`. */
+  react: string;
+  /** Whether this is the preset's minimal variant, shipped as `minimal-skin`. */
+  minimal?: boolean;
+}
+
+const { preset, react, minimal = false } = Astro.props;
+const module = minimal ? 'minimal-skin' : 'skin';
+const bundle = preset === 'background' ? 'background' : `${preset}${minimal ? '-minimal' : ''}`;
+
+const imports: Array<{ code: string; framework: 'react' | 'html'; lang: BundledLanguage }> = [
+  {
+    code: `import { ${react} } from '@videojs/react/${preset}';\nimport '@videojs/react/${preset}/${module}.css';`,
+    framework: 'react',
+    lang: 'tsx',
+  },
+  {
+    code: `import '@videojs/html/${preset}/${module}';`,
+    framework: 'html',
+    lang: 'ts',
+  },
+];
+---
+
+{
+  imports.map(({ code, framework, lang }) => (
+    <FrameworkCase frameworks={[framework]}>
+      <CodeFrame lang={lang}>
+        <ServerCode code={code} lang={lang} />
+      </CodeFrame>
+    </FrameworkCase>
+  ))
+}
+
+<FrameworkCase frameworks={['html']}>
+  <P>
+    The import registers the skin and every UI element it composes. On a CDN page, the{' '}
+    <MarkdownCode>{bundle}.js</MarkdownCode> player bundle registers this skin together with its player — see{' '}
+    <DocsLink slug="concepts/cdn">CDN</DocsLink>.
+  </P>
+</FrameworkCase>

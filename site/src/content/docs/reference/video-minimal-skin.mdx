@@ -1,0 +1,56 @@
+---
+title: MinimalVideoSkin
+frameworkTitle:
+  html: video-minimal-skin
+description: The video preset's minimal skin with a smaller control set
+---
+
+import DocsLink from '@/components/docs/DocsLink.astro';
+import FrameworkCase from '@/components/docs/FrameworkCase.astro';
+import SkinImports from '@/components/docs/api-reference/SkinImports.astro';
+
+The minimal skin of the video preset: the same player with a smaller control set. <DocsLink slug="reference/video-skin">VideoSkin</DocsLink> is the same preset's other variant. See <DocsLink slug="concepts/skins">Skins</DocsLink> for how packaged skins work and <DocsLink slug="concepts/presets">Presets</DocsLink> for what the video preset ships.
+
+## Import
+
+<SkinImports preset="video" react="MinimalVideoSkin" minimal />
+
+## Usage
+
+The skin nests between the player and the media element and renders its controls around the media it wraps.
+
+<FrameworkCase frameworks={["react"]}>
+```tsx
+<VideoPlayer>
+  <MinimalVideoSkin>
+    <Video src="video.mp4" />
+  </MinimalVideoSkin>
+</VideoPlayer>
+```
+</FrameworkCase>
+
+<FrameworkCase frameworks={["html"]}>
+```html
+<video-player>
+  <video-minimal-skin>
+    <video src="video.mp4"></video>
+  </video-minimal-skin>
+</video-player>
+```
+</FrameworkCase>
+
+## Poster
+
+<FrameworkCase frameworks={["react"]}>
+The skin renders a poster image before playback starts. Pass `renderPoster` to replace it with your own component.
+</FrameworkCase>
+
+<FrameworkCase frameworks={["html"]}>
+The skin renders a poster image before playback starts. An element with `slot="poster"` replaces it.
+</FrameworkCase>
+
+See <DocsLink slug="how-to/add-a-poster-and-loading-placeholder">Add a poster and loading placeholder</DocsLink> for complete examples.
+
+## Styling
+
+Packaged skins style themselves and expose four CSS custom properties: `--media-accent-color`, `--media-accent-text-color`, `--media-border-radius`, and `--media-scale-unit`. Everything else inside the skin is private and may change between releases. <DocsLink slug="how-to/customize-skins">Customize skins</DocsLink> covers the properties and the ejection path when you need deeper changes.

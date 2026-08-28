@@ -1,0 +1,44 @@
+---
+title: AudioSkin
+frameworkTitle:
+  html: audio-skin
+description: The audio preset's default skin with the full audio control layout
+---
+
+import DocsLink from '@/components/docs/DocsLink.astro';
+import FrameworkCase from '@/components/docs/FrameworkCase.astro';
+import SkinImports from '@/components/docs/api-reference/SkinImports.astro';
+
+The default skin of the audio preset: the complete control layout for on-demand audio. <DocsLink slug="reference/audio-minimal-skin">MinimalAudioSkin</DocsLink> is the same preset's other variant. See <DocsLink slug="concepts/skins">Skins</DocsLink> for how packaged skins work and <DocsLink slug="concepts/presets">Presets</DocsLink> for what the audio preset ships.
+
+## Import
+
+<SkinImports preset="audio" react="AudioSkin" />
+
+## Usage
+
+The skin nests between the player and the media element and renders its controls around the media it wraps.
+
+<FrameworkCase frameworks={["react"]}>
+```tsx
+<AudioPlayer>
+  <AudioSkin>
+    <Audio src="audio.mp3" />
+  </AudioSkin>
+</AudioPlayer>
+```
+</FrameworkCase>
+
+<FrameworkCase frameworks={["html"]}>
+```html
+<audio-player>
+  <audio-skin>
+    <audio src="audio.mp3"></audio>
+  </audio-skin>
+</audio-player>
+```
+</FrameworkCase>
+
+## Styling
+
+Packaged skins style themselves and expose four CSS custom properties: `--media-accent-color`, `--media-accent-text-color`, `--media-border-radius`, and `--media-scale-unit`. Everything else inside the skin is private and may change between releases. <DocsLink slug="how-to/customize-skins">Customize skins</DocsLink> covers the properties and the ejection path when you need deeper changes.
