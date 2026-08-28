@@ -54,6 +54,7 @@ export default {
     toggleElapsed: 'Växla mellan förfluten och återstående tid.',
     toggleDuration: 'Växla mellan varaktighet och återstående tid.',
     position: '{current} av {duration}',
+    unknown: 'Videon laddades inte, okänd tid.',
   },
   playback: {
     rate: 'Uppspelningshastighet {rate}',

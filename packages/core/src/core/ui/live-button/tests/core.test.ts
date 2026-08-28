@@ -1,4 +1,3 @@
-import { MediaReadyState } from '@videojs/media';
 import { describe, expect, it, vi } from 'vite-plus/test';
 
 import type { LiveButtonMediaState, LiveButtonState } from '../core';
@@ -6,7 +5,6 @@ import { LiveButtonCore } from '../core';
 
 function createMediaState(overrides: Partial<LiveButtonMediaState> = {}): LiveButtonMediaState {
   return {
-    readyState: MediaReadyState.HAVE_METADATA,
     currentTime: 0,
     seekable: [],
     liveEdgeStart: Number.NaN,
@@ -56,18 +54,17 @@ describe('LiveButtonCore', () => {
       expect(state.liveEdge).toBe(false);
     });
 
-    it('is disabled until metadata is loaded', () => {
+    it('is enabled when the live edge is seekable', () => {
       const core = new LiveButtonCore();
 
       core.setMedia(
         createMediaState({
-          readyState: MediaReadyState.HAVE_NOTHING,
           targetLiveWindow: 0,
           seekable: [[0, 100]],
         })
       );
 
-      expect(core.getState().disabled).toBe(true);
+      expect(core.getState().disabled).toBe(false);
     });
 
     it('reports live for low-latency live (`targetLiveWindow === 0`)', () => {
@@ -300,19 +297,6 @@ describe('LiveButtonCore', () => {
       });
 
       await core.seekToLive(media);
-      expect(media.seek).not.toHaveBeenCalled();
-    });
-
-    it('does nothing until metadata is loaded', async () => {
-      const core = new LiveButtonCore();
-      const media = createMediaState({
-        readyState: MediaReadyState.HAVE_NOTHING,
-        targetLiveWindow: 0,
-        seekable: [[0, 100]],
-      });
-
-      await core.seekToLive(media);
-
       expect(media.seek).not.toHaveBeenCalled();
     });
   });

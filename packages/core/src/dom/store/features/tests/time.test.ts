@@ -34,35 +34,6 @@ describe('timeFeature', () => {
       expect(store.state.duration).toBe(0);
     });
 
-    it('tracks metadata readiness', () => {
-      const video = createMockVideo({
-        duration: Number.NaN,
-        readyState: HTMLMediaElement.HAVE_NOTHING,
-      });
-      const store = createStore<PlayerTarget>()(timeFeature);
-
-      store.attach({ media: video, container: null });
-
-      expect(store.state.readyState).toBe(HTMLMediaElement.HAVE_NOTHING);
-
-      Object.defineProperty(video, 'readyState', {
-        value: HTMLMediaElement.HAVE_METADATA,
-        configurable: true,
-      });
-      Object.defineProperty(video, 'duration', { value: 100, configurable: true });
-      video.dispatchEvent(new Event('loadedmetadata'));
-
-      expect(store.state.readyState).toBe(HTMLMediaElement.HAVE_METADATA);
-
-      Object.defineProperty(video, 'readyState', {
-        value: HTMLMediaElement.HAVE_NOTHING,
-        configurable: true,
-      });
-      video.dispatchEvent(new Event('emptied'));
-
-      expect(store.state.readyState).toBe(HTMLMediaElement.HAVE_NOTHING);
-    });
-
     it('updates on timeupdate event', () => {
       const video = createMockVideo({ currentTime: 0 });
 

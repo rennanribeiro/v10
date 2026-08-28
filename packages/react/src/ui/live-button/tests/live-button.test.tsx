@@ -17,7 +17,6 @@ function createWrapper() {
     targetLiveWindow: 0,
     currentTime: 80,
     duration: 100,
-    readyState: HTMLMediaElement.HAVE_METADATA,
     seeking: false,
     seek: vi.fn(),
     buffered: [],

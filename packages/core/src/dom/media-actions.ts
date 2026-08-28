@@ -1,4 +1,3 @@
-import { hasMetadata } from '@videojs/media';
 import { isUndefined } from '@videojs/utils/predicate';
 
 import { DEFAULT_SEEK_STEP, DEFAULT_VOLUME_STEP } from '../core/ui/constants';
@@ -42,7 +41,7 @@ export const MEDIA_INPUT_ACTION_OVERRIDES: Record<MediaInputActionName, MediaInp
     const step = getMediaInputActionValue('seekStep', key, value)!;
 
     const time = selectTime(store.state);
-    if (!time || !hasMetadata(time)) return;
+    if (!time) return;
 
     time.seek(time.currentTime + step);
   },

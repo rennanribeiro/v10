@@ -6,6 +6,4 @@ export const SeekButtonDataAttrs = {
   seeking: 'data-seeking',
   /** Indicates the seek direction: `"forward"` or `"backward"`. */
   direction: 'data-direction',
-  /** Present when the button is non-interactive (mirrors `aria-disabled`). */
-  disabled: 'data-disabled',
 } as const satisfies StateAttrMap<SeekButtonState>;

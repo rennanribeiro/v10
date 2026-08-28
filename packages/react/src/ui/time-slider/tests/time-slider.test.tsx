@@ -63,7 +63,6 @@ const {
     mockTimeState: {
       currentTime: 30,
       duration: 120,
-      readyState: 1,
       seeking: false,
       seek: vi.fn(),
     },
@@ -131,7 +130,8 @@ afterEach(() => {
     pointing: false,
     focused: false,
   });
-  mockTimeState.readyState = 1;
+  mockTimeState.duration = 120;
+  mockBufferState.seekable = [[0, 120]];
 });
 
 // --- Tests ---
@@ -202,8 +202,9 @@ describe('TimeSliderRoot', () => {
     expect(el?.style.getPropertyValue('--media-slider-buffer')).toBeTruthy();
   });
 
-  it('disables the slider before metadata is loaded', () => {
-    mockTimeState.readyState = 0;
+  it('disables the slider when the time range is unknown', () => {
+    mockTimeState.duration = 0;
+    mockBufferState.seekable = [];
     const { Wrapper } = createPlayerWrapper();
     const { container } = render(
       <Wrapper>
@@ -218,6 +219,7 @@ describe('TimeSliderRoot', () => {
 
     expect(root).toBeTruthy();
     expect(thumb?.getAttribute('aria-disabled')).toBe('true');
+    expect(thumb?.getAttribute('aria-valuetext')).toBe('Video not loaded, unknown time.');
     expect(thumb?.getAttribute('tabindex')).toBe('-1');
   });
 });

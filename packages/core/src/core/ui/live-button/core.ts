@@ -1,4 +1,4 @@
-import { hasMetadata, type MediaBufferState, type MediaLiveState, type MediaTimeState } from '@videojs/media';
+import type { MediaBufferState, MediaLiveState, MediaTimeState } from '@videojs/media';
 import { createState } from '@videojs/store';
 import { defaults } from '@videojs/utils/object';
 import type { NonNullableObject } from '@videojs/utils/types';
@@ -33,7 +33,6 @@ const LIVE_EDGE_TOLERANCE = 5;
  * `live`, `time`, and `buffer` store slices.
  */
 export type LiveButtonMediaState = Pick<MediaTimeState, 'currentTime' | 'seek'> &
-  Pick<MediaTimeState, 'readyState'> &
   Pick<MediaBufferState, 'seekable'> &
   MediaLiveState;
 
@@ -105,7 +104,7 @@ export class LiveButtonCore {
     const media = this.#media!;
     const live = isLiveMedia(media);
     const liveEdge = live && this.#isAtLiveEdge(media);
-    const disabled = this.#props.disabled || !hasMetadata(media) || !live || liveEdgeTarget(media) == null;
+    const disabled = this.#props.disabled || !live || liveEdgeTarget(media) == null;
 
     this.state.patch({ live, liveEdge, disabled });
     this.state.patch({ label: resolveText(this.getLabel(this.state.current)) });

@@ -82,12 +82,6 @@ export interface MediaVolumeState {
 
 export interface MediaTimeState {
   /**
-   * Current readiness of the media resource, matching `HTMLMediaElement.readyState`.
-   *
-   * @see https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement/readyState
-   */
-  readyState: number;
-  /**
    * Current playback position in seconds.
    *
    * @see https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement/currentTime

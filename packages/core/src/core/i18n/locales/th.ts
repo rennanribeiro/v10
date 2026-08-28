@@ -54,6 +54,7 @@ export default {
     toggleElapsed: 'สลับระหว่างเวลาที่ผ่านไปกับเวลาที่เหลือ',
     toggleDuration: 'สลับระหว่างระยะเวลากับเวลาที่เหลือ',
     position: '{current} ของ {duration}',
+    unknown: 'วิดีโอไม่ได้โหลด ไม่ทราบเวลา',
   },
   playback: {
     rate: 'อัตราการเล่น {rate}',

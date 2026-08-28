@@ -1,4 +1,4 @@
-import { MediaReadyState, type MediaTimeState } from '@videojs/media';
+import type { MediaBufferState, MediaTimeState } from '@videojs/media';
 import { formatTimeAsPhrase } from '@videojs/utils/time';
 import { describe, expect, it } from 'vite-plus/test';
 
@@ -7,13 +7,15 @@ import { TimeCore } from '../core';
 
 const t = createTranslator(flattenTranslations(translations), 'en');
 
-function createMediaState(overrides: Partial<MediaTimeState> = {}): MediaTimeState {
+type TimeMedia = MediaTimeState & Pick<MediaBufferState, 'seekable'>;
+
+function createMediaState(overrides: Partial<TimeMedia> = {}): TimeMedia {
   return {
-    readyState: MediaReadyState.HAVE_METADATA,
     currentTime: 90,
     duration: 300,
     seeking: false,
     seek: async () => 0,
+    seekable: [],
     ...overrides,
   };
 }
@@ -41,12 +43,26 @@ describe('TimeCore', () => {
   });
 
   describe('getState', () => {
-    it('is disabled before metadata is available', () => {
+    it('is disabled without a duration or seekable range', () => {
       const core = new TimeCore();
 
-      core.setMedia(createMediaState({ readyState: MediaReadyState.HAVE_NOTHING }));
+      core.setMedia(createMediaState({ duration: 0, seekable: [] }));
 
-      expect(core.getState().disabled).toBe(true);
+      const state = core.getState();
+
+      expect(state.disabled).toBe(true);
+      expect(core.getAttrs(state)['aria-label']).toMatchObject({
+        key: 'time.unknown',
+        text: 'Video not loaded, unknown time.',
+      });
+    });
+
+    it('is enabled when a seekable range is available', () => {
+      const core = new TimeCore();
+
+      core.setMedia(createMediaState({ duration: 0, seekable: [[10, 120]] }));
+
+      expect(core.getState().disabled).toBe(false);
     });
 
     it('returns current time state', () => {
@@ -204,7 +220,7 @@ describe('TimeCore', () => {
     ] as const)('includes zero in the %s toggle label', (type, media, expected) => {
       const core = new TimeCore({ type, toggle: true });
 
-      core.setMedia(createMediaState(media));
+      core.setMedia(createMediaState({ ...media, seekable: [[0, 300]] }));
       const state = core.getState();
 
       expect(translateText(core.getLabel(state), t, core.getLabelParams(state))).toBe(expected);

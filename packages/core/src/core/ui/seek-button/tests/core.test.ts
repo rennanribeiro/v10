@@ -1,4 +1,4 @@
-import { MediaReadyState, type MediaTimeState } from '@videojs/media';
+import type { MediaTimeState } from '@videojs/media';
 import { describe, expect, it, vi } from 'vite-plus/test';
 
 import type { SeekButtonState } from '../core';
@@ -6,7 +6,6 @@ import { SeekButtonCore } from '../core';
 
 function createMediaState(overrides: Partial<MediaTimeState> = {}): MediaTimeState {
   return {
-    readyState: MediaReadyState.HAVE_METADATA,
     currentTime: 0,
     duration: 300,
     seeking: false,
@@ -19,7 +18,6 @@ function createState(overrides: Partial<SeekButtonState> = {}): SeekButtonState 
   return {
     seeking: false,
     direction: 'forward',
-    disabled: false,
     label: '',
     ...overrides,
   };
@@ -61,14 +59,6 @@ describe('SeekButtonCore', () => {
 
       core.setMedia(createMediaState({ seeking: true }));
       expect(core.getState().seeking).toBe(true);
-    });
-
-    it('is disabled until metadata is loaded', () => {
-      const core = new SeekButtonCore();
-
-      core.setMedia(createMediaState({ readyState: MediaReadyState.HAVE_NOTHING }));
-
-      expect(core.getState().disabled).toBe(true);
     });
 
     it('derives forward direction from positive seconds', () => {
@@ -185,7 +175,7 @@ describe('SeekButtonCore', () => {
 
     it('sets aria-disabled when disabled', () => {
       const core = new SeekButtonCore({ disabled: true });
-      const attrs = core.getAttrs(createState({ disabled: true }));
+      const attrs = core.getAttrs(createState());
 
       expect(attrs['aria-disabled']).toBe('true');
     });
@@ -232,13 +222,13 @@ describe('SeekButtonCore', () => {
       expect(media.seek).not.toHaveBeenCalled();
     });
 
-    it('does nothing until metadata is loaded', async () => {
+    it('forwards seeks when the timeline is not known yet', async () => {
       const core = new SeekButtonCore();
-      const media = createMediaState({ readyState: MediaReadyState.HAVE_NOTHING });
+      const media = createMediaState({ duration: 0 });
 
       await core.seek(media);
 
-      expect(media.seek).not.toHaveBeenCalled();
+      expect(media.seek).toHaveBeenCalledWith(30);
     });
   });
 });

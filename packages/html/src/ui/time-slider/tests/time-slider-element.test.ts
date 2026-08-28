@@ -39,7 +39,6 @@ class TestPlayerProviderElement extends UIElement {
     state: () => ({
       currentTime: 0,
       duration: 0,
-      readyState: HTMLMediaElement.HAVE_NOTHING,
       seeking: false,
       seek: vi.fn(),
       buffered: [],
@@ -143,7 +142,7 @@ describe('TimeSliderElement', () => {
     expect(slider.style.userSelect).toBe('none');
   });
 
-  it('disables the slider before metadata is loaded', async () => {
+  it('disables the slider when the time range is unknown', async () => {
     const player = document.createElement('test-time-slider-player');
     const slider = createElement(TimeSliderElement);
     const thumb = createElement(SliderThumbElement);
@@ -156,6 +155,7 @@ describe('TimeSliderElement', () => {
 
     expect(slider.hasAttribute('data-disabled')).toBe(true);
     expect(thumb.getAttribute('aria-disabled')).toBe('true');
+    expect(thumb.getAttribute('aria-valuetext')).toBe('Video not loaded, unknown time.');
     expect(thumb.getAttribute('tabindex')).toBe('-1');
   });
 

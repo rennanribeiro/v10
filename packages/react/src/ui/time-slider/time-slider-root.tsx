@@ -1,7 +1,7 @@
 import { TimeSliderCore, TimeSliderDataAttrs } from '@videojs/core';
 import { getTimeSliderCSSVars, logMissingFeature, selectBuffer, selectPlayback, selectTime } from '@videojs/core/dom';
 import { translateText } from '@videojs/core/i18n';
-import { hasMetadata, MediaReadyState } from '@videojs/media';
+import { hasTimeRange } from '@videojs/media';
 import { formatTime } from '@videojs/utils/time';
 import { forwardRef, useEffect, useState } from 'react';
 
@@ -81,7 +81,6 @@ export const TimeSliderRoot = forwardRef<HTMLDivElement, TimeSliderRootProps>(
             core.setMedia({
               currentTime: 0,
               duration: 0,
-              readyState: MediaReadyState.HAVE_NOTHING,
               seeking: false,
               seek: noopSeek,
               buffered: [],
@@ -97,7 +96,7 @@ export const TimeSliderRoot = forwardRef<HTMLDivElement, TimeSliderRootProps>(
         getStepPercent: () => core.getStepPercent(),
         getLargeStepPercent: () => core.getLargeStepPercent(),
         orientation,
-        disabled: disabled || !time || !hasMetadata(time),
+        disabled: disabled || !time || !buffer || !hasTimeRange({ ...time, ...buffer }),
         changeThrottle,
         adjustPercent: (rawPercent, thumbSize, trackSize) =>
           core.adjustPercentForAlignment(rawPercent, thumbSize, trackSize),
