@@ -262,6 +262,8 @@ export interface ComponentTargetTransform {
 export interface ComponentTargetDefinition<Schema extends ComponentSchema> {
   readonly source: Schema['source'];
   readonly resolve: ComponentTargetResolver<Schema>;
+  /** Maps canonical render-target names to framework element contracts. */
+  readonly renderTargets?: Readonly<Record<string, TargetElement>> | undefined;
   readonly components?: ComponentTargetRules<NoInfer<Schema['definitions']>> | undefined;
   readonly primitives?: ComponentTargetPrimitives | undefined;
   readonly types?: ComponentTargetTypes | undefined;
@@ -272,6 +274,7 @@ export interface ComponentTargetDefinition<Schema extends ComponentSchema> {
 export interface ComponentTarget<Schema extends ComponentSchema = ComponentSchema> {
   readonly source: Schema['source'];
   readonly resolve: ComponentTargetResolver<Schema>;
+  readonly renderTargets?: Readonly<Record<string, TargetElement>> | undefined;
   readonly components: ComponentTargetRules<Schema['definitions']>;
   readonly primitives: ComponentTargetPrimitives;
   readonly types: ComponentTargetTypes;
@@ -312,6 +315,7 @@ export function defineComponentTarget<const Schema extends ComponentSchema>(): (
     return {
       source: definition.source,
       resolve: definition.resolve,
+      renderTargets: definition.renderTargets ?? {},
       components: definition.components ?? {},
       primitives: definition.primitives ?? {},
       types: definition.types ?? {},

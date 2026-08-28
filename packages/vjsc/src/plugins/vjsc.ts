@@ -9,6 +9,7 @@ import { componentModulesPlugin } from './component-modules';
 import { type ComponentTargetSelection, componentTargetPlugin, primitiveTargetPlugin } from './component-target';
 import { htmlRuntimePlugin } from './html-runtime';
 import { reactTargetPropsPlugin } from './react-target-props';
+import { renderTargetPlugin } from './render-target';
 import { stylePlugin, type StylePluginLifecycle } from './style';
 import { targetImportCleanupPlugin } from './target-import-cleanup';
 import { targetJsxPlugin } from './target-jsx';
@@ -76,6 +77,7 @@ export function createVjscPluginPipeline(options: VjscPluginOptions, styleLifecy
     componentMetaPlugin(),
     targetJsxPlugin({ targets }),
     stylePlugin((module) => configure(module)?.styles ?? null, options.diagnostics, styleLifecycle),
+    renderTargetPlugin({ targets }),
     targetTransformPlugin({ targets }),
     targetTypePlugin({ targets }),
     primitiveTargetPlugin({ targets }),

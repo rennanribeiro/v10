@@ -38,6 +38,17 @@ describe('stylePlugin', () => {
     expect(source).toContain('className={["grid", "p-0", active && "size-4 shrink-0", \'hook\']}');
   });
 
+  it('rewrites the static style carried by defineRenderTarget', async () => {
+    const { source } = await transform(`
+      import { defineRenderTarget } from 'vjsc/components';
+      import styles from './fixtures/button.styles';
+      export const Button = defineRenderTarget('Button', styles.button);
+    `);
+
+    expect(source).not.toContain('button.styles');
+    expect(source).toContain('defineRenderTarget(\'Button\', "grid p-0")');
+  });
+
   it('combines normalized variants in selection order', async () => {
     const input = `
       import styles from './fixtures/button.styles';
@@ -83,7 +94,7 @@ describe('stylePlugin', () => {
     await expect(transform(source)).rejects.toMatchObject({
       errors: [
         {
-          message: expect.stringContaining('must use static className references'),
+          message: expect.stringContaining('must use static className or defineRenderTarget references'),
           pos: source.indexOf('styles.button'),
         },
       ],

@@ -1,6 +1,17 @@
 declare const __PROPS_BRAND__: unique symbol;
 declare const __EMPTY_PROPS__: unique symbol;
 
+type ClassNamePart = string | false | null | undefined;
+
+/** Static class-name values accepted while authoring canonical components. */
+export type ClassNameValue = ClassNamePart | readonly ClassNameValue[];
+
+/** A compiler-owned named element contract shared by generated component modules. */
+export interface RenderTargetDefinition<Name extends string = string> {
+  readonly name: Name;
+  readonly className: ClassNameValue;
+}
+
 export type EmptyProps = {
   readonly [__EMPTY_PROPS__]?: never;
 };
@@ -99,4 +110,12 @@ export function defineSchema<const Source extends string, const Definitions exte
   definitions: Definitions
 ): ComponentSchema<Definitions, Source> {
   return { source, definitions };
+}
+
+/** Define one statically transformable, styled render target. */
+export function defineRenderTarget<const Name extends string>(
+  name: Name,
+  className: ClassNameValue
+): RenderTargetDefinition<Name> {
+  return { name, className };
 }

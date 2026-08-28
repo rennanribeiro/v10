@@ -156,6 +156,13 @@ export const htmlComponentTarget: ComponentTarget<CoreSchema> = defineComponentT
 
   return {
     source: '@videojs/core/vjsc',
+    renderTargets: {
+      Button,
+      SliderBuffer: Div,
+      SliderFill: Div,
+      SliderThumb: Div,
+      SliderTrack: Div,
+    },
     resolve: ({ component, part }) => {
       const name = part ? componentParts[component]?.[part] : component === 'Container' ? 'MediaContainer' : component;
 

@@ -2,12 +2,14 @@ import {
   type ComponentDefinition,
   type ComponentManifest,
   type ComponentRecord,
+  type ClassNameValue,
   type EmptyProps,
   hasParts,
   type InferProps,
+  type RenderTargetDefinition,
 } from './definition';
 
-export type { EmptyProps } from './definition';
+export type { ClassNameValue, EmptyProps } from './definition';
 
 export const VIDEOJS_NODE = Symbol.for('@videojs/node');
 
@@ -24,11 +26,6 @@ export interface VjscElement {
 /** Framework-neutral content accepted by a component child or named content slot. */
 export type VjscNode = unknown;
 
-type ClassNamePart = string | false | null | undefined;
-
-/** Static class-name values accepted while authoring canonical components. */
-export type ClassNameValue = ClassNamePart | readonly ClassNameValue[];
-
 export interface BaseProps {
   className?: ClassNameValue;
   children?: unknown;
@@ -42,6 +39,8 @@ export type PropsWithChildren<CoreProps extends object = EmptyProps> = Props<Cor
 export type PropsOf<Component extends (props: never) => unknown> = NonNullable<Parameters<Component>[0]>;
 
 type ComponentAttributes<Props extends object> = Omit<PropsWithChildren<Props>, 'className'> & {
+  /** Selects a compiler-owned generated element and is removed from runtime props. */
+  $render?: RenderTargetDefinition | undefined;
   className?: ClassNameValue;
 };
 

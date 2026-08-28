@@ -292,9 +292,49 @@ function transformStyles(
   const edits: SourceEdit[] = [];
   const referencedRules = new Set<string>();
   const transformedRanges: Array<readonly [number, number]> = [];
+  const renderTargetDefinitions = importedRenderTargetDefinitions(ast);
+
+  const transformExpression = (expression: Expression) => {
+    walk(expression, {
+      enter(node, parent) {
+        if (node.type !== 'MemberExpression') return;
+
+        const path = readAccessPath(node);
+        const [root, ...tokenPath] = path ?? [];
+        const binding = root ? bindings.get(root) : undefined;
+        const rule = binding ? ruleForToken(manifest, binding.modulePath, tokenPath) : undefined;
+        if (!rule) return;
+
+        edits.push({
+          start: node.start,
+          end: node.end,
+          content: renderStyleRule(rule, options, isListItem(node, parent)),
+        });
+        referencedRules.add(rule.className);
+        transformedRanges.push([node.start, node.end]);
+        this.skip();
+      },
+    });
+  };
 
   walk(ast, {
     enter(node) {
+      if (
+        node.type === 'CallExpression' &&
+        node.callee.type === 'Identifier' &&
+        renderTargetDefinitions.has(node.callee.name)
+      ) {
+        const className = node.arguments[1];
+
+        if (!className || className.type === 'SpreadElement') {
+          throw sourceError('defineRenderTarget() requires one static style reference.', node.start);
+        }
+
+        transformExpression(className);
+        this.skip();
+        return;
+      }
+
       if (
         node.type !== 'JSXAttribute' ||
         node.name.type !== 'JSXIdentifier' ||
@@ -305,26 +345,8 @@ function transformStyles(
         return;
       }
 
-      walk(node.value.expression, {
-        enter(expression, parent) {
-          if (expression.type !== 'MemberExpression') return;
-
-          const path = readAccessPath(expression);
-          const [root, ...tokenPath] = path ?? [];
-          const binding = root ? bindings.get(root) : undefined;
-          const rule = binding ? ruleForToken(manifest, binding.modulePath, tokenPath) : undefined;
-          if (!rule) return;
-
-          edits.push({
-            start: expression.start,
-            end: expression.end,
-            content: renderStyleRule(rule, options, isListItem(expression, parent)),
-          });
-          referencedRules.add(rule.className);
-          transformedRanges.push([expression.start, expression.end]);
-          this.skip();
-        },
-      });
+      transformExpression(node.value.expression);
+      this.skip();
     },
   });
 
@@ -337,6 +359,30 @@ function transformStyles(
   }
 
   return referencedRules;
+}
+
+function importedRenderTargetDefinitions(ast: Program): ReadonlySet<string> {
+  const bindings = new Set<string>();
+
+  for (const statement of ast.body) {
+    if (
+      statement.type !== 'ImportDeclaration' ||
+      statement.importKind === 'type' ||
+      statement.source.value !== 'vjsc/components'
+    ) {
+      continue;
+    }
+
+    for (const specifier of statement.specifiers) {
+      if (specifier.type !== 'ImportSpecifier' || specifier.importKind === 'type') continue;
+
+      const imported = specifier.imported.type === 'Identifier' ? specifier.imported.name : specifier.imported.value;
+
+      if (imported === 'defineRenderTarget') bindings.add(specifier.local.name);
+    }
+  }
+
+  return bindings;
 }
 
 function styleBindings(filename: string, ast: Program, manifest: StyleManifest): ReadonlyMap<string, StyleBinding> {
@@ -440,7 +486,7 @@ function assertNoUntransformedReferences(
 
   if (unresolved.size > 0) {
     throw sourceError(
-      `Styles must use static className references. Could not transform: ${[...unresolved]
+      `Styles must use static className or defineRenderTarget references. Could not transform: ${[...unresolved]
         .map(([name, positions]) => `${name} at ${positions.join(', ')}`)
         .join('; ')}.`,
       Math.min(...[...unresolved.values()].flat())

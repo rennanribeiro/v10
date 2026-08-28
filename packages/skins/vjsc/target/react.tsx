@@ -14,6 +14,13 @@ export const reactComponentTarget: ComponentTarget<CoreSchema> = defineComponent
   element,
   imported,
 }) => {
+  const Button = element('button', {
+    props: {
+      from: 'react',
+      name: 'ComponentProps',
+      intrinsic: 'button',
+    },
+  });
   const Div = element('div', {
     props: {
       from: 'react',
@@ -35,6 +42,13 @@ export const reactComponentTarget: ComponentTarget<CoreSchema> = defineComponent
 
   return {
     source: '@videojs/core/vjsc',
+    renderTargets: {
+      Button,
+      SliderBuffer: Div,
+      SliderFill: Div,
+      SliderThumb: Div,
+      SliderTrack: Div,
+    },
     resolve: ({ component, part }) => {
       const path = part ? part.split('.') : [];
       const propsPath = path.length === 0 ? ['Props'] : [...path.slice(0, -1), `${path.at(-1)}Props`];
