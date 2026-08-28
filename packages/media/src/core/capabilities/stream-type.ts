@@ -1,5 +1,5 @@
-import { defineMediaCapability } from '../../core/capability';
-import { type MediaStreamTypeCapability, MediaStreamTypes } from '../../core/types';
+import { defineMediaCapability } from '../capability';
+import { type MediaStreamTypeCapability, MediaStreamTypes } from '../types';
 
 /**
  * Whether the media is on-demand, live, or not yet known.

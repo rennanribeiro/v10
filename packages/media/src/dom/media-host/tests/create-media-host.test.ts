@@ -1,9 +1,9 @@
 import { afterEach, describe, expect, it, vi } from 'vite-plus/test';
 
+import { pauseCapability, playbackCapability, posterCapability, sourceCapability } from '../../../core/capabilities';
 import { getMediaCapabilityEvents, supportsMediaCapability } from '../../../core/capability';
 import { isMediaVolumeCapable } from '../../../core/predicate';
 import { HTMLAudioElementHost } from '../../audio-host';
-import { pauseCapability, playbackCapability, posterCapability, sourceCapability } from '../../capabilities';
 import { CustomMediaElement } from '../../custom-media-element';
 import { HTMLVideoElementHost } from '../../video-host';
 import { MediaHostBase } from '../base';

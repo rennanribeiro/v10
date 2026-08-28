@@ -410,9 +410,18 @@ export interface MediaPictureInPictureEvents {
   leavepictureinpicture: EventLike;
 }
 
-export interface MediaPictureInPictureCapability {
-  readonly isPictureInPicture: boolean;
+/**
+ * The part of {@link MediaPictureInPictureCapability} the media itself owns.
+ *
+ * Entering, leaving, and reading the current mode run against the presentation environment rather than the media, so a
+ * host implements those directly.
+ */
+export interface MediaDisablePictureInPictureCapability {
   disablePictureInPicture: boolean;
+}
+
+export interface MediaPictureInPictureCapability extends MediaDisablePictureInPictureCapability {
+  readonly isPictureInPicture: boolean;
   requestPictureInPicture(): Promise<unknown>;
   exitPictureInPicture(): Promise<unknown>;
 }

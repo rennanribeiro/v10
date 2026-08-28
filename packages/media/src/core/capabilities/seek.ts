@@ -1,5 +1,5 @@
-import { defineMediaCapability } from '../../core/capability';
-import type { MediaSeekCapability } from '../../core/types';
+import { defineMediaCapability } from '../capability';
+import type { MediaSeekCapability } from '../types';
 
 /** Moving through a timeline. Media with no addressable position (a live-only embed, an animated image) skips it. */
 export const seekCapability = defineMediaCapability<MediaSeekCapability>()({

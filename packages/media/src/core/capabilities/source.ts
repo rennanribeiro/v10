@@ -1,5 +1,5 @@
-import { defineMediaCapability } from '../../core/capability';
-import type { MediaSourceCapability } from '../../core/types';
+import { defineMediaCapability } from '../capability';
+import type { MediaSourceCapability } from '../types';
 
 /** Loading a source. */
 export const sourceCapability = defineMediaCapability<MediaSourceCapability>()({

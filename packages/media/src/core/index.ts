@@ -1,3 +1,4 @@
+export * from './capabilities';
 export * from './capability';
 export { EMPTY_REMOTE, EMPTY_TEXT_TRACKS, EMPTY_TIME_RANGES } from './constants';
 export type { DrmSystemConfig, DrmSystemsConfig, KeySystem } from './drm';

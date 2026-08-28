@@ -1,5 +1,5 @@
-import { defineMediaCapability } from '../../core/capability';
-import type { MediaTitleCapability } from '../../core/types';
+import { defineMediaCapability } from '../capability';
+import type { MediaTitleCapability } from '../types';
 
 /** An author-supplied title, distinct from the media-owned `contentData.title`. */
 export const titleCapability = defineMediaCapability<MediaTitleCapability>()({

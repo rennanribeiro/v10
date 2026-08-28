@@ -2,13 +2,13 @@ import type { WebKitDocument, WebKitPresentationMode, WebKitVideoElement } from 
 import { isFunction } from '@videojs/utils/predicate';
 import type { Constructor } from '@videojs/utils/types';
 
-import type { Video, VideoEvents, VideoTargetLike } from '../../core/types';
 import {
   pictureInPictureCapability,
   playsInlineCapability,
   posterCapability,
   videoDimensionsCapability,
-} from '../capabilities';
+} from '../../core/capabilities';
+import type { Video, VideoEvents, VideoTargetLike } from '../../core/types';
 import { createMediaHost, HTMLMediaElementHost, type HTMLMediaTargetLike } from '../media-host';
 
 export interface HTMLVideoTargetLike extends VideoTargetLike, HTMLMediaTargetLike {}

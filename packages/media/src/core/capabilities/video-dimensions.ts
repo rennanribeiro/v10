@@ -1,5 +1,5 @@
-import { defineMediaCapability } from '../../core/capability';
-import type { MediaVideoDimensionsCapability } from '../../core/types';
+import { defineMediaCapability } from '../capability';
+import type { MediaVideoDimensionsCapability } from '../types';
 
 /** Reporting the intrinsic size of the decoded video. */
 export const videoDimensionsCapability = defineMediaCapability<MediaVideoDimensionsCapability>()({

@@ -1,6 +1,5 @@
 import type { EventListenerFor, EventType } from '@videojs/utils/dom';
 
-import type { EventLike, MediaFull } from '../../core/types';
 import {
   autoplayCapability,
   bufferCapability,
@@ -19,7 +18,8 @@ import {
   textTrackCapability,
   titleCapability,
   volumeCapability,
-} from '../capabilities';
+} from '../../core/capabilities';
+import type { EventLike, MediaFull } from '../../core/types';
 import type { HTMLMediaTargetLike } from './base';
 import { createMediaHost } from './create-media-host';
 
