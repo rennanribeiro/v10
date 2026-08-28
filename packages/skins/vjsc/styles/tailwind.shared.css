@@ -2,7 +2,7 @@
   --color-media-accent: var(--media-accent-color, var(--media-default-accent-color, oklch(1 0 0)));
   --color-media-accent-text: var(
     --media-accent-text-color,
-    contrast-color(var(--media-accent-color, var(--media-default-accent-color, oklch(0 0 0))))
+    contrast-color(var(--media-accent-color, var(--media-internal-accent-text-base, oklch(0 0 0))))
   );
   --color-media-control-hover: var(
     --media-accent-color,

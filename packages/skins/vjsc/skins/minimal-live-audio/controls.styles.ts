@@ -20,6 +20,7 @@ const minimalSurface = [
 
 const minimalAudioSurface = [
   'bg-(--media-audio-controls-background-color)! [color:var(--media-audio-text-color)]!',
+  'after:hidden!',
   'shadow-sm shadow-black/20 ring-1 ring-[light-dark(rgb(0_0_0/0.1),rgb(255_255_255/0.1))]',
   'backdrop-blur-lg backdrop-saturate-150',
   '[@media(prefers-reduced-transparency:reduce)]:backdrop-filter-none',

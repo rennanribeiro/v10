@@ -43,6 +43,7 @@ const defaultAudioSurface = [
 
 const minimalAudioSurface = [
   'bg-(--media-audio-controls-background-color)! [color:var(--media-audio-text-color)]!',
+  'after:hidden!',
   'shadow-sm shadow-black/20 ring-1 ring-[light-dark(rgb(0_0_0/0.1),rgb(255_255_255/0.1))]',
   'backdrop-blur-lg backdrop-saturate-150',
   '[@media(prefers-reduced-transparency:reduce)]:backdrop-filter-none',
@@ -61,16 +62,20 @@ export default styles({
       className: 'media-audio-time-slider-preview-content',
       utilities: [
         ...sliderPreviewContent,
-        'left-(--media-slider-pointer) bottom-[calc(100%+--spacing(10))] rounded-media-control px-2.5 py-1 tabular-nums',
+        'bottom-[calc(100%+--spacing(10))] rounded-media-control px-2.5 py-1 tabular-nums',
         'text-media',
       ],
       variants: {
-        default: defaultSurface,
-        minimal: [...minimalTooltipSurface, 'rounded-[--spacing(2)] px-2'],
-        'default-audio': defaultAudioSurface,
-        'default-live-audio': defaultAudioSurface,
-        'minimal-audio': minimalAudioSurface,
-        'minimal-live-audio': minimalAudioSurface,
+        default: ['left-1/2', ...defaultSurface],
+        minimal: [
+          '[left:var(--media-preview-left,var(--media-slider-pointer))]',
+          ...minimalTooltipSurface,
+          'rounded-[--spacing(2)] px-2',
+        ],
+        'default-audio': ['left-1/2', ...defaultAudioSurface],
+        'default-live-audio': ['left-1/2', ...defaultAudioSurface],
+        'minimal-audio': ['[left:var(--media-preview-left,var(--media-slider-pointer))]', ...minimalAudioSurface],
+        'minimal-live-audio': ['[left:var(--media-preview-left,var(--media-slider-pointer))]', ...minimalAudioSurface],
       },
     },
     value: {

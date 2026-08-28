@@ -2,13 +2,16 @@ import { styles } from 'vjsc/styles';
 
 const popup = [
   'm-0 overflow-visible border-0 text-inherit',
-  'data-starting-style:opacity-0 data-starting-style:[transform:scale(.95)]',
-  'data-ending-style:opacity-0 data-ending-style:blur-xs data-ending-style:[transform:scale(.95)]',
+  'data-starting-style:opacity-0 data-starting-style:scale-95',
+  'data-ending-style:opacity-0 data-ending-style:blur-xs data-ending-style:scale-95',
+  'motion-reduce:data-starting-style:scale-100! motion-reduce:data-ending-style:scale-100!',
+  'motion-reduce:data-starting-style:transform-none! motion-reduce:data-ending-style:transform-none!',
+  'motion-reduce:data-ending-style:filter-none!',
   'data-[side=top]:origin-bottom data-[side=bottom]:origin-top data-[side=left]:origin-right data-[side=right]:origin-left',
-  'data-[side=top]:data-starting-style:[transform:translateY(var(--media-popup-translate-distance))_scale(.95)]',
-  'data-[side=bottom]:data-starting-style:[transform:translateY(calc(var(--media-popup-translate-distance)*-1))_scale(.95)]',
-  'data-[side=left]:data-starting-style:[transform:translateX(var(--media-popup-translate-distance))_scale(.95)]',
-  'data-[side=right]:data-starting-style:[transform:translateX(calc(var(--media-popup-translate-distance)*-1))_scale(.95)]',
+  'data-[side=top]:data-starting-style:[transform:translateY(var(--media-popup-translate-distance))]',
+  'data-[side=bottom]:data-starting-style:[transform:translateY(calc(var(--media-popup-translate-distance)*-1))]',
+  'data-[side=left]:data-starting-style:[transform:translateX(var(--media-popup-translate-distance))]',
+  'data-[side=right]:data-starting-style:[transform:translateX(calc(var(--media-popup-translate-distance)*-1))]',
   'before:pointer-events-auto before:absolute',
   'data-[side=top]:before:inset-x-0 data-[side=top]:before:top-full',
   'data-[side=bottom]:before:inset-x-0 data-[side=bottom]:before:bottom-full',
@@ -62,6 +65,7 @@ const defaultAudioSurface = [
 
 const minimalAudioSurface = [
   'bg-(--media-audio-controls-background-color)! [color:var(--media-audio-text-color)]!',
+  'after:hidden!',
   'shadow-sm shadow-black/20 ring-1 ring-[light-dark(rgb(0_0_0/0.1),rgb(255_255_255/0.1))]',
   'backdrop-blur-lg backdrop-saturate-150',
   '[@media(prefers-reduced-transparency:reduce)]:backdrop-filter-none',
@@ -134,7 +138,7 @@ export default styles({
         '[transition-duration:100ms,100ms,100ms,100ms,250ms,250ms] ease-out',
         'data-starting-style:[transition-duration:100ms] data-starting-style:[transition-property:opacity,filter,transform,scale]',
         'data-ending-style:[transition-duration:100ms] data-ending-style:[transition-property:opacity,filter,transform,scale]',
-        'motion-reduce:[transition-duration:0ms]',
+        'motion-reduce:[transition-duration:0ms]!',
       ],
       variants: {
         default: [
