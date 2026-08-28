@@ -3,8 +3,10 @@ import { mkdir, readFile, readdir, rm, writeFile } from 'node:fs/promises';
 import { dirname, extname, posix, resolve } from 'node:path';
 
 import { isString } from '@videojs/utils/predicate';
+import { rolldown } from 'rolldown';
 import type { Plugin, Rolldown } from 'vite';
 
+import { HTML_RUNTIME } from '../../vjsc/src/plugins/html-runtime.ts';
 import { analyzeImports, replaceImportSpecifiers } from '../../vjsc/src/shadcn/analyze.ts';
 import type { VideojsRegistryMeta } from '../registry/meta.ts';
 
@@ -37,6 +39,14 @@ interface MaterializedSource {
   readonly target: string;
 }
 
+interface HtmlSkinSource {
+  readonly entry: MaterializedSource;
+  readonly item: RegistryItem;
+  readonly sources: ReadonlyMap<string, MaterializedSource>;
+}
+
+type HtmlSkinRenderProps = Readonly<Record<never, never>>;
+
 export interface FrameworkArtifact {
   /** Workspace-relative output path. */
   readonly path: string;
@@ -68,12 +78,86 @@ export function frameworkSkinMaterializer(options: FrameworkSkinMaterializerOpti
     },
     async writeBundle(_outputOptions, bundle) {
       const registry = registryAssets(bundle);
-      const artifacts = [...createReactSkinArtifacts(registry), ...(await backgroundArtifacts(options.workspaceDir))];
+      const artifacts = [
+        ...createReactSkinArtifacts(registry),
+        ...(await createHtmlSkinArtifacts(registry, options.workspaceDir)),
+        ...(await backgroundArtifacts(options.workspaceDir)),
+      ];
       const changed = await syncArtifacts(options.workspaceDir, artifacts);
 
       if (changed > 0) this.info(`Materialized ${changed} changed framework skin file${changed === 1 ? '' : 's'}.`);
     },
   };
+}
+
+/** Render package HTML once from prepared registry sources and materialize private template, registration, and CSS. */
+export async function createHtmlSkinArtifacts(
+  assets: ReadonlyMap<string, string>,
+  workspaceDir: string
+): Promise<FrameworkArtifact[]> {
+  const items = registryItems(assets);
+  const selected = [...items.values()]
+    .filter(({ item }) => isHtmlCssSkin(item.meta))
+    .sort((left, right) => left.item.name.localeCompare(right.item.name));
+
+  if (selected.length !== presets.length * 2) {
+    throw new Error(`Expected ${presets.length * 2} HTML CSS skin items, received ${selected.length}.`);
+  }
+
+  const skins = selected.map((root): HtmlSkinSource => {
+    const sources = new Map<string, MaterializedSource>();
+
+    for (const record of dependencyClosure(root, items)) {
+      if (record.item.meta?.role === 'support') continue;
+
+      for (const file of record.item.files ?? []) {
+        if (!file.target)
+          throw new Error(`Registry item \`${record.item.name}\` has a file without an install target.`);
+
+        const target = normalizeTarget(file.target);
+        const content = file.content ?? assets.get(posix.join(record.directory, file.path));
+
+        if (content === undefined) {
+          throw new Error(`Registry item \`${record.item.name}\` has no source asset for \`${file.path}\`.`);
+        }
+
+        const source = { content, destination: target, target };
+        const previous = sources.get(target);
+
+        if (previous && previous.content !== content) {
+          throw new Error(`HTML skin registry target \`${target}\` has conflicting materializations.`);
+        }
+
+        sources.set(target, source);
+      }
+    }
+
+    const meta = root.item.meta!;
+    const entryTarget = htmlSkinEntryTarget(meta);
+    const entry = sources.get(entryTarget);
+    if (!entry) throw new Error(`HTML skin entry \`${entryTarget}\` is missing.`);
+
+    return { entry, item: root.item, sources };
+  });
+  const templates = await renderHtmlSkinTemplates(skins, workspaceDir);
+
+  return skins.flatMap(({ item, sources }) => {
+    const meta = item.meta!;
+    const name = frameworkSkinName(meta);
+    const root = `packages/html/src/internal/skins/${name}`;
+    const template = templates.get(item.name);
+    const stylesheet = sources.get(htmlSkinEntryTarget(meta).replace(/\.tsx$/, '.css'));
+
+    if (template === undefined) throw new Error(`HTML skin \`${item.name}\` did not render a template.`);
+
+    if (!stylesheet) throw new Error(`HTML skin \`${item.name}\` has no stylesheet.`);
+
+    return [
+      { path: `${root}/template.ts`, content: htmlTemplateModule(template) },
+      { path: `${root}/register.ts`, content: htmlRegistration(template, sources.values()) },
+      { path: `${root}/skin.css`, content: stylesheet.content },
+    ];
+  });
 }
 
 /** Convert prepared registry assets into package-shaped React skin files without invoking VJSC again. */
@@ -205,6 +289,17 @@ function isReactCssSkin(meta: VideojsRegistryMeta | undefined): meta is VideojsR
   );
 }
 
+function isHtmlCssSkin(meta: VideojsRegistryMeta | undefined): meta is VideojsRegistryMeta & {
+  readonly framework: 'html';
+  readonly preset: NonNullable<VideojsRegistryMeta['preset']>;
+  readonly styling: 'css';
+  readonly variant: NonNullable<VideojsRegistryMeta['variant']>;
+} {
+  return (
+    meta?.role === 'skin' && meta.framework === 'html' && meta.styling === 'css' && Boolean(meta.preset && meta.variant)
+  );
+}
+
 function normalizeTarget(target: string): string {
   const normalized = posix.normalize(target);
 
@@ -302,6 +397,222 @@ function pascalCase(value: string): string {
   return value.replace(/(?:^|-)([a-z])/g, (_match, letter: string) => letter.toUpperCase());
 }
 
+function frameworkSkinName(meta: VideojsRegistryMeta): string {
+  if (!meta.preset || !meta.variant) throw new Error('Framework skin metadata requires a preset and variant.');
+
+  return `${meta.variant}-${meta.preset}`;
+}
+
+function htmlSkinEntryTarget(meta: VideojsRegistryMeta): string {
+  if (!isHtmlCssSkin(meta)) throw new Error('HTML package materialization requires CSS skin metadata.');
+
+  const suffix = meta.variant === 'minimal' ? '-minimal' : '';
+
+  return `${installPrefix}skins/${meta.preset}${suffix}-css/skin.tsx`;
+}
+
+async function renderHtmlSkinTemplates(
+  skins: readonly HtmlSkinSource[],
+  workspaceDir: string
+): Promise<ReadonlyMap<string, string>> {
+  const sources = new Map<string, string>();
+
+  for (const skin of skins) {
+    for (const source of skin.sources.values()) {
+      if (!scriptExtensions.some((extension) => source.target.endsWith(extension))) continue;
+
+      const id = `/${source.target}`;
+      const previous = sources.get(id);
+
+      if (previous !== undefined && previous !== source.content) {
+        throw new Error(`HTML renderer source \`${source.target}\` has conflicting contents.`);
+      }
+
+      sources.set(id, source.content);
+    }
+  }
+
+  const iconBindings = new Set<string>(['registerIcons']);
+
+  for (const source of sources.values()) {
+    for (const match of source.matchAll(/registerIcons\([^,]+,\s*\{([\s\S]*?)\}\);/g)) {
+      for (const pair of match[1]!.matchAll(/(?:['"][^'"]+['"]|[A-Za-z_$][\w$]*)\s*:\s*([A-Za-z_$][\w$]*)/g)) {
+        iconBindings.add(pair[1]!);
+      }
+    }
+  }
+
+  const entry = skins
+    .map(({ entry: source, item }, index) => {
+      const meta = item.meta!;
+      const exportName = `${meta.variant === 'minimal' ? 'Minimal' : 'Default'}${pascalCase(meta.preset!)}Skin`;
+
+      return `export { ${exportName} as render${index} } from ${JSON.stringify(`/${source.target}`)};`;
+    })
+    .join('\n');
+  const emptyId = '\0skins:html-render-empty';
+  const entryId = '\0skins:html-render-entry';
+  const iconsId = '\0skins:html-render-icons';
+  const runtimeId = '\0skins:html-render-runtime';
+  const aliases = new Map([
+    ['@videojs/core/i18n/text/menu', resolve(workspaceDir, 'packages/core/src/core/i18n/text/menu.ts')],
+    ['@videojs/utils/string', resolve(workspaceDir, 'packages/utils/src/string/index.ts')],
+    ['vjsc/target', resolve(workspaceDir, 'packages/vjsc/src/target/attributes.ts')],
+  ]);
+  const build = await rolldown({
+    input: entryId,
+    treeshake: true,
+    plugins: [
+      {
+        name: 'skins:render-html-templates',
+        resolveId(id, importer) {
+          if ([emptyId, entryId, iconsId, runtimeId].includes(id) || sources.has(id)) return id;
+
+          const alias = aliases.get(id);
+          if (alias) return alias;
+
+          if (id === 'vjsc/html-runtime/jsx-runtime') return runtimeId;
+
+          if (id.startsWith('@videojs/html/ui/') || id === '@videojs/html/i18n' || id.endsWith('.css')) return emptyId;
+
+          if (id === '@videojs/html/icons' || id === '@videojs/html/icons/minimal') return iconsId;
+
+          if (id.startsWith('.') && importer?.startsWith(`/${installPrefix}`)) {
+            const requested = posix.normalize(posix.join(posix.dirname(importer), id));
+            const resolved = [
+              requested,
+              ...scriptExtensions.map((extension) => `${requested}${extension}`),
+              ...scriptExtensions.map((extension) => posix.join(requested, `index${extension}`)),
+            ].find((candidate) => sources.has(candidate));
+            if (resolved) return resolved;
+          }
+
+          return null;
+        },
+        load(id) {
+          if (id === entryId) return { code: entry, moduleType: 'js' };
+
+          if (id === emptyId) return { code: 'export {};', moduleType: 'js' };
+
+          if (id === runtimeId) return { code: HTML_RUNTIME, moduleType: 'js' };
+
+          if (id === iconsId) {
+            const code = [...iconBindings]
+              .sort()
+              .map((name) => `export const ${name} = ${name === 'registerIcons' ? '() => {}' : "''"};`)
+              .join('\n');
+
+            return { code, moduleType: 'js' };
+          }
+
+          const source = sources.get(id);
+
+          return source === undefined ? null : { code: source, moduleType: 'tsx' };
+        },
+      },
+    ],
+  });
+
+  try {
+    const output = await build.generate({ codeSplitting: false, format: 'esm' });
+    const chunks = output.output.filter((value) => value.type === 'chunk');
+
+    if (chunks.length !== 1 || chunks[0]!.imports.length > 0) {
+      throw new Error('Prepared HTML skin renderer did not produce one self-contained module.');
+    }
+
+    const url = `data:text/javascript;base64,${Buffer.from(chunks[0]!.code).toString('base64')}`;
+    // SAFETY: The self-contained module is produced from the canonical, already-transformed registry graph above.
+    const rendered = (await import(url)) as Readonly<
+      Record<string, (props?: HtmlSkinRenderProps) => { toString(): string }>
+    >;
+
+    return new Map(
+      skins.map(({ item }, index) => {
+        const render = rendered[`render${index}`];
+        if (!render) throw new Error(`HTML skin \`${item.name}\` has no renderer export.`);
+
+        return [item.name, formatHtml(String(render({})))] as const;
+      })
+    );
+  } finally {
+    await build.close();
+  }
+}
+
+function htmlTemplateModule(html: string): string {
+  const template = html.replaceAll('\\', '\\\\').replaceAll('`', '\\`').replaceAll('${', '\\${');
+
+  return `import { createTemplate } from '@videojs/utils/dom';
+
+/** Static template rendered from the canonical prepared VJSC registry graph. */
+export const template = createTemplate(/* html */ \`${template}\`);
+`;
+}
+
+function htmlRegistration(html: string, sources: Iterable<MaterializedSource>): string {
+  const output: string[] = [];
+  const tags = new Set<string>();
+
+  for (const match of html.matchAll(/<media-([a-z0-9-]+)\b/g)) tags.add(match[1]!);
+
+  if (tags.delete('text')) output.push("import '../../../define/i18n';");
+
+  tags.delete('icon');
+
+  output.push(...[...tags].map((tag) => `import '../../../define/ui/${tag}';`));
+
+  const families = iconRegistrations(sources);
+
+  if (families.size > 0) output.push("import { registerIcons } from '../../../icons';");
+
+  for (const [family, icons] of [...families].sort(([left], [right]) => left.localeCompare(right))) {
+    const bindings = [...new Set(icons.values())].sort();
+    const source = family === 'default' ? '../../../icons' : `../../../icons/${family}`;
+
+    output.push(`import {\n${bindings.map((binding) => `  ${binding},`).join('\n')}\n} from '${source}';`);
+  }
+
+  if (families.size > 0) output.push('');
+
+  for (const [family, icons] of [...families].sort(([left], [right]) => left.localeCompare(right))) {
+    const entries = [...icons]
+      .sort(([left], [right]) => left.localeCompare(right))
+      .map(([name, binding]) => `  ${quote(name)}: ${binding},`)
+      .join('\n');
+
+    output.push(`registerIcons(${quote(family)}, {\n${entries}\n});`);
+  }
+
+  return `${output.join('\n')}\n`;
+}
+
+function quote(value: string): string {
+  return `'${value.replaceAll('\\', '\\\\').replaceAll("'", "\\'")}'`;
+}
+
+function iconRegistrations(sources: Iterable<MaterializedSource>): ReadonlyMap<string, ReadonlyMap<string, string>> {
+  const families = new Map<string, Map<string, string>>();
+
+  for (const { content } of sources) {
+    for (const match of content.matchAll(/registerIcons\(['"]([^'"]+)['"],\s*\{([\s\S]*?)\}\);/g)) {
+      const icons = families.get(match[1]!) ?? new Map<string, string>();
+
+      for (const pair of match[2]!.matchAll(/(?:['"]([^'"]+)['"]|([A-Za-z_$][\w$]*))\s*:\s*([A-Za-z_$][\w$]*)/g)) {
+        icons.set(pair[1] ?? pair[2]!, pair[3]!);
+      }
+
+      families.set(match[1]!, icons);
+    }
+  }
+
+  return families;
+}
+
+function formatHtml(html: string): string {
+  return html.replace(/></g, '>\n<');
+}
+
 function reactSkinWrapper(
   meta: VideojsRegistryMeta,
   sources: ReadonlyMap<string, MaterializedSource>
@@ -356,6 +667,7 @@ async function syncArtifacts(workspaceDir: string, artifacts: readonly Framework
   const expected = new Map(artifacts.map((artifact) => [artifact.path, artifact.content]));
   const existing = new Set<string>([
     ...(await filesWithin(workspaceDir, 'packages/react/src/internal/skins')),
+    ...(await filesWithin(workspaceDir, 'packages/html/src/internal/skins')),
     ...ownedPublicPaths(),
   ]);
   let changed = 0;

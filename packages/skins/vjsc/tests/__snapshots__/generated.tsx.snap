@@ -24596,6 +24596,8 @@ import type { PropsWithChildren, VjscElement, VjscNode } from 'vjsc/components';
 import "virtual:vjsc/css/<hash>/base.css";
 import "virtual:vjsc/css/<hash>/popups.css";
 import "@videojs/html/ui/tooltip";
+import "@videojs/html/ui/tooltip-label";
+import "@videojs/html/ui/tooltip-shortcut";
 import { Host, Scope } from "vjsc/html-runtime/jsx-runtime";
 
 
@@ -25279,6 +25281,8 @@ import "virtual:vjsc/css/<hash>/base.css";
 import "virtual:vjsc/css/<hash>/buttons.css";
 import "virtual:vjsc/css/<hash>/menus.css";
 import "@videojs/html/ui/playback-rate-button";
+import "@videojs/html/ui/menu-item";
+import "@videojs/html/ui/menu-content";
 import "@videojs/html/ui/menu";
 import { Scope } from "vjsc/html-runtime/jsx-runtime";
 
@@ -25363,6 +25367,8 @@ import "virtual:vjsc/css/<hash>/buttons.css";
 import "virtual:vjsc/css/<hash>/menus.css";
 import { registerIcons, captionsOffIcon, captionsOnIcon } from "@videojs/html/icons";
 import "@videojs/html/ui/captions-button";
+import "@videojs/html/ui/menu-item";
+import "@videojs/html/ui/menu-content";
 import "@videojs/html/ui/menu";
 import { Scope } from "vjsc/html-runtime/jsx-runtime";
 
@@ -25579,7 +25585,8 @@ import type { PropsWithChildren } from 'vjsc/components';
 import "virtual:vjsc/css/<hash>/base.css";
 import "virtual:vjsc/css/<hash>/menus.css";
 import { registerIcons, checkIcon } from "@videojs/html/icons";
-import "@videojs/html/ui/menu";
+import "@videojs/html/ui/menu-item-indicator";
+import "@videojs/html/ui/menu-radio-item";
 
 registerIcons("default", { "check": checkIcon });
 
@@ -25612,6 +25619,8 @@ import "virtual:vjsc/css/<hash>/buttons.css";
 import "virtual:vjsc/css/<hash>/menus.css";
 import { registerIcons, gearIcon } from "@videojs/html/icons";
 import "@videojs/html/i18n";
+import "@videojs/html/ui/menu-item";
+import "@videojs/html/ui/menu-content";
 import "@videojs/html/ui/menu";
 import { Scope } from "vjsc/html-runtime/jsx-runtime";
 
@@ -25649,7 +25658,9 @@ import { type PropsWithChildren, type VjscNode } from "vjsc/components";
 import { MenuChevron } from './menu-chevron';
 import "virtual:vjsc/css/<hash>/base.css";
 import "virtual:vjsc/css/<hash>/menus.css";
-import "@videojs/html/ui/menu";
+import "@videojs/html/ui/menu-item";
+import "@videojs/html/ui/menu-separator";
+import "@videojs/html/ui/menu-content";
 import { Scope } from "vjsc/html-runtime/jsx-runtime";
 
 
@@ -25758,7 +25769,7 @@ import "@videojs/html/ui/slider-fill";
 import "@videojs/html/ui/slider-track";
 import "@videojs/html/ui/slider-thumb";
 import "@videojs/html/ui/slider-value";
-import "@videojs/html/ui/slider";
+import "@videojs/html/ui/slider-preview";
 import "@videojs/html/ui/time-slider";
 
 
@@ -25824,7 +25835,7 @@ import "@videojs/html/ui/slider-thumb";
 import "@videojs/html/ui/slider-thumbnail";
 import "@videojs/html/ui/time-slider-chapter-title";
 import "@videojs/html/ui/slider-value";
-import "@videojs/html/ui/slider";
+import "@videojs/html/ui/slider-preview";
 import "@videojs/html/ui/time-slider";
 
 registerIcons("default", { "spinner": spinnerIcon });
@@ -26092,6 +26103,8 @@ import type { PropsWithChildren, VjscElement, VjscNode } from 'vjsc/components';
 
 
 import "@videojs/html/ui/tooltip";
+import "@videojs/html/ui/tooltip-label";
+import "@videojs/html/ui/tooltip-shortcut";
 import { Host, Scope } from "vjsc/html-runtime/jsx-runtime";
 
 
@@ -26710,6 +26723,8 @@ import { ButtonTooltip } from '../buttons/button-tooltip';
 import { PlaybackRateRadioGroup } from './radio-group';
 import { RadioItem } from './radio-item';
 import "@videojs/html/ui/playback-rate-button";
+import "@videojs/html/ui/menu-item";
+import "@videojs/html/ui/menu-content";
 import "@videojs/html/ui/menu";
 import { Scope } from "vjsc/html-runtime/jsx-runtime";
 
@@ -26787,6 +26802,8 @@ import { CaptionsRadioGroup } from './radio-group';
 import { RadioItem } from './radio-item';
 import { registerIcons, captionsOffIcon, captionsOnIcon } from "@videojs/html/icons";
 import "@videojs/html/ui/captions-button";
+import "@videojs/html/ui/menu-item";
+import "@videojs/html/ui/menu-content";
 import "@videojs/html/ui/menu";
 import { Scope } from "vjsc/html-runtime/jsx-runtime";
 
@@ -26983,7 +27000,8 @@ import type { MenuItemProps } from '@videojs/core';
 
 import type { PropsWithChildren } from 'vjsc/components';
 import { registerIcons, checkIcon } from "@videojs/html/icons";
-import "@videojs/html/ui/menu";
+import "@videojs/html/ui/menu-item-indicator";
+import "@videojs/html/ui/menu-radio-item";
 
 registerIcons("default", { "check": checkIcon });
 
@@ -27014,6 +27032,8 @@ import { type PropsWithChildren } from "vjsc/components";
 import { ButtonTooltip } from '../buttons/button-tooltip';
 import { registerIcons, gearIcon } from "@videojs/html/icons";
 import "@videojs/html/i18n";
+import "@videojs/html/ui/menu-item";
+import "@videojs/html/ui/menu-content";
 import "@videojs/html/ui/menu";
 import { Scope } from "vjsc/html-runtime/jsx-runtime";
 
@@ -27048,7 +27068,9 @@ import { type PropsWithChildren, type VjscNode } from "vjsc/components";
 
 
 import { MenuChevron } from './menu-chevron';
-import "@videojs/html/ui/menu";
+import "@videojs/html/ui/menu-item";
+import "@videojs/html/ui/menu-separator";
+import "@videojs/html/ui/menu-content";
 import { Scope } from "vjsc/html-runtime/jsx-runtime";
 
 
@@ -27154,7 +27176,7 @@ import "@videojs/html/ui/slider-fill";
 import "@videojs/html/ui/slider-track";
 import "@videojs/html/ui/slider-thumb";
 import "@videojs/html/ui/slider-value";
-import "@videojs/html/ui/slider";
+import "@videojs/html/ui/slider-preview";
 import "@videojs/html/ui/time-slider";
 
 
@@ -27213,7 +27235,7 @@ import "@videojs/html/ui/slider-thumb";
 import "@videojs/html/ui/slider-thumbnail";
 import "@videojs/html/ui/time-slider-chapter-title";
 import "@videojs/html/ui/slider-value";
-import "@videojs/html/ui/slider";
+import "@videojs/html/ui/slider-preview";
 import "@videojs/html/ui/time-slider";
 
 registerIcons("default", { "spinner": spinnerIcon });
@@ -27484,6 +27506,8 @@ import type { PropsWithChildren, VjscElement, VjscNode } from 'vjsc/components';
 import "virtual:vjsc/css/<hash>/base.css";
 import "virtual:vjsc/css/<hash>/popups.css";
 import "@videojs/html/ui/tooltip";
+import "@videojs/html/ui/tooltip-label";
+import "@videojs/html/ui/tooltip-shortcut";
 import { Host, Scope } from "vjsc/html-runtime/jsx-runtime";
 
 
@@ -28178,6 +28202,8 @@ import "virtual:vjsc/css/<hash>/base.css";
 import "virtual:vjsc/css/<hash>/buttons.css";
 import "virtual:vjsc/css/<hash>/menus.css";
 import "@videojs/html/ui/playback-rate-button";
+import "@videojs/html/ui/menu-item";
+import "@videojs/html/ui/menu-content";
 import "@videojs/html/ui/menu";
 import { Scope } from "vjsc/html-runtime/jsx-runtime";
 
@@ -28264,6 +28290,8 @@ import "virtual:vjsc/css/<hash>/menus.css";
 import { registerIcons } from "@videojs/html/icons";
 import { captionsOffIcon, captionsOnIcon } from "@videojs/html/icons/minimal";
 import "@videojs/html/ui/captions-button";
+import "@videojs/html/ui/menu-item";
+import "@videojs/html/ui/menu-content";
 import "@videojs/html/ui/menu";
 import { Scope } from "vjsc/html-runtime/jsx-runtime";
 
@@ -28485,7 +28513,8 @@ import "virtual:vjsc/css/<hash>/base.css";
 import "virtual:vjsc/css/<hash>/menus.css";
 import { registerIcons } from "@videojs/html/icons";
 import { checkIcon } from "@videojs/html/icons/minimal";
-import "@videojs/html/ui/menu";
+import "@videojs/html/ui/menu-item-indicator";
+import "@videojs/html/ui/menu-radio-item";
 
 registerIcons("minimal", { "check": checkIcon });
 
@@ -28519,6 +28548,8 @@ import "virtual:vjsc/css/<hash>/menus.css";
 import { registerIcons } from "@videojs/html/icons";
 import { gearIcon } from "@videojs/html/icons/minimal";
 import "@videojs/html/i18n";
+import "@videojs/html/ui/menu-item";
+import "@videojs/html/ui/menu-content";
 import "@videojs/html/ui/menu";
 import { Scope } from "vjsc/html-runtime/jsx-runtime";
 
@@ -28556,7 +28587,9 @@ import { type PropsWithChildren, type VjscNode } from "vjsc/components";
 import { MenuChevron } from './menu-chevron';
 import "virtual:vjsc/css/<hash>/base.css";
 import "virtual:vjsc/css/<hash>/menus.css";
-import "@videojs/html/ui/menu";
+import "@videojs/html/ui/menu-item";
+import "@videojs/html/ui/menu-separator";
+import "@videojs/html/ui/menu-content";
 import { Scope } from "vjsc/html-runtime/jsx-runtime";
 
 
@@ -28665,7 +28698,7 @@ import "@videojs/html/ui/slider-fill";
 import "@videojs/html/ui/slider-track";
 import "@videojs/html/ui/slider-thumb";
 import "@videojs/html/ui/slider-value";
-import "@videojs/html/ui/slider";
+import "@videojs/html/ui/slider-preview";
 import "@videojs/html/ui/time-slider";
 
 
@@ -28732,7 +28765,7 @@ import "@videojs/html/ui/slider-thumb";
 import "@videojs/html/ui/slider-thumbnail";
 import "@videojs/html/ui/time-slider-chapter-title";
 import "@videojs/html/ui/slider-value";
-import "@videojs/html/ui/slider";
+import "@videojs/html/ui/slider-preview";
 import "@videojs/html/ui/time-slider";
 
 registerIcons("minimal", { "spinner": spinnerIcon });
@@ -29007,6 +29040,8 @@ import type { PropsWithChildren, VjscElement, VjscNode } from 'vjsc/components';
 
 
 import "@videojs/html/ui/tooltip";
+import "@videojs/html/ui/tooltip-label";
+import "@videojs/html/ui/tooltip-shortcut";
 import { Host, Scope } from "vjsc/html-runtime/jsx-runtime";
 
 
@@ -29636,6 +29671,8 @@ import { ButtonTooltip } from '../buttons/button-tooltip';
 import { PlaybackRateRadioGroup } from './radio-group';
 import { RadioItem } from './radio-item';
 import "@videojs/html/ui/playback-rate-button";
+import "@videojs/html/ui/menu-item";
+import "@videojs/html/ui/menu-content";
 import "@videojs/html/ui/menu";
 import { Scope } from "vjsc/html-runtime/jsx-runtime";
 
@@ -29715,6 +29752,8 @@ import { RadioItem } from './radio-item';
 import { registerIcons } from "@videojs/html/icons";
 import { captionsOffIcon, captionsOnIcon } from "@videojs/html/icons/minimal";
 import "@videojs/html/ui/captions-button";
+import "@videojs/html/ui/menu-item";
+import "@videojs/html/ui/menu-content";
 import "@videojs/html/ui/menu";
 import { Scope } from "vjsc/html-runtime/jsx-runtime";
 
@@ -29916,7 +29955,8 @@ import type { MenuItemProps } from '@videojs/core';
 import type { PropsWithChildren } from 'vjsc/components';
 import { registerIcons } from "@videojs/html/icons";
 import { checkIcon } from "@videojs/html/icons/minimal";
-import "@videojs/html/ui/menu";
+import "@videojs/html/ui/menu-item-indicator";
+import "@videojs/html/ui/menu-radio-item";
 
 registerIcons("minimal", { "check": checkIcon });
 
@@ -29948,6 +29988,8 @@ import { ButtonTooltip } from '../buttons/button-tooltip';
 import { registerIcons } from "@videojs/html/icons";
 import { gearIcon } from "@videojs/html/icons/minimal";
 import "@videojs/html/i18n";
+import "@videojs/html/ui/menu-item";
+import "@videojs/html/ui/menu-content";
 import "@videojs/html/ui/menu";
 import { Scope } from "vjsc/html-runtime/jsx-runtime";
 
@@ -29982,7 +30024,9 @@ import { type PropsWithChildren, type VjscNode } from "vjsc/components";
 
 
 import { MenuChevron } from './menu-chevron';
-import "@videojs/html/ui/menu";
+import "@videojs/html/ui/menu-item";
+import "@videojs/html/ui/menu-separator";
+import "@videojs/html/ui/menu-content";
 import { Scope } from "vjsc/html-runtime/jsx-runtime";
 
 
@@ -30088,7 +30132,7 @@ import "@videojs/html/ui/slider-fill";
 import "@videojs/html/ui/slider-track";
 import "@videojs/html/ui/slider-thumb";
 import "@videojs/html/ui/slider-value";
-import "@videojs/html/ui/slider";
+import "@videojs/html/ui/slider-preview";
 import "@videojs/html/ui/time-slider";
 
 
@@ -30148,7 +30192,7 @@ import "@videojs/html/ui/slider-thumb";
 import "@videojs/html/ui/slider-thumbnail";
 import "@videojs/html/ui/time-slider-chapter-title";
 import "@videojs/html/ui/slider-value";
-import "@videojs/html/ui/slider";
+import "@videojs/html/ui/slider-preview";
 import "@videojs/html/ui/time-slider";
 
 registerIcons("minimal", { "spinner": spinnerIcon });
@@ -30424,6 +30468,8 @@ import type { PropsWithChildren, VjscElement, VjscNode } from 'vjsc/components';
 import "virtual:vjsc/css/<hash>/base.css";
 import "virtual:vjsc/css/<hash>/popups.css";
 import "@videojs/html/ui/tooltip";
+import "@videojs/html/ui/tooltip-label";
+import "@videojs/html/ui/tooltip-shortcut";
 import { Host, Scope } from "vjsc/html-runtime/jsx-runtime";
 
 
@@ -31107,6 +31153,8 @@ import "virtual:vjsc/css/<hash>/base.css";
 import "virtual:vjsc/css/<hash>/buttons.css";
 import "virtual:vjsc/css/<hash>/menus.css";
 import "@videojs/html/ui/playback-rate-button";
+import "@videojs/html/ui/menu-item";
+import "@videojs/html/ui/menu-content";
 import "@videojs/html/ui/menu";
 import { Scope } from "vjsc/html-runtime/jsx-runtime";
 
@@ -31191,6 +31239,8 @@ import "virtual:vjsc/css/<hash>/buttons.css";
 import "virtual:vjsc/css/<hash>/menus.css";
 import { registerIcons, captionsOffIcon, captionsOnIcon } from "@videojs/html/icons";
 import "@videojs/html/ui/captions-button";
+import "@videojs/html/ui/menu-item";
+import "@videojs/html/ui/menu-content";
 import "@videojs/html/ui/menu";
 import { Scope } from "vjsc/html-runtime/jsx-runtime";
 
@@ -31407,7 +31457,8 @@ import type { PropsWithChildren } from 'vjsc/components';
 import "virtual:vjsc/css/<hash>/base.css";
 import "virtual:vjsc/css/<hash>/menus.css";
 import { registerIcons, checkIcon } from "@videojs/html/icons";
-import "@videojs/html/ui/menu";
+import "@videojs/html/ui/menu-item-indicator";
+import "@videojs/html/ui/menu-radio-item";
 
 registerIcons("default", { "check": checkIcon });
 
@@ -31440,6 +31491,8 @@ import "virtual:vjsc/css/<hash>/buttons.css";
 import "virtual:vjsc/css/<hash>/menus.css";
 import { registerIcons, gearIcon } from "@videojs/html/icons";
 import "@videojs/html/i18n";
+import "@videojs/html/ui/menu-item";
+import "@videojs/html/ui/menu-content";
 import "@videojs/html/ui/menu";
 import { Scope } from "vjsc/html-runtime/jsx-runtime";
 
@@ -31477,7 +31530,9 @@ import { type PropsWithChildren, type VjscNode } from "vjsc/components";
 import { MenuChevron } from './menu-chevron';
 import "virtual:vjsc/css/<hash>/base.css";
 import "virtual:vjsc/css/<hash>/menus.css";
-import "@videojs/html/ui/menu";
+import "@videojs/html/ui/menu-item";
+import "@videojs/html/ui/menu-separator";
+import "@videojs/html/ui/menu-content";
 import { Scope } from "vjsc/html-runtime/jsx-runtime";
 
 
@@ -31586,7 +31641,7 @@ import "@videojs/html/ui/slider-fill";
 import "@videojs/html/ui/slider-track";
 import "@videojs/html/ui/slider-thumb";
 import "@videojs/html/ui/slider-value";
-import "@videojs/html/ui/slider";
+import "@videojs/html/ui/slider-preview";
 import "@videojs/html/ui/time-slider";
 
 
@@ -31652,7 +31707,7 @@ import "@videojs/html/ui/slider-thumb";
 import "@videojs/html/ui/slider-thumbnail";
 import "@videojs/html/ui/time-slider-chapter-title";
 import "@videojs/html/ui/slider-value";
-import "@videojs/html/ui/slider";
+import "@videojs/html/ui/slider-preview";
 import "@videojs/html/ui/time-slider";
 
 registerIcons("default", { "spinner": spinnerIcon });
@@ -31908,6 +31963,8 @@ import type { PropsWithChildren, VjscElement, VjscNode } from 'vjsc/components';
 
 
 import "@videojs/html/ui/tooltip";
+import "@videojs/html/ui/tooltip-label";
+import "@videojs/html/ui/tooltip-shortcut";
 import { Host, Scope } from "vjsc/html-runtime/jsx-runtime";
 
 
@@ -32526,6 +32583,8 @@ import { ButtonTooltip } from '../buttons/button-tooltip';
 import { PlaybackRateRadioGroup } from './radio-group';
 import { RadioItem } from './radio-item';
 import "@videojs/html/ui/playback-rate-button";
+import "@videojs/html/ui/menu-item";
+import "@videojs/html/ui/menu-content";
 import "@videojs/html/ui/menu";
 import { Scope } from "vjsc/html-runtime/jsx-runtime";
 
@@ -32603,6 +32662,8 @@ import { CaptionsRadioGroup } from './radio-group';
 import { RadioItem } from './radio-item';
 import { registerIcons, captionsOffIcon, captionsOnIcon } from "@videojs/html/icons";
 import "@videojs/html/ui/captions-button";
+import "@videojs/html/ui/menu-item";
+import "@videojs/html/ui/menu-content";
 import "@videojs/html/ui/menu";
 import { Scope } from "vjsc/html-runtime/jsx-runtime";
 
@@ -32799,7 +32860,8 @@ import type { MenuItemProps } from '@videojs/core';
 
 import type { PropsWithChildren } from 'vjsc/components';
 import { registerIcons, checkIcon } from "@videojs/html/icons";
-import "@videojs/html/ui/menu";
+import "@videojs/html/ui/menu-item-indicator";
+import "@videojs/html/ui/menu-radio-item";
 
 registerIcons("default", { "check": checkIcon });
 
@@ -32830,6 +32892,8 @@ import { type PropsWithChildren } from "vjsc/components";
 import { ButtonTooltip } from '../buttons/button-tooltip';
 import { registerIcons, gearIcon } from "@videojs/html/icons";
 import "@videojs/html/i18n";
+import "@videojs/html/ui/menu-item";
+import "@videojs/html/ui/menu-content";
 import "@videojs/html/ui/menu";
 import { Scope } from "vjsc/html-runtime/jsx-runtime";
 
@@ -32864,7 +32928,9 @@ import { type PropsWithChildren, type VjscNode } from "vjsc/components";
 
 
 import { MenuChevron } from './menu-chevron';
-import "@videojs/html/ui/menu";
+import "@videojs/html/ui/menu-item";
+import "@videojs/html/ui/menu-separator";
+import "@videojs/html/ui/menu-content";
 import { Scope } from "vjsc/html-runtime/jsx-runtime";
 
 
@@ -32970,7 +33036,7 @@ import "@videojs/html/ui/slider-fill";
 import "@videojs/html/ui/slider-track";
 import "@videojs/html/ui/slider-thumb";
 import "@videojs/html/ui/slider-value";
-import "@videojs/html/ui/slider";
+import "@videojs/html/ui/slider-preview";
 import "@videojs/html/ui/time-slider";
 
 
@@ -33029,7 +33095,7 @@ import "@videojs/html/ui/slider-thumb";
 import "@videojs/html/ui/slider-thumbnail";
 import "@videojs/html/ui/time-slider-chapter-title";
 import "@videojs/html/ui/slider-value";
-import "@videojs/html/ui/slider";
+import "@videojs/html/ui/slider-preview";
 import "@videojs/html/ui/time-slider";
 
 registerIcons("default", { "spinner": spinnerIcon });
@@ -33288,6 +33354,8 @@ import type { PropsWithChildren, VjscElement, VjscNode } from 'vjsc/components';
 import "virtual:vjsc/css/<hash>/base.css";
 import "virtual:vjsc/css/<hash>/popups.css";
 import "@videojs/html/ui/tooltip";
+import "@videojs/html/ui/tooltip-label";
+import "@videojs/html/ui/tooltip-shortcut";
 import { Host, Scope } from "vjsc/html-runtime/jsx-runtime";
 
 
@@ -33982,6 +34050,8 @@ import "virtual:vjsc/css/<hash>/base.css";
 import "virtual:vjsc/css/<hash>/buttons.css";
 import "virtual:vjsc/css/<hash>/menus.css";
 import "@videojs/html/ui/playback-rate-button";
+import "@videojs/html/ui/menu-item";
+import "@videojs/html/ui/menu-content";
 import "@videojs/html/ui/menu";
 import { Scope } from "vjsc/html-runtime/jsx-runtime";
 
@@ -34068,6 +34138,8 @@ import "virtual:vjsc/css/<hash>/menus.css";
 import { registerIcons } from "@videojs/html/icons";
 import { captionsOffIcon, captionsOnIcon } from "@videojs/html/icons/minimal";
 import "@videojs/html/ui/captions-button";
+import "@videojs/html/ui/menu-item";
+import "@videojs/html/ui/menu-content";
 import "@videojs/html/ui/menu";
 import { Scope } from "vjsc/html-runtime/jsx-runtime";
 
@@ -34289,7 +34361,8 @@ import "virtual:vjsc/css/<hash>/base.css";
 import "virtual:vjsc/css/<hash>/menus.css";
 import { registerIcons } from "@videojs/html/icons";
 import { checkIcon } from "@videojs/html/icons/minimal";
-import "@videojs/html/ui/menu";
+import "@videojs/html/ui/menu-item-indicator";
+import "@videojs/html/ui/menu-radio-item";
 
 registerIcons("minimal", { "check": checkIcon });
 
@@ -34323,6 +34396,8 @@ import "virtual:vjsc/css/<hash>/menus.css";
 import { registerIcons } from "@videojs/html/icons";
 import { gearIcon } from "@videojs/html/icons/minimal";
 import "@videojs/html/i18n";
+import "@videojs/html/ui/menu-item";
+import "@videojs/html/ui/menu-content";
 import "@videojs/html/ui/menu";
 import { Scope } from "vjsc/html-runtime/jsx-runtime";
 
@@ -34360,7 +34435,9 @@ import { type PropsWithChildren, type VjscNode } from "vjsc/components";
 import { MenuChevron } from './menu-chevron';
 import "virtual:vjsc/css/<hash>/base.css";
 import "virtual:vjsc/css/<hash>/menus.css";
-import "@videojs/html/ui/menu";
+import "@videojs/html/ui/menu-item";
+import "@videojs/html/ui/menu-separator";
+import "@videojs/html/ui/menu-content";
 import { Scope } from "vjsc/html-runtime/jsx-runtime";
 
 
@@ -34469,7 +34546,7 @@ import "@videojs/html/ui/slider-fill";
 import "@videojs/html/ui/slider-track";
 import "@videojs/html/ui/slider-thumb";
 import "@videojs/html/ui/slider-value";
-import "@videojs/html/ui/slider";
+import "@videojs/html/ui/slider-preview";
 import "@videojs/html/ui/time-slider";
 
 
@@ -34536,7 +34613,7 @@ import "@videojs/html/ui/slider-thumb";
 import "@videojs/html/ui/slider-thumbnail";
 import "@videojs/html/ui/time-slider-chapter-title";
 import "@videojs/html/ui/slider-value";
-import "@videojs/html/ui/slider";
+import "@videojs/html/ui/slider-preview";
 import "@videojs/html/ui/time-slider";
 
 registerIcons("minimal", { "spinner": spinnerIcon });
@@ -34797,6 +34874,8 @@ import type { PropsWithChildren, VjscElement, VjscNode } from 'vjsc/components';
 
 
 import "@videojs/html/ui/tooltip";
+import "@videojs/html/ui/tooltip-label";
+import "@videojs/html/ui/tooltip-shortcut";
 import { Host, Scope } from "vjsc/html-runtime/jsx-runtime";
 
 
@@ -35426,6 +35505,8 @@ import { ButtonTooltip } from '../buttons/button-tooltip';
 import { PlaybackRateRadioGroup } from './radio-group';
 import { RadioItem } from './radio-item';
 import "@videojs/html/ui/playback-rate-button";
+import "@videojs/html/ui/menu-item";
+import "@videojs/html/ui/menu-content";
 import "@videojs/html/ui/menu";
 import { Scope } from "vjsc/html-runtime/jsx-runtime";
 
@@ -35505,6 +35586,8 @@ import { RadioItem } from './radio-item';
 import { registerIcons } from "@videojs/html/icons";
 import { captionsOffIcon, captionsOnIcon } from "@videojs/html/icons/minimal";
 import "@videojs/html/ui/captions-button";
+import "@videojs/html/ui/menu-item";
+import "@videojs/html/ui/menu-content";
 import "@videojs/html/ui/menu";
 import { Scope } from "vjsc/html-runtime/jsx-runtime";
 
@@ -35706,7 +35789,8 @@ import type { MenuItemProps } from '@videojs/core';
 import type { PropsWithChildren } from 'vjsc/components';
 import { registerIcons } from "@videojs/html/icons";
 import { checkIcon } from "@videojs/html/icons/minimal";
-import "@videojs/html/ui/menu";
+import "@videojs/html/ui/menu-item-indicator";
+import "@videojs/html/ui/menu-radio-item";
 
 registerIcons("minimal", { "check": checkIcon });
 
@@ -35738,6 +35822,8 @@ import { ButtonTooltip } from '../buttons/button-tooltip';
 import { registerIcons } from "@videojs/html/icons";
 import { gearIcon } from "@videojs/html/icons/minimal";
 import "@videojs/html/i18n";
+import "@videojs/html/ui/menu-item";
+import "@videojs/html/ui/menu-content";
 import "@videojs/html/ui/menu";
 import { Scope } from "vjsc/html-runtime/jsx-runtime";
 
@@ -35772,7 +35858,9 @@ import { type PropsWithChildren, type VjscNode } from "vjsc/components";
 
 
 import { MenuChevron } from './menu-chevron';
-import "@videojs/html/ui/menu";
+import "@videojs/html/ui/menu-item";
+import "@videojs/html/ui/menu-separator";
+import "@videojs/html/ui/menu-content";
 import { Scope } from "vjsc/html-runtime/jsx-runtime";
 
 
@@ -35878,7 +35966,7 @@ import "@videojs/html/ui/slider-fill";
 import "@videojs/html/ui/slider-track";
 import "@videojs/html/ui/slider-thumb";
 import "@videojs/html/ui/slider-value";
-import "@videojs/html/ui/slider";
+import "@videojs/html/ui/slider-preview";
 import "@videojs/html/ui/time-slider";
 
 
@@ -35938,7 +36026,7 @@ import "@videojs/html/ui/slider-thumb";
 import "@videojs/html/ui/slider-thumbnail";
 import "@videojs/html/ui/time-slider-chapter-title";
 import "@videojs/html/ui/slider-value";
-import "@videojs/html/ui/slider";
+import "@videojs/html/ui/slider-preview";
 import "@videojs/html/ui/time-slider";
 
 registerIcons("minimal", { "spinner": spinnerIcon });
@@ -36200,6 +36288,8 @@ import type { PropsWithChildren, VjscElement, VjscNode } from 'vjsc/components';
 import "virtual:vjsc/css/<hash>/base.css";
 import "virtual:vjsc/css/<hash>/popups.css";
 import "@videojs/html/ui/tooltip";
+import "@videojs/html/ui/tooltip-label";
+import "@videojs/html/ui/tooltip-shortcut";
 import { Host, Scope } from "vjsc/html-runtime/jsx-runtime";
 
 
@@ -36883,6 +36973,8 @@ import "virtual:vjsc/css/<hash>/base.css";
 import "virtual:vjsc/css/<hash>/buttons.css";
 import "virtual:vjsc/css/<hash>/menus.css";
 import "@videojs/html/ui/playback-rate-button";
+import "@videojs/html/ui/menu-item";
+import "@videojs/html/ui/menu-content";
 import "@videojs/html/ui/menu";
 import { Scope } from "vjsc/html-runtime/jsx-runtime";
 
@@ -36967,6 +37059,8 @@ import "virtual:vjsc/css/<hash>/buttons.css";
 import "virtual:vjsc/css/<hash>/menus.css";
 import { registerIcons, captionsOffIcon, captionsOnIcon } from "@videojs/html/icons";
 import "@videojs/html/ui/captions-button";
+import "@videojs/html/ui/menu-item";
+import "@videojs/html/ui/menu-content";
 import "@videojs/html/ui/menu";
 import { Scope } from "vjsc/html-runtime/jsx-runtime";
 
@@ -37183,7 +37277,8 @@ import type { PropsWithChildren } from 'vjsc/components';
 import "virtual:vjsc/css/<hash>/base.css";
 import "virtual:vjsc/css/<hash>/menus.css";
 import { registerIcons, checkIcon } from "@videojs/html/icons";
-import "@videojs/html/ui/menu";
+import "@videojs/html/ui/menu-item-indicator";
+import "@videojs/html/ui/menu-radio-item";
 
 registerIcons("default", { "check": checkIcon });
 
@@ -37216,6 +37311,8 @@ import "virtual:vjsc/css/<hash>/buttons.css";
 import "virtual:vjsc/css/<hash>/menus.css";
 import { registerIcons, gearIcon } from "@videojs/html/icons";
 import "@videojs/html/i18n";
+import "@videojs/html/ui/menu-item";
+import "@videojs/html/ui/menu-content";
 import "@videojs/html/ui/menu";
 import { Scope } from "vjsc/html-runtime/jsx-runtime";
 
@@ -37253,7 +37350,9 @@ import { type PropsWithChildren, type VjscNode } from "vjsc/components";
 import { MenuChevron } from './menu-chevron';
 import "virtual:vjsc/css/<hash>/base.css";
 import "virtual:vjsc/css/<hash>/menus.css";
-import "@videojs/html/ui/menu";
+import "@videojs/html/ui/menu-item";
+import "@videojs/html/ui/menu-separator";
+import "@videojs/html/ui/menu-content";
 import { Scope } from "vjsc/html-runtime/jsx-runtime";
 
 
@@ -37362,7 +37461,7 @@ import "@videojs/html/ui/slider-fill";
 import "@videojs/html/ui/slider-track";
 import "@videojs/html/ui/slider-thumb";
 import "@videojs/html/ui/slider-value";
-import "@videojs/html/ui/slider";
+import "@videojs/html/ui/slider-preview";
 import "@videojs/html/ui/time-slider";
 
 
@@ -37428,7 +37527,7 @@ import "@videojs/html/ui/slider-thumb";
 import "@videojs/html/ui/slider-thumbnail";
 import "@videojs/html/ui/time-slider-chapter-title";
 import "@videojs/html/ui/slider-value";
-import "@videojs/html/ui/slider";
+import "@videojs/html/ui/slider-preview";
 import "@videojs/html/ui/time-slider";
 
 registerIcons("default", { "spinner": spinnerIcon });
@@ -37667,6 +37766,8 @@ import type { PropsWithChildren, VjscElement, VjscNode } from 'vjsc/components';
 
 
 import "@videojs/html/ui/tooltip";
+import "@videojs/html/ui/tooltip-label";
+import "@videojs/html/ui/tooltip-shortcut";
 import { Host, Scope } from "vjsc/html-runtime/jsx-runtime";
 
 
@@ -38285,6 +38386,8 @@ import { ButtonTooltip } from '../buttons/button-tooltip';
 import { PlaybackRateRadioGroup } from './radio-group';
 import { RadioItem } from './radio-item';
 import "@videojs/html/ui/playback-rate-button";
+import "@videojs/html/ui/menu-item";
+import "@videojs/html/ui/menu-content";
 import "@videojs/html/ui/menu";
 import { Scope } from "vjsc/html-runtime/jsx-runtime";
 
@@ -38362,6 +38465,8 @@ import { CaptionsRadioGroup } from './radio-group';
 import { RadioItem } from './radio-item';
 import { registerIcons, captionsOffIcon, captionsOnIcon } from "@videojs/html/icons";
 import "@videojs/html/ui/captions-button";
+import "@videojs/html/ui/menu-item";
+import "@videojs/html/ui/menu-content";
 import "@videojs/html/ui/menu";
 import { Scope } from "vjsc/html-runtime/jsx-runtime";
 
@@ -38558,7 +38663,8 @@ import type { MenuItemProps } from '@videojs/core';
 
 import type { PropsWithChildren } from 'vjsc/components';
 import { registerIcons, checkIcon } from "@videojs/html/icons";
-import "@videojs/html/ui/menu";
+import "@videojs/html/ui/menu-item-indicator";
+import "@videojs/html/ui/menu-radio-item";
 
 registerIcons("default", { "check": checkIcon });
 
@@ -38589,6 +38695,8 @@ import { type PropsWithChildren } from "vjsc/components";
 import { ButtonTooltip } from '../buttons/button-tooltip';
 import { registerIcons, gearIcon } from "@videojs/html/icons";
 import "@videojs/html/i18n";
+import "@videojs/html/ui/menu-item";
+import "@videojs/html/ui/menu-content";
 import "@videojs/html/ui/menu";
 import { Scope } from "vjsc/html-runtime/jsx-runtime";
 
@@ -38623,7 +38731,9 @@ import { type PropsWithChildren, type VjscNode } from "vjsc/components";
 
 
 import { MenuChevron } from './menu-chevron';
-import "@videojs/html/ui/menu";
+import "@videojs/html/ui/menu-item";
+import "@videojs/html/ui/menu-separator";
+import "@videojs/html/ui/menu-content";
 import { Scope } from "vjsc/html-runtime/jsx-runtime";
 
 
@@ -38729,7 +38839,7 @@ import "@videojs/html/ui/slider-fill";
 import "@videojs/html/ui/slider-track";
 import "@videojs/html/ui/slider-thumb";
 import "@videojs/html/ui/slider-value";
-import "@videojs/html/ui/slider";
+import "@videojs/html/ui/slider-preview";
 import "@videojs/html/ui/time-slider";
 
 
@@ -38788,7 +38898,7 @@ import "@videojs/html/ui/slider-thumb";
 import "@videojs/html/ui/slider-thumbnail";
 import "@videojs/html/ui/time-slider-chapter-title";
 import "@videojs/html/ui/slider-value";
-import "@videojs/html/ui/slider";
+import "@videojs/html/ui/slider-preview";
 import "@videojs/html/ui/time-slider";
 
 registerIcons("default", { "spinner": spinnerIcon });
@@ -39030,6 +39140,8 @@ import type { PropsWithChildren, VjscElement, VjscNode } from 'vjsc/components';
 import "virtual:vjsc/css/<hash>/base.css";
 import "virtual:vjsc/css/<hash>/popups.css";
 import "@videojs/html/ui/tooltip";
+import "@videojs/html/ui/tooltip-label";
+import "@videojs/html/ui/tooltip-shortcut";
 import { Host, Scope } from "vjsc/html-runtime/jsx-runtime";
 
 
@@ -39724,6 +39836,8 @@ import "virtual:vjsc/css/<hash>/base.css";
 import "virtual:vjsc/css/<hash>/buttons.css";
 import "virtual:vjsc/css/<hash>/menus.css";
 import "@videojs/html/ui/playback-rate-button";
+import "@videojs/html/ui/menu-item";
+import "@videojs/html/ui/menu-content";
 import "@videojs/html/ui/menu";
 import { Scope } from "vjsc/html-runtime/jsx-runtime";
 
@@ -39810,6 +39924,8 @@ import "virtual:vjsc/css/<hash>/menus.css";
 import { registerIcons } from "@videojs/html/icons";
 import { captionsOffIcon, captionsOnIcon } from "@videojs/html/icons/minimal";
 import "@videojs/html/ui/captions-button";
+import "@videojs/html/ui/menu-item";
+import "@videojs/html/ui/menu-content";
 import "@videojs/html/ui/menu";
 import { Scope } from "vjsc/html-runtime/jsx-runtime";
 
@@ -40031,7 +40147,8 @@ import "virtual:vjsc/css/<hash>/base.css";
 import "virtual:vjsc/css/<hash>/menus.css";
 import { registerIcons } from "@videojs/html/icons";
 import { checkIcon } from "@videojs/html/icons/minimal";
-import "@videojs/html/ui/menu";
+import "@videojs/html/ui/menu-item-indicator";
+import "@videojs/html/ui/menu-radio-item";
 
 registerIcons("minimal", { "check": checkIcon });
 
@@ -40065,6 +40182,8 @@ import "virtual:vjsc/css/<hash>/menus.css";
 import { registerIcons } from "@videojs/html/icons";
 import { gearIcon } from "@videojs/html/icons/minimal";
 import "@videojs/html/i18n";
+import "@videojs/html/ui/menu-item";
+import "@videojs/html/ui/menu-content";
 import "@videojs/html/ui/menu";
 import { Scope } from "vjsc/html-runtime/jsx-runtime";
 
@@ -40102,7 +40221,9 @@ import { type PropsWithChildren, type VjscNode } from "vjsc/components";
 import { MenuChevron } from './menu-chevron';
 import "virtual:vjsc/css/<hash>/base.css";
 import "virtual:vjsc/css/<hash>/menus.css";
-import "@videojs/html/ui/menu";
+import "@videojs/html/ui/menu-item";
+import "@videojs/html/ui/menu-separator";
+import "@videojs/html/ui/menu-content";
 import { Scope } from "vjsc/html-runtime/jsx-runtime";
 
 
@@ -40211,7 +40332,7 @@ import "@videojs/html/ui/slider-fill";
 import "@videojs/html/ui/slider-track";
 import "@videojs/html/ui/slider-thumb";
 import "@videojs/html/ui/slider-value";
-import "@videojs/html/ui/slider";
+import "@videojs/html/ui/slider-preview";
 import "@videojs/html/ui/time-slider";
 
 
@@ -40278,7 +40399,7 @@ import "@videojs/html/ui/slider-thumb";
 import "@videojs/html/ui/slider-thumbnail";
 import "@videojs/html/ui/time-slider-chapter-title";
 import "@videojs/html/ui/slider-value";
-import "@videojs/html/ui/slider";
+import "@videojs/html/ui/slider-preview";
 import "@videojs/html/ui/time-slider";
 
 registerIcons("minimal", { "spinner": spinnerIcon });
@@ -40518,6 +40639,8 @@ import type { PropsWithChildren, VjscElement, VjscNode } from 'vjsc/components';
 
 
 import "@videojs/html/ui/tooltip";
+import "@videojs/html/ui/tooltip-label";
+import "@videojs/html/ui/tooltip-shortcut";
 import { Host, Scope } from "vjsc/html-runtime/jsx-runtime";
 
 
@@ -41147,6 +41270,8 @@ import { ButtonTooltip } from '../buttons/button-tooltip';
 import { PlaybackRateRadioGroup } from './radio-group';
 import { RadioItem } from './radio-item';
 import "@videojs/html/ui/playback-rate-button";
+import "@videojs/html/ui/menu-item";
+import "@videojs/html/ui/menu-content";
 import "@videojs/html/ui/menu";
 import { Scope } from "vjsc/html-runtime/jsx-runtime";
 
@@ -41226,6 +41351,8 @@ import { RadioItem } from './radio-item';
 import { registerIcons } from "@videojs/html/icons";
 import { captionsOffIcon, captionsOnIcon } from "@videojs/html/icons/minimal";
 import "@videojs/html/ui/captions-button";
+import "@videojs/html/ui/menu-item";
+import "@videojs/html/ui/menu-content";
 import "@videojs/html/ui/menu";
 import { Scope } from "vjsc/html-runtime/jsx-runtime";
 
@@ -41427,7 +41554,8 @@ import type { MenuItemProps } from '@videojs/core';
 import type { PropsWithChildren } from 'vjsc/components';
 import { registerIcons } from "@videojs/html/icons";
 import { checkIcon } from "@videojs/html/icons/minimal";
-import "@videojs/html/ui/menu";
+import "@videojs/html/ui/menu-item-indicator";
+import "@videojs/html/ui/menu-radio-item";
 
 registerIcons("minimal", { "check": checkIcon });
 
@@ -41459,6 +41587,8 @@ import { ButtonTooltip } from '../buttons/button-tooltip';
 import { registerIcons } from "@videojs/html/icons";
 import { gearIcon } from "@videojs/html/icons/minimal";
 import "@videojs/html/i18n";
+import "@videojs/html/ui/menu-item";
+import "@videojs/html/ui/menu-content";
 import "@videojs/html/ui/menu";
 import { Scope } from "vjsc/html-runtime/jsx-runtime";
 
@@ -41493,7 +41623,9 @@ import { type PropsWithChildren, type VjscNode } from "vjsc/components";
 
 
 import { MenuChevron } from './menu-chevron';
-import "@videojs/html/ui/menu";
+import "@videojs/html/ui/menu-item";
+import "@videojs/html/ui/menu-separator";
+import "@videojs/html/ui/menu-content";
 import { Scope } from "vjsc/html-runtime/jsx-runtime";
 
 
@@ -41599,7 +41731,7 @@ import "@videojs/html/ui/slider-fill";
 import "@videojs/html/ui/slider-track";
 import "@videojs/html/ui/slider-thumb";
 import "@videojs/html/ui/slider-value";
-import "@videojs/html/ui/slider";
+import "@videojs/html/ui/slider-preview";
 import "@videojs/html/ui/time-slider";
 
 
@@ -41659,7 +41791,7 @@ import "@videojs/html/ui/slider-thumb";
 import "@videojs/html/ui/slider-thumbnail";
 import "@videojs/html/ui/time-slider-chapter-title";
 import "@videojs/html/ui/slider-value";
-import "@videojs/html/ui/slider";
+import "@videojs/html/ui/slider-preview";
 import "@videojs/html/ui/time-slider";
 
 registerIcons("minimal", { "spinner": spinnerIcon });
@@ -41900,6 +42032,8 @@ import type { PropsWithChildren, VjscElement, VjscNode } from 'vjsc/components';
 import "virtual:vjsc/css/<hash>/base.css";
 import "virtual:vjsc/css/<hash>/popups.css";
 import "@videojs/html/ui/tooltip";
+import "@videojs/html/ui/tooltip-label";
+import "@videojs/html/ui/tooltip-shortcut";
 import { Host, Scope } from "vjsc/html-runtime/jsx-runtime";
 
 
@@ -42583,6 +42717,8 @@ import "virtual:vjsc/css/<hash>/base.css";
 import "virtual:vjsc/css/<hash>/buttons.css";
 import "virtual:vjsc/css/<hash>/menus.css";
 import "@videojs/html/ui/playback-rate-button";
+import "@videojs/html/ui/menu-item";
+import "@videojs/html/ui/menu-content";
 import "@videojs/html/ui/menu";
 import { Scope } from "vjsc/html-runtime/jsx-runtime";
 
@@ -42667,6 +42803,8 @@ import "virtual:vjsc/css/<hash>/buttons.css";
 import "virtual:vjsc/css/<hash>/menus.css";
 import { registerIcons, captionsOffIcon, captionsOnIcon } from "@videojs/html/icons";
 import "@videojs/html/ui/captions-button";
+import "@videojs/html/ui/menu-item";
+import "@videojs/html/ui/menu-content";
 import "@videojs/html/ui/menu";
 import { Scope } from "vjsc/html-runtime/jsx-runtime";
 
@@ -42883,7 +43021,8 @@ import type { PropsWithChildren } from 'vjsc/components';
 import "virtual:vjsc/css/<hash>/base.css";
 import "virtual:vjsc/css/<hash>/menus.css";
 import { registerIcons, checkIcon } from "@videojs/html/icons";
-import "@videojs/html/ui/menu";
+import "@videojs/html/ui/menu-item-indicator";
+import "@videojs/html/ui/menu-radio-item";
 
 registerIcons("default", { "check": checkIcon });
 
@@ -42916,6 +43055,8 @@ import "virtual:vjsc/css/<hash>/buttons.css";
 import "virtual:vjsc/css/<hash>/menus.css";
 import { registerIcons, gearIcon } from "@videojs/html/icons";
 import "@videojs/html/i18n";
+import "@videojs/html/ui/menu-item";
+import "@videojs/html/ui/menu-content";
 import "@videojs/html/ui/menu";
 import { Scope } from "vjsc/html-runtime/jsx-runtime";
 
@@ -42953,7 +43094,9 @@ import { type PropsWithChildren, type VjscNode } from "vjsc/components";
 import { MenuChevron } from './menu-chevron';
 import "virtual:vjsc/css/<hash>/base.css";
 import "virtual:vjsc/css/<hash>/menus.css";
-import "@videojs/html/ui/menu";
+import "@videojs/html/ui/menu-item";
+import "@videojs/html/ui/menu-separator";
+import "@videojs/html/ui/menu-content";
 import { Scope } from "vjsc/html-runtime/jsx-runtime";
 
 
@@ -43062,7 +43205,7 @@ import "@videojs/html/ui/slider-fill";
 import "@videojs/html/ui/slider-track";
 import "@videojs/html/ui/slider-thumb";
 import "@videojs/html/ui/slider-value";
-import "@videojs/html/ui/slider";
+import "@videojs/html/ui/slider-preview";
 import "@videojs/html/ui/time-slider";
 
 
@@ -43128,7 +43271,7 @@ import "@videojs/html/ui/slider-thumb";
 import "@videojs/html/ui/slider-thumbnail";
 import "@videojs/html/ui/time-slider-chapter-title";
 import "@videojs/html/ui/slider-value";
-import "@videojs/html/ui/slider";
+import "@videojs/html/ui/slider-preview";
 import "@videojs/html/ui/time-slider";
 
 registerIcons("default", { "spinner": spinnerIcon });
@@ -43375,6 +43518,8 @@ import type { PropsWithChildren, VjscElement, VjscNode } from 'vjsc/components';
 
 
 import "@videojs/html/ui/tooltip";
+import "@videojs/html/ui/tooltip-label";
+import "@videojs/html/ui/tooltip-shortcut";
 import { Host, Scope } from "vjsc/html-runtime/jsx-runtime";
 
 
@@ -43993,6 +44138,8 @@ import { ButtonTooltip } from '../buttons/button-tooltip';
 import { PlaybackRateRadioGroup } from './radio-group';
 import { RadioItem } from './radio-item';
 import "@videojs/html/ui/playback-rate-button";
+import "@videojs/html/ui/menu-item";
+import "@videojs/html/ui/menu-content";
 import "@videojs/html/ui/menu";
 import { Scope } from "vjsc/html-runtime/jsx-runtime";
 
@@ -44070,6 +44217,8 @@ import { CaptionsRadioGroup } from './radio-group';
 import { RadioItem } from './radio-item';
 import { registerIcons, captionsOffIcon, captionsOnIcon } from "@videojs/html/icons";
 import "@videojs/html/ui/captions-button";
+import "@videojs/html/ui/menu-item";
+import "@videojs/html/ui/menu-content";
 import "@videojs/html/ui/menu";
 import { Scope } from "vjsc/html-runtime/jsx-runtime";
 
@@ -44266,7 +44415,8 @@ import type { MenuItemProps } from '@videojs/core';
 
 import type { PropsWithChildren } from 'vjsc/components';
 import { registerIcons, checkIcon } from "@videojs/html/icons";
-import "@videojs/html/ui/menu";
+import "@videojs/html/ui/menu-item-indicator";
+import "@videojs/html/ui/menu-radio-item";
 
 registerIcons("default", { "check": checkIcon });
 
@@ -44297,6 +44447,8 @@ import { type PropsWithChildren } from "vjsc/components";
 import { ButtonTooltip } from '../buttons/button-tooltip';
 import { registerIcons, gearIcon } from "@videojs/html/icons";
 import "@videojs/html/i18n";
+import "@videojs/html/ui/menu-item";
+import "@videojs/html/ui/menu-content";
 import "@videojs/html/ui/menu";
 import { Scope } from "vjsc/html-runtime/jsx-runtime";
 
@@ -44331,7 +44483,9 @@ import { type PropsWithChildren, type VjscNode } from "vjsc/components";
 
 
 import { MenuChevron } from './menu-chevron';
-import "@videojs/html/ui/menu";
+import "@videojs/html/ui/menu-item";
+import "@videojs/html/ui/menu-separator";
+import "@videojs/html/ui/menu-content";
 import { Scope } from "vjsc/html-runtime/jsx-runtime";
 
 
@@ -44437,7 +44591,7 @@ import "@videojs/html/ui/slider-fill";
 import "@videojs/html/ui/slider-track";
 import "@videojs/html/ui/slider-thumb";
 import "@videojs/html/ui/slider-value";
-import "@videojs/html/ui/slider";
+import "@videojs/html/ui/slider-preview";
 import "@videojs/html/ui/time-slider";
 
 
@@ -44496,7 +44650,7 @@ import "@videojs/html/ui/slider-thumb";
 import "@videojs/html/ui/slider-thumbnail";
 import "@videojs/html/ui/time-slider-chapter-title";
 import "@videojs/html/ui/slider-value";
-import "@videojs/html/ui/slider";
+import "@videojs/html/ui/slider-preview";
 import "@videojs/html/ui/time-slider";
 
 registerIcons("default", { "spinner": spinnerIcon });
@@ -44746,6 +44900,8 @@ import type { PropsWithChildren, VjscElement, VjscNode } from 'vjsc/components';
 import "virtual:vjsc/css/<hash>/base.css";
 import "virtual:vjsc/css/<hash>/popups.css";
 import "@videojs/html/ui/tooltip";
+import "@videojs/html/ui/tooltip-label";
+import "@videojs/html/ui/tooltip-shortcut";
 import { Host, Scope } from "vjsc/html-runtime/jsx-runtime";
 
 
@@ -45440,6 +45596,8 @@ import "virtual:vjsc/css/<hash>/base.css";
 import "virtual:vjsc/css/<hash>/buttons.css";
 import "virtual:vjsc/css/<hash>/menus.css";
 import "@videojs/html/ui/playback-rate-button";
+import "@videojs/html/ui/menu-item";
+import "@videojs/html/ui/menu-content";
 import "@videojs/html/ui/menu";
 import { Scope } from "vjsc/html-runtime/jsx-runtime";
 
@@ -45526,6 +45684,8 @@ import "virtual:vjsc/css/<hash>/menus.css";
 import { registerIcons } from "@videojs/html/icons";
 import { captionsOffIcon, captionsOnIcon } from "@videojs/html/icons/minimal";
 import "@videojs/html/ui/captions-button";
+import "@videojs/html/ui/menu-item";
+import "@videojs/html/ui/menu-content";
 import "@videojs/html/ui/menu";
 import { Scope } from "vjsc/html-runtime/jsx-runtime";
 
@@ -45747,7 +45907,8 @@ import "virtual:vjsc/css/<hash>/base.css";
 import "virtual:vjsc/css/<hash>/menus.css";
 import { registerIcons } from "@videojs/html/icons";
 import { checkIcon } from "@videojs/html/icons/minimal";
-import "@videojs/html/ui/menu";
+import "@videojs/html/ui/menu-item-indicator";
+import "@videojs/html/ui/menu-radio-item";
 
 registerIcons("minimal", { "check": checkIcon });
 
@@ -45781,6 +45942,8 @@ import "virtual:vjsc/css/<hash>/menus.css";
 import { registerIcons } from "@videojs/html/icons";
 import { gearIcon } from "@videojs/html/icons/minimal";
 import "@videojs/html/i18n";
+import "@videojs/html/ui/menu-item";
+import "@videojs/html/ui/menu-content";
 import "@videojs/html/ui/menu";
 import { Scope } from "vjsc/html-runtime/jsx-runtime";
 
@@ -45818,7 +45981,9 @@ import { type PropsWithChildren, type VjscNode } from "vjsc/components";
 import { MenuChevron } from './menu-chevron';
 import "virtual:vjsc/css/<hash>/base.css";
 import "virtual:vjsc/css/<hash>/menus.css";
-import "@videojs/html/ui/menu";
+import "@videojs/html/ui/menu-item";
+import "@videojs/html/ui/menu-separator";
+import "@videojs/html/ui/menu-content";
 import { Scope } from "vjsc/html-runtime/jsx-runtime";
 
 
@@ -45927,7 +46092,7 @@ import "@videojs/html/ui/slider-fill";
 import "@videojs/html/ui/slider-track";
 import "@videojs/html/ui/slider-thumb";
 import "@videojs/html/ui/slider-value";
-import "@videojs/html/ui/slider";
+import "@videojs/html/ui/slider-preview";
 import "@videojs/html/ui/time-slider";
 
 
@@ -45994,7 +46159,7 @@ import "@videojs/html/ui/slider-thumb";
 import "@videojs/html/ui/slider-thumbnail";
 import "@videojs/html/ui/time-slider-chapter-title";
 import "@videojs/html/ui/slider-value";
-import "@videojs/html/ui/slider";
+import "@videojs/html/ui/slider-preview";
 import "@videojs/html/ui/time-slider";
 
 registerIcons("minimal", { "spinner": spinnerIcon });
@@ -46247,6 +46412,8 @@ import type { PropsWithChildren, VjscElement, VjscNode } from 'vjsc/components';
 
 
 import "@videojs/html/ui/tooltip";
+import "@videojs/html/ui/tooltip-label";
+import "@videojs/html/ui/tooltip-shortcut";
 import { Host, Scope } from "vjsc/html-runtime/jsx-runtime";
 
 
@@ -46876,6 +47043,8 @@ import { ButtonTooltip } from '../buttons/button-tooltip';
 import { PlaybackRateRadioGroup } from './radio-group';
 import { RadioItem } from './radio-item';
 import "@videojs/html/ui/playback-rate-button";
+import "@videojs/html/ui/menu-item";
+import "@videojs/html/ui/menu-content";
 import "@videojs/html/ui/menu";
 import { Scope } from "vjsc/html-runtime/jsx-runtime";
 
@@ -46955,6 +47124,8 @@ import { RadioItem } from './radio-item';
 import { registerIcons } from "@videojs/html/icons";
 import { captionsOffIcon, captionsOnIcon } from "@videojs/html/icons/minimal";
 import "@videojs/html/ui/captions-button";
+import "@videojs/html/ui/menu-item";
+import "@videojs/html/ui/menu-content";
 import "@videojs/html/ui/menu";
 import { Scope } from "vjsc/html-runtime/jsx-runtime";
 
@@ -47156,7 +47327,8 @@ import type { MenuItemProps } from '@videojs/core';
 import type { PropsWithChildren } from 'vjsc/components';
 import { registerIcons } from "@videojs/html/icons";
 import { checkIcon } from "@videojs/html/icons/minimal";
-import "@videojs/html/ui/menu";
+import "@videojs/html/ui/menu-item-indicator";
+import "@videojs/html/ui/menu-radio-item";
 
 registerIcons("minimal", { "check": checkIcon });
 
@@ -47188,6 +47360,8 @@ import { ButtonTooltip } from '../buttons/button-tooltip';
 import { registerIcons } from "@videojs/html/icons";
 import { gearIcon } from "@videojs/html/icons/minimal";
 import "@videojs/html/i18n";
+import "@videojs/html/ui/menu-item";
+import "@videojs/html/ui/menu-content";
 import "@videojs/html/ui/menu";
 import { Scope } from "vjsc/html-runtime/jsx-runtime";
 
@@ -47222,7 +47396,9 @@ import { type PropsWithChildren, type VjscNode } from "vjsc/components";
 
 
 import { MenuChevron } from './menu-chevron';
-import "@videojs/html/ui/menu";
+import "@videojs/html/ui/menu-item";
+import "@videojs/html/ui/menu-separator";
+import "@videojs/html/ui/menu-content";
 import { Scope } from "vjsc/html-runtime/jsx-runtime";
 
 
@@ -47328,7 +47504,7 @@ import "@videojs/html/ui/slider-fill";
 import "@videojs/html/ui/slider-track";
 import "@videojs/html/ui/slider-thumb";
 import "@videojs/html/ui/slider-value";
-import "@videojs/html/ui/slider";
+import "@videojs/html/ui/slider-preview";
 import "@videojs/html/ui/time-slider";
 
 
@@ -47388,7 +47564,7 @@ import "@videojs/html/ui/slider-thumb";
 import "@videojs/html/ui/slider-thumbnail";
 import "@videojs/html/ui/time-slider-chapter-title";
 import "@videojs/html/ui/slider-value";
-import "@videojs/html/ui/slider";
+import "@videojs/html/ui/slider-preview";
 import "@videojs/html/ui/time-slider";
 
 registerIcons("minimal", { "spinner": spinnerIcon });

@@ -13,7 +13,15 @@ import { Host } from 'vjsc/target/jsx-runtime';
 
 type CoreSchema = typeof coreSchema;
 
-const componentParts: Readonly<Record<string, Readonly<Record<string, string>>>> = {
+interface ComponentPartNameMap {
+  readonly [component: string]: Readonly<Record<string, string>>;
+}
+
+interface PublicNameMap {
+  readonly [component: string]: string;
+}
+
+const componentParts: ComponentPartNameMap = {
   Controls: {
     Root: 'Controls',
     Backdrop: 'ControlsBackdrop',
@@ -112,22 +120,7 @@ const componentParts: Readonly<Record<string, Readonly<Record<string, string>>>>
   },
 };
 
-const groupedModules: Readonly<Record<string, string>> = {
-  MenuCheckboxItem: 'menu',
-  MenuContent: 'menu',
-  MenuGroup: 'menu',
-  MenuGroupLabel: 'menu',
-  MenuItem: 'menu',
-  MenuItemIndicator: 'menu',
-  MenuRadioGroup: 'menu',
-  MenuRadioItem: 'menu',
-  MenuSeparator: 'menu',
-  SliderPreview: 'slider',
-  TooltipLabel: 'tooltip',
-  TooltipShortcut: 'tooltip',
-};
-
-const publicNames: Readonly<Record<string, string>> = {
+const publicNames: PublicNameMap = {
   AirPlayButton: 'airplay-button',
   PiPButton: 'pip-button',
 };
@@ -307,8 +300,7 @@ export const htmlComponentTarget: ComponentTarget<CoreSchema> = defineComponentT
 
 function htmlElementTarget(name: string, element: ComponentTargetHelpers<CoreSchema>['element']) {
   const publicName = publicNames[name] ?? kebabCase(name === 'MediaContainer' ? 'container' : name);
-  const moduleName = groupedModules[name] ?? publicName;
-  const source = `@videojs/html/ui/${moduleName}`;
+  const source = `@videojs/html/ui/${publicName}`;
 
   return element(`media-${publicName}`, { import: { from: source, sideEffect: true } });
 }
