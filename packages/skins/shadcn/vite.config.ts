@@ -7,6 +7,7 @@ import { baseConfig } from '../../../build/pack.ts';
 // Vite+ loads this config before it can schedule builds, so bootstrap the private compiler from source.
 import { shadcnPlugin, vjscPlugin } from '../../vjsc/src/plugins/index.ts';
 import type { ShadcnItem } from '../../vjsc/src/shadcn/index.ts';
+import { frameworkSkinMaterializer } from '../framework/materialize.ts';
 import { registryCatalog } from '../registry/catalog.ts';
 import type { VideojsRegistryMeta } from '../registry/meta.ts';
 import { configureSkinModule } from '../vjsc/config';
@@ -201,6 +202,7 @@ export const shadcnPackConfig: PackUserConfig = {
       },
     }),
     formatRegistrySources(),
+    frameworkSkinMaterializer({ workspaceDir: resolve(packageDir, '../..') }),
   ],
 };
 

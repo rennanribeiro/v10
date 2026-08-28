@@ -1,6 +1,6 @@
 import { isPlainObject, isString } from '../predicate';
 
-type ClassPrimitive = string | Record<string, unknown> | undefined;
+type ClassPrimitive = string | Record<string, unknown> | false | null | undefined;
 type ClassValue = ClassPrimitive | readonly string[] | readonly ClassPrimitive[];
 
 export type ClassName<State> = string | ((state: State) => string | undefined) | undefined;

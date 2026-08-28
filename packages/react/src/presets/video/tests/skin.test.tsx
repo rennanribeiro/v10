@@ -34,10 +34,10 @@ describe('VideoSkin', () => {
       }),
     });
 
-    const controls = container.querySelector('.media-controls--root');
+    const controls = container.querySelector('.media-controls');
     const controlsBackdrop = container.querySelector('.media-controls__backdrop');
-    const error = container.querySelector('.media-dialog__popup');
-    const errorBackdrop = container.querySelector('.media-dialog__backdrop');
+    const error = container.querySelector('[role="alertdialog"]');
+    const errorBackdrop = container.querySelector('.media-dialog-backdrop');
 
     expect(controlsBackdrop).not.toBeNull();
     expect(controlsBackdrop?.parentElement).toBe(controls?.parentElement);
@@ -45,7 +45,7 @@ describe('VideoSkin', () => {
     expect(errorBackdrop).not.toBeNull();
     expect(errorBackdrop?.parentElement).toBe(error?.parentElement);
     expect(error?.contains(errorBackdrop)).toBe(false);
-    expect(container.querySelector('.media-input-indicator')).not.toBeNull();
+    expect(container.querySelector('.media-video-status-indicators')).not.toBeNull();
   });
 
   it('draws its own poster image', () => {

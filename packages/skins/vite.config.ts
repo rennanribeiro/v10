@@ -39,8 +39,29 @@ export default defineConfig({
         dependsOn: workspaceTaskDependencies(),
         // The registry plugin compares files in its output directory before
         // rewriting them; those reads must not turn outputs into inputs.
-        input: [...cachedTaskInputs, '!dist/registry', '!dist/registry/**'],
-        output: ['dist/registry/source/**'],
+        input: [
+          ...cachedTaskInputs,
+          '!dist/registry',
+          '!dist/registry/**',
+          { pattern: '!packages/html/src/presets/background/skin.ts', base: 'workspace' },
+          { pattern: '!packages/html/src/define/background/skin.css', base: 'workspace' },
+          { pattern: '!packages/react/src/internal/skins', base: 'workspace' },
+          { pattern: '!packages/react/src/internal/skins/**', base: 'workspace' },
+          { pattern: '!packages/react/src/presets/*/skin.tsx', base: 'workspace' },
+          { pattern: '!packages/react/src/presets/*/skin.css', base: 'workspace' },
+          { pattern: '!packages/react/src/presets/*/minimal-skin.tsx', base: 'workspace' },
+          { pattern: '!packages/react/src/presets/*/minimal-skin.css', base: 'workspace' },
+        ],
+        output: [
+          'dist/registry/source/**',
+          { pattern: 'packages/html/src/presets/background/skin.ts', base: 'workspace' },
+          { pattern: 'packages/html/src/define/background/skin.css', base: 'workspace' },
+          { pattern: 'packages/react/src/internal/skins/**', base: 'workspace' },
+          { pattern: 'packages/react/src/presets/*/skin.tsx', base: 'workspace' },
+          { pattern: 'packages/react/src/presets/*/skin.css', base: 'workspace' },
+          { pattern: 'packages/react/src/presets/*/minimal-skin.tsx', base: 'workspace' },
+          { pattern: 'packages/react/src/presets/*/minimal-skin.css', base: 'workspace' },
+        ],
       },
       'build:shadcn': {
         command: 'rimraf dist/registry/r && shadcn build dist/registry/source/registry.json --output dist/registry/r',
@@ -65,7 +86,7 @@ export default defineConfig({
         test: {
           name: 'skins',
           root: packageDir,
-          include: ['vjsc/**/*.test.ts'],
+          include: ['framework/**/*.test.ts', 'vjsc/**/*.test.ts'],
           // These integration tests share Vite and Rolldown package state.
           fileParallelism: false,
         },

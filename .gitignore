@@ -51,8 +51,14 @@ packages/html/vjsc/entries.generated.ts
 packages/icons/vjsc/schema.generated.ts
 packages/react/vjsc/entries.generated.ts
 packages/skins/vjsc/registry/
-packages/html/src/__generated__/skins/
-packages/react/src/__generated__/skins/
+# Framework skin sources are materialized by the canonical Skins registry build.
+packages/html/src/presets/background/skin.ts
+packages/html/src/define/background/skin.css
+packages/react/src/internal/skins/
+packages/react/src/presets/*/skin.tsx
+packages/react/src/presets/*/skin.css
+packages/react/src/presets/*/minimal-skin.tsx
+packages/react/src/presets/*/minimal-skin.css
 
 # -------------------------
 # Merge & Patch Backups
