@@ -20,46 +20,56 @@ describe('Skins Shadcn registry', () => {
       output.filter((item) => item.type === 'asset').map((item) => [item.fileName, String(item.source)] as const)
     );
     const registry = assetJson<ShadcnRegistry>(assets, 'registry.json');
-    const playButton = assetJson<BuiltItem>(assets, 'play-button.json');
-    const minimalPlayButton = assetJson<BuiltItem>(assets, 'play-button-minimal.json');
-    const button = assetJson<BuiltItem>(assets, 'button.json');
-    const minimalButton = assetJson<BuiltItem>(assets, 'button-minimal.json');
-    const defaultVideo = assetJson<BuiltItem>(assets, 'default-video.json');
-    const minimalVideo = assetJson<BuiltItem>(assets, 'minimal-video.json');
-    const container = assetJson<BuiltItem>(assets, 'container.json');
-    const poster = assetJson<BuiltItem>(assets, 'poster.json');
-    const videoSettingsMenu = assetJson<BuiltItem>(assets, 'video-settings-menu.json');
-    const videoHotkeys = assetJson<BuiltItem>(assets, 'video-hotkeys.json');
-    const minimalVideoHotkeys = assetJson<BuiltItem>(assets, 'video-hotkeys-minimal.json');
-    const volumePopover = assetJson<BuiltItem>(assets, 'volume-popover.json');
-    const styles = assetJson<BuiltItem>(assets, 'styles.json');
-    const utils = assetJson<BuiltItem>(assets, 'utils.json');
+    const items = registryItems(assets, registry);
+    const playButton = registryItem(items, 'react-play-button');
+    const minimalPlayButton = registryItem(items, 'react-play-button-minimal');
+    const button = registryItem(items, 'react-button');
+    const minimalButton = registryItem(items, 'react-button-minimal');
+    const defaultVideo = registryItem(items, 'react-video-skin');
+    const minimalVideo = registryItem(items, 'react-video-skin-minimal');
+    const defaultAudio = registryItem(items, 'react-audio-skin');
+    const audioPlayButton = registryItem(items, 'react-audio-play-button');
+    const defaultVideoCss = registryItem(items, 'react-video-skin-css');
+    const htmlVideo = registryItem(items, 'html-video-skin');
+    const htmlMinimalVideoCss = registryItem(items, 'html-video-skin-minimal-css');
+    const container = registryItem(items, 'react-container');
+    const poster = registryItem(items, 'react-poster');
+    const videoSettingsMenu = registryItem(items, 'react-video-settings-menu');
+    const videoHotkeys = registryItem(items, 'react-video-hotkeys');
+    const volumePopover = registryItem(items, 'react-volume-popover');
+    const styles = registryItem(items, 'tailwind-styles');
+    const utils = registryItem(items, 'react-utils');
+    const reactLiveVideoPlayer = registryItem(items, 'react-live-video-minimal-css');
+    const htmlAudioPlayer = registryItem(items, 'html-audio');
+    const reactHlsJsVideo = registryItem(items, 'react-hlsjs-video');
+    const htmlMuxSpf = registryItem(items, 'html-mux-video-spf');
 
-    const playSource = playButton.files.find((file) => file.target?.endsWith('/play-button.tsx'))?.content;
-    const buttonSource = button.files.find((file) => file.target?.endsWith('/button.tsx'))?.content;
-    const posterSource = poster.files.find((file) => file.target?.endsWith('/poster.tsx'))?.content;
-    const qualityMenuSource = videoSettingsMenu.files.find((file) =>
-      file.target?.endsWith('/quality-menu.tsx')
-    )?.content;
-    const submenuSource = videoSettingsMenu.files.find((file) => file.target?.endsWith('/submenu.tsx'))?.content;
-    const videoSettingsMenuSource = videoSettingsMenu.files.find((file) =>
-      file.target?.endsWith('/video-settings-menu.tsx')
-    )?.content;
-    const volumePopoverSource = volumePopover.files.find((file) =>
-      file.target?.endsWith('/volume-popover.tsx')
-    )?.content;
+    const playSource = registrySource(assets, 'react/components', playButton, '/play-button.tsx');
+    const buttonSource = registrySource(assets, 'react/components', button, '/button.tsx');
+    const minimalButtonSource = registrySource(assets, 'react/components', minimalButton, '/button-minimal.tsx');
+    const posterSource = registrySource(assets, 'react/components', poster, '/poster.tsx');
+    const qualityMenuSource = registrySource(assets, 'react/components', videoSettingsMenu, '/quality-menu.tsx');
+    const submenuSource = registrySource(assets, 'react/components', videoSettingsMenu, '/submenu.tsx');
+    const videoSettingsMenuSource = registrySource(
+      assets,
+      'react/components',
+      videoSettingsMenu,
+      '/video-settings-menu.tsx'
+    );
+    const volumePopoverSource = registrySource(assets, 'react/components', volumePopover, '/volume-popover.tsx');
 
-    expect(registry.items).toHaveLength(56);
-    expect(registry.items.map((item: { name: string }) => item.name)).toEqual(
+    expect(items).toHaveLength(166);
+    expect(new Set(items.map((item) => item.name)).size).toBe(items.length);
+    expect(items.every((item) => item.meta?.role && typeof item.meta.public === 'boolean')).toBe(true);
+    expect(items.map((item) => item.name)).toEqual(
       expect.arrayContaining([
-        'button-tooltip',
-        'minimal-video',
-        'play-button',
-        'play-button-minimal',
-        'playback-hotkeys',
-        'playback-hotkeys-minimal',
+        'react-video-skin-minimal',
+        'react-play-button',
+        'react-play-button-minimal',
+        'react-playback-hotkeys',
       ])
     );
+    expect(items.some((item) => item.name === 'react-button-tooltip')).toBe(false);
     expect(playSource).toContain('export interface PlayButtonProps');
     expect(playSource).toContain('<PlayButtonPrimitive render={<Button />} className=');
     expect(buttonSource).toContain('export interface ButtonProps');
@@ -67,31 +77,48 @@ describe('Skins Shadcn registry', () => {
     expect(playSource).toContain(`from "@/components/videojs/utils"`);
     expect(playSource).not.toContain('const meta');
     expect(playSource).not.toContain('jsx-runtime');
-    expect(playButton.dependencies).toEqual(['@videojs/react', 'react']);
+    expect(playButton.dependencies).toEqual(['@videojs/react@10.0.0-beta.32', 'react']);
     expect(playButton.registryDependencies).toEqual([
-      '@videojs/button',
-      '@videojs/button-tooltip',
-      '@videojs/styles',
-      '@videojs/utils',
+      '@videojs/react-button',
+      '@videojs/react-utils',
+      '@videojs/tailwind-styles',
     ]);
     expect(minimalPlayButton.registryDependencies).toEqual([
-      '@videojs/button-minimal',
-      '@videojs/button-tooltip-minimal',
-      '@videojs/styles',
-      '@videojs/utils',
+      '@videojs/react-button-minimal',
+      '@videojs/react-utils',
+      '@videojs/tailwind-styles',
     ]);
     expect(buttonSource).toContain('size-9');
-    expect(minimalButton.files[0]?.content).toContain('size-9.5');
+    expect(minimalButtonSource).toContain('size-9.5');
     expect(defaultVideo.registryDependencies).toEqual(
-      expect.arrayContaining(['@videojs/container', '@videojs/play-button', '@videojs/poster'])
+      expect.arrayContaining(['@videojs/react-container', '@videojs/react-play-button', '@videojs/react-poster'])
     );
-    expect(defaultVideo.registryDependencies).not.toContain('@videojs/seek-button');
-    expect(minimalVideo.registryDependencies).toContain('@videojs/play-button-minimal');
-    expect(minimalVideo.registryDependencies).not.toContain('@videojs/play-button');
-    expect(videoHotkeys.registryDependencies).toContain('@videojs/playback-hotkeys');
-    expect(minimalVideoHotkeys.registryDependencies).toContain('@videojs/playback-hotkeys-minimal');
-    expect(container.dependencies).toEqual(['@videojs/react', 'react']);
-    expect(container.registryDependencies).toEqual(['@videojs/styles', '@videojs/utils']);
+    expect(defaultVideo.registryDependencies).not.toContain('@videojs/react-seek-button');
+    expect(minimalVideo.registryDependencies).toContain('@videojs/react-play-button-minimal');
+    expect(minimalVideo.registryDependencies).not.toContain('@videojs/react-play-button');
+    expect(defaultAudio.registryDependencies).toContain('@videojs/react-audio-play-button');
+    expect(audioPlayButton.registryDependencies).toContain('@videojs/react-play-button');
+    expect(defaultVideoCss.registryDependencies).not.toContain('@videojs/tailwind-styles');
+    expect(htmlVideo.registryDependencies).toContain('@videojs/tailwind-styles');
+    expect(htmlMinimalVideoCss.registryDependencies).not.toContain('@videojs/tailwind-styles');
+    const defaultVideoCssSource = registrySource(assets, 'react/skins', defaultVideoCss, '/skin.tsx');
+    const defaultVideoCssPlaySource = registrySource(
+      assets,
+      'react/skins',
+      defaultVideoCss,
+      '/buttons/play-button.tsx'
+    );
+    const defaultVideoStyles = registrySource(assets, 'react/skins', defaultVideoCss, '/skin.css');
+
+    expect(defaultVideoCssSource).toContain(`import './skin.css';`);
+    expect(defaultVideoCssSource).not.toContain('virtual:vjsc/css');
+    expect(defaultVideoCssPlaySource).toContain('media-play-button');
+    expect(defaultVideoStyles).toContain('.media-button {');
+    expect(defaultVideoStyles).toContain('@layer videojs.base');
+    expect(videoHotkeys.registryDependencies).toContain('@videojs/react-playback-hotkeys');
+    expect(items.some((item) => item.name === 'react-playback-hotkeys-minimal')).toBe(false);
+    expect(container.dependencies).toEqual(['@videojs/react@10.0.0-beta.32', 'react']);
+    expect(container.registryDependencies).toEqual(['@videojs/react-utils', '@videojs/tailwind-styles']);
     expect(posterSource).toContain('<PosterPrimitive render={children}');
     expect(posterSource).not.toContain('@videojs/core/vjsc');
     expect(qualityMenuSource).not.toContain('useQualityOptions');
@@ -120,12 +147,24 @@ describe('Skins Shadcn registry', () => {
       type: 'registry:lib',
       target: 'components/videojs/utils.ts',
     });
-    expect(utils.files[0]?.content).toContain('export function resolveClassName');
+    expect(registrySource(assets, 'shared', utils, '/utils.ts')).toContain('export function resolveClassName');
+    expect(reactLiveVideoPlayer.registryDependencies).toEqual(['@videojs/react-live-video-skin-minimal-css']);
+    expect(
+      registrySource(assets, 'react/players', reactLiveVideoPlayer, '/players/live-video-minimal-css.tsx')
+    ).toContain('interface LiveVideoProps extends LiveVideoPlayerProps');
+    expect(htmlAudioPlayer.registryDependencies).toEqual(['@videojs/html-audio-skin']);
+    expect(registrySource(assets, 'html/players', htmlAudioPlayer, '/players/audio.html')).toContain('<audio-player>');
+    expect(registrySource(assets, 'react/media', reactHlsJsVideo, '/media/hlsjs-video.ts')).toContain(
+      `from '@videojs/react/media/hlsjs-video'`
+    );
+    expect(registrySource(assets, 'html/media', htmlMuxSpf, '/media/mux-video-spf.ts')).toContain(
+      `from '@videojs/html/media/mux-video/spf'`
+    );
   }, 30_000);
 });
 
 type BuiltItem = Omit<ShadcnRegistry['items'][number], 'files'> & {
-  files: Array<{ type: string; path: string; target?: string | undefined; content: string }>;
+  files: Array<{ type: string; path: string; target?: string | undefined }>;
 };
 
 function assetJson<Value>(assets: ReadonlyMap<string, string>, fileName: string): Value {
@@ -133,4 +172,27 @@ function assetJson<Value>(assets: ReadonlyMap<string, string>, fileName: string)
   if (!source) throw new Error(`Missing registry asset: ${fileName}`);
 
   return JSON.parse(source) as Value;
+}
+
+function registryItems(assets: ReadonlyMap<string, string>, registry: ShadcnRegistry): BuiltItem[] {
+  return (registry.include ?? []).flatMap(
+    (path) => assetJson<{ items: BuiltItem[] }>(assets, path.replace(/^\.\//, '')).items
+  );
+}
+
+function registryItem(items: readonly BuiltItem[], name: string): BuiltItem {
+  const item = items.find((candidate) => candidate.name === name);
+  if (!item) throw new Error(`Missing registry item: ${name}`);
+
+  return item;
+}
+
+function registrySource(assets: ReadonlyMap<string, string>, group: string, item: BuiltItem, target: string): string {
+  const file = item.files.find((candidate) => candidate.target?.endsWith(target));
+  if (!file) throw new Error(`Missing registry file: ${item.name}${target}`);
+
+  const source = assets.get(`${group}/${file.path}`);
+  if (!source) throw new Error(`Missing registry source: ${group}/${file.path}`);
+
+  return source;
 }
