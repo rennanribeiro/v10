@@ -6,11 +6,23 @@ description: The files the Video.js CDN serves and the layout rules behind their
 import CdnMediaList from '@/components/docs/CdnMediaList.astro';
 import DocsLink from '@/components/docs/DocsLink.astro';
 
-`@videojs/html` ships the player in two layouts. The npm package exposes one small module per player, skin, UI component, or media element, and a bundler combines the ones you import. The CDN layout regroups the same source into browser-ready bundles — complete players, whole skins, one media element per file — that run from `<script>` tags alone: no package manager, no bundler. This page maps what the CDN serves and the rules that keep those URLs working. The <DocsLink slug="how-to/installation">installation</DocsLink> flow generates the tags for your player; <DocsLink slug="how-to/self-host-the-player">Self-host the player</DocsLink> covers serving the same player from your own origin.
+Video.js can run straight from `<script>` tags: no npm, no bundler. The CDN serves `@videojs/html` prebuilt into browser-ready bundles, and loading a bundle registers its custom elements. For many pages, one script tag is the whole install:
 
-## The URL layout
+```html title="index.html"
+<script type="module" src="{{VJS10_HTML_CDN_BASE}}/video.js"></script>
 
-`@videojs/html` publishes a `cdn/` directory of prebuilt, self-contained ES modules, and [jsDelivr](https://www.jsdelivr.com) serves the published package as-is. There is no separate CDN deploy: the file layout inside the package is the URL layout, and the filename is the public URL. The `exports` map in `package.json` plays no part.
+<video-player>
+  <video-skin>
+    <video src="video.mp4"></video>
+  </video-skin>
+</video-player>
+```
+
+The npm package splits the player into one small module per component and lets your bundler assemble them. The CDN regroups the same source into complete players, whole skins, and one media element per file. This page maps those files and the rules that keep their URLs working. <DocsLink slug="how-to/installation">Installation</DocsLink> generates the tags for your player; <DocsLink slug="how-to/self-host-the-player">Self-host the player</DocsLink> covers serving the same files from your own origin.
+
+## URLs
+
+`@videojs/html` publishes a `cdn/` directory of prebuilt, self-contained ES modules, and [jsDelivr](https://www.jsdelivr.com) serves the published package as-is. There is no separate CDN deploy. The filename inside `cdn/` is the public URL:
 
 ```
 https://cdn.jsdelivr.net/npm/@videojs/html@<version>/cdn/<file>
@@ -18,9 +30,7 @@ https://cdn.jsdelivr.net/npm/@videojs/html@<version>/cdn/<file>
 
 For the current release, that base is `{{VJS10_HTML_CDN_BASE}}`.
 
-Pin every URL to one exact version, and the same version across all of them. Bundles import shared, content-hashed chunks that change between releases, and a floating tag such as `@latest` re-resolves over time — so two unpinned files fetched moments apart can come from different releases and load duplicate modules that no longer share state.
-
-Because the layout is the package, any origin that serves a copy of `cdn/` exposes the same paths — that is all mirroring the CDN requires.
+Pin every URL to one exact version, and the same version across all of them. Bundles share content-hashed chunks that change between releases. A floating tag like `@latest` re-resolves over time, so two unpinned files can come from different releases and load duplicate modules that no longer share state.
 
 ## Player bundles
 
@@ -34,13 +44,7 @@ Each installation preset ships three bundles at the root of `cdn/`, one per skin
 
 The same trio exists for `audio`, `live-video`, and `live-audio`. Background video is the exception: one bundle, `background.js`, registers the player, the skin, and the `<background-video>` media element.
 
-Loading a bundle registers its custom elements as a side effect, so when the browser's own `<video>` or `<audio>` can play your source, one script tag is the whole install:
-
-```html
-<script type="module" src="{{VJS10_HTML_CDN_BASE}}/video.js"></script>
-```
-
-A skin bundle registers the UI elements its skin is built from, so an <DocsLink slug="how-to/customize-skins">ejected layout</DocsLink> composed of those elements runs against the same script. The per-component boundary belongs to npm: `import '@videojs/html/ui/play-button'` registers one element, and the CDN publishes no matching `ui/play-button.js`. When a custom layout needs elements beyond what its bundle registers, install from npm and bundle instead.
+A skin bundle registers every UI element its skin is built from. That means an <DocsLink slug="how-to/customize-skins">ejected layout</DocsLink> composed of those elements runs against the same script. The CDN publishes no per-component bundles, though: `import '@videojs/html/ui/play-button'` exists on npm, but there is no matching `ui/play-button.js`. When a custom layout needs elements beyond what its bundle registers, install from npm and bundle.
 
 ## Media bundles
 
@@ -51,15 +55,15 @@ The default presets play through the browser's own `<video>` and `<audio>`. Ever
 <script type="module" src="{{VJS10_HTML_CDN_BASE}}/media/hlsjs-video.js"></script>
 ```
 
-Each path mirrors its npm subpath: `media/hlsjs-video.js` registers the same `<hlsjs-video>` element as `import '@videojs/html/media/hlsjs-video'`. The bundles are discovered from those npm modules at build time, so the two delivery surfaces cannot drift. The current release ships:
+Each path mirrors its npm subpath: `media/hlsjs-video.js` registers the same `<hlsjs-video>` element as `import '@videojs/html/media/hlsjs-video'`. The bundles are generated from those npm modules at build time, so the two delivery surfaces cannot drift. The current release ships:
 
 <CdnMediaList />
 
-An element with more than one engine keeps its flavors in a directory named for the element: `media/mux-video.js` is the default engine, and `media/mux-video/spf.js` is the same `<mux-video>` tag on a different engine. Load one flavor per page — every flavor claims the same tag name, and the first registration wins.
+Some elements support more than one playback engine. Those keep their flavors in a directory named for the element: `media/mux-video.js` is the default engine, and `media/mux-video/spf.js` is the same `<mux-video>` tag on a different engine. Load one flavor per page. Every flavor claims the same tag name, and the first registration wins.
 
-## Locales and the i18n registry
+## Locales
 
-English ships inside the skin bundles, next to the UI it labels. Each other locale is a bundle under `locales/` that registers its translations on import, so it loads ahead of the player script:
+English ships inside the skin bundles. Each other locale is a bundle under `locales/` that registers its translations on import, so load it before the player script:
 
 ```html
 <script type="module" src="{{VJS10_HTML_CDN_BASE}}/locales/es.js"></script>
@@ -68,26 +72,26 @@ English ships inside the skin bundles, next to the UI it labels. Each other loca
 
 One bundle exists per shipped locale pack, plus bare-language aliases such as `pt` and `zh`.
 
-`i18n.js` at the root is the shared translation registry. Every bundle that uses translations imports that same relative file instead of carrying its own copy — a size measure, not a correctness one: the registry keeps its state on `globalThis`, so even a duplicate copy of the module, say from a pinned and an unpinned URL on one page, converges on the same translations. Register custom strings through the version-pinned `i18n.js` beside your player and the page downloads the module once. <DocsLink slug="how-to/internationalize-the-player">Internationalize the player</DocsLink> covers the workflow.
+`i18n.js` at the root is the shared translation registry. Every bundle that uses translations imports that same relative file instead of carrying its own copy. The registry also keeps its state on `globalThis`, so even a duplicate copy of the module (say, from a pinned and an unpinned URL on one page) converges on the same translations. To register custom strings, import the version-pinned `i18n.js` beside your player; the page downloads the module once. <DocsLink slug="how-to/internationalize-the-player">Internationalize the player</DocsLink> covers the workflow.
 
 ## Stylesheets
 
 The skin bundles inline their CSS and apply it when their elements upgrade, so no `<link>` is required to render. The separate `.css` files exist for the two jobs a bundle cannot do:
 
 - `global.css` holds the light-DOM rules. Link it in `<head>` and the player reserves its space before the elements upgrade. The background preset keeps its light-DOM rules in `background.css` instead.
-- The skin sheets are shadow-DOM styles for declaratively rendered skins, named for the bundle they pair with — `video.css` beside `video.js`, `video-minimal.css` beside `video-minimal.js` — plus the `shared.css` base they build on.
+- The skin sheets are shadow-DOM styles for declaratively rendered skins, named for the bundle they pair with: `video.css` beside `video.js`, `video-minimal.css` beside `video-minimal.js`, plus the `shared.css` base they build on.
 
 <DocsLink slug="how-to/self-host-the-player">Self-host the player</DocsLink> shows both in use.
 
 ## Development bundles
 
-Every JavaScript entry has a `.dev.js` sibling — `video.dev.js`, `media/hlsjs-video.dev.js` — built with development warnings on. Swap the suffix while debugging and swap it back to ship. Sourcemaps sit beside both variants; stylesheets have no development variant.
+Every JavaScript entry has a `.dev.js` sibling, such as `video.dev.js`, built with development warnings on. Swap the suffix while debugging and swap it back to ship. Sourcemaps sit beside both variants; stylesheets have no development variant.
 
 ## Shared chunks
 
-Everything else at the root — content-hashed files such as `default-*.js` — is a shared chunk that the entry files import by relative path. Chunks are why loading several entries stays cheap: a player bundle and a media bundle import the same framework chunk, and the browser fetches it once. Their names change every release, so never link one directly, and never copy a lone entry file: an entry without its chunks breaks at runtime. Mirror the whole directory and keep its layout intact.
+Everything else at the root, like the content-hashed `default-*.js` files, is a shared chunk that the entry files import by relative path. Chunks are why loading several entries stays cheap: a player bundle and a media bundle import the same framework chunk, and the browser fetches it once. Their names change every release, so never link a chunk directly. And never copy a lone entry file: an entry without its chunks breaks at runtime.
 
-Every specifier in the directory is relative and resolves inside `cdn/` — CI verifies this on each build — so a mirrored copy makes no requests back to a public CDN and works offline. The release archives on [GitHub releases](https://github.com/videojs/v10/releases) are cut from this same output.
+Every specifier in the directory resolves inside `cdn/` (CI verifies this on each build), so mirroring the CDN means copying the whole directory and keeping its layout intact. A mirror makes no requests back to a public CDN and works offline. The release archives on [GitHub releases](https://github.com/videojs/v10/releases) are cut from this same output.
 
 ## Related guides
 
