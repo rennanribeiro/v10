@@ -66,6 +66,12 @@ export function setMediaProp<Capability extends object = TargetLike, K extends k
   if (own) (own as Record<K, Capability[K]>)[prop] = value;
 }
 
+/** The target a host is attached to, or `null`. For a host's own machinery, not for consumers. */
+export function getMediaTarget(host: MediaHost): TargetLike | null {
+  // @ts-expect-error `target` is protected, but these helpers are the host's own machinery.
+  return host.target;
+}
+
 /**
  * Find the object that owns a media property: the first component `override` exposing it, otherwise the attached
  * target.
@@ -79,6 +85,5 @@ export function getMediaOwner<Capability extends object = TargetLike>(
     if (override?.[prop] !== undefined) return override;
   }
 
-  // @ts-expect-error `target` is protected, but these helpers are the host's own machinery.
-  return host.target;
+  return getMediaTarget(host) as Partial<Capability> | null;
 }

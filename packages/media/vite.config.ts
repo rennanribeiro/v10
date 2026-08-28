@@ -12,6 +12,7 @@ const createPackConfig = (mode: PackageBuildMode): PackUserConfig => ({
     'media-tracks': './src/core/media-tracks/index.ts',
     dom: './src/dom/index.ts',
     'dom/audio-host/index': './src/dom/audio-host/index.ts',
+    'dom/capabilities/index': './src/dom/capabilities/index.ts',
     'dom/media-host/index': './src/dom/media-host/index.ts',
     'dom/video-host/index': './src/dom/video-host/index.ts',
     'dom/custom-media-element/index': './src/dom/custom-media-element/index.ts',

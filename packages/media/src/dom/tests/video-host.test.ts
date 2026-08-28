@@ -1,7 +1,27 @@
 import type { WebKitDocument, WebKitVideoElement } from '@videojs/utils/dom';
-import { afterEach, describe, expect, it } from 'vite-plus/test';
+import { afterEach, describe, expect, it, vi } from 'vite-plus/test';
 
-import { HTMLVideoElementHost } from '../video-host';
+import type { MediaFullscreenControlCapability } from '../../core/types';
+import { addMediaComponent, type MediaComponent } from '../media-host';
+import { HTMLVideoElementHost, type HTMLVideoTargetLike } from '../video-host';
+
+/**
+ * A media component that takes over leaving fullscreen, the way a media managing its own presentation would.
+ *
+ * An override supplies members of the composed media surface, which is wider than the target's own properties —
+ * `exitFullscreen` is a capability command no media element holds.
+ */
+class SelfExitingOverride implements MediaComponent<HTMLVideoTargetLike & MediaFullscreenControlCapability> {
+  exitFullscreen = vi.fn(async () => undefined);
+
+  get targetOverride(): Partial<HTMLVideoTargetLike & MediaFullscreenControlCapability> {
+    return { exitFullscreen: this.exitFullscreen };
+  }
+}
+
+function stub(owner: object, prop: string, value: unknown) {
+  Object.defineProperty(owner, prop, { value, writable: true, configurable: true });
+}
 
 afterEach(() => {
   document.body.innerHTML = '';
@@ -164,6 +184,73 @@ describe('HTMLVideoElementHost', () => {
       host.attach(video);
 
       expect(host.isFullscreen).toBe(false);
+    });
+  });
+
+  describe('presentation commands', () => {
+    it('forwards a command the media holds', async () => {
+      const video = document.createElement('video');
+      const requestFullscreen = vi.fn(async () => undefined);
+      const requestPictureInPicture = vi.fn(async () => undefined);
+
+      stub(video, 'requestFullscreen', requestFullscreen);
+      stub(video, 'requestPictureInPicture', requestPictureInPicture);
+
+      const host = new HTMLVideoElementHost();
+
+      host.attach(video);
+
+      await host.requestFullscreen();
+      await host.requestPictureInPicture();
+
+      expect(requestFullscreen).toHaveBeenCalled();
+      expect(requestPictureInPicture).toHaveBeenCalled();
+    });
+
+    it('asks the document to leave, because no media holds that command', async () => {
+      const exitFullscreen = vi.fn(async () => undefined);
+      const exitPictureInPicture = vi.fn(async () => undefined);
+
+      stub(document, 'exitFullscreen', exitFullscreen);
+      stub(document, 'exitPictureInPicture', exitPictureInPicture);
+
+      const host = new HTMLVideoElementHost();
+
+      host.attach(document.createElement('video'));
+
+      await host.exitFullscreen();
+      await host.exitPictureInPicture();
+
+      expect(exitFullscreen).toHaveBeenCalled();
+      expect(exitPictureInPicture).toHaveBeenCalled();
+    });
+
+    it('prefers a media that leaves fullscreen itself over the document', async () => {
+      const exitFullscreen = vi.fn(async () => undefined);
+
+      stub(document, 'exitFullscreen', exitFullscreen);
+
+      const host = new HTMLVideoElementHost();
+
+      host.attach(document.createElement('video'));
+
+      const override = new SelfExitingOverride();
+
+      addMediaComponent(host, override);
+
+      await host.exitFullscreen();
+
+      expect(override.exitFullscreen).toHaveBeenCalled();
+      expect(exitFullscreen).not.toHaveBeenCalled();
+    });
+
+    it('rejects every command while no media is attached', async () => {
+      const host = new HTMLVideoElementHost();
+
+      await expect(host.requestFullscreen()).rejects.toThrow('No media is attached.');
+      await expect(host.exitFullscreen()).rejects.toThrow('No media is attached.');
+      await expect(host.requestPictureInPicture()).rejects.toThrow('No media is attached.');
+      await expect(host.exitPictureInPicture()).rejects.toThrow('No media is attached.');
     });
   });
 });

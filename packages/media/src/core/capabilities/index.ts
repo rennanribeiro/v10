@@ -5,7 +5,6 @@ export * from './controls';
 export * from './error';
 export * from './live';
 export * from './pause';
-export * from './picture-in-picture';
 export * from './playback';
 export * from './playback-rate';
 export * from './played';

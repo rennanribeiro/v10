@@ -2,13 +2,9 @@ import type { WebKitDocument, WebKitPresentationMode, WebKitVideoElement } from 
 import { isFunction } from '@videojs/utils/predicate';
 import type { Constructor } from '@videojs/utils/types';
 
-import {
-  pictureInPictureCapability,
-  playsInlineCapability,
-  posterCapability,
-  videoDimensionsCapability,
-} from '../../core/capabilities';
+import { playsInlineCapability, posterCapability, videoDimensionsCapability } from '../../core/capabilities';
 import type { Video, VideoEvents, VideoTargetLike } from '../../core/types';
+import { fullscreenCapability, pictureInPictureCapability } from '../capabilities';
 import { createMediaHost, HTMLMediaElementHost, type HTMLMediaTargetLike } from '../media-host';
 
 export interface HTMLVideoTargetLike extends VideoTargetLike, HTMLMediaTargetLike {}
@@ -19,6 +15,7 @@ export const htmlVideoElementCapabilities = [
   playsInlineCapability,
   videoDimensionsCapability,
   pictureInPictureCapability,
+  fullscreenCapability,
 ] as const;
 
 // The media host is generic, and a value cannot carry type arguments into a
@@ -31,8 +28,8 @@ const HTMLVideoElementHostBase = createMediaHost(
 /**
  * A host forwarding the full `HTMLVideoElement` surface.
  *
- * Presentation modes stay in the class body: entering and leaving fullscreen or picture-in-picture runs against
- * `document` rather than the media, so there is no property to forward.
+ * What is left in the class body is what a manifest cannot describe: the current presentation mode, which the document
+ * holds with the media as its subject, and Safari's non-standard presentation API.
  */
 export class HTMLVideoElementHost extends HTMLVideoElementHostBase implements Video {
   get webkitCurrentPlaybackTargetIsWireless() {
@@ -68,29 +65,5 @@ export class HTMLVideoElementHost extends HTMLVideoElementHostBase implements Vi
     const doc = globalThis.document as WebKitDocument;
 
     return doc?.fullscreenElement === el || doc?.webkitFullscreenElement === el;
-  }
-
-  async requestPictureInPicture() {
-    if (!this.target) return Promise.reject();
-
-    return this.target.requestPictureInPicture();
-  }
-
-  async exitPictureInPicture() {
-    if (!this.target) return Promise.reject();
-
-    return globalThis.document?.exitPictureInPicture();
-  }
-
-  requestFullscreen() {
-    if (!this.target) return Promise.reject();
-
-    return this.target.requestFullscreen();
-  }
-
-  exitFullscreen() {
-    if (!this.target) return Promise.reject();
-
-    return globalThis.document?.exitFullscreen();
   }
 }

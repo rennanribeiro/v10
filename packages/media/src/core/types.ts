@@ -395,10 +395,19 @@ export interface MediaVideoRenditionCapability {
 // Fullscreen
 // ----------------------------------------
 
-export interface MediaFullscreenCapability {
-  readonly isFullscreen: boolean;
+/**
+ * The part of {@link MediaFullscreenCapability} the media itself owns: the commands it can carry out.
+ *
+ * Whether fullscreen is currently active is derived from the presentation environment rather than held by the media, so
+ * a host reports that itself.
+ */
+export interface MediaFullscreenControlCapability {
   requestFullscreen(): Promise<unknown>;
   exitFullscreen(): Promise<unknown>;
+}
+
+export interface MediaFullscreenCapability extends MediaFullscreenControlCapability {
+  readonly isFullscreen: boolean;
 }
 
 // ----------------------------------------
@@ -411,19 +420,20 @@ export interface MediaPictureInPictureEvents {
 }
 
 /**
- * The part of {@link MediaPictureInPictureCapability} the media itself owns.
+ * The part of {@link MediaPictureInPictureCapability} the media itself owns: the commands it can carry out and the flag
+ * it holds.
  *
- * Entering, leaving, and reading the current mode run against the presentation environment rather than the media, so a
- * host implements those directly.
+ * Whether picture-in-picture is currently active is derived from the presentation environment rather than held by the
+ * media, so a host reports that itself.
  */
-export interface MediaDisablePictureInPictureCapability {
+export interface MediaPictureInPictureControlCapability {
   disablePictureInPicture: boolean;
-}
-
-export interface MediaPictureInPictureCapability extends MediaDisablePictureInPictureCapability {
-  readonly isPictureInPicture: boolean;
   requestPictureInPicture(): Promise<unknown>;
   exitPictureInPicture(): Promise<unknown>;
+}
+
+export interface MediaPictureInPictureCapability extends MediaPictureInPictureControlCapability {
+  readonly isPictureInPicture: boolean;
 }
 
 // ----------------------------------------
