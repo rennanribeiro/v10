@@ -173,7 +173,7 @@ function describePublishedModules<Item extends ComponentMeta>(
             (candidate) =>
               candidate.item.type === 'registry:component' &&
               candidate.module.filename === module.filename &&
-              candidate.module.source === module.source
+              moduleGraphSourceKey(candidate.module, modules) === moduleGraphSourceKey(module, modules)
           )
         : undefined;
     if (equivalent) continue;
@@ -199,11 +199,11 @@ function canonicalPublishedModules<Item extends ComponentMeta>(
   const bySource = new Map<string, PublishedModule<Item>>();
 
   for (const publication of published.values()) {
-    bySource.set(moduleSourceKey(publication.module), publication);
+    bySource.set(moduleGraphSourceKey(publication.module, modules), publication);
   }
 
   for (const module of modules.values()) {
-    const publication = bySource.get(moduleSourceKey(module));
+    const publication = bySource.get(moduleGraphSourceKey(module, modules));
 
     if (publication) canonical.set(module.id, publication);
   }
@@ -211,8 +211,25 @@ function canonicalPublishedModules<Item extends ComponentMeta>(
   return canonical;
 }
 
-function moduleSourceKey(module: RegistrySourceModule): string {
-  return `${module.filename}\0${module.source}`;
+function moduleGraphSourceKey(root: RegistrySourceModule, modules: ReadonlyMap<string, RegistrySourceModule>): string {
+  const sources = new Set<string>();
+  const visited = new Set<string>();
+
+  const visit = (module: RegistrySourceModule): void => {
+    if (visited.has(module.id)) return;
+
+    visited.add(module.id);
+    sources.add(`${module.filename}\0${module.source}`);
+
+    for (const reference of module.imports) {
+      const dependency = reference.resolvedId ? modules.get(reference.resolvedId) : undefined;
+
+      if (dependency) visit(dependency);
+    }
+  };
+
+  visit(root);
+  return JSON.stringify([...sources].sort());
 }
 
 async function buildPublishedItem<Item extends ComponentMeta>(

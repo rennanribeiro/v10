@@ -6,6 +6,8 @@ import { renderStylesheets } from './render';
 export interface CompileStylesOptions {
   readonly design: DesignSystem;
   readonly manifest: StyleManifest;
+  /** Preserve each style definition's cascade layer. Defaults to true. */
+  readonly cascadeLayers?: boolean | undefined;
   readonly scope?: string | undefined;
   /** Ordered variant utilities to append to each rule's base utilities when defined. */
   readonly variants?: readonly string[] | undefined;
@@ -43,6 +45,7 @@ export async function compileStyles(options: CompileStylesOptions): Promise<Map<
 
   const rendered = await renderStylesheets({
     design: options.design,
+    cascadeLayers: options.cascadeLayers ?? true,
     ...(options.scope ? { scope: options.scope } : {}),
     files: [...byFile.values()],
   });

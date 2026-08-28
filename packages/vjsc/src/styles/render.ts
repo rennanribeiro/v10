@@ -20,6 +20,7 @@ const decoder = new TextDecoder();
 
 interface RenderStylesheetsOptions {
   design: DesignSystem;
+  cascadeLayers: boolean;
   scope?: string | undefined;
   files: readonly StyleOutputFile[];
 }
@@ -41,17 +42,17 @@ export async function renderStylesheets(options: RenderStylesheetsOptions): Prom
     const analyzed = analyzedFiles.get(file);
     if (!analyzed) throw new Error(`Style output '${file.name}' was not compiled.`);
 
-    files.set(file.name, wrapFileCss(renderFile(analyzed, file), options.scope, file));
+    files.set(file.name, wrapFileCss(renderFile(analyzed, file), options.scope, file, options.cascadeLayers));
   }
 
   return files;
 }
 
-function wrapFileCss(css: string, scope: string | undefined, file: StyleOutputFile): string {
+function wrapFileCss(css: string, scope: string | undefined, file: StyleOutputFile, cascadeLayers: boolean): string {
   const relationshipOwners = new Set(file.groupOwners.values());
   const scopeRootClasses = new Set(file.rules.filter((rule) => rule.scopeRoot).map((rule) => rule.className));
   const scoped = scope ? `@scope (${scope}) {\n${css}\n}` : css;
-  const wrapped = `@layer ${file.layer} {\n${scoped}\n}`;
+  const wrapped = cascadeLayers ? `@layer ${file.layer} {\n${scoped}\n}` : scoped;
 
   return optimizeSemanticCss(
     decoder.decode(

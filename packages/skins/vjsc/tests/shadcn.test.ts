@@ -58,7 +58,7 @@ describe('Skins Shadcn registry', () => {
     );
     const volumePopoverSource = registrySource(assets, 'react/components', volumePopover, '/volume-popover.tsx');
 
-    expect(items).toHaveLength(166);
+    expect(items).toHaveLength(169);
     expect(new Set(items.map((item) => item.name)).size).toBe(items.length);
     expect(items.every((item) => item.meta?.role && typeof item.meta.public === 'boolean')).toBe(true);
     expect(items.map((item) => item.name)).toEqual(
@@ -67,6 +67,9 @@ describe('Skins Shadcn registry', () => {
         'react-play-button',
         'react-play-button-minimal',
         'react-playback-hotkeys',
+        'react-audio-play-button-minimal',
+        'react-live-button-minimal',
+        'react-video-settings-menu-minimal',
       ])
     );
     expect(items.some((item) => item.name === 'react-button-tooltip')).toBe(false);
@@ -97,7 +100,10 @@ describe('Skins Shadcn registry', () => {
     expect(minimalVideo.registryDependencies).toContain('@videojs/react-play-button-minimal');
     expect(minimalVideo.registryDependencies).not.toContain('@videojs/react-play-button');
     expect(defaultAudio.registryDependencies).toContain('@videojs/react-audio-play-button');
-    expect(audioPlayButton.registryDependencies).toContain('@videojs/react-play-button');
+    expect(audioPlayButton.registryDependencies).not.toContain('@videojs/react-play-button');
+    expect(
+      audioPlayButton.files.some((file) => file.path.includes('/internal/') && file.path.endsWith('/play-button.tsx'))
+    ).toBe(true);
     expect(defaultVideoCss.registryDependencies).not.toContain('@videojs/tailwind-styles');
     expect(htmlVideo.registryDependencies).toContain('@videojs/tailwind-styles');
     expect(htmlMinimalVideoCss.registryDependencies).not.toContain('@videojs/tailwind-styles');
@@ -132,8 +138,15 @@ describe('Skins Shadcn registry', () => {
     expect(defaultVideoCssSource).toContain(`import './skin.css';`);
     expect(defaultVideoCssSource).not.toContain('virtual:vjsc/css');
     expect(defaultVideoCssPlaySource).toContain('media-play-button');
+    expect(defaultVideoCss.registryDependencies).not.toContain('@videojs/react-video-settings-menu');
+    expect(defaultVideoCss.files.some((file) => file.path.endsWith('/menus/video-settings-menu.tsx'))).toBe(true);
     expect(defaultVideoStyles).toContain('.media-button {');
-    expect(defaultVideoStyles).toContain('@layer videojs.base');
+    expect(defaultVideoStyles.lastIndexOf('@layer videojs.components')).toBeLessThan(
+      defaultVideoStyles.indexOf('.media-button {')
+    );
+    expect(registrySource(assets, 'shared', styles, '/tailwind.css')).toContain(
+      '@import "./base.css" layer(videojs.base);'
+    );
     expect(videoHotkeys.registryDependencies).toContain('@videojs/react-playback-hotkeys');
     expect(items.some((item) => item.name === 'react-playback-hotkeys-minimal')).toBe(false);
     expect(container.dependencies).toEqual(['@videojs/react@10.0.0-beta.32', 'react']);

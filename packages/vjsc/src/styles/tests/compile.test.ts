@@ -9,6 +9,19 @@ import type { StyleManifest, StyleManifestRule } from '../manifest';
 const designPath = resolve(import.meta.dirname, 'fixtures/tailwind.css');
 
 describe('compileStyles', () => {
+  it('can emit semantic styles without cascade layers', async () => {
+    const styles = await compileStyles({
+      design: await loadDesignSystem(designPath),
+      manifest: manifest([rule('root', 'media-button', ['grid'])]),
+      cascadeLayers: false,
+      scope: '.media-skin-video',
+    });
+    const css = styles.get('buttons.css') ?? '';
+
+    expect(css).toContain('@scope (.media-skin-video)');
+    expect(css).not.toContain('@layer videojs.components');
+  });
+
   it('includes explicitly configured semantic classes on the CSS scope root', async () => {
     const container = { ...rule('root', 'media-container', ['block']), scopeRoot: true };
     const styles = await compileStyles({

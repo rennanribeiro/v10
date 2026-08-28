@@ -154,6 +154,7 @@ export function stylePlugin(
           const assets = await compileStyles({
             design: cachedDesign.design,
             manifest,
+            cascadeLayers: options.stylesheet.cascadeLayers ?? true,
             ...(options.stylesheet.scope ? { scope: options.stylesheet.scope } : {}),
             ...(options.variants ? { variants: options.variants } : {}),
             ruleClassNames: referencedRules,

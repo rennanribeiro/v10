@@ -5,6 +5,8 @@ export interface StylesheetOptions {
   readonly input: string;
   /** Runtime base CSS entry imported before generated semantic styles. */
   readonly base?: string | undefined;
+  /** Preserve each style definition's cascade layer. Defaults to true. */
+  readonly cascadeLayers?: boolean | undefined;
   /** Optional selector wrapped around emitted CSS with `@scope`. */
   readonly scope?: string | undefined;
 }

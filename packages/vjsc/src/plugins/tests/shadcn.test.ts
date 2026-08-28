@@ -121,7 +121,7 @@ describe('shadcnPlugin', () => {
     expect(registryFile(output, 'react/components', item, '/root.tsx')).toContain('<main/>');
   });
 
-  it('keeps transformed module identities and dependencies transform-specific', async () => {
+  it('keeps transformed dependency graphs specific when root sources match', async () => {
     const root = setup({
       'components/root.tsx': `import { Child } from './child'; export function Root() { return <main>{Child}</main>; } ${meta('root', 'block')}`,
       'components/child.tsx': `export const Child = <aside/>; ${meta('child')}`,
@@ -144,9 +144,7 @@ describe('shadcnPlugin', () => {
           transform(code, id) {
             const skin = parseModuleId(id).parameters.get('skin');
 
-            return skin
-              ? code.replace('<main>', `<main data-skin="${skin}">`).replace('<aside/>', `<aside data-skin="${skin}"/>`)
-              : null;
+            return skin ? code.replace('<aside/>', `<aside data-skin="${skin}"/>`) : null;
           },
         },
       ]
@@ -157,8 +155,8 @@ describe('shadcnPlugin', () => {
 
     expect(rootItem.registryDependencies).toContain('@example/child');
     expect(minimal.registryDependencies).toContain('@example/child-minimal');
-    expect(registryFile(output, 'react/components', rootItem, '/root.tsx')).toContain('data-skin="default"');
-    expect(registryFile(output, 'react/components', minimal, '/root.tsx')).toContain('data-skin="minimal"');
+    expect(registryFile(output, 'react/components', rootItem, '/root.tsx')).not.toContain('data-skin');
+    expect(registryFile(output, 'react/components', minimal, '/root.tsx')).not.toContain('data-skin');
     expect(registryFile(output, 'react/components', minimal, '/root.tsx')).toContain(
       `from '@/components/example/child-minimal/child'`
     );
