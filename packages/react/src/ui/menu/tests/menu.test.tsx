@@ -28,8 +28,8 @@ function makeDOMRect(x: number, y: number, width: number, height: number): DOMRe
   return new DOMRect(x, y, width, height);
 }
 
-function OptionPublisher() {
-  useMenuOptionState({ value: 'Auto', disabled: false, availability: 'available' });
+function OptionPublisher({ hasMultipleOptions }: { hasMultipleOptions?: boolean }) {
+  useMenuOptionState({ value: 'Auto', disabled: false, availability: 'available', hasMultipleOptions });
 
   return null;
 }
@@ -48,6 +48,29 @@ function MountedOptionMenuFixture() {
               <OptionPublisher />
             </MenuContent>
           </MenuRoot>
+        </MenuContent>
+      </MenuPopup>
+    </MenuRoot>
+  );
+}
+
+function AdaptiveOptionMenuFixture({
+  hasMultipleOptions,
+  onDirectAction,
+  onOpenChange,
+}: {
+  hasMultipleOptions: boolean;
+  onDirectAction: () => void;
+  onOpenChange: (open: boolean) => void;
+}) {
+  return (
+    <MenuRoot onOpenChange={onOpenChange}>
+      <MenuTrigger data-testid="adaptive-trigger" openWhen="multiple-options" onClick={onDirectAction}>
+        Captions
+      </MenuTrigger>
+      <MenuPopup keepMounted data-testid="adaptive-popup">
+        <MenuContent>
+          <OptionPublisher hasMultipleOptions={hasMultipleOptions} />
         </MenuContent>
       </MenuPopup>
     </MenuRoot>
@@ -463,6 +486,45 @@ describe('MenuContent', () => {
     expect(screen.getByTestId('settings-popup').hasAttribute('inert')).toBe(true);
     expect(screen.getByTestId('quality-content').hasAttribute('hidden')).toBe(true);
     expect(screen.getByTestId('quality-content').hasAttribute('inert')).toBe(true);
+  });
+
+  it('leaves activation with an adaptive trigger when a menu is unnecessary', async () => {
+    const onDirectAction = vi.fn();
+    const onOpenChange = vi.fn();
+
+    render(
+      <AdaptiveOptionMenuFixture
+        hasMultipleOptions={false}
+        onDirectAction={onDirectAction}
+        onOpenChange={onOpenChange}
+      />
+    );
+
+    const trigger = screen.getByTestId('adaptive-trigger');
+
+    await waitFor(() => expect(trigger.hasAttribute('aria-haspopup')).toBe(false));
+    fireEvent.click(trigger);
+
+    expect(onDirectAction).toHaveBeenCalledOnce();
+    expect(onOpenChange).not.toHaveBeenCalled();
+    expect(screen.getByTestId('adaptive-popup').hasAttribute('hidden')).toBe(true);
+  });
+
+  it('opens an adaptive trigger when the option group has multiple choices', async () => {
+    const onDirectAction = vi.fn();
+    const onOpenChange = vi.fn();
+
+    render(
+      <AdaptiveOptionMenuFixture hasMultipleOptions onDirectAction={onDirectAction} onOpenChange={onOpenChange} />
+    );
+
+    const trigger = screen.getByTestId('adaptive-trigger');
+
+    await waitFor(() => expect(trigger.getAttribute('aria-haspopup')).toBe('menu'));
+    fireEvent.click(trigger);
+
+    expect(onDirectAction).not.toHaveBeenCalled();
+    expect(onOpenChange).toHaveBeenCalledWith(true, expect.objectContaining({ reason: 'click' }));
   });
 
   it('includes the root trigger in sequential focus', () => {

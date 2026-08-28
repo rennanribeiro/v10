@@ -178,14 +178,29 @@ export const htmlComponentTarget: ComponentTarget<CoreSchema> = defineComponentT
         const controlledId = id(popup ? 'popup' : 'content');
 
         if (popup) {
+          const openForMultipleOptions = trigger.props.has('openWhen');
+          const triggerProps = trigger.props.omit('openWhen');
+
+          if (openForMultipleOptions && !canMergeHostProps(trigger.children)) {
+            throw new Error(
+              'VJSC cannot compile a Menu.Trigger with `openWhen="multiple-options"` without one concrete child.\n' +
+                'Reason: the child must handle direct activation when a menu is unnecessary.\n' +
+                'Recommendation: render one adaptive button as the trigger child.'
+            );
+          }
+
           return [
             trigger.replaceWith(
               canMergeHostProps(trigger.children) ? (
-                <Host commandfor={controlledId} {...trigger.props}>
+                <Host
+                  commandfor={openForMultipleOptions ? undefined : controlledId}
+                  menuFor={openForMultipleOptions ? controlledId : undefined}
+                  {...triggerProps}
+                >
                   {trigger.children}
                 </Host>
               ) : (
-                <Button commandfor={controlledId} {...trigger.props}>
+                <Button commandfor={controlledId} {...triggerProps}>
                   {trigger.children}
                 </Button>
               )

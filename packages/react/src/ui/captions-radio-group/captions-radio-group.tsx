@@ -61,6 +61,7 @@ export const CaptionsRadioGroup = forwardRef<HTMLDivElement, CaptionsRadioGroupP
       value: captions?.selectedLabel ?? '',
       disabled: captions?.disabled ?? true,
       availability: captions?.state.availability ?? 'unsupported',
+      hasMultipleOptions: captions?.showMenu,
     });
 
     if (!captions) return null;

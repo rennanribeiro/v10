@@ -1,4 +1,4 @@
-import type { MenuCore, MenuOptionState, MenuState } from '@videojs/core';
+import type { MenuCore, MenuOptionState, MenuState, MenuTriggerProps as CoreMenuTriggerProps } from '@videojs/core';
 import { isMenuNavigationKey } from '@videojs/core/dom';
 import { isInteractiveActivation } from '@videojs/utils/dom';
 import { forwardRef, useCallback, useEffect, useMemo, useRef } from 'react';
@@ -15,6 +15,8 @@ export interface MenuTriggerProps extends Omit<
   UIComponentProps<'button', MenuState>,
   'type' | 'onClick' | 'onKeyDown'
 > {
+  /** Open on every activation, or only when the option group reports multiple meaningful choices. Root menus only. */
+  openWhen?: CoreMenuTriggerProps['openWhen'];
   /** Disables the trigger. */
   disabled?: boolean;
   onClick?: React.MouseEventHandler<MenuTriggerElement>;
@@ -26,13 +28,14 @@ export interface MenuTriggerProps extends Omit<
  * trigger), renders as a `<div role="menuitem">` that opens the submenu on click or ArrowRight.
  */
 export const MenuTrigger = forwardRef<HTMLButtonElement | HTMLDivElement, MenuTriggerProps>(function MenuTrigger(
-  { render, className, style, disabled, onClick, onKeyDown, ...elementProps },
+  { render, className, style, openWhen = 'always', disabled, onClick, onKeyDown, ...elementProps },
   forwardedRef
 ) {
   const { core, menu, parent, state, contentId, optionState } = useMenuContext();
   const resolvedDisabled = disabled || optionState?.disabled || false;
   const isSubMenuTrigger = parent !== null;
-  const controlledId = state.open || state.status === 'ending' ? contentId : undefined;
+  const shouldOpenMenu = isSubMenuTrigger || openWhen === 'always' || optionState?.hasMultipleOptions !== false;
+  const controlledId = shouldOpenMenu && (state.open || state.status === 'ending') ? contentId : undefined;
 
   const elementRef = useRef<HTMLElement>(null);
   const triggerId = useSafeId('sub-trigger');
@@ -93,9 +96,9 @@ export const MenuTrigger = forwardRef<HTMLButtonElement | HTMLDivElement, MenuTr
   // Root trigger mode — standard button that toggles the menu.
   const triggerRef = useCallback(
     (element: HTMLButtonElement | null) => {
-      menu.setTriggerElement(element);
+      menu.setTriggerElement(shouldOpenMenu ? element : null);
     },
-    [menu]
+    [menu, shouldOpenMenu]
   );
 
   const handleRootKeyDown = useCallback(
@@ -108,6 +111,8 @@ export const MenuTrigger = forwardRef<HTMLButtonElement | HTMLDivElement, MenuTr
         return;
       }
 
+      if (!shouldOpenMenu) return;
+
       if (isInteractiveActivation(event.nativeEvent)) {
         event.preventDefault();
         menu.triggerProps.onClick(event.nativeEvent);
@@ -116,17 +121,19 @@ export const MenuTrigger = forwardRef<HTMLButtonElement | HTMLDivElement, MenuTr
 
       menu.triggerProps.onKeyDown(event);
     },
-    [resolvedDisabled, menu.triggerProps, onKeyDown]
+    [resolvedDisabled, shouldOpenMenu, menu.triggerProps, onKeyDown]
   );
 
   const rootTriggerProps = useMemo(
     () => ({
       onClick: resolvedDisabled
         ? (event: React.MouseEvent<HTMLElement>) => event.preventDefault()
-        : menu.triggerProps.onClick,
+        : shouldOpenMenu
+          ? menu.triggerProps.onClick
+          : onClick,
       onKeyDown: handleRootKeyDown,
     }),
-    [resolvedDisabled, handleRootKeyDown, menu.triggerProps]
+    [resolvedDisabled, shouldOpenMenu, handleRootKeyDown, menu.triggerProps, onClick]
   );
 
   // Submenu trigger mode — renders as a div with role="menuitem"
@@ -152,7 +159,7 @@ export const MenuTrigger = forwardRef<HTMLButtonElement | HTMLDivElement, MenuTr
   }
 
   return (
-    <MenuTriggerChildContextProvider value>
+    <MenuTriggerChildContextProvider value={shouldOpenMenu}>
       {renderElement(
         'button',
         { render, className, style },
@@ -160,10 +167,13 @@ export const MenuTrigger = forwardRef<HTMLButtonElement | HTMLDivElement, MenuTr
           state,
           ref: [forwardedRef as React.Ref<HTMLButtonElement>, triggerRef],
           props: [
-            { type: 'button' as const, ...core.getTriggerAttrs(state, controlledId) },
+            {
+              type: 'button' as const,
+              ...(shouldOpenMenu ? core.getTriggerAttrs(state, controlledId) : undefined),
+            },
             resolvedDisabled ? { disabled: true, 'aria-disabled': 'true' as const } : undefined,
             optionState ? { 'data-availability': optionState.availability } : undefined,
-            state.open ? { onKeyDownCapture: preventMenuKeyDefault } : undefined,
+            shouldOpenMenu && state.open ? { onKeyDownCapture: preventMenuKeyDefault } : undefined,
             rootTriggerProps,
             elementProps,
           ],

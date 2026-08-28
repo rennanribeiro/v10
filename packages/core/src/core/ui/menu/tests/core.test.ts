@@ -238,6 +238,19 @@ describe('resolveMenuOptionState', () => {
     });
   });
 
+  it('preserves whether one option group requires a menu', () => {
+    expect(
+      resolveMenuOptionState([
+        { value: 'English', disabled: false, availability: 'available', hasMultipleOptions: false },
+      ])
+    ).toEqual({
+      value: 'English',
+      disabled: false,
+      availability: 'available',
+      hasMultipleOptions: false,
+    });
+  });
+
   it('makes a parent available when any nested menu is available', () => {
     expect(
       resolveMenuOptionState([

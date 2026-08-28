@@ -178,7 +178,12 @@ export function MenuRoot({
 }
 
 function isSameOptionState(a: MenuOptionState | undefined, b: MenuOptionState): boolean {
-  return a?.value === b.value && a.disabled === b.disabled && a.availability === b.availability;
+  return (
+    a?.value === b.value &&
+    a.disabled === b.disabled &&
+    a.availability === b.availability &&
+    a.hasMultipleOptions === b.hasMultipleOptions
+  );
 }
 
 export namespace MenuRoot {

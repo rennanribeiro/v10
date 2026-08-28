@@ -23,6 +23,8 @@ export interface MenuProps {
 }
 
 export interface MenuTriggerProps {
+  /** Open on every activation, or only when the option group reports multiple meaningful choices. Root menus only. */
+  openWhen?: 'always' | 'multiple-options' | undefined;
   disabled?: boolean | undefined;
 }
 
@@ -43,6 +45,8 @@ export interface MenuOptionState {
   disabled: boolean;
   /** Whether the menu has a meaningful option available. */
   availability: 'available' | 'unavailable' | 'unsupported';
+  /** Whether the option group has multiple meaningful choices that require a menu. */
+  hasMultipleOptions?: boolean | undefined;
 }
 
 export interface MenuItemProps {
@@ -67,10 +71,13 @@ export function resolveMenuOptionState(states: Iterable<MenuOptionState>): MenuO
         ? 'unsupported'
         : 'unavailable';
 
+  const hasMultipleOptions = options.length === 1 ? options[0]!.hasMultipleOptions : undefined;
+
   return {
     value: options.length === 1 ? options[0]!.value : '',
     disabled: available.length === 0 || available.every((state) => state.disabled),
     availability,
+    ...(hasMultipleOptions === undefined ? undefined : { hasMultipleOptions }),
   };
 }
 

@@ -50,7 +50,11 @@ export class MenuRadioGroupElement extends RadioGroupElement {
     this.setAttribute('aria-label', label);
   }
 
-  protected publishMenuOptionState(disabled: boolean, availability: MenuOptionState['availability']): void {
+  protected publishMenuOptionState(
+    disabled: boolean,
+    availability: MenuOptionState['availability'],
+    hasMultipleOptions?: boolean
+  ): void {
     const context = this.#menu.value ?? null;
 
     if (context?.menu !== this.#optionMenu) {
@@ -68,7 +72,7 @@ export class MenuRadioGroupElement extends RadioGroupElement {
     const label = selectedItem?.querySelector<HTMLElement>('[data-part~="label"]')?.textContent;
     const value = label ?? selectedItem?.textContent?.trim() ?? '';
 
-    this.#setOptionState(this.#optionSource, { value, disabled, availability });
+    this.#setOptionState(this.#optionSource, { value, disabled, availability, hasMultipleOptions });
   }
 
   #clearMenuOptionState(): void {

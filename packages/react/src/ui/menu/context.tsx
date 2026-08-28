@@ -39,15 +39,15 @@ export function useMenuOptionState(state: MenuOptionState): void {
   const menu = useOptionalMenuContext();
   const setOptionState = menu?.setOptionState;
   const [source] = useState(() => Symbol('menu-option'));
-  const { value, disabled, availability } = state;
+  const { value, disabled, availability, hasMultipleOptions } = state;
 
   useLayoutEffect(() => {
     if (!setOptionState) return undefined;
 
-    setOptionState(source, { value, disabled, availability });
+    setOptionState(source, { value, disabled, availability, hasMultipleOptions });
 
     return () => setOptionState(source, null);
-  }, [availability, disabled, setOptionState, source, value]);
+  }, [availability, disabled, hasMultipleOptions, setOptionState, source, value]);
 }
 
 export interface MenuPopupContextValue {

@@ -56,7 +56,7 @@ export class CaptionsRadioGroupElement extends MenuRadioGroupElement {
 
       this.applyDefaultAriaLabel(translateText(this.#core.getLabel(state), this.#i18n.value));
       this.#options.sync(state, this.#i18n.value, this.#i18n.locale);
-      this.publishMenuOptionState(state.disabled, state.availability);
+      this.publishMenuOptionState(state.disabled, state.availability, state.options.length > 2);
     } else {
       this.publishMenuOptionState(true, 'unsupported');
     }
