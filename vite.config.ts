@@ -151,7 +151,6 @@ export default defineConfig({
         cache: false,
         dependsOn: [
           'site#api-docs:generate',
-          'site#ejected-skins',
           'site#cdn-manifest',
           '@videojs/sandbox#setup',
           '@videojs/skins#prepare:shadcn',
