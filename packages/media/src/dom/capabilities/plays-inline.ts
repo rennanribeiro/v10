@@ -1,5 +1,5 @@
-import type { MediaPlaysInlineCapability } from '../../../core/types';
-import { defineMediaCapability } from '../capability';
+import { defineMediaCapability } from '../../core/capability';
+import type { MediaPlaysInlineCapability } from '../../core/types';
 
 /** Playing in place rather than taking over the screen, which small-screen browsers otherwise do. */
 export const playsInlineCapability = defineMediaCapability<MediaPlaysInlineCapability>()({

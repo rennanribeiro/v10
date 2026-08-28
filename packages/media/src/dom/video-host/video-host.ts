@@ -4,14 +4,12 @@ import type { Constructor } from '@videojs/utils/types';
 
 import type { Video, VideoEvents, VideoTargetLike } from '../../core/types';
 import {
-  createMediaHost,
-  HTMLMediaElementHost,
-  type HTMLMediaTargetLike,
   pictureInPictureCapability,
   playsInlineCapability,
   posterCapability,
   videoDimensionsCapability,
-} from '../media-host';
+} from '../capabilities';
+import { createMediaHost, HTMLMediaElementHost, type HTMLMediaTargetLike } from '../media-host';
 
 export interface HTMLVideoTargetLike extends VideoTargetLike, HTMLMediaTargetLike {}
 

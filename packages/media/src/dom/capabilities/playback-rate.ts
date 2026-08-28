@@ -1,5 +1,5 @@
-import type { MediaPlaybackRateCapability } from '../../../core/types';
-import { defineMediaCapability } from '../capability';
+import { defineMediaCapability } from '../../core/capability';
+import type { MediaPlaybackRateCapability } from '../../core/types';
 
 /** Playing faster or slower than real time. */
 export const playbackRateCapability = defineMediaCapability<MediaPlaybackRateCapability>()({

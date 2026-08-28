@@ -1,5 +1,5 @@
-import type { MediaLiveCapability } from '../../../core/types';
-import { defineMediaCapability } from '../capability';
+import { defineMediaCapability } from '../../core/capability';
+import type { MediaLiveCapability } from '../../core/types';
 
 /** Describing the live window a stream exposes. */
 export const liveCapability = defineMediaCapability<MediaLiveCapability>()({

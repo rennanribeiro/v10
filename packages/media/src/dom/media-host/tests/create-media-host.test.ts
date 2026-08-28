@@ -1,13 +1,13 @@
-import type { Constructor } from '@videojs/utils/types';
 import { afterEach, describe, expect, it, vi } from 'vite-plus/test';
 
+import { getMediaCapabilityEvents, supportsMediaCapability } from '../../../core/capability';
 import { isMediaVolumeCapable } from '../../../core/predicate';
 import { HTMLAudioElementHost } from '../../audio-host';
+import { pauseCapability, playbackCapability, posterCapability, sourceCapability } from '../../capabilities';
 import { CustomMediaElement } from '../../custom-media-element';
 import { HTMLVideoElementHost } from '../../video-host';
-import type { MediaHostBase } from '../base';
-import { pauseCapability, playbackCapability, posterCapability, sourceCapability } from '../capabilities';
-import { createMediaHost, getMediaCapabilityEvents, supportsMediaCapability } from '../capability';
+import { MediaHostBase } from '../base';
+import { createMediaHost } from '../create-media-host';
 import { HTMLMediaElementHost } from '../media-host';
 
 /**
@@ -18,7 +18,7 @@ class GifMediaHost extends createMediaHost([playbackCapability, pauseCapability,
 
 let tagCounter = 0;
 
-function defineElement(Host: Constructor<MediaHostBase>) {
+function defineElement(Host: Parameters<typeof CustomMediaElement>[1]) {
   const tag = `capability-video-${++tagCounter}`;
   const Ctor = CustomMediaElement('video', Host);
 
@@ -84,7 +84,7 @@ describe('createMediaHost', () => {
     expect(host.canPlayType('video/mp4')).toBe('');
   });
 
-  it('lets a capability own its state and announce its own event', () => {
+  it('remembers a written value and announces the change event a capability declares', () => {
     const host = new HTMLAudioElementHost();
     const onChange = vi.fn();
 
@@ -189,6 +189,16 @@ describe('CustomMediaElement', () => {
     expect(Gif.observedAttributes).toContain('src');
     expect(Gif.observedAttributes).toContain('poster');
     expect('defaultMuted' in gif).toBe(false);
+  });
+
+  it('falls back to the standard media attributes for a media that declares no capabilities', () => {
+    // Third-party media and iframe embeds are not composed from capabilities, so
+    // there is nothing to narrow their attribute surface by.
+    const { Ctor } = defineElement(MediaHostBase);
+
+    expect(Ctor.observedAttributes).toContain('src');
+    expect(Ctor.observedAttributes).toContain('muted');
+    expect(Ctor.observedAttributes).toContain('poster');
   });
 });
 

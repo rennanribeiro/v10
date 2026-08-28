@@ -1,7 +1,6 @@
 import type { EventListenerFor, EventType } from '@videojs/utils/dom';
 
 import type { EventLike, MediaFull } from '../../core/types';
-import type { HTMLMediaTargetLike } from './base';
 import {
   autoplayCapability,
   bufferCapability,
@@ -20,8 +19,9 @@ import {
   textTrackCapability,
   titleCapability,
   volumeCapability,
-} from './capabilities';
-import { createMediaHost } from './capability';
+} from '../capabilities';
+import type { HTMLMediaTargetLike } from './base';
+import { createMediaHost } from './create-media-host';
 
 export { addMediaComponent, getMediaComponents, getMediaOwner, getMediaProp, setMediaProp } from '../utils';
 export {
@@ -31,22 +31,7 @@ export {
   type MediaComponents,
   MediaHostBase,
 } from './base';
-export * from './capabilities';
-export {
-  type ComposedMediaApi,
-  createMediaHost,
-  defineMediaCapability,
-  getMediaCapabilities,
-  getMediaCapabilityAttributes,
-  getMediaCapabilityEvents,
-  type MediaCapabilityAttribute,
-  type MediaCapabilityDescriptor,
-  type MediaCapabilityMethod,
-  type MediaCapabilityProp,
-  type MediaCapabilitySource,
-  type MediaHostConstructor,
-  supportsMediaCapability,
-} from './capability';
+export { createMediaHost, type MediaHostConstructor } from './create-media-host';
 
 /**
  * Every capability an `HTMLMediaElement` offers.

@@ -1,5 +1,5 @@
-import type { MediaErrorCapability } from '../../../core/types';
-import { defineMediaCapability } from '../capability';
+import { defineMediaCapability } from '../../core/capability';
+import type { MediaErrorCapability } from '../../core/types';
 
 /** Reporting a fatal playback failure. */
 export const errorCapability = defineMediaCapability<MediaErrorCapability>()({

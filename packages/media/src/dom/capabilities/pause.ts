@@ -1,5 +1,5 @@
-import type { MediaPauseCapability } from '../../../core/types';
-import { defineMediaCapability } from '../capability';
+import { defineMediaCapability } from '../../core/capability';
+import type { MediaPauseCapability } from '../../core/types';
 
 /** Suspending playback. A media that plays through once, unstoppably, composes `playback` without this. */
 export const pauseCapability = defineMediaCapability<MediaPauseCapability>()({

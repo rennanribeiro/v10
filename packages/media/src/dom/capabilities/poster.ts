@@ -1,5 +1,5 @@
-import type { MediaPosterCapability } from '../../../core/types';
-import { defineMediaCapability } from '../capability';
+import { defineMediaCapability } from '../../core/capability';
+import type { MediaPosterCapability } from '../../core/types';
 
 /** A still image standing in for the content before playback. */
 export const posterCapability = defineMediaCapability<MediaPosterCapability>()({

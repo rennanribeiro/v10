@@ -1,6 +1,6 @@
-import { EMPTY_TIME_RANGES } from '../../../core/constants';
-import type { MediaBufferCapability } from '../../../core/types';
-import { defineMediaCapability } from '../capability';
+import { defineMediaCapability } from '../../core/capability';
+import { EMPTY_TIME_RANGES } from '../../core/constants';
+import type { MediaBufferCapability } from '../../core/types';
 
 /** DOM-shaped {@link MediaBufferCapability}: browser hosts hand back real `TimeRanges`. */
 export interface HTMLMediaBufferCapability extends MediaBufferCapability {

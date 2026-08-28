@@ -1,6 +1,6 @@
-import { EMPTY_REMOTE } from '../../../core/constants';
-import type { MediaRemotePlaybackCapability } from '../../../core/types';
-import { defineMediaCapability } from '../capability';
+import { defineMediaCapability } from '../../core/capability';
+import { EMPTY_REMOTE } from '../../core/constants';
+import type { MediaRemotePlaybackCapability } from '../../core/types';
 
 /**
  * Handing playback to a remote device.

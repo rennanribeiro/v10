@@ -1,6 +1,6 @@
-import { EMPTY_TEXT_TRACKS } from '../../../core/constants';
-import type { MediaTextTrackCapability, TextTrackLike } from '../../../core/types';
-import { defineMediaCapability } from '../capability';
+import { defineMediaCapability } from '../../core/capability';
+import { EMPTY_TEXT_TRACKS } from '../../core/constants';
+import type { MediaTextTrackCapability, TextTrackLike } from '../../core/types';
 
 /** DOM-shaped {@link MediaTextTrackCapability}: browser hosts hand back a real `TextTrackList`. */
 export interface HTMLMediaTextTrackCapability extends MediaTextTrackCapability {

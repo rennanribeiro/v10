@@ -1,5 +1,5 @@
-import type { MediaControlsCapability } from '../../../core/types';
-import { defineMediaCapability } from '../capability';
+import { defineMediaCapability } from '../../core/capability';
+import type { MediaControlsCapability } from '../../core/types';
 
 /** The media's own native controls. */
 export const controlsCapability = defineMediaCapability<MediaControlsCapability>()({

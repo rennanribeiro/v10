@@ -1,5 +1,5 @@
-import type { MediaContentDataCapability } from '../../../core/types';
-import { defineMediaCapability } from '../capability';
+import { defineMediaCapability } from '../../core/capability';
+import type { MediaContentDataCapability } from '../../core/types';
 
 /** Media-owned content metadata: title, poster, storyboard, and whatever else the media can vouch for. */
 export const contentDataCapability = defineMediaCapability<MediaContentDataCapability>()({

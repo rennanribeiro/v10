@@ -1,5 +1,5 @@
-import type { MediaVolumeCapability } from '../../../core/types';
-import { defineMediaCapability } from '../capability';
+import { defineMediaCapability } from '../../core/capability';
+import type { MediaVolumeCapability } from '../../core/types';
 
 /**
  * Volume forwarding.

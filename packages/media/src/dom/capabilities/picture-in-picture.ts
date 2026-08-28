@@ -1,4 +1,4 @@
-import { defineMediaCapability } from '../capability';
+import { defineMediaCapability } from '../../core/capability';
 
 /**
  * The part of picture-in-picture the media itself owns.

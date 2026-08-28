@@ -3,7 +3,7 @@ import { omit, pick } from '@videojs/utils/object';
 import { kebabCase } from '@videojs/utils/string';
 import type { Constructor } from '@videojs/utils/types';
 
-import { getMediaCapabilityAttributes } from '../media-host/capability';
+import { getMediaCapabilityAttributes } from '../../core/capability';
 
 /** CSS custom property names for video elements. */
 export const VideoCSSVars = {
@@ -121,6 +121,35 @@ function propertyValueFor(attrValue: string | null, current: unknown, config?: P
   return attrValue ?? (config && 'empty' in config ? config.empty : '');
 }
 
+/** Attributes the element itself owns: they drive the element or the target tag, never a media capability. */
+const elementAttributes: PropertyConfigs = {
+  autoPictureInPicture: { type: Boolean },
+  controlsList: { type: String },
+  loading: { type: String },
+};
+
+/**
+ * The standard HTML media attributes, reflected for a media that declares no capabilities.
+ *
+ * A media composed from capabilities says which attributes it can honor, and the element reflects only those. One that
+ * says nothing — a third-party media, or an embed the player only drives through its own API — gets the full set,
+ * because there is nothing to narrow it by.
+ */
+const undeclaredMediaAttributes: PropertyConfigs = {
+  autoplay: { type: Boolean },
+  controls: { type: Boolean },
+  crossOrigin: { type: String, empty: null },
+  defaultMuted: { type: Boolean, attribute: 'muted' },
+  disablePictureInPicture: { type: Boolean },
+  disableRemotePlayback: { type: Boolean },
+  loop: { type: Boolean },
+  playsInline: { type: Boolean },
+  poster: { type: String, empty: '' },
+  preload: { type: String, empty: null },
+  src: { type: String, empty: '' },
+  streamType: { type: String, attribute: 'stream-type', empty: 'unknown' },
+};
+
 export interface MediaHost extends EventTarget {
   attach(target: EventTarget | null): void;
   detach(): void;
@@ -151,20 +180,14 @@ export function CustomMediaElement<T extends Constructor<MediaHost>>(
   // there is no `<track>` / `<source>` syncing.
   const syncTargetAttributes = tag !== 'iframe';
   const mediaHostAttrToProp = new Map<string, string>();
+  const declaredAttributes = getMediaCapabilityAttributes(MediaHost);
+  const mediaAttributes = Object.keys(declaredAttributes).length ? declaredAttributes : undeclaredMediaAttributes;
   let isDefined = false;
 
   class CustomMedia extends (globalThis.HTMLElement ?? class {}) {
     static getTemplateHTML = tag.endsWith('video') ? getVideoTemplateHTML : getCommonTemplateHTML(tag);
     static shadowRootOptions: ShadowRootInit = { mode: 'open' };
-    // Attributes the host's composed capabilities declare (`muted` from volume,
-    // `poster` from poster, and so on) join the few this element owns outright,
-    // so a host that skips a capability never reflects its attributes.
-    static properties: PropertyConfigs = {
-      autoPictureInPicture: { type: Boolean },
-      controlsList: { type: String },
-      loading: { type: String },
-      ...getMediaCapabilityAttributes(MediaHost),
-    };
+    static properties: PropertyConfigs = { ...elementAttributes, ...mediaAttributes };
 
     static get observedAttributes() {
       // `this` resolves to the subclass, which may override `properties`.
