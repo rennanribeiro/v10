@@ -54,7 +54,7 @@ export default {
     toggleElapsed: 'Alterna entre el temps transcorregut i el temps restant.',
     toggleDuration: 'Alterna entre la durada i el temps restant.',
     position: '{current} de {duration}',
-    unknown: 'Vídeo no carregat, temps desconegut.',
+    unknown: 'Contingut multimèdia no carregat, temps desconegut.',
   },
   playback: {
     rate: 'Velocitat de reproducció {rate}',

@@ -170,7 +170,7 @@ describe('TimeSliderCore', () => {
       expect(core.getAttrs(state)).toMatchObject({ 'aria-disabled': 'true', tabIndex: -1 });
       expect(core.getAttrs(state)['aria-valuetext']).toMatchObject({
         key: 'time.unknown',
-        text: 'Video not loaded, unknown time.',
+        text: 'Media not loaded, unknown time.',
       });
     });
 

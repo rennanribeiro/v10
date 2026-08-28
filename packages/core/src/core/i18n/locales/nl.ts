@@ -54,7 +54,7 @@ export default {
     toggleElapsed: 'Schakel tussen verstreken en resterende tijd.',
     toggleDuration: 'Schakel tussen duur en resterende tijd.',
     position: '{current} van {duration}',
-    unknown: 'Video niet geladen, onbekende tijd.',
+    unknown: 'Media niet geladen, onbekende tijd.',
   },
   playback: {
     rate: 'Afspeelsnelheid {rate}',

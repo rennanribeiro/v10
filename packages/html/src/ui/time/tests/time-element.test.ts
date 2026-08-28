@@ -125,7 +125,7 @@ describe('TimeElement', () => {
     const { time } = await setup({}, undefined, { duration: 0, seekable: [] });
 
     expect(time.hasAttribute('data-disabled')).toBe(true);
-    expect(time.getAttribute('aria-label')).toBe('Video not loaded, unknown time.');
+    expect(time.getAttribute('aria-label')).toBe('Media not loaded, unknown time.');
     expect(time.hasAttribute('datetime')).toBe(false);
   });
 

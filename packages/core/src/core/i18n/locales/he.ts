@@ -54,7 +54,7 @@ export default {
     toggleElapsed: 'החלף בין הזמן שחלף לזמן שנותר.',
     toggleDuration: 'החלף בין משך הזמן לזמן שנותר.',
     position: '{current} מתוך {duration}',
-    unknown: 'הווידאו לא נטען, זמן לא ידוע.',
+    unknown: 'המדיה לא נטענה, זמן לא ידוע.',
   },
   playback: {
     rate: 'קצב ניגון {rate}',

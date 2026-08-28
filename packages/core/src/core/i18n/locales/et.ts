@@ -54,7 +54,7 @@ export default {
     toggleElapsed: 'Lülita möödunud ja järelejäänud aja vahel.',
     toggleDuration: 'Lülita kestuse ja järelejäänud aja vahel.',
     position: '{current} / {duration}',
-    unknown: 'Video pole laaditud, aeg teadmata.',
+    unknown: 'Meedium pole laaditud, aeg teadmata.',
   },
   playback: {
     rate: 'Taasesituse kiirus {rate}',

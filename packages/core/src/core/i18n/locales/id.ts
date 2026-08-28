@@ -54,7 +54,7 @@ export default {
     toggleElapsed: 'Beralih antara waktu berlalu dan waktu tersisa.',
     toggleDuration: 'Beralih antara durasi dan waktu tersisa.',
     position: '{current} dari {duration}',
-    unknown: 'Video belum dimuat, waktu tidak diketahui.',
+    unknown: 'Media belum dimuat, waktu tidak diketahui.',
   },
   playback: {
     rate: 'Kecepatan pemutaran {rate}',

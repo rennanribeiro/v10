@@ -54,7 +54,7 @@ export default {
     toggleElapsed: 'Vaihda kuluneen ja jäljellä olevan ajan välillä.',
     toggleDuration: 'Vaihda keston ja jäljellä olevan ajan välillä.',
     position: '{current} / {duration}',
-    unknown: 'Videota ei ole ladattu, aika ei ole tiedossa.',
+    unknown: 'Mediaa ei ole ladattu, aika ei ole tiedossa.',
   },
   playback: {
     rate: 'Toistonopeus {rate}',

@@ -155,7 +155,7 @@ describe('TimeSliderElement', () => {
 
     expect(slider.hasAttribute('data-disabled')).toBe(true);
     expect(thumb.getAttribute('aria-disabled')).toBe('true');
-    expect(thumb.getAttribute('aria-valuetext')).toBe('Video not loaded, unknown time.');
+    expect(thumb.getAttribute('aria-valuetext')).toBe('Media not loaded, unknown time.');
     expect(thumb.getAttribute('tabindex')).toBe('-1');
   });
 

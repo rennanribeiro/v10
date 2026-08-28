@@ -54,7 +54,7 @@ export default {
     toggleElapsed: 'Basculer entre le temps écoulé et le temps restant.',
     toggleDuration: 'Basculer entre la durée et le temps restant.',
     position: '{current} de {duration}',
-    unknown: 'Vidéo non chargée, durée inconnue.',
+    unknown: 'Média non chargé, durée inconnue.',
   },
   playback: {
     rate: 'Vitesse de lecture {rate}',

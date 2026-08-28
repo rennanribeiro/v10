@@ -54,7 +54,7 @@ export default {
     toggleElapsed: 'Toglaich eadar an ùine a chaidh seachad agus an ùine air fhàgail.',
     toggleDuration: 'Toglaich eadar an fhaid agus an ùine air fhàgail.',
     position: '{current} à {duration}',
-    unknown: 'Cha deach a’ bhidio a luchdadh, àm neo-aithnichte.',
+    unknown: 'Cha deach na meadhanan a luchdadh, àm neo-aithnichte.',
   },
   playback: {
     rate: 'Reat cluich {rate}',

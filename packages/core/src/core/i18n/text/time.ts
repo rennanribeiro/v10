@@ -66,5 +66,5 @@ export const positionText = {
 
 export const unknownText = {
   key: `${prefix}unknown`,
-  text: 'Video not loaded, unknown time.',
+  text: 'Media not loaded, unknown time.',
 } as const satisfies Text;

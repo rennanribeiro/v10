@@ -54,7 +54,7 @@ export default {
     toggleElapsed: 'Váltás az eltelt és a hátralévő idő között.',
     toggleDuration: 'Váltás az időtartam és a hátralévő idő között.',
     position: '{current} / {duration}',
-    unknown: 'A videó nem töltődött be, ismeretlen hossz.',
+    unknown: 'A média nem töltődött be, ismeretlen hossz.',
   },
   playback: {
     rate: 'Lejátszási sebesség {rate}',

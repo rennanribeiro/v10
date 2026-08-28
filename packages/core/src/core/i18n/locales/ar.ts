@@ -54,7 +54,7 @@ export default {
     toggleElapsed: 'التبديل بين الوقت المنقضي والوقت المتبقي.',
     toggleDuration: 'التبديل بين المدة والوقت المتبقي.',
     position: '{current} من {duration}',
-    unknown: 'الفيديو غير محمل، الوقت غير معلوم.',
+    unknown: 'الوسائط غير محملة، الوقت غير معلوم.',
   },
   playback: {
     rate: 'سرعة التشغيل {rate}',

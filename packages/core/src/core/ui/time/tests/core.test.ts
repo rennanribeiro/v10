@@ -53,7 +53,7 @@ describe('TimeCore', () => {
       expect(state.disabled).toBe(true);
       expect(core.getAttrs(state)['aria-label']).toMatchObject({
         key: 'time.unknown',
-        text: 'Video not loaded, unknown time.',
+        text: 'Media not loaded, unknown time.',
       });
     });
 

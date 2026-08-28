@@ -54,7 +54,7 @@ export default {
     toggleElapsed: 'Prebacivanje između proteklog i preostalog vremena.',
     toggleDuration: 'Prebacivanje između trajanja i preostalog vremena.',
     position: '{current} od {duration}',
-    unknown: 'Videozapis nije učitan, vrijeme nije poznato.',
+    unknown: 'Medijski sadržaj nije učitan, vrijeme nije poznato.',
   },
   playback: {
     rate: 'Stopa reprodukcije {rate}',
