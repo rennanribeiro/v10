@@ -1,4 +1,4 @@
-import type { MediaTimeState } from '@videojs/media';
+import { MediaReadyState, type MediaTimeState } from '@videojs/media';
 import { describe, expect, it, vi } from 'vite-plus/test';
 
 import type { SeekButtonState } from '../core';
@@ -6,6 +6,7 @@ import { SeekButtonCore } from '../core';
 
 function createMediaState(overrides: Partial<MediaTimeState> = {}): MediaTimeState {
   return {
+    readyState: MediaReadyState.HAVE_METADATA,
     currentTime: 0,
     duration: 300,
     seeking: false,
@@ -18,6 +19,7 @@ function createState(overrides: Partial<SeekButtonState> = {}): SeekButtonState 
   return {
     seeking: false,
     direction: 'forward',
+    disabled: false,
     label: '',
     ...overrides,
   };
@@ -45,7 +47,9 @@ describe('SeekButtonCore', () => {
 
     it('accepts disabled via constructor', () => {
       const core = new SeekButtonCore({ disabled: true });
-      const attrs = core.getAttrs(createState());
+
+      core.setMedia(createMediaState());
+      const attrs = core.getAttrs(core.getState());
 
       expect(attrs['aria-disabled']).toBe('true');
     });
@@ -57,6 +61,14 @@ describe('SeekButtonCore', () => {
 
       core.setMedia(createMediaState({ seeking: true }));
       expect(core.getState().seeking).toBe(true);
+    });
+
+    it('is disabled until metadata is loaded', () => {
+      const core = new SeekButtonCore();
+
+      core.setMedia(createMediaState({ readyState: MediaReadyState.HAVE_NOTHING }));
+
+      expect(core.getState().disabled).toBe(true);
     });
 
     it('derives forward direction from positive seconds', () => {
@@ -173,7 +185,7 @@ describe('SeekButtonCore', () => {
 
     it('sets aria-disabled when disabled', () => {
       const core = new SeekButtonCore({ disabled: true });
-      const attrs = core.getAttrs(createState());
+      const attrs = core.getAttrs(createState({ disabled: true }));
 
       expect(attrs['aria-disabled']).toBe('true');
     });
@@ -217,6 +229,15 @@ describe('SeekButtonCore', () => {
       const media = createMediaState({ currentTime: 60 });
 
       await core.seek(media);
+      expect(media.seek).not.toHaveBeenCalled();
+    });
+
+    it('does nothing until metadata is loaded', async () => {
+      const core = new SeekButtonCore();
+      const media = createMediaState({ readyState: MediaReadyState.HAVE_NOTHING });
+
+      await core.seek(media);
+
       expect(media.seek).not.toHaveBeenCalled();
     });
   });

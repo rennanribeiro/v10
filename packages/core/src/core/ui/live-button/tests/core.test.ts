@@ -1,3 +1,4 @@
+import { MediaReadyState } from '@videojs/media';
 import { describe, expect, it, vi } from 'vite-plus/test';
 
 import type { LiveButtonMediaState, LiveButtonState } from '../core';
@@ -5,6 +6,7 @@ import { LiveButtonCore } from '../core';
 
 function createMediaState(overrides: Partial<LiveButtonMediaState> = {}): LiveButtonMediaState {
   return {
+    readyState: MediaReadyState.HAVE_METADATA,
     currentTime: 0,
     seekable: [],
     liveEdgeStart: Number.NaN,
@@ -18,6 +20,7 @@ function createState(overrides: Partial<LiveButtonState> = {}): LiveButtonState 
   return {
     live: false,
     liveEdge: false,
+    disabled: false,
     label: '',
     ...overrides,
   };
@@ -34,7 +37,9 @@ describe('LiveButtonCore', () => {
 
     it('accepts constructor props', () => {
       const core = new LiveButtonCore({ disabled: true });
-      const attrs = core.getAttrs(createState());
+
+      core.setMedia(createMediaState());
+      const attrs = core.getAttrs(core.getState());
 
       expect(attrs['aria-disabled']).toBe('true');
     });
@@ -49,6 +54,20 @@ describe('LiveButtonCore', () => {
 
       expect(state.live).toBe(false);
       expect(state.liveEdge).toBe(false);
+    });
+
+    it('is disabled until metadata is loaded', () => {
+      const core = new LiveButtonCore();
+
+      core.setMedia(
+        createMediaState({
+          readyState: MediaReadyState.HAVE_NOTHING,
+          targetLiveWindow: 0,
+          seekable: [[0, 100]],
+        })
+      );
+
+      expect(core.getState().disabled).toBe(true);
     });
 
     it('reports live for low-latency live (`targetLiveWindow === 0`)', () => {
@@ -201,7 +220,7 @@ describe('LiveButtonCore', () => {
 
     it('sets aria-disabled when disabled', () => {
       const core = new LiveButtonCore({ disabled: true });
-      const attrs = core.getAttrs(createState({ live: true }));
+      const attrs = core.getAttrs(createState({ live: true, disabled: true }));
 
       expect(attrs['aria-disabled']).toBe('true');
     });
@@ -281,6 +300,19 @@ describe('LiveButtonCore', () => {
       });
 
       await core.seekToLive(media);
+      expect(media.seek).not.toHaveBeenCalled();
+    });
+
+    it('does nothing until metadata is loaded', async () => {
+      const core = new LiveButtonCore();
+      const media = createMediaState({
+        readyState: MediaReadyState.HAVE_NOTHING,
+        targetLiveWindow: 0,
+        seekable: [[0, 100]],
+      });
+
+      await core.seekToLive(media);
+
       expect(media.seek).not.toHaveBeenCalled();
     });
   });

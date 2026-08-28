@@ -1,5 +1,11 @@
-import type { MediaTimeState } from '@videojs/media';
-import { hasMetadata, isMediaBufferCapable, isMediaSeekCapable, isMediaSourceCapable } from '@videojs/media';
+import {
+  hasMetadata,
+  isMediaBufferCapable,
+  isMediaSeekCapable,
+  isMediaSourceCapable,
+  MediaReadyState,
+  type MediaTimeState,
+} from '@videojs/media';
 import { listen, onEvent } from '@videojs/utils/dom';
 import { noop } from '@videojs/utils/function';
 
@@ -9,6 +15,7 @@ import { signalKeys } from '../signal-keys';
 export const timeFeature = definePlayerFeature({
   name: 'time',
   state: ({ target, signals, set }): MediaTimeState => ({
+    readyState: MediaReadyState.HAVE_NOTHING,
     currentTime: 0,
     duration: 0,
     seeking: false,
@@ -54,6 +61,7 @@ export const timeFeature = definePlayerFeature({
 
     const sync = () =>
       set({
+        readyState: isMediaSourceCapable(media) ? media.readyState : MediaReadyState.HAVE_NOTHING,
         currentTime: media.currentTime,
         duration: resolveDuration(),
         seeking: media.seeking,

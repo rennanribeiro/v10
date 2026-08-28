@@ -1,4 +1,4 @@
-import type { MediaBufferState, MediaLiveState, MediaTimeState } from '@videojs/media';
+import { hasMetadata, type MediaBufferState, type MediaLiveState, type MediaTimeState } from '@videojs/media';
 import { createState } from '@videojs/store';
 import { defaults } from '@videojs/utils/object';
 import type { NonNullableObject } from '@videojs/utils/types';
@@ -33,6 +33,7 @@ const LIVE_EDGE_TOLERANCE = 5;
  * `live`, `time`, and `buffer` store slices.
  */
 export type LiveButtonMediaState = Pick<MediaTimeState, 'currentTime' | 'seek'> &
+  Pick<MediaTimeState, 'readyState'> &
   Pick<MediaBufferState, 'seekable'> &
   MediaLiveState;
 
@@ -41,6 +42,8 @@ export interface LiveButtonState extends ButtonState {
   live: boolean;
   /** Whether playback is at the live edge. */
   liveEdge: boolean;
+  /** Whether seeking to the live edge is temporarily unavailable. */
+  disabled: boolean;
 }
 
 /**
@@ -61,6 +64,7 @@ export class LiveButtonCore {
   readonly state = createState<LiveButtonState>({
     live: false,
     liveEdge: false,
+    disabled: true,
     label: '',
   });
 
@@ -85,7 +89,7 @@ export class LiveButtonCore {
   }
 
   getAttrs(state: LiveButtonState) {
-    const inactive = this.#props.disabled || state.liveEdge;
+    const inactive = state.disabled || state.liveEdge;
 
     return {
       'aria-label': this.getLabel(state),
@@ -101,8 +105,9 @@ export class LiveButtonCore {
     const media = this.#media!;
     const live = isLiveMedia(media);
     const liveEdge = live && this.#isAtLiveEdge(media);
+    const disabled = this.#props.disabled || !hasMetadata(media) || !live || liveEdgeTarget(media) == null;
 
-    this.state.patch({ live, liveEdge });
+    this.state.patch({ live, liveEdge, disabled });
     this.state.patch({ label: resolveText(this.getLabel(this.state.current)) });
 
     return this.state.current;
@@ -110,7 +115,9 @@ export class LiveButtonCore {
 
   /** Seek to the Seekable Live Edge. No-op when not live or already at edge. */
   async seekToLive(media: LiveButtonMediaState): Promise<void> {
-    if (this.#props.disabled) return;
+    this.setMedia(media);
+
+    if (this.getState().disabled) return;
 
     if (!isLiveMedia(media)) return;
 

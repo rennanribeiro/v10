@@ -1,4 +1,5 @@
 import { cleanup, fireEvent, render, screen } from '@testing-library/react';
+import { MediaReadyState, type MediaTimeState } from '@videojs/media';
 import { formatTimeAsPhrase } from '@videojs/utils/time';
 import { afterEach, describe, expect, it, vi } from 'vite-plus/test';
 
@@ -13,11 +14,12 @@ vi.mock('@videojs/store/react', () => ({
 }));
 
 const timeState = {
+  readyState: Number(MediaReadyState.HAVE_METADATA),
   currentTime: 90,
   duration: 300,
   seeking: false,
-  seek: vi.fn(),
-};
+  seek: vi.fn(async () => 0),
+} satisfies MediaTimeState;
 
 function setup(props: Value.Props = {}, state = timeState) {
   const { Wrapper } = createPlayerWrapper(state);
@@ -32,6 +34,18 @@ function setup(props: Value.Props = {}, state = timeState) {
 afterEach(cleanup);
 
 describe('Time.Value', () => {
+  it('is disabled before metadata is available', () => {
+    setup({}, { ...timeState, readyState: MediaReadyState.HAVE_NOTHING });
+
+    expect(screen.getByTestId('time').hasAttribute('data-disabled')).toBe(true);
+  });
+
+  it('is enabled when metadata is available', () => {
+    setup();
+
+    expect(screen.getByTestId('time').hasAttribute('data-disabled')).toBe(false);
+  });
+
   it('renders current time by default', () => {
     setup();
 

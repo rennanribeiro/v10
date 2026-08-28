@@ -1,6 +1,7 @@
 import { isFunction, isObject, isUndefined } from '@videojs/utils/predicate';
 
 import { EMPTY_REMOTE, EMPTY_TEXT_TRACKS, EMPTY_TIME_RANGES } from './constants';
+import { MediaReadyState } from './types';
 import type {
   MediaAudioTrackCapability,
   MediaBufferCapability,
@@ -20,8 +21,8 @@ import type {
   MediaVolumeCapability,
 } from './types';
 
-export function hasMetadata(media: MediaSourceCapability): boolean {
-  return media.readyState >= 1;
+export function hasMetadata(media: Pick<MediaSourceCapability, 'readyState'>): boolean {
+  return media.readyState >= MediaReadyState.HAVE_METADATA;
 }
 
 export function isMediaPauseCapable(value: unknown): value is MediaPauseCapability {

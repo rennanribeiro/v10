@@ -135,7 +135,7 @@ describe('seekStep', () => {
 
   it('seeks forward by value', () => {
     const seek = vi.fn();
-    const store = mockStore({ currentTime: 10, duration: 100, seeking: false, seek });
+    const store = mockStore({ currentTime: 10, duration: 100, seeking: false, readyState: 1, seek });
 
     resolveHotkeyAction('seekStep')!({ store, value: 5, key: '' });
 
@@ -144,7 +144,7 @@ describe('seekStep', () => {
 
   it('seeks backward by negative value', () => {
     const seek = vi.fn();
-    const store = mockStore({ currentTime: 10, duration: 100, seeking: false, seek });
+    const store = mockStore({ currentTime: 10, duration: 100, seeking: false, readyState: 1, seek });
 
     resolveHotkeyAction('seekStep')!({ store, value: -5, key: '' });
 
@@ -153,11 +153,20 @@ describe('seekStep', () => {
 
   it('uses the default without a value', () => {
     const seek = vi.fn();
-    const store = mockStore({ currentTime: 10, duration: 100, seeking: false, seek });
+    const store = mockStore({ currentTime: 10, duration: 100, seeking: false, readyState: 1, seek });
 
     resolveHotkeyAction('seekStep')!({ store, key: '' });
 
     expect(seek).toHaveBeenCalledWith(20);
+  });
+
+  it('no-ops before metadata is loaded', () => {
+    const seek = vi.fn();
+    const store = mockStore({ currentTime: 0, duration: 0, seeking: false, readyState: 0, seek });
+
+    resolveHotkeyAction('seekStep')!({ store, value: 5, key: '' });
+
+    expect(seek).not.toHaveBeenCalled();
   });
 });
 
@@ -266,7 +275,7 @@ describe('speedDown', () => {
 describe('seekToPercent', () => {
   it('seeks to explicit value percentage', () => {
     const seek = vi.fn();
-    const store = mockStore({ currentTime: 0, duration: 200, seeking: false, seek });
+    const store = mockStore({ currentTime: 0, duration: 200, seeking: false, readyState: 1, seek });
 
     resolveHotkeyAction('seekToPercent')!({ store, value: 50, key: '' });
 
@@ -275,7 +284,7 @@ describe('seekToPercent', () => {
 
   it('derives percentage from digit key', () => {
     const seek = vi.fn();
-    const store = mockStore({ currentTime: 0, duration: 200, seeking: false, seek });
+    const store = mockStore({ currentTime: 0, duration: 200, seeking: false, readyState: 1, seek });
 
     resolveHotkeyAction('seekToPercent')!({ store, key: '3' });
 
@@ -284,7 +293,7 @@ describe('seekToPercent', () => {
 
   it('no-ops for non-digit key without value', () => {
     const seek = vi.fn();
-    const store = mockStore({ currentTime: 0, duration: 200, seeking: false, seek });
+    const store = mockStore({ currentTime: 0, duration: 200, seeking: false, readyState: 1, seek });
 
     resolveHotkeyAction('seekToPercent')!({ store, key: 'k' });
 
@@ -293,7 +302,16 @@ describe('seekToPercent', () => {
 
   it('no-ops when duration is 0', () => {
     const seek = vi.fn();
-    const store = mockStore({ currentTime: 0, duration: 0, seeking: false, seek });
+    const store = mockStore({ currentTime: 0, duration: 0, seeking: false, readyState: 1, seek });
+
+    resolveHotkeyAction('seekToPercent')!({ store, value: 50, key: '' });
+
+    expect(seek).not.toHaveBeenCalled();
+  });
+
+  it('no-ops before metadata is loaded', () => {
+    const seek = vi.fn();
+    const store = mockStore({ currentTime: 0, duration: 200, seeking: false, readyState: 0, seek });
 
     resolveHotkeyAction('seekToPercent')!({ store, value: 50, key: '' });
 

@@ -138,6 +138,7 @@ export class LiveButtonElement extends UIElement {
 
     return {
       currentTime: time.currentTime,
+      readyState: time.readyState,
       seek: time.seek,
       seekable: buffer.seekable,
       liveEdgeStart: live.liveEdgeStart,

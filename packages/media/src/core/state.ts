@@ -1,4 +1,10 @@
-import type { ErrorLike, MediaFeatureAvailability, MediaStreamType, TextTrackKind } from './types';
+import type {
+  ErrorLike,
+  MediaFeatureAvailability,
+  MediaReadyStateValue,
+  MediaStreamType,
+  TextTrackKind,
+} from './types';
 
 export type { TextTrackKind };
 
@@ -81,6 +87,12 @@ export interface MediaVolumeState {
 }
 
 export interface MediaTimeState {
+  /**
+   * Current readiness of the media resource, matching `HTMLMediaElement.readyState`.
+   *
+   * @see https://developer.mozilla.org/en-US/docs/Web/API/HTMLMediaElement/readyState
+   */
+  readyState: MediaReadyStateValue | number;
   /**
    * Current playback position in seconds.
    *

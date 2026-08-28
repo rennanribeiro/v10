@@ -1,4 +1,4 @@
-import type { MediaTimeState } from '@videojs/media';
+import { hasMetadata, type MediaTimeState } from '@videojs/media';
 import { defaults } from '@videojs/utils/object';
 import { formatTime, formatTimeAsPhrase, secondsToIsoDuration } from '@videojs/utils/time';
 import type { NonNullableObject } from '@videojs/utils/types';
@@ -33,6 +33,8 @@ export interface TimeProps {
 export interface TimeState {
   /** Time display type. */
   type: TimeType;
+  /** Whether the time value is unavailable. */
+  disabled: boolean;
   /** Raw value in seconds. */
   seconds: number;
   /** Whether the time value is negative (remaining time before end). */
@@ -190,6 +192,7 @@ export class TimeCore {
 
     return {
       type: this.#props.type,
+      disabled: !hasMetadata(this.#media!),
       seconds,
       negative: this.#props.type === 'remaining' && seconds < 0,
       text: this.#getText(),

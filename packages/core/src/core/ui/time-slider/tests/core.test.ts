@@ -1,4 +1,4 @@
-import type { MediaBufferState, MediaPlaybackState, MediaTimeState } from '@videojs/media';
+import { MediaReadyState, type MediaBufferState, type MediaPlaybackState, type MediaTimeState } from '@videojs/media';
 import { formatTimeAsPhrase } from '@videojs/utils/time';
 import { describe, expect, it, vi } from 'vite-plus/test';
 
@@ -20,6 +20,7 @@ function createInput(overrides: Partial<SliderInput> = {}): SliderInput {
 
 function createMediaState(overrides: Partial<TimeSliderMedia> = {}): TimeSliderMedia {
   return {
+    readyState: MediaReadyState.HAVE_METADATA,
     currentTime: 0,
     duration: 300,
     seeking: false,
@@ -157,6 +158,17 @@ describe('TimeSliderCore', () => {
 
       expect(state.fillPercent).toBe(0);
       expect(state.value).toBe(0);
+    });
+
+    it('is disabled until metadata is loaded', () => {
+      const core = new TimeSliderCore();
+
+      core.setInput(createInput());
+      core.setMedia(createMediaState({ readyState: MediaReadyState.HAVE_NOTHING, duration: 0 }));
+      const state = core.getState();
+
+      expect(state.disabled).toBe(true);
+      expect(core.getAttrs(state)).toMatchObject({ 'aria-disabled': 'true', tabIndex: -1 });
     });
   });
 

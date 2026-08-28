@@ -81,15 +81,22 @@ describe('seekStep', () => {
   it('seeks by value offset', () => {
     const seek = vi.fn();
 
-    resolveGestureAction('seekStep')!(ctx({ currentTime: 10, duration: 60, seeking: false, seek }, 5));
+    resolveGestureAction('seekStep')!(ctx({ currentTime: 10, duration: 60, seeking: false, readyState: 1, seek }, 5));
     expect(seek).toHaveBeenCalledWith(15);
   });
 
   it('uses the default without value', () => {
     const seek = vi.fn();
 
-    resolveGestureAction('seekStep')!(ctx({ currentTime: 10, duration: 60, seeking: false, seek }));
+    resolveGestureAction('seekStep')!(ctx({ currentTime: 10, duration: 60, seeking: false, readyState: 1, seek }));
     expect(seek).toHaveBeenCalledWith(20);
+  });
+
+  it('does nothing before metadata is loaded', () => {
+    const seek = vi.fn();
+
+    resolveGestureAction('seekStep')!(ctx({ currentTime: 0, duration: 0, seeking: false, readyState: 0, seek }, 5));
+    expect(seek).not.toHaveBeenCalled();
   });
 });
 

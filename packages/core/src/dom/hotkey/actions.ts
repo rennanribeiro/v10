@@ -1,3 +1,4 @@
+import { hasMetadata } from '@videojs/media';
 import { isUndefined } from '@videojs/utils/predicate';
 
 import type { HotkeyActionName } from '../../core/ui/hotkey/core';
@@ -67,7 +68,7 @@ const HOTKEY_ACTIONS: Record<HotkeyActionName, HotkeyActionResolver> = {
 
   seekToPercent({ store, value, key }) {
     const time = selectTime(store.state);
-    if (!time || time.duration <= 0) return;
+    if (!time || !hasMetadata(time) || time.duration <= 0) return;
 
     let percent: number;
 

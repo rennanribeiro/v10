@@ -42,6 +42,7 @@ export const LiveButton = forwardRef<HTMLButtonElement, LiveButtonProps>(
       live && time && buffer
         ? {
             currentTime: time.currentTime,
+            readyState: time.readyState,
             seek: time.seek,
             seekable: buffer.seekable,
             liveEdgeStart: live.liveEdgeStart,

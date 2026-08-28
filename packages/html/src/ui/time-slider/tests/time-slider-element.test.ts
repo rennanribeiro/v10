@@ -1,7 +1,10 @@
 import { SliderDataAttrs, type SliderState } from '@videojs/core';
+import type { AnyPlayerStore } from '@videojs/core/dom';
 import { ContextProvider } from '@videojs/element/context';
+import { createStore } from '@videojs/store';
 import { afterEach, describe, expect, it, vi } from 'vitest';
 
+import { playerContext } from '../../../player/context';
 import { sliderContext } from '../../slider/context';
 import { SliderThumbElement } from '../../slider/slider-thumb-element';
 import { SliderValueElement } from '../../slider/slider-value-element';
@@ -29,6 +32,38 @@ class TestSliderProviderElement extends UIElement {
     initialValue: createSliderContext(),
   });
 }
+
+class TestPlayerProviderElement extends UIElement {
+  readonly store = createStore<unknown>()({
+    name: 'timeSlider',
+    state: () => ({
+      currentTime: 0,
+      duration: 0,
+      readyState: HTMLMediaElement.HAVE_NOTHING,
+      seeking: false,
+      seek: vi.fn(),
+      buffered: [],
+      seekable: [],
+      paused: true,
+      ended: false,
+      started: false,
+      waiting: false,
+      play: vi.fn(() => Promise.resolve()),
+      pause: vi.fn(),
+      userActive: true,
+      controlsVisible: true,
+      requestControlsLock: vi.fn(() => vi.fn()),
+      toggleControls: vi.fn(),
+    }),
+  }) as unknown as AnyPlayerStore;
+
+  readonly provider = new ContextProvider(this, {
+    context: playerContext,
+    initialValue: this.store,
+  });
+}
+
+customElements.define('test-time-slider-player', TestPlayerProviderElement);
 
 function createSliderContext(state: Partial<SliderState> = {}, pointerValue = 0) {
   return {
@@ -106,6 +141,22 @@ describe('TimeSliderElement', () => {
 
     expect(slider.style.touchAction).toBe('none');
     expect(slider.style.userSelect).toBe('none');
+  });
+
+  it('disables the slider before metadata is loaded', async () => {
+    const player = document.createElement('test-time-slider-player');
+    const slider = createElement(TimeSliderElement);
+    const thumb = createElement(SliderThumbElement);
+
+    slider.appendChild(thumb);
+    player.appendChild(slider);
+    document.body.appendChild(player);
+    await slider.updateComplete;
+    await thumb.updateComplete;
+
+    expect(slider.hasAttribute('data-disabled')).toBe(true);
+    expect(thumb.getAttribute('aria-disabled')).toBe('true');
+    expect(thumb.getAttribute('tabindex')).toBe('-1');
   });
 
   it('does not set CSS vars without player context', async () => {

@@ -1,4 +1,4 @@
-import type { MediaTimeState } from '@videojs/media';
+import { MediaReadyState, type MediaTimeState } from '@videojs/media';
 import { formatTimeAsPhrase } from '@videojs/utils/time';
 import { describe, expect, it } from 'vite-plus/test';
 
@@ -9,6 +9,7 @@ const t = createTranslator(flattenTranslations(translations), 'en');
 
 function createMediaState(overrides: Partial<MediaTimeState> = {}): MediaTimeState {
   return {
+    readyState: MediaReadyState.HAVE_METADATA,
     currentTime: 90,
     duration: 300,
     seeking: false,
@@ -40,6 +41,14 @@ describe('TimeCore', () => {
   });
 
   describe('getState', () => {
+    it('is disabled before metadata is available', () => {
+      const core = new TimeCore();
+
+      core.setMedia(createMediaState({ readyState: MediaReadyState.HAVE_NOTHING }));
+
+      expect(core.getState().disabled).toBe(true);
+    });
+
     it('returns current time state', () => {
       const core = new TimeCore({ type: 'current' });
 
@@ -47,6 +56,7 @@ describe('TimeCore', () => {
       const state = core.getState();
 
       expect(state.type).toBe('current');
+      expect(state.disabled).toBe(false);
       expect(state.seconds).toBe(90);
       expect(state.negative).toBe(false);
       expect(state.text).toBe('1:30');

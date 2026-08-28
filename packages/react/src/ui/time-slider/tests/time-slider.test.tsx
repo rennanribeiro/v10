@@ -63,6 +63,7 @@ const {
     mockTimeState: {
       currentTime: 30,
       duration: 120,
+      readyState: 1,
       seeking: false,
       seek: vi.fn(),
     },
@@ -130,6 +131,7 @@ afterEach(() => {
     pointing: false,
     focused: false,
   });
+  mockTimeState.readyState = 1;
 });
 
 // --- Tests ---
@@ -198,6 +200,25 @@ describe('TimeSliderRoot', () => {
     expect(el?.style.getPropertyValue('--media-slider-fill')).toBeTruthy();
     expect(el?.style.getPropertyValue('--media-slider-pointer')).toBeTruthy();
     expect(el?.style.getPropertyValue('--media-slider-buffer')).toBeTruthy();
+  });
+
+  it('disables the slider before metadata is loaded', () => {
+    mockTimeState.readyState = 0;
+    const { Wrapper } = createPlayerWrapper();
+    const { container } = render(
+      <Wrapper>
+        <TimeSliderRoot>
+          <SliderThumb data-testid="thumb" />
+        </TimeSliderRoot>
+      </Wrapper>
+    );
+
+    const root = container.querySelector('[data-disabled]');
+    const thumb = container.querySelector('[data-testid="thumb"]');
+
+    expect(root).toBeTruthy();
+    expect(thumb?.getAttribute('aria-disabled')).toBe('true');
+    expect(thumb?.getAttribute('tabindex')).toBe('-1');
   });
 });
 

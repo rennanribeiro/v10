@@ -1,4 +1,4 @@
-import type { MediaBufferState, MediaPlaybackState, MediaTimeState } from '@videojs/media';
+import { hasMetadata, type MediaBufferState, type MediaPlaybackState, type MediaTimeState } from '@videojs/media';
 import { toPercent } from '@videojs/utils/number';
 import { defaults } from '@videojs/utils/object';
 import { formatTimeAsPhrase } from '@videojs/utils/time';
@@ -66,7 +66,7 @@ export class TimeSliderCore extends SliderCore {
     const { duration, currentTime, seeking, buffered } = media;
 
     // Override min/max for time domain, forwarding all user props so disabled/thumbAlignment aren't lost.
-    super.setProps({ ...this.#props, min: 0, max: duration });
+    super.setProps({ ...this.#props, disabled: this.#props.disabled || !hasMetadata(media), min: 0, max: duration });
 
     const base = super.getSliderState(currentTime);
 

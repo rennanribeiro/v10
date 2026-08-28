@@ -1,7 +1,7 @@
 import type { AnyPlayerStore } from '@videojs/core/dom';
 import { registerI18n, resetI18nRegistry } from '@videojs/core/i18n';
 import { ContextProvider } from '@videojs/element/context';
-import type { MediaTimeState } from '@videojs/media';
+import { MediaReadyState, type MediaTimeState } from '@videojs/media';
 import { createStore } from '@videojs/store';
 import { formatTimeAsPhrase } from '@videojs/utils/time';
 import { afterEach, describe, expect, it, vi } from 'vite-plus/test';
@@ -56,6 +56,7 @@ function createTimeStore(overrides: Partial<MediaTimeState> = {}): AnyPlayerStor
     state: () => ({
       currentTime: 90,
       duration: 300,
+      readyState: MediaReadyState.HAVE_METADATA,
       seeking: false,
       seek: vi.fn(),
       ...overrides,
@@ -117,6 +118,18 @@ afterEach(() => {
 });
 
 describe('TimeElement', () => {
+  it('is disabled before metadata is available', async () => {
+    const { time } = await setup({}, undefined, { readyState: MediaReadyState.HAVE_NOTHING });
+
+    expect(time.hasAttribute('data-disabled')).toBe(true);
+  });
+
+  it('is enabled when metadata is available', async () => {
+    const { time } = await setup();
+
+    expect(time.hasAttribute('data-disabled')).toBe(false);
+  });
+
   it('reflects toggle from the attribute', async () => {
     const { time } = await setup();
 
