@@ -29,7 +29,10 @@ export function addMediaComponent<T extends MediaComponent>(host: MediaHost, com
 
   components.set(ctor, component);
 
-  component.setMedia?.(host);
+  // A component declares the target surface it works with, and a host forwards
+  // its own target's surface. Only whoever registers the two can know they
+  // match, so this helper takes the pairing on trust.
+  component.setMedia?.(host as MediaHost & TargetLike);
 
   // @ts-expect-error `target` is protected, but these helpers are the host's own machinery.
   if (host.target) component.attach?.(host.target);

@@ -10,7 +10,13 @@ export interface HTMLMediaTargetLike extends MediaTargetLike, EventTarget {
 
 export interface MediaComponent<Target extends HTMLMediaTargetLike = HTMLMediaTargetLike> {
   readonly targetOverride?: Partial<Target> | null;
-  setMedia?(host: MediaHostBase): void;
+  /**
+   * Called with the host the component was registered against.
+   *
+   * The host forwards its target's surface, so a component sees the base host plus everything `Target` carries — which
+   * is what lets one read the media properties it cares about rather than only the lifecycle.
+   */
+  setMedia?(host: MediaHostBase & Target): void;
   attach?(target: Target): void;
   detach?(): void;
   destroy?(): void;
