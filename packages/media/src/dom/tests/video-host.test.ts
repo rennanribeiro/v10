@@ -1,20 +1,14 @@
 import type { WebKitDocument, WebKitVideoElement } from '@videojs/utils/dom';
 import { afterEach, describe, expect, it, vi } from 'vite-plus/test';
 
-import type { MediaFullscreenControlCapability } from '../../core/types';
 import { addMediaComponent, type MediaComponent } from '../media-host';
 import { HTMLVideoElementHost, type HTMLVideoTargetLike } from '../video-host';
 
-/**
- * A media component that takes over leaving fullscreen, the way a media managing its own presentation would.
- *
- * An override supplies members of the composed media surface, which is wider than the target's own properties —
- * `exitFullscreen` is a capability command no media element holds.
- */
-class SelfExitingOverride implements MediaComponent<HTMLVideoTargetLike & MediaFullscreenControlCapability> {
+/** A media component that takes over leaving fullscreen, the way a media managing its own presentation would. */
+class SelfExitingOverride implements MediaComponent<HTMLVideoTargetLike> {
   exitFullscreen = vi.fn(async () => undefined);
 
-  get targetOverride(): Partial<HTMLVideoTargetLike & MediaFullscreenControlCapability> {
+  get targetOverride(): Partial<HTMLVideoTargetLike> {
     return { exitFullscreen: this.exitFullscreen };
   }
 }

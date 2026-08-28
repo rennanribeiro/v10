@@ -1,13 +1,24 @@
 import { afterEach, describe, expect, it, vi } from 'vite-plus/test';
 
 import { pauseCapability, playbackCapability, posterCapability, sourceCapability } from '../../../core/capabilities';
+import type { ComposedMediaApi, MediaCapabilityDescriptor } from '../../../core/capability';
 import { getMediaCapabilityEvents, supportsMediaCapability } from '../../../core/capability';
 import { isMediaVolumeCapable } from '../../../core/predicate';
 import { HTMLAudioElementHost } from '../../audio-host';
 import { CustomMediaElement } from '../../custom-media-element';
-import { HTMLVideoElementHost } from '../../video-host';
+import { HTMLVideoElementHost, htmlVideoElementCapabilities, type HTMLVideoTargetLike } from '../../video-host';
+import type { HTMLMediaTargetLike } from '../base';
 import { createMediaHost } from '../create-media-host';
-import { HTMLMediaElementHost } from '../media-host';
+import { HTMLMediaElementHost, htmlMediaElementCapabilities } from '../media-host';
+
+/**
+ * Whether every member a manifest describes is one a target could hold.
+ *
+ * `MediaComponent.targetOverride` is typed `Partial<Target>`, so a capability describing a member no target shape
+ * carries would be one no component could override.
+ */
+type OwnableBy<Capabilities extends readonly MediaCapabilityDescriptor<any>[], Target> =
+  Exclude<keyof ComposedMediaApi<Capabilities>, keyof Target> extends never ? true : false;
 
 /**
  * A host for media with no notion of loudness, rate, or a timeline — an animated image, say. It plays, it stops, it has
@@ -138,6 +149,14 @@ describe('createMediaHost with a narrower manifest', () => {
     expect(supportsMediaCapability(new GifMediaHost(), 'playback')).toBe(true);
     expect(supportsMediaCapability(new GifMediaHost(), 'volume')).toBe(false);
     expect(supportsMediaCapability(new HTMLAudioElementHost(), 'volume')).toBe(true);
+  });
+
+  it('describes only members a target or an override can own', () => {
+    // These stop compiling if a capability ever describes something unownable.
+    const media: OwnableBy<typeof htmlMediaElementCapabilities, HTMLMediaTargetLike> = true;
+    const video: OwnableBy<typeof htmlVideoElementCapabilities, HTMLVideoTargetLike> = true;
+
+    expect(media && video).toBe(true);
   });
 
   it('knows which events its capabilities emit', () => {

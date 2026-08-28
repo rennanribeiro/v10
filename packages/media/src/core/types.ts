@@ -671,6 +671,14 @@ export interface VideoTargetLike
   disablePictureInPicture: boolean;
   requestPictureInPicture(): Promise<unknown>;
   requestFullscreen(): Promise<unknown>;
+  /**
+   * Leaving a presentation mode, for a media that manages its own.
+   *
+   * Optional because a media element cannot leave one — the document does, which is what a host falls back to. An embed
+   * driving a third-party player can, and implementing these is what makes a host prefer it over the document.
+   */
+  exitFullscreen?(): Promise<unknown>;
+  exitPictureInPicture?(): Promise<unknown>;
 }
 
 export interface MediaEngineHost<Engine = unknown, Target = unknown> {
