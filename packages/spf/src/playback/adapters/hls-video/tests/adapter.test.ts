@@ -413,6 +413,45 @@ describe('HlsVideoMediaElement', () => {
       expect(media.engine.state.preload.get()).toBe('none');
     });
 
+    // Regression (#2532): the engine's DOM→state read must never adopt the
+    // attached element's UA-default preload. A shadow-style <video> carries no
+    // preload attribute, and its `preload` IDL property then reports a
+    // browser-dependent UA default ('metadata' Chromium, 'auto' WebKit).
+    it('keeps an explicit preload across attach of an element with no preload attribute (UA default is not a source)', async () => {
+      const media = new HlsVideoMediaElement();
+      const el = document.createElement('video');
+
+      // 'none' differs from every measured UA default, so a clobber from the
+      // attach-time read fails this on any browser.
+      media.preload = 'none';
+      media.attach(el);
+      await new Promise<void>((resolve) => setTimeout(resolve, 0));
+
+      expect(media.engine.state.preload.get()).toBe('none');
+    });
+
+    it("keeps SPF's 'metadata' default (not the UA default) when attaching with no preload set anywhere", async () => {
+      const media = new HlsVideoMediaElement();
+      const el = document.createElement('video');
+
+      media.attach(el);
+      await new Promise<void>((resolve) => setTimeout(resolve, 0));
+
+      expect(media.engine.state.preload.get()).toBe('metadata');
+    });
+
+    it('adopts an authored preload attribute from a newly attached element (most-recent-wins on attach)', async () => {
+      const media = new HlsVideoMediaElement();
+      const el = document.createElement('video');
+
+      el.setAttribute('preload', 'auto');
+      media.preload = 'none';
+      media.attach(el);
+      await new Promise<void>((resolve) => setTimeout(resolve, 0));
+
+      expect(media.engine.state.preload.get()).toBe('auto');
+    });
+
     it('keeps explicit preload in engine state across src changes', () => {
       const media = new HlsVideoMediaElement();
       const el = document.createElement('video');

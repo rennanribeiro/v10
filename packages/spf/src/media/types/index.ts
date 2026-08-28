@@ -41,6 +41,13 @@ export interface AddressableObject {
  */
 export interface MediaElementLike {
   preload: string;
+  /**
+   * DOM attribute-reflection surface, present on real elements. Where it exists, reflected IDL properties like
+   * `preload` report a browser-dependent UA default even when no attribute was authored — so consumers that need author
+   * intent must gate property reads on attribute presence. A non-DOM implementation may omit it; its properties carry
+   * no UA defaults and are authored by construction.
+   */
+  hasAttribute?(qualifiedName: string): boolean;
 }
 
 // =============================================================================
