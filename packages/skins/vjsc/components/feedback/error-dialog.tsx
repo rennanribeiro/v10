@@ -4,13 +4,12 @@ import { Box, type Props } from 'vjsc/components';
 import type { SkinComponentMeta } from '../../meta';
 import buttonStyles from '../../styles/buttons/button.styles';
 import styles from '../../styles/popups/dialog.styles';
-import surfaceStyles from '../../styles/surfaces/surface.styles';
 
 export function ErrorDialog({ className, ...props }: Props = {}) {
   return (
     <$.ErrorDialog.Root className={styles.root}>
       <$.ErrorDialog.Backdrop className={styles.backdrop} />
-      <$.ErrorDialog.Popup className={[surfaceStyles.feedback, styles.popup, className]} {...props}>
+      <$.ErrorDialog.Popup className={[styles.popup, className]} {...props}>
         <Box className={styles.content}>
           <$.ErrorDialog.Title className={styles.title} />
           <$.ErrorDialog.Description className={styles.description} />

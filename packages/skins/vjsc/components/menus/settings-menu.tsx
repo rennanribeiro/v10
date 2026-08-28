@@ -6,8 +6,6 @@ import { type PropsWithChildren, Text } from 'vjsc/components';
 
 import buttonStyles from '../../styles/buttons/button.styles';
 import styles from '../../styles/menus/menu.styles';
-import popupStyles from '../../styles/popups/popup.styles';
-import surfaceStyles from '../../styles/surfaces/surface.styles';
 import { ButtonTooltip } from '../buttons/button-tooltip';
 
 export function SettingsMenu({ children, className, ...props }: PropsWithChildren<MenuProps>) {
@@ -21,10 +19,7 @@ export function SettingsMenu({ children, className, ...props }: PropsWithChildre
           </Text>
         </$.Menu.Trigger>
       </ButtonTooltip>
-      <$.Menu.Popup
-        keepMounted
-        className={[popupStyles.root, popupStyles.safeArea, surfaceStyles.root, styles.popup, className]}
-      >
+      <$.Menu.Popup keepMounted className={[styles.popup, className]}>
         <$.Menu.Content className={styles.content}>{children}</$.Menu.Content>
       </$.Menu.Popup>
     </$.Menu.Root>

@@ -6,8 +6,6 @@ import type { SkinComponentMeta } from '../../meta';
 import buttonStyles from '../../styles/buttons/button.styles';
 import playbackRateButtonStyles from '../../styles/buttons/playback-rate-button.styles';
 import styles from '../../styles/menus/menu.styles';
-import popupStyles from '../../styles/popups/popup.styles';
-import surfaceStyles from '../../styles/surfaces/surface.styles';
 import { ButtonTooltip } from '../buttons/button-tooltip';
 import { PlaybackRateRadioGroup } from './radio-group';
 import { RadioItem } from './radio-item';
@@ -20,10 +18,7 @@ export function AudioSettingsMenu({ className, ...props }: Props<MenuProps> = {}
           <$.PlaybackRateButton className={[buttonStyles.root, playbackRateButtonStyles.root]} />
         </$.Menu.Trigger>
       </ButtonTooltip>
-      <$.Menu.Popup
-        keepMounted
-        className={[popupStyles.root, popupStyles.safeArea, surfaceStyles.root, styles.popup, className]}
-      >
+      <$.Menu.Popup keepMounted className={[styles.popup, className]}>
         <$.Menu.Content className={styles.content}>
           <PlaybackRateRadioGroup>
             <Template name="playback-rate-option">
