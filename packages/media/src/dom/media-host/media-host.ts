@@ -35,8 +35,8 @@ export { createMediaHost, type MediaHostConstructor } from './create-media-host'
 /**
  * Every capability an `HTMLMediaElement` offers.
  *
- * A media with a narrower surface composes its own list rather than inheriting this one, so it exposes no member — and
- * reflects no attribute — for a capability it cannot honor.
+ * A media with a narrower surface composes its own list rather than inheriting this one, so it exposes no member for a
+ * capability it cannot honor.
  */
 export const htmlMediaElementCapabilities = [
   playbackCapability,

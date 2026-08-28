@@ -5,11 +5,6 @@ import type { MediaSourceCapability } from '../types';
 export const sourceCapability = defineMediaCapability<MediaSourceCapability>()({
   name: 'source',
   events: ['loadstart', 'emptied', 'canplay', 'canplaythrough', 'loadeddata', 'abort', 'stalled', 'suspend'],
-  reflects: {
-    src: { type: String, empty: '' },
-    preload: { type: String, empty: null },
-    crossOrigin: { type: String, empty: null },
-  },
   props: {
     src: { fallback: '' },
     currentSrc: { fallback: '', readonly: true },

@@ -16,9 +16,6 @@ import { getMediaTarget } from '../utils';
 export const pictureInPictureCapability = defineMediaCapability<MediaPictureInPictureControlCapability>()({
   name: 'picture-in-picture',
   events: ['enterpictureinpicture', 'leavepictureinpicture'],
-  reflects: {
-    disablePictureInPicture: { type: Boolean },
-  },
   props: {
     disablePictureInPicture: { fallback: false },
   },

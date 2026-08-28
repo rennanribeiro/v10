@@ -4,7 +4,6 @@ import {
   defineMediaCapability,
   getMediaCapabilities,
   getMediaCapabilityEvents,
-  getMediaCapabilityReflections,
   type MediaCapabilityDescriptor,
   type MediaCapabilityManifest,
   supportsMediaCapability,
@@ -13,7 +12,7 @@ import {
 const volumeCapability = defineMediaCapability<{ volume: number; muted: boolean }>()({
   name: 'volume',
   events: ['volumechange'],
-  reflects: { muted: { type: Boolean } },
+
   props: { volume: { fallback: 1 }, muted: { fallback: false } },
 });
 
@@ -66,11 +65,5 @@ describe('supportsMediaCapability', () => {
 describe('getMediaCapabilityEvents', () => {
   it('collects the events of every composed capability', () => {
     expect(getMediaCapabilityEvents(ComposedMedia)).toEqual(['volumechange', 'timeupdate', 'seeked']);
-  });
-});
-
-describe('getMediaCapabilityReflections', () => {
-  it('collects the reflections of every composed capability', () => {
-    expect(getMediaCapabilityReflections(ComposedMedia)).toEqual({ muted: { type: Boolean } });
   });
 });

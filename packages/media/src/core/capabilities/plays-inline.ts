@@ -5,9 +5,6 @@ import type { MediaPlaysInlineCapability } from '../types';
 export const playsInlineCapability = defineMediaCapability<MediaPlaysInlineCapability>()({
   name: 'plays-inline',
   events: [],
-  reflects: {
-    playsInline: { type: Boolean },
-  },
   props: {
     playsInline: { fallback: false },
   },

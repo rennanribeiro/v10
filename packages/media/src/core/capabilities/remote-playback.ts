@@ -11,9 +11,6 @@ import type { MediaRemotePlaybackCapability } from '../types';
 export const remotePlaybackCapability = defineMediaCapability<MediaRemotePlaybackCapability>()({
   name: 'remote-playback',
   events: [],
-  reflects: {
-    disableRemotePlayback: { type: Boolean },
-  },
   props: {
     remote: { fallback: EMPTY_REMOTE, readonly: true },
     disableRemotePlayback: { fallback: false },

@@ -38,30 +38,11 @@ export interface MediaCapabilityMethod<Method extends AnyFunction> {
 }
 
 /**
- * How a property is mirrored by an external attribute.
- *
- * Named for the HTML relationship it describes: the `playsInline` property reflects the `playsinline` attribute. The
- * attribute name is the lowercased property name unless `attribute` says otherwise, which is why a reflection is keyed
- * by the property it belongs to rather than by the attribute.
- *
- * Attributes are a platform concern rather than a media one; HTML adapters turn these into content attributes on the
- * custom element wrapping the media.
- */
-export interface MediaAttributeReflection {
-  readonly type: typeof Boolean | typeof Number | typeof String;
-  /** Attribute name, when it is not the lowercased property name. */
-  readonly attribute?: string;
-  /** Property value for a present-but-empty attribute. */
-  readonly empty?: unknown;
-}
-
-/**
  * One media capability, described as data.
  *
- * A descriptor is the single place a capability declares its members, the events it emits, and the attributes it
- * reflects, so a host's surface, an element's attributes, and capability detection all read from the same source.
- * `props` and `methods` must cover the contract exactly, which is what keeps the description and the type from
- * drifting.
+ * A descriptor is the single place a capability declares its members and the events it emits, so a host's surface and
+ * capability detection read from the same source. `props` and `methods` must cover the contract exactly, which is what
+ * keeps the description and the type from drifting.
  *
  * Descriptors are inert: they name behavior without implementing it, so they know nothing about the hosts that compose
  * them and can be read by any adapter.
@@ -72,8 +53,6 @@ export interface MediaCapabilityDescriptor<Api extends object = object> {
   readonly events: readonly string[];
   readonly props: { readonly [K in PropKeys<Api>]-?: MediaCapabilityProp<Api[K]> };
   readonly methods?: { readonly [K in MethodKeys<Api>]-?: MediaCapabilityMethod<Extract<Api[K], AnyFunction>> };
-  /** Properties an external attribute mirrors, keyed by property name. */
-  readonly reflects?: Readonly<Record<string, MediaAttributeReflection>>;
   /** Phantom marker carrying the capability's contract to whoever composes it. Never set at runtime. */
   readonly api?: Api;
 }
@@ -126,11 +105,6 @@ export function supportsMediaCapability(source: MediaCapabilitySource, name: str
 /** Every event the composed capabilities of a media can emit. */
 export function getMediaCapabilityEvents(source: MediaCapabilitySource): string[] {
   return [...getMediaCapabilities(source).values()].flatMap((capability) => [...capability.events]);
-}
-
-/** Every reflection the composed capabilities of a media declare, keyed by property name. */
-export function getMediaCapabilityReflections(source: MediaCapabilitySource): Record<string, MediaAttributeReflection> {
-  return Object.assign({}, ...[...getMediaCapabilities(source).values()].map((capability) => capability.reflects));
 }
 
 const EMPTY_CAPABILITIES: MediaCapabilityManifest['capabilities'] = new Map();

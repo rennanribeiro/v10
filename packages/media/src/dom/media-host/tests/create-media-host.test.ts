@@ -6,7 +6,6 @@ import { isMediaVolumeCapable } from '../../../core/predicate';
 import { HTMLAudioElementHost } from '../../audio-host';
 import { CustomMediaElement } from '../../custom-media-element';
 import { HTMLVideoElementHost } from '../../video-host';
-import { MediaHostBase } from '../base';
 import { createMediaHost } from '../create-media-host';
 import { HTMLMediaElementHost } from '../media-host';
 
@@ -172,33 +171,6 @@ describe('CustomMediaElement', () => {
     expect('volume' in gif).toBe(false);
     expect('playbackRate' in gif).toBe(false);
     expect('poster' in gif).toBe(true);
-  });
-
-  it('reflects a capability-declared attribute only when the host composes its capability', () => {
-    const { Ctor: Full } = defineElement(HTMLVideoElementHost);
-    const { Ctor: Gif, element: gif } = defineElement(GifMediaHost);
-
-    expect(Full.observedAttributes).toContain('muted');
-    expect(Full.observedAttributes).toContain('loop');
-    expect(Full.observedAttributes).toContain('stream-type');
-
-    // The attribute surface comes from the host's manifest rather than a
-    // hardcoded bag, so a host without volume never observes `muted`.
-    expect(Gif.observedAttributes).not.toContain('muted');
-    expect(Gif.observedAttributes).not.toContain('loop');
-    expect(Gif.observedAttributes).toContain('src');
-    expect(Gif.observedAttributes).toContain('poster');
-    expect('defaultMuted' in gif).toBe(false);
-  });
-
-  it('falls back to the standard media attributes for a media that declares no capabilities', () => {
-    // Third-party media and iframe embeds are not composed from capabilities, so
-    // there is nothing to narrow their attribute surface by.
-    const { Ctor } = defineElement(MediaHostBase);
-
-    expect(Ctor.observedAttributes).toContain('src');
-    expect(Ctor.observedAttributes).toContain('muted');
-    expect(Ctor.observedAttributes).toContain('poster');
   });
 });
 
