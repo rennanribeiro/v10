@@ -1,5 +1,24 @@
 # Changelog
 
+## [10.0.0-beta.33](https://github.com/videojs/v10/compare/@videojs/skins@10.0.0-beta.32...@videojs/skins@10.0.0-beta.33) (2026-08-28)
+
+
+### Bug Fixes
+
+* **packages:** align dialog styles across skins ([#2481](https://github.com/videojs/v10/issues/2481)) ([9601006](https://github.com/videojs/v10/commit/9601006ede03d295f1c2811db6eee0f768e30bd3))
+* **packages:** contain error dialogs in player layouts ([#2451](https://github.com/videojs/v10/issues/2451)) ([f18c59a](https://github.com/videojs/v10/commit/f18c59a159d96b2dc1b2407d3f8a0589f076cbc9))
+* **packages:** hide source-less poster images ([#2453](https://github.com/videojs/v10/issues/2453)) ([6c84721](https://github.com/videojs/v10/commit/6c8472118ab36f97381279802e1a906f828cceed))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @videojs/utils bumped to 10.0.0-beta.33
+  * devDependencies
+    * @videojs/core bumped to 10.0.0-beta.33
+    * @videojs/icons bumped to 10.0.0-beta.33
+
 ## [10.0.0-beta.32](https://github.com/videojs/v10/compare/@videojs/skins@10.0.0-beta.31...@videojs/skins@10.0.0-beta.32) (2026-08-26)
 
 

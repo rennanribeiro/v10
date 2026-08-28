@@ -1,5 +1,40 @@
 # Changelog
 
+## [10.0.0-beta.33](https://github.com/videojs/v10/compare/@videojs/html@10.0.0-beta.32...@videojs/html@10.0.0-beta.33) (2026-08-28)
+
+
+### Features
+
+* **html:** publish skin stylesheets to the CDN build ([#2340](https://github.com/videojs/v10/issues/2340)) ([a67ffb4](https://github.com/videojs/v10/commit/a67ffb437161654d704dd0e3e4ecde2a6c4fcdad))
+* **packages:** add wistia video media ([#2305](https://github.com/videojs/v10/issues/2305)) ([306c733](https://github.com/videojs/v10/commit/306c7333fc100308a7ac59c8edaa08dbc5c64d58))
+
+
+### Bug Fixes
+
+* **html:** remove tailwind skin elements ([#2434](https://github.com/videojs/v10/issues/2434)) ([45f6f28](https://github.com/videojs/v10/commit/45f6f2876fba5d8b82b3ae96b0bc6704483fa011))
+* **packages:** align dialog styles across skins ([#2481](https://github.com/videojs/v10/issues/2481)) ([9601006](https://github.com/videojs/v10/commit/9601006ede03d295f1c2811db6eee0f768e30bd3))
+* **packages:** isolate focused slider hotkeys ([#2474](https://github.com/videojs/v10/issues/2474)) ([0f7b08f](https://github.com/videojs/v10/commit/0f7b08f8a9c8948cf35a0b1c8d4d411f1bf166c3))
+* **packages:** preserve fullscreen after pointer activation ([#2472](https://github.com/videojs/v10/issues/2472)) ([b526c44](https://github.com/videojs/v10/commit/b526c444efae99873946eafa607673b19c6978f0))
+* **packages:** reject invalid gesture types ([#2473](https://github.com/videojs/v10/issues/2473)) ([0da416a](https://github.com/videojs/v10/commit/0da416aa3a5d08bc23ec968593b7f3beee00d204))
+* **packages:** restore ejected player registration and slider press locking ([#2505](https://github.com/videojs/v10/issues/2505)) ([36bb836](https://github.com/videojs/v10/commit/36bb83600622aff75169f4fe5d039f17e9f1f7d9))
+* **packages:** scope error dialogs to player containers ([#2449](https://github.com/videojs/v10/issues/2449)) ([9fbc979](https://github.com/videojs/v10/commit/9fbc9790189b5df8d5d047eaf01605d6e8d7fb6b))
+* **packages:** share input action defaults ([#2484](https://github.com/videojs/v10/issues/2484)) ([db1221c](https://github.com/videojs/v10/commit/db1221c7ebd019b58dced646fc4223d816e48bca))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @videojs/core bumped to 10.0.0-beta.33
+    * @videojs/element bumped to 10.0.0-beta.33
+    * @videojs/media bumped to 10.0.0-beta.33
+    * @videojs/spf bumped to 10.0.0-beta.33
+    * @videojs/store bumped to 10.0.0-beta.33
+    * @videojs/utils bumped to 10.0.0-beta.33
+  * devDependencies
+    * @videojs/icons bumped to 10.0.0-beta.33
+    * @videojs/skins bumped to 10.0.0-beta.33
+
 ## [10.0.0-beta.32](https://github.com/videojs/v10/compare/@videojs/html@10.0.0-beta.31...@videojs/html@10.0.0-beta.32) (2026-08-26)
 
 

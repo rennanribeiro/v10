@@ -1,5 +1,24 @@
 # Changelog
 
+## [10.0.0-beta.33](https://github.com/videojs/v10/compare/@videojs/media@10.0.0-beta.32...@videojs/media@10.0.0-beta.33) (2026-08-28)
+
+
+### Features
+
+* **packages:** add wistia video media ([#2305](https://github.com/videojs/v10/issues/2305)) ([306c733](https://github.com/videojs/v10/commit/306c7333fc100308a7ac59c8edaa08dbc5c64d58))
+
+
+### Bug Fixes
+
+* Track disableRemotePlayback Preference ([#1889](https://github.com/videojs/v10/issues/1889)) ([0eadc6d](https://github.com/videojs/v10/commit/0eadc6d77a0df2629f25e5684af35e89ad5a305f))
+
+
+### Dependencies
+
+* The following workspace dependencies were updated
+  * dependencies
+    * @videojs/utils bumped to 10.0.0-beta.33
+
 ## [10.0.0-beta.32](https://github.com/videojs/v10/compare/@videojs/media@10.0.0-beta.31...@videojs/media@10.0.0-beta.32) (2026-08-26)
 
 
