@@ -1,0 +1,49 @@
+---
+import type { BundledLanguage } from 'shiki';
+
+import ServerCode from '@/components/Code/ServerCode.astro';
+import CodeFrame from '@/components/typography/CodeFrame.astro';
+import MarkdownCode from '@/components/typography/MarkdownCode.astro';
+import P from '@/components/typography/P.astro';
+import DocsLink from '../DocsLink.astro';
+import FrameworkCase from '../FrameworkCase.astro';
+
+interface Props {
+  /** Module name: the suffix of the `media/` subpath on both platforms and of the CDN bundle. */
+  media: string;
+  /** Named export from `@videojs/react/media/<media>`. */
+  react: string;
+}
+
+const { media, react } = Astro.props;
+
+const imports: Array<{ code: string; framework: 'react' | 'html'; lang: BundledLanguage }> = [
+  {
+    code: `import { ${react} } from '@videojs/react/media/${media}';`,
+    framework: 'react',
+    lang: 'tsx',
+  },
+  {
+    code: `import '@videojs/html/media/${media}';`,
+    framework: 'html',
+    lang: 'ts',
+  },
+];
+---
+
+{
+  imports.map(({ code, framework, lang }) => (
+    <FrameworkCase frameworks={[framework]}>
+      <CodeFrame lang={lang}>
+        <ServerCode code={code} lang={lang} />
+      </CodeFrame>
+    </FrameworkCase>
+  ))
+}
+
+<FrameworkCase frameworks={['html']}>
+  <P>
+    On a CDN page, the <MarkdownCode>media/{media}.js</MarkdownCode> bundle registers the same element — see{' '}
+    <DocsLink slug="concepts/cdn">CDN</DocsLink>.
+  </P>
+</FrameworkCase>

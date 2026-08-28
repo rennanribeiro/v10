@@ -6,7 +6,7 @@ description: How to create API reference pages for the Video.js documentation si
 import Aside from '@/components/Aside.astro';
 import DocsLink from '@/components/docs/DocsLink.astro';
 
-This guide covers how to create API reference pages — both component references and util references (hooks, controllers, mixins) under `reference/` in the docs sidebar.
+This guide covers how to create API reference pages — component references, media references, and util references (hooks, controllers, mixins) under `reference/` in the docs sidebar.
 
 <Aside type="tip">
 Reference pages use the portable `write-api-reference` agent skill. Invoke `/write-api-reference play-button` in clients that expose skills as slash commands.
@@ -275,6 +275,22 @@ The `util` prop takes the export name (`"usePlayer"`, `"PlayerController"`). If 
 ### Generated JSON
 
 Util reference JSON is at `site/src/content/generated-util-reference/{slug}.json`. The builder generates it from the discovery pipeline in `site/scripts/api-docs-builder/src/util-handler.ts`.
+
+## Create a media reference page
+
+Media reference pages pair hand-written prose — source formats, provider quirks, behavior differences from a native `<video>` — with `<MediaReference media="..." />`, which renders the generated API tables.
+
+Every media page opens with an `## Import` section rendered by `<MediaImports>`, placed after the intro prose and before the first body section:
+
+```mdx
+## Import
+
+<MediaImports media="hls-video" react="HlsVideo" />
+```
+
+`media` is the module name: the suffix of `@videojs/react/media/{media}` and `@videojs/html/media/{media}`, and of the CDN bundle `media/{media}.js`. `react` is the named export from the React subpath.
+
+Unlike UI components, every media module ships a matching CDN bundle, so for HTML readers the component names that bundle and links the <DocsLink slug="concepts/cdn">CDN</DocsLink> concept. A unit test enforces the Import section on every page that renders `<MediaReference />`.
 
 ## Add to the sidebar
 

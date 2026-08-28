@@ -8,15 +8,18 @@ description: Options for the Mux Data component that monitors playback quality
 import FrameworkCase from '@/components/docs/FrameworkCase.astro';
 import DocsLink from '@/components/docs/DocsLink.astro';
 import DocsLinkCard from '@/components/docs/DocsLinkCard.astro';
+import MediaImports from '@/components/docs/api-reference/MediaImports.astro';
 
 Adds [Mux Data](https://data.mux.com) monitoring to the player's media. It renders nothing — place it inside the player as a sibling of the media element. See <DocsLink slug="concepts/mux-data">Mux Data</DocsLink> for how monitoring works.
+
+## Import
+
+<MediaImports media="mux-data" react="MuxData" />
 
 ## Anatomy
 
 <FrameworkCase frameworks={["react"]}>
 ```tsx
-import { MuxData } from '@videojs/react/media/mux-data';
-
 <MuxData />
 ```
 </FrameworkCase>
@@ -25,8 +28,6 @@ import { MuxData } from '@videojs/react/media/mux-data';
 ```html
 <mux-data></mux-data>
 ```
-
-Register the element by importing `@videojs/html/media/mux-data`.
 </FrameworkCase>
 
 ## Options
