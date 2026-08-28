@@ -48,7 +48,15 @@ export default defineConfig({
         input: ['dist/registry/source/**'],
         output: ['dist/registry/r/**'],
       },
-      'test:ci': packageTestTask('pnpm run test:types && vp test run'),
+      'validate:shadcn': {
+        command: 'node --import tsx scripts/validate-shadcn-registry.ts',
+        dependsOn: ['build:shadcn', '@videojs/html#build', '@videojs/react#build'],
+        cache: false,
+      },
+      'test:ci': {
+        ...packageTestTask('pnpm run test:types && vp test run'),
+        dependsOn: ['build', 'validate:shadcn'],
+      },
     },
   },
   test: {
