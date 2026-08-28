@@ -1,9 +1,10 @@
 import type { MediaStreamType } from '../../core/types';
-import type { HTMLMediaElementHost, HTMLMediaTargetLike, MediaComponent } from '../media-host';
+import type { HTMLMediaTargetLike, MediaComponent, MediaHostBase } from '../media-host';
 import { GoogleCastProvider } from './google-cast-provider';
 import { requiresCastFramework } from './utils';
 
-type MediaHost = HTMLMediaElementHost<HTMLMediaTargetLike, any>;
+/** Any host forwarding a media target, which is all this component needs to read a source and drive remote playback. */
+type MediaHost = MediaHostBase & HTMLMediaTargetLike;
 
 export interface GoogleCastProps {
   /** Source URL loaded on the Cast receiver. Falls back to the host's `src` / `currentSrc`. */
