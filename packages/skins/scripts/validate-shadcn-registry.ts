@@ -70,6 +70,8 @@ async function validateHostedItems(manifests: readonly RegistryItem[]): Promise<
       );
       if (item.name !== manifest.name) throw new Error(`Hosted registry item name mismatch: ${manifest.name}.`);
 
+      validateHtmlItem(item);
+
       for (const file of item.files ?? []) {
         if (!file.content || !generatedSource.test(file.target ?? file.path)) continue;
 
@@ -83,6 +85,37 @@ async function validateHostedItems(manifests: readonly RegistryItem[]): Promise<
       return item;
     })
   );
+}
+
+function validateHtmlItem(item: RegistryItem): void {
+  if (item.meta?.framework !== 'html') return;
+
+  const files = item.files ?? [];
+
+  if (item.meta.role === 'skin') {
+    const template = files.find((file) => file.target?.endsWith('/skin.html'))?.content;
+    const registration = files.find((file) => file.target?.endsWith('/skin.ts'))?.content;
+
+    if (!template?.includes('<media-container') || !template.includes('Add a compatible media element here')) {
+      throw new Error(`Hosted HTML skin \`${item.name}\` has no complete editable template.`);
+    }
+
+    if (!registration?.includes(`@videojs/html/ui/container`) || registration.includes('vjsc')) {
+      throw new Error(`Hosted HTML skin \`${item.name}\` has no exact package registration.`);
+    }
+
+    if (files.some((file) => file.target?.endsWith('.tsx'))) {
+      throw new Error(`Hosted HTML skin \`${item.name}\` contains compiler-owned TSX.`);
+    }
+  }
+
+  if (item.meta.role === 'player') {
+    const template = files.find((file) => file.target?.endsWith('.html'))?.content;
+
+    if (!template?.includes('<media-container') || /<(?:live-)?(?:video|audio)-(?:minimal-)?skin\b/.test(template)) {
+      throw new Error(`Hosted HTML Player \`${item.name}\` does not contain its complete skin template.`);
+    }
+  }
 }
 
 async function validateDiscovery(address: string, hostedItems: readonly RegistryItem[]): Promise<void> {

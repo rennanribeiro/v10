@@ -101,6 +101,25 @@ describe('Skins Shadcn registry', () => {
     expect(defaultVideoCss.registryDependencies).not.toContain('@videojs/tailwind-styles');
     expect(htmlVideo.registryDependencies).toContain('@videojs/tailwind-styles');
     expect(htmlMinimalVideoCss.registryDependencies).not.toContain('@videojs/tailwind-styles');
+    expect(htmlVideo.dependencies).toEqual(['@videojs/html@10.0.0-beta.32']);
+    expect(htmlVideo.files.map((file) => file.target)).toEqual([
+      'components/videojs/skins/video/skin.html',
+      'components/videojs/skins/video/skin.ts',
+    ]);
+    expect(htmlMinimalVideoCss.files.map((file) => file.target)).toEqual([
+      'components/videojs/skins/video-minimal-css/skin.html',
+      'components/videojs/skins/video-minimal-css/skin.ts',
+      'components/videojs/skins/video-minimal-css/skin.css',
+    ]);
+    const htmlVideoTemplate = registrySource(assets, 'html/skins', htmlVideo, '/skin.html');
+    const htmlVideoRegistration = registrySource(assets, 'html/skins', htmlVideo, '/skin.ts');
+
+    expect(htmlVideoTemplate).toContain('<media-container');
+    expect(htmlVideoTemplate).toContain('<!-- Add a compatible media element here. -->');
+    expect(htmlVideoTemplate).not.toContain('<slot>');
+    expect(htmlVideoRegistration).toContain(`import '@videojs/html/ui/container';`);
+    expect(htmlVideoRegistration).toContain(`import { registerIcons } from '@videojs/html/icons';`);
+    expect(htmlVideoRegistration).not.toContain('vjsc');
     const defaultVideoCssSource = registrySource(assets, 'react/skins', defaultVideoCss, '/skin.tsx');
     const defaultVideoCssPlaySource = registrySource(
       assets,
@@ -153,7 +172,17 @@ describe('Skins Shadcn registry', () => {
       registrySource(assets, 'react/players', reactLiveVideoPlayer, '/players/live-video-minimal-css.tsx')
     ).toContain('interface LiveVideoProps extends LiveVideoPlayerProps');
     expect(htmlAudioPlayer.registryDependencies).toEqual(['@videojs/html-audio-skin']);
-    expect(registrySource(assets, 'html/players', htmlAudioPlayer, '/players/audio.html')).toContain('<audio-player>');
+    const htmlAudioPlayerSource = registrySource(assets, 'html/players', htmlAudioPlayer, '/players/audio.html');
+
+    expect(htmlAudioPlayerSource).toContain('<audio-player>');
+    expect(htmlAudioPlayerSource).toContain('<media-container');
+    expect(htmlAudioPlayerSource).not.toContain('<audio-skin>');
+    expect(
+      items
+        .filter((item) => item.meta?.framework === 'html' && item.meta.role === 'skin')
+        .flatMap((item) => item.files)
+        .some((file) => file.target?.endsWith('.tsx'))
+    ).toBe(false);
     expect(registrySource(assets, 'react/media', reactHlsJsVideo, '/media/hlsjs-video.ts')).toContain(
       `from '@videojs/react/media/hlsjs-video'`
     );

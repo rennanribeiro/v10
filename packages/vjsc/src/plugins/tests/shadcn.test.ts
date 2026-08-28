@@ -233,10 +233,10 @@ describe('shadcnPlugin', () => {
     expect(registryFile(second, 'react/components', secondItem, '/root.tsx')).not.toContain('first');
   });
 
-  it('reads style metadata after the transform pipeline finishes', async () => {
+  it('captures style ownership from final transformed imports', async () => {
     const virtualStyle = 'virtual:vjsc/css/late/styles';
     const root = setup({
-      'components/root.tsx': `import ${JSON.stringify(virtualStyle)}; ${meta('root', 'block')} export const Root = <main />;`,
+      'components/root.tsx': `import ${JSON.stringify(virtualStyle)};\n${meta('root', 'block')} export const Root = <main />;`,
     });
     const output = await build(
       root,
@@ -266,7 +266,7 @@ describe('shadcnPlugin', () => {
       [],
       [
         {
-          name: 'late-style-metadata',
+          name: 'late-style-import',
           buildStart() {
             this.emitFile({ type: 'chunk', id: virtualStyle });
           },
@@ -282,7 +282,7 @@ describe('shadcnPlugin', () => {
             if (!id.endsWith('/components/root.tsx')) return null;
 
             return {
-              meta: { componentStyles: [virtualStyle] },
+              meta: { componentStyles: ['virtual:vjsc/css/stale/styles'] },
             };
           },
         },

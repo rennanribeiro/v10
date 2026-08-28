@@ -11,7 +11,7 @@ import type { ShadcnModule, ShadcnPluginOptions } from '../shadcn/types';
 import { toArray } from '../utils/array';
 import { moduleFilename, moduleId, normalizeResolvedId } from '../utils/module-id';
 import { isInsideRoot } from '../utils/path';
-import { readComponentMeta, readComponentStyles } from './component-meta';
+import { readComponentMeta } from './component-meta';
 import { componentSourcePlugin } from './component-source';
 
 export type { ShadcnPluginOptions } from '../shadcn/types';
@@ -94,8 +94,7 @@ function shadcnEmitterPlugin<Item extends ComponentMeta>(
 
         const meta = readComponentMeta(info?.meta) as Item | undefined;
         const imports: SourceImport[] = [];
-        // Module metadata is complete only after the transform pipeline has finished.
-        const styleIds = readComponentStyles(info?.meta).map(normalizeShadcnId);
+        const styleIds = virtualStyleImports(source).map(normalizeShadcnId);
 
         if (styleIds.length > 0) styles.set(module.id, styleIds);
 
@@ -143,6 +142,10 @@ function shadcnEmitterPlugin<Item extends ComponentMeta>(
       }
     },
   };
+}
+
+function virtualStyleImports(source: string): string[] {
+  return [...source.matchAll(/^\s*import\s+["'](virtual:vjsc\/css\/[^"']+)["'];?\s*$/gm)].map((match) => match[1]!);
 }
 
 function transformedAssetPlugin(assets: Map<string, string>): Plugin {

@@ -44,7 +44,7 @@ describe('createHtmlSkinArtifacts', () => {
       "import '../../../define/ui/play-button';"
     );
     expect(files.get('packages/html/src/internal/skins/default-video/register.ts')).toContain(
-      "registerIcons('default', {\n  'play': playIcon,\n});"
+      "registerIcons('default', {\n  play: playIcon,\n});"
     );
     expect(files.get('packages/html/src/internal/skins/default-video/skin.css')).toBe('.video-default {}\n');
   });

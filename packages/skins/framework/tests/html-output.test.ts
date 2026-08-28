@@ -26,7 +26,13 @@ describe('materialized HTML skins', () => {
     const tags = uniqueMatches(template, /<media-([a-z0-9-]+)\b/g).filter((tag) => tag !== 'icon' && tag !== 'text');
     const registeredTags = uniqueMatches(registration, /^import '\.\.\/\.\.\/\.\.\/define\/ui\/([a-z0-9-]+)';$/gm);
     const iconNames = uniqueMatches(template, /<media-icon\b[^>]*\bname="([^"]+)"/g).sort();
-    const registeredIcons = uniqueMatches(registration, /^  '([^']+)': [A-Za-z_$][\w$]*,$/gm).sort();
+    const registeredIcons = [
+      ...new Set(
+        [...registration.matchAll(/^  (?:'([^']+)'|([A-Za-z_$][\w$]*)): [A-Za-z_$][\w$]*,$/gm)].map(
+          (match) => match[1] ?? match[2]!
+        )
+      ),
+    ].sort();
 
     expect(template).toContain('createTemplate');
     expect(template).toContain('<media-container');

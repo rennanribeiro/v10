@@ -13,12 +13,17 @@ import type { VideojsRegistryMeta } from '../registry/meta.ts';
 interface RegistryFile {
   readonly path: string;
   readonly target?: string | undefined;
+  readonly type?: string | undefined;
   readonly content?: string | undefined;
 }
 
 interface RegistryItem {
   readonly name: string;
+  readonly type?: string | undefined;
+  readonly title?: string | undefined;
+  readonly description?: string | undefined;
   readonly files?: readonly RegistryFile[] | undefined;
+  readonly dependencies?: readonly string[] | undefined;
   readonly registryDependencies?: readonly string[] | undefined;
   readonly meta?: VideojsRegistryMeta | undefined;
 }
@@ -43,6 +48,10 @@ interface HtmlSkinSource {
   readonly entry: MaterializedSource;
   readonly item: RegistryItem;
   readonly sources: ReadonlyMap<string, MaterializedSource>;
+}
+
+interface RenderedHtmlSkin extends HtmlSkinSource {
+  readonly template: string;
 }
 
 type HtmlSkinRenderProps = Readonly<Record<never, never>>;
@@ -71,18 +80,29 @@ const backgroundSources = [
 
 /** Materialize package-owned CSS skins from the canonical prepared registry after its single VJSC build. */
 export function frameworkSkinMaterializer(options: FrameworkSkinMaterializerOptions): Plugin {
+  let artifacts: readonly FrameworkArtifact[] | undefined;
+
   return {
     name: 'skins:materialize-framework-skins',
     buildStart() {
       for (const [source] of backgroundSources) this.addWatchFile(resolve(options.workspaceDir, source));
     },
-    async writeBundle(_outputOptions, bundle) {
+    async generateBundle(_outputOptions, bundle) {
       const registry = registryAssets(bundle);
-      const artifacts = [
+      const htmlSkins = await renderHtmlSkins(registry, options.workspaceDir, 'all');
+
+      artifacts = [
         ...createReactSkinArtifacts(registry),
-        ...(await createHtmlSkinArtifacts(registry, options.workspaceDir)),
+        ...createHtmlPackageArtifacts(htmlSkins),
         ...(await backgroundArtifacts(options.workspaceDir)),
       ];
+      materializeHtmlRegistry(bundle, htmlSkins, (fileName, source) => {
+        this.emitFile({ type: 'asset', fileName, source });
+      });
+    },
+    async writeBundle() {
+      if (!artifacts) throw new Error('Framework skin artifacts were not prepared before output.');
+
       const changed = await syncArtifacts(options.workspaceDir, artifacts);
 
       if (changed > 0) this.info(`Materialized ${changed} changed framework skin file${changed === 1 ? '' : 's'}.`);
@@ -95,13 +115,22 @@ export async function createHtmlSkinArtifacts(
   assets: ReadonlyMap<string, string>,
   workspaceDir: string
 ): Promise<FrameworkArtifact[]> {
+  return createHtmlPackageArtifacts(await renderHtmlSkins(assets, workspaceDir, 'css'));
+}
+
+async function renderHtmlSkins(
+  assets: ReadonlyMap<string, string>,
+  workspaceDir: string,
+  selection: 'all' | 'css'
+): Promise<RenderedHtmlSkin[]> {
   const items = registryItems(assets);
   const selected = [...items.values()]
-    .filter(({ item }) => isHtmlCssSkin(item.meta))
+    .filter(({ item }) => (selection === 'all' ? isHtmlSkin(item.meta) : isHtmlCssSkin(item.meta)))
     .sort((left, right) => left.item.name.localeCompare(right.item.name));
+  const expected = presets.length * 2 * (selection === 'all' ? 2 : 1);
 
-  if (selected.length !== presets.length * 2) {
-    throw new Error(`Expected ${presets.length * 2} HTML CSS skin items, received ${selected.length}.`);
+  if (selected.length !== expected) {
+    throw new Error(`Expected ${expected} HTML skin items, received ${selected.length}.`);
   }
 
   const skins = selected.map((root): HtmlSkinSource => {
@@ -141,20 +170,31 @@ export async function createHtmlSkinArtifacts(
   });
   const templates = await renderHtmlSkinTemplates(skins, workspaceDir);
 
-  return skins.flatMap(({ item, sources }) => {
+  return skins.map((skin) => {
+    const template = templates.get(skin.item.name);
+    if (template === undefined) throw new Error(`HTML skin \`${skin.item.name}\` did not render a template.`);
+
+    return { ...skin, template };
+  });
+}
+
+function createHtmlPackageArtifacts(skins: readonly RenderedHtmlSkin[]): FrameworkArtifact[] {
+  const selected = skins.filter(({ item }) => isHtmlCssSkin(item.meta));
+
+  if (selected.length !== presets.length * 2) {
+    throw new Error(`Expected ${presets.length * 2} HTML CSS skin items, received ${selected.length}.`);
+  }
+
+  return selected.flatMap(({ item, sources, template }) => {
     const meta = item.meta!;
     const name = frameworkSkinName(meta);
     const root = `packages/html/src/internal/skins/${name}`;
-    const template = templates.get(item.name);
     const stylesheet = sources.get(htmlSkinEntryTarget(meta).replace(/\.tsx$/, '.css'));
-
-    if (template === undefined) throw new Error(`HTML skin \`${item.name}\` did not render a template.`);
-
     if (!stylesheet) throw new Error(`HTML skin \`${item.name}\` has no stylesheet.`);
 
     return [
       { path: `${root}/template.ts`, content: htmlTemplateModule(template) },
-      { path: `${root}/register.ts`, content: htmlRegistration(template, sources.values()) },
+      { path: `${root}/register.ts`, content: htmlRegistration(template, sources.values(), 'package') },
       { path: `${root}/skin.css`, content: stylesheet.content },
     ];
   });
@@ -300,6 +340,15 @@ function isHtmlCssSkin(meta: VideojsRegistryMeta | undefined): meta is VideojsRe
   );
 }
 
+function isHtmlSkin(meta: VideojsRegistryMeta | undefined): meta is VideojsRegistryMeta & {
+  readonly framework: 'html';
+  readonly preset: NonNullable<VideojsRegistryMeta['preset']>;
+  readonly styling: NonNullable<VideojsRegistryMeta['styling']>;
+  readonly variant: NonNullable<VideojsRegistryMeta['variant']>;
+} {
+  return meta?.role === 'skin' && meta.framework === 'html' && Boolean(meta.preset && meta.styling && meta.variant);
+}
+
 function normalizeTarget(target: string): string {
   const normalized = posix.normalize(target);
 
@@ -404,11 +453,12 @@ function frameworkSkinName(meta: VideojsRegistryMeta): string {
 }
 
 function htmlSkinEntryTarget(meta: VideojsRegistryMeta): string {
-  if (!isHtmlCssSkin(meta)) throw new Error('HTML package materialization requires CSS skin metadata.');
+  if (!isHtmlSkin(meta)) throw new Error('HTML materialization requires complete skin metadata.');
 
   const suffix = meta.variant === 'minimal' ? '-minimal' : '';
+  const styling = meta.styling === 'css' ? '-css' : '';
 
-  return `${installPrefix}skins/${meta.preset}${suffix}-css/skin.tsx`;
+  return `${installPrefix}skins/${meta.preset}${suffix}${styling}/skin.tsx`;
 }
 
 async function renderHtmlSkinTemplates(
@@ -550,25 +600,37 @@ export const template = createTemplate(/* html */ \`${template}\`);
 `;
 }
 
-function htmlRegistration(html: string, sources: Iterable<MaterializedSource>): string {
+function htmlRegistration(
+  html: string,
+  sources: Iterable<MaterializedSource>,
+  destination: 'package' | 'registry'
+): string {
   const output: string[] = [];
   const tags = new Set<string>();
+  const define = (tag: string): string =>
+    destination === 'package' ? `../../../define/ui/${tag}` : `@videojs/html/ui/${tag}`;
+  const i18n = destination === 'package' ? '../../../define/i18n' : '@videojs/html/i18n';
+  const iconsRoot = destination === 'package' ? '../../../icons' : '@videojs/html/icons';
 
   for (const match of html.matchAll(/<media-([a-z0-9-]+)\b/g)) tags.add(match[1]!);
 
-  if (tags.delete('text')) output.push("import '../../../define/i18n';");
+  if (tags.delete('text')) output.push(`import ${quote(i18n)};`);
 
   tags.delete('icon');
 
-  output.push(...[...tags].map((tag) => `import '../../../define/ui/${tag}';`));
+  output.push(...[...tags].map((tag) => `import ${quote(define(tag))};`));
 
   const families = iconRegistrations(sources);
 
-  if (families.size > 0) output.push("import { registerIcons } from '../../../icons';");
+  if (families.size > 0) {
+    if (destination === 'package' && output.length > 0) output.push('');
+
+    output.push(`import { registerIcons } from ${quote(iconsRoot)};`);
+  }
 
   for (const [family, icons] of [...families].sort(([left], [right]) => left.localeCompare(right))) {
     const bindings = [...new Set(icons.values())].sort();
-    const source = family === 'default' ? '../../../icons' : `../../../icons/${family}`;
+    const source = family === 'default' ? iconsRoot : `${iconsRoot}/${family}`;
 
     output.push(`import {\n${bindings.map((binding) => `  ${binding},`).join('\n')}\n} from '${source}';`);
   }
@@ -578,7 +640,7 @@ function htmlRegistration(html: string, sources: Iterable<MaterializedSource>): 
   for (const [family, icons] of [...families].sort(([left], [right]) => left.localeCompare(right))) {
     const entries = [...icons]
       .sort(([left], [right]) => left.localeCompare(right))
-      .map(([name, binding]) => `  ${quote(name)}: ${binding},`)
+      .map(([name, binding]) => `  ${propertyKey(name)}: ${binding},`)
       .join('\n');
 
     output.push(`registerIcons(${quote(family)}, {\n${entries}\n});`);
@@ -587,8 +649,122 @@ function htmlRegistration(html: string, sources: Iterable<MaterializedSource>): 
   return `${output.join('\n')}\n`;
 }
 
+/** Replace transformed HTML registry sources with installable static templates and exact registrations. */
+function materializeHtmlRegistry(
+  bundle: Rolldown.OutputBundle,
+  skins: readonly RenderedHtmlSkin[],
+  emit: (fileName: string, source: string) => void
+): void {
+  const rendered = new Map(skins.map((skin) => [skin.item.name, skin]));
+  const skinPath = 'html/skins/registry.json';
+  const skinAsset = registryAsset(bundle, skinPath);
+  // SAFETY: The registry emitter validates this group before the materializer replaces its generated file closure.
+  const skinGroup = JSON.parse(assetSource(skinAsset)) as RegistryGroup;
+  const skinItems = skinGroup.items.map((item): RegistryItem => {
+    const skin = rendered.get(item.name);
+    if (!skin) return item;
+
+    const meta = skin.item.meta!;
+    const directory = posix.dirname(htmlSkinEntryTarget(meta));
+    const html = sourceOwnedHtml(skin.template);
+    const root = `files/${item.name}`;
+    const templatePath = `${root}/skin.html`;
+    const registrationPath = `${root}/skin.ts`;
+    const templateTarget = `${directory}/skin.html`;
+    const registrationTarget = `${directory}/skin.ts`;
+    const stylesheet = item.files?.find((file) => file.target === `${directory}/skin.css`);
+
+    emit(`${posix.dirname(skinPath)}/${templatePath}`, html);
+    emit(`${posix.dirname(skinPath)}/${registrationPath}`, htmlRegistration(html, skin.sources.values(), 'registry'));
+
+    return {
+      ...item,
+      files: [
+        { path: templatePath, target: templateTarget, type: 'registry:file' },
+        { path: registrationPath, target: registrationTarget, type: 'registry:file' },
+        ...(stylesheet ? [stylesheet] : []),
+      ],
+      dependencies: item.dependencies?.filter((dependency) => dependency.startsWith('@videojs/html@')),
+      registryDependencies:
+        meta.styling === 'tailwind'
+          ? item.registryDependencies?.filter((name) => name === '@videojs/tailwind-styles')
+          : [],
+    };
+  });
+
+  skinAsset.source = `${JSON.stringify({ ...skinGroup, items: skinItems }, null, 2)}\n`;
+
+  const playerPath = 'html/players/registry.json';
+  const playerAsset = registryAsset(bundle, playerPath);
+  // SAFETY: The registry emitter validates this authored group before the materializer fills its skin template slot.
+  const playerGroup = JSON.parse(assetSource(playerAsset)) as RegistryGroup;
+
+  for (const item of playerGroup.items) {
+    const dependency = item.registryDependencies?.find((name) => rendered.has(name.slice(registryPrefix.length)));
+    if (!dependency) continue;
+
+    const skin = rendered.get(dependency.slice(registryPrefix.length))!;
+    const file = item.files?.find((candidate) => candidate.target?.endsWith('.html'));
+    if (!file) throw new Error(`HTML Player registry item \`${item.name}\` has no template file.`);
+
+    const asset = registryAsset(bundle, `${posix.dirname(playerPath)}/${file.path}`);
+
+    asset.source = htmlPlayerTemplate(skin, sourceOwnedHtml(skin.template));
+  }
+}
+
+function sourceOwnedHtml(template: string): string {
+  const mediaSlot = /<slot>\s*<\/slot>/;
+  if (!mediaSlot.test(template)) throw new Error('Rendered HTML skin has no default media slot.');
+
+  return template
+    .replace(mediaSlot, '<!-- Add a compatible media element here. -->')
+    .replace(/<slot name="poster">\s*([\s\S]*?)\s*<\/slot>/, '$1')
+    .replaceAll('&amp;', '&')
+    .replaceAll('&gt;', '>')
+    .replaceAll('&lt;', '<');
+}
+
+function htmlPlayerTemplate(skin: RenderedHtmlSkin, html: string): string {
+  const meta = skin.item.meta!;
+  if (!isHtmlSkin(meta)) throw new Error('HTML Player materialization requires HTML skin metadata.');
+
+  const directory = posix.basename(posix.dirname(htmlSkinEntryTarget(meta)));
+  const stylesheet = meta.styling === 'css' ? `\n<link rel="stylesheet" href="../skins/${directory}/skin.css">` : '';
+  const content = html
+    .trim()
+    .split('\n')
+    .map((line) => `  ${line}`)
+    .join('\n');
+
+  return `<script type="module">
+  import '@videojs/html/${meta.preset}/player';
+  import '../skins/${directory}/skin';
+</script>
+${stylesheet}
+<${meta.preset}-player>
+${content}
+</${meta.preset}-player>
+`;
+}
+
+function registryAsset(bundle: Rolldown.OutputBundle, fileName: string): Rolldown.OutputAsset {
+  const output = bundle[fileName];
+  if (!output || output.type !== 'asset') throw new Error(`Prepared registry asset \`${fileName}\` is missing.`);
+
+  return output;
+}
+
+function assetSource(asset: Rolldown.OutputAsset): string {
+  return isString(asset.source) ? asset.source : new TextDecoder().decode(asset.source);
+}
+
 function quote(value: string): string {
   return `'${value.replaceAll('\\', '\\\\').replaceAll("'", "\\'")}'`;
+}
+
+function propertyKey(value: string): string {
+  return /^[A-Za-z_$][\w$]*$/.test(value) ? value : quote(value);
 }
 
 function iconRegistrations(sources: Iterable<MaterializedSource>): ReadonlyMap<string, ReadonlyMap<string, string>> {
