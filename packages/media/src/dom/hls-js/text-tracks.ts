@@ -105,7 +105,12 @@ export function HlsJsMediaTextTracksMixin<Base extends Constructor<HlsEngineHost
     constructor(...args: any[]) {
       super(...args);
 
-      this.engine?.on(Hls.Events.MANIFEST_LOADING, () => this.#init());
+      // A new manifest invalidates the tracks built from the previous one. Attaching media does not: it rebinds the
+      // handlers to the element hls.js drives now, and the tracks of the load in progress have to survive it.
+      this.engine?.on(Hls.Events.MANIFEST_LOADING, () => {
+        this.#clearTracks();
+        this.#init();
+      });
       this.engine?.on(Hls.Events.MEDIA_ATTACHED, () => this.#init());
       this.engine?.on(Hls.Events.MEDIA_DETACHED, () => this.#destroy());
       this.engine?.on(Hls.Events.DESTROYING, () => this.#destroy());
@@ -114,6 +119,7 @@ export function HlsJsMediaTextTracksMixin<Base extends Constructor<HlsEngineHost
     #destroy(): void {
       this.#disconnect?.abort();
       this.#disconnect = null;
+      this.#clearTracks();
     }
 
     #init(): void {
@@ -216,7 +222,6 @@ export function HlsJsMediaTextTracksMixin<Base extends Constructor<HlsEngineHost
         () => {
           engine.off(Hls.Events.NON_NATIVE_TEXT_TRACKS_FOUND, onTracksFound);
           engine.off(Hls.Events.CUES_PARSED, onCuesParsed);
-          this.#clearTracks();
         },
         { once: true }
       );
