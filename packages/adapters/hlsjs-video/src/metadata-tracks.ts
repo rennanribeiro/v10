@@ -1,13 +1,22 @@
 import type { Constructor } from '@videojs/utils/types';
 import Hls from 'hls.js';
 
+import { TRACK_LOADED, withReadableCues } from './text-tracks';
 import type { HlsEngineHost } from './types';
 
 /**
- * Ensures user-authored metadata and chapters `<track>` elements stay loaded when hls.js is active.
+ * Elements already rebuilt once. A source that legitimately parses to zero cues reads as wiped on every event, so
+ * without this the reload would refetch it for the lifetime of the element.
+ */
+const reloaded = new WeakSet<HTMLTrackElement>();
+
+/**
+ * Keeps user-authored `<track kind="metadata|chapters">` elements usable while hls.js is active.
  *
- * Hls.js forcibly clears all cues from text tracks on manifest loads and media attaches. This mixin re-enables those
- * tracks by forcing `mode = 'hidden'` and reloading the track source when cues have been wiped.
+ * Hls.js clears the cues of every text track when it attaches media or starts loading a manifest. On the paths this
+ * package drives, `withPreservedTextTracks` puts those cues back, so what is left for this mixin is the wipes it does
+ * not wrap: an app calling `recoverMediaError()` or `loadSource()` on the engine directly. Such a track is rebuilt from
+ * its `src`, and a `default` track is forced to `hidden` so it loads at all.
  */
 export function HlsJsMetadataTracksMixin<Base extends Constructor<HlsEngineHost>>(BaseClass: Base) {
   class HlsJsMetadataTracks extends (BaseClass as Constructor<HlsEngineHost>) {
@@ -24,35 +33,40 @@ export function HlsJsMetadataTracksMixin<Base extends Constructor<HlsEngineHost>
       const target = this.target as HTMLVideoElement | null;
       if (!target) return;
 
-      [...target.textTracks].forEach((track) => {
-        if (!(track.kind === 'metadata' || track.kind === 'chapters')) return;
+      // Walk the elements themselves. A selector rebuilt from the track's kind and label throws on labels that are
+      // not valid selector text, and collapses same-kind tracks onto whichever element matches first.
+      for (const trackEl of [...target.querySelectorAll('track')]) {
+        const { track } = trackEl;
+        // A host without a text track implementation exposes no `track`; leave those elements alone.
+        if (!track) continue;
 
-        let selector = 'track';
+        if (!(track.kind === 'metadata' || track.kind === 'chapters')) continue;
 
-        if (track.kind) selector += `[kind="${track.kind}"]`;
+        const loaded = trackEl.getAttribute('src') !== null && trackEl.readyState === TRACK_LOADED;
 
-        if (track.label) selector += `[label="${track.label}"]`;
+        // `cues` reads as `null` while a track is disabled no matter what it holds, so an emptied track is only told
+        // apart from a disabled one by counting through a mode that exposes them.
+        const wiped = loaded && !reloaded.has(trackEl) && withReadableCues(track, () => !track.cues?.length);
 
-        const trackEl = target.querySelector(selector) as HTMLTrackElement | null;
-        if (!trackEl) return;
-
-        const src = trackEl.getAttribute('src') ?? '';
-        const TRACK_LOADED = 2;
-
-        // Only reset the track if it was loaded before and had no cues.
-        if (src && trackEl.readyState === TRACK_LOADED && !track.cues?.length) {
-          const clonedTrackEl = trackEl.cloneNode() as HTMLTrackElement;
-
-          target.replaceChild(clonedTrackEl, trackEl);
-        }
+        const currentTrackEl = wiped ? this.#reload(target, trackEl) : trackEl;
 
         // Force mode to 'hidden' for default tracks (independent of replacement).
-        const currentTrackEl = target.querySelector(selector) as HTMLTrackElement | null;
+        if (currentTrackEl.default && currentTrackEl.track.mode !== 'hidden') currentTrackEl.track.mode = 'hidden';
+      }
+    }
 
-        if (currentTrackEl?.default && currentTrackEl.track.mode !== 'hidden') {
-          currentTrackEl.track.mode = 'hidden';
-        }
-      });
+    /** Swaps in a fresh element so the source is fetched again, carrying over the mode that was driving playback. */
+    #reload(target: HTMLVideoElement, trackEl: HTMLTrackElement): HTMLTrackElement {
+      const { mode } = trackEl.track;
+      const clonedTrackEl = trackEl.cloneNode() as HTMLTrackElement;
+
+      reloaded.add(clonedTrackEl);
+      target.replaceChild(clonedTrackEl, trackEl);
+
+      // The clone starts disabled with a fresh `TextTrack`, and a disabled track is never fetched.
+      if (mode !== 'disabled') clonedTrackEl.track.mode = mode;
+
+      return clonedTrackEl;
     }
   }
 

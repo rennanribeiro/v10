@@ -9,7 +9,7 @@ import type { HlsEngineHost } from './types';
 const HLS_TRACK_ATTR = 'data-removeondestroy';
 
 /** `HTMLTrackElement.LOADED` — the element parsed its resource and will not parse it again. */
-const TRACK_LOADED = 2;
+export const TRACK_LOADED = 2;
 
 interface TextTrackSnapshot {
   track: TextTrack;
@@ -77,8 +77,11 @@ function restoreTextTrack({ track, mode, cues }: TextTrackSnapshot): void {
   });
 }
 
-/** Reads or writes cues through a mode that exposes them, leaving the track's own mode intact. */
-function withReadableCues<T>(track: TextTrack, action: () => T): T {
+/**
+ * Reads or writes cues through a mode that exposes them, leaving the track's own mode intact: `cues` is `null` while a
+ * track is disabled, whatever the track actually holds.
+ */
+export function withReadableCues<T>(track: TextTrack, action: () => T): T {
   const { mode } = track;
 
   if (mode === 'disabled') track.mode = 'hidden';
