@@ -27,6 +27,6 @@ function CustomHlsVideo() {
 }
 ```
 
-The callback attaches a non-null element to the playback adapter and detaches it when React clears or cleans up the ref.
+The callback attaches the element it receives to the playback adapter and detaches it when the element or the adapter changes, and on unmount. React handing the ref `null` and then the same element again, which it does when a composed ref changes identity, leaves the attachment alone.
 
 <UtilReference util="useAttachMedia" />

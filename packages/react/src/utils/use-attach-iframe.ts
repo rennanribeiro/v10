@@ -1,15 +1,8 @@
 import type { EngineAdapter } from '@videojs/media';
 import type { RefCallback } from 'react';
-import { useCallback } from 'react';
+
+import { useAttachMedia } from './use-attach-media';
 
 export function useAttachIframe<T extends HTMLIFrameElement>(media: EngineAdapter): RefCallback<T> {
-  return useCallback(
-    (element: T | null) => {
-      if (element) media.attach?.(element);
-      else media.detach?.();
-
-      return () => media.detach?.();
-    },
-    [media]
-  );
+  return useAttachMedia<T>(media);
 }
