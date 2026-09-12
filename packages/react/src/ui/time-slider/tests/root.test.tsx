@@ -1,4 +1,4 @@
-import { cleanup, render } from '@testing-library/react';
+import { act, cleanup, render } from '@testing-library/react';
 import { formatTimeAsPhrase } from '@videojs/utils/time';
 import type { HTMLAttributes } from 'react';
 import { createRef } from 'react';
@@ -24,9 +24,12 @@ const {
   mockBufferState,
   mockPlaybackState,
   mockTextTrackState,
+  mockNoBuffer,
   capturedSliderOptions,
 } = vi.hoisted(() => {
-  const capturedSliderOptions: { current: { onDragStart?: () => void; onDragEnd?: () => void } } = {
+  const capturedSliderOptions: {
+    current: { onDragStart?: () => void; onDragEnd?: () => void; onValueCommit?: (percent: number) => void };
+  } = {
     current: {},
   };
   const mockSliderInput = {
@@ -84,6 +87,7 @@ const {
         { id: 'second', startTime: 60, endTime: 120, text: 'Second' },
       ],
     },
+    mockNoBuffer: { value: false },
     capturedSliderOptions,
   };
 });
@@ -114,7 +118,11 @@ vi.mock('@videojs/store/react', () => ({
     }
 
     try {
-      return selector({ ...mockTimeState, ...mockBufferState, ...mockPlaybackState, ...mockTextTrackState });
+      const state = { ...mockTimeState, ...mockPlaybackState, ...mockTextTrackState };
+
+      if (!mockNoBuffer.value) Object.assign(state, mockBufferState);
+
+      return selector(state);
     } catch {
       return undefined;
     }
@@ -132,6 +140,8 @@ afterEach(() => {
   });
   mockTimeState.duration = 120;
   mockBufferState.seekable = [[0, 120]];
+  mockNoBuffer.value = false;
+  mockTimeState.seek.mockClear();
 });
 
 // --- Tests ---
@@ -221,6 +231,29 @@ describe('TimeSliderRoot', () => {
     expect(thumb?.getAttribute('aria-disabled')).toBe('true');
     expect(thumb?.getAttribute('aria-valuetext')).toBe('Media not loaded, unknown time.');
     expect(thumb?.getAttribute('tabindex')).toBe('-1');
+  });
+
+  it('stays interactive when the buffer feature is not composed', () => {
+    mockNoBuffer.value = true;
+    const { Wrapper } = createPlayerWrapper();
+    const { container } = render(
+      <Wrapper>
+        <TimeSliderRoot>
+          <SliderThumb data-testid="thumb" />
+        </TimeSliderRoot>
+      </Wrapper>
+    );
+
+    const root = container.querySelector('[data-disabled]');
+    const thumb = container.querySelector('[data-testid="thumb"]');
+
+    expect(root).toBeNull();
+    expect(thumb?.getAttribute('aria-disabled')).toBeNull();
+    expect(thumb?.getAttribute('tabindex')).toBe('0');
+
+    act(() => capturedSliderOptions.current.onValueCommit?.(50));
+
+    expect(mockTimeState.seek).toHaveBeenCalledWith(60);
   });
 });
 

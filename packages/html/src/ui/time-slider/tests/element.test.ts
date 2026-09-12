@@ -1,5 +1,5 @@
 import { SliderDataAttrs, type SliderState } from '@videojs/core';
-import type { AnyPlayerStore } from '@videojs/core/dom';
+import type { AnyPlayerStore, PlayerTarget } from '@videojs/core/dom';
 import { ContextProvider } from '@videojs/element/context';
 import { createStore } from '@videojs/store';
 import { afterEach, describe, expect, it, vi } from 'vitest';
@@ -64,6 +64,39 @@ class TestPlayerProviderElement extends UIElement {
 
 customElements.define('test-time-slider-player', TestPlayerProviderElement);
 
+const timeOnlySeek = vi.fn();
+
+/** A store without `bufferFeature`, i.e. the documented composition that omits it. */
+class TestTimeOnlyPlayerProviderElement extends UIElement {
+  // SAFETY: minimal test store; the element only reads the time and playback slices declared below.
+  readonly store = createStore<PlayerTarget>()({
+    name: 'timeOnly',
+    state: () => ({
+      currentTime: 30,
+      duration: 120,
+      seeking: false,
+      seek: timeOnlySeek,
+      paused: true,
+      ended: false,
+      started: false,
+      waiting: false,
+      play: vi.fn(() => Promise.resolve()),
+      pause: vi.fn(),
+      userActive: true,
+      controlsVisible: true,
+      requestControlsLock: vi.fn(() => vi.fn()),
+      toggleControls: vi.fn(),
+    }),
+  }) as AnyPlayerStore;
+
+  readonly provider = new ContextProvider(this, {
+    context: playerContext,
+    initialValue: this.store,
+  });
+}
+
+customElements.define('test-time-only-player', TestTimeOnlyPlayerProviderElement);
+
 function createSliderContext(state: Partial<SliderState> = {}, pointerValue = 0) {
   return {
     state: {
@@ -87,6 +120,7 @@ function createSliderContext(state: Partial<SliderState> = {}, pointerValue = 0)
 
 afterEach(() => {
   document.body.innerHTML = '';
+  timeOnlySeek.mockClear();
 });
 
 describe('TimeSliderElement', () => {
@@ -157,6 +191,27 @@ describe('TimeSliderElement', () => {
     expect(thumb.getAttribute('aria-disabled')).toBe('true');
     expect(thumb.getAttribute('aria-valuetext')).toBe('Media not loaded, unknown time.');
     expect(thumb.getAttribute('tabindex')).toBe('-1');
+  });
+
+  it('stays interactive when the buffer feature is not composed', async () => {
+    const player = document.createElement('test-time-only-player');
+    const slider = createElement(TimeSliderElement);
+    const thumb = createElement(SliderThumbElement);
+
+    slider.appendChild(thumb);
+    player.appendChild(slider);
+    document.body.appendChild(player);
+    await slider.updateComplete;
+    await thumb.updateComplete;
+
+    expect(slider.hasAttribute('data-disabled')).toBe(false);
+    expect(thumb.getAttribute('aria-disabled')).toBeNull();
+    expect(thumb.getAttribute('tabindex')).toBe('0');
+
+    thumb.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true }));
+
+    expect(timeOnlySeek).toHaveBeenCalledTimes(1);
+    expect(timeOnlySeek.mock.calls[0]?.[0]).toBeCloseTo(31, 5);
   });
 
   it('does not set CSS vars without player context', async () => {

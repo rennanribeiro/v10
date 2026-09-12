@@ -80,7 +80,8 @@ export class TimeSliderElement extends UIElement {
         const time = this.#timeState.value;
         const buffer = this.#bufferState.value;
 
-        return this.disabled || !time || !buffer || !hasTimeRange({ ...time, ...buffer });
+        // `bufferFeature` is optional: compositions that omit it still get a working slider, with an empty buffer.
+        return this.disabled || !time || !hasTimeRange({ ...time, ...(buffer ?? { buffered: [], seekable: [] }) });
       },
       getPercent: () => {
         const media = this.#timeState.value;

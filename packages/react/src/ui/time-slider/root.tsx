@@ -60,8 +60,11 @@ export const TimeSliderRoot = forwardRef<HTMLDivElement, TimeSliderRootProps>(
     });
     core.setFormatLocale(locale);
 
+    // `bufferFeature` is optional: compositions that omit it still get a working slider, with an empty buffer.
+    const media = time ? { ...time, ...(buffer ?? { buffered: [], seekable: [] }) } : null;
+
     // Keep a ref to the latest media state for callbacks that fire outside the render cycle.
-    const mediaRef = useLatestRef(time && buffer ? { ...time, ...buffer } : null);
+    const mediaRef = useLatestRef(media);
     const playbackRef = useLatestRef(playback);
 
     // Resume playback if the slider unmounts mid-drag — createSlider's destroy()
@@ -75,18 +78,16 @@ export const TimeSliderRoot = forwardRef<HTMLDivElement, TimeSliderRootProps>(
         computeState: (input) => {
           core.setInput(input);
 
-          if (!time || !buffer) {
-            core.setMedia({
+          core.setMedia(
+            media ?? {
               currentTime: 0,
               duration: 0,
               seeking: false,
               seek: noopSeek,
               buffered: [],
               seekable: [],
-            });
-          } else {
-            core.setMedia({ ...time, ...buffer });
-          }
+            }
+          );
 
           return core.getState();
         },
@@ -94,7 +95,7 @@ export const TimeSliderRoot = forwardRef<HTMLDivElement, TimeSliderRootProps>(
         getStepPercent: () => core.getStepPercent(),
         getLargeStepPercent: () => core.getLargeStepPercent(),
         orientation,
-        disabled: disabled || !time || !buffer || !hasTimeRange({ ...time, ...buffer }),
+        disabled: disabled || !media || !hasTimeRange(media),
         changeThrottle,
         adjustPercent: (rawPercent, thumbSize, trackSize) =>
           core.adjustPercentForAlignment(rawPercent, thumbSize, trackSize),
